@@ -74,7 +74,13 @@ def normalize_name(value: str) -> str:
     value = strip_quality_markers(value)
     value = unicodedata.normalize("NFKD", value)
     value = "".join(ch for ch in value if not unicodedata.combining(ch))
-    value = value.upper().replace("&", " E ")
+    value = value.upper()
+    # XMLTVs diferentes escrevem a conjunção de formas distintas.
+    # Exemplos: "FILM & ARTS" x "Film And Arts.br" e
+    # "Sabor & Arte" x "Sabor And Arte.br".
+    # Canonizamos AND para o mesmo token usado por &, sem alterar nomes exibidos.
+    value = re.sub(r"\bAND\b", " E ", value)
+    value = value.replace("&", " E ")
     value = re.sub(r"[^A-Z0-9]+", "", value)
     return value
 
