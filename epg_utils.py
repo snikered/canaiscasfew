@@ -10,6 +10,10 @@ from difflib import SequenceMatcher
 SUPERSCRIPT_DIGITS = "⁰¹²³⁴⁵⁶⁷⁸⁹"
 QUALITY_TOKENS = {
     "HD", "FHD", "FULLHD", "FULL", "UHD", "4K", "8K", "SD",
+    # Para casar, por exemplo, "History Channel" com "History" e
+    # "Paramount Channel" com "Paramount". É tratado como marcador
+    # genérico, assim como HD/FHD, apenas durante a comparação.
+    "CHANNEL",
     "H264", "H265", "HEVC", "AVC", "HDR", "HDR10", "DV",
     "FPS", "50FPS", "60FPS", "30FPS", "25FPS",
     "VIP", "BACKUP", "BKP", "ALT", "TESTE", "TEST", "RAW",
@@ -22,6 +26,11 @@ def remove_superscript_markers(value: str) -> str:
 
 
 def strip_quality_markers(value: str) -> str:
+    """Remove marcadores de cópia/qualidade e o termo genérico CHANNEL.
+
+    Funciona também quando os termos vêm separados por ponto, hífen ou
+    underscore em IDs XMLTV. Números normais (HBO 2, ESPN 4 etc.) permanecem.
+    """
     value = remove_superscript_markers(value)
     # Marcadores de cópia no fim, como "Discovery HD (2)".
     value = re.sub(r"\s*\(\s*\d+\s*\)\s*$", "", value)
@@ -31,11 +40,19 @@ def strip_quality_markers(value: str) -> str:
         " ", value, flags=re.IGNORECASE,
     )
     value = re.sub(r"HDR\+", " HDR ", value, flags=re.IGNORECASE)
-    tokens = re.split(r"\s+", value.strip())
+
+    # Separa apenas para a comparação. Isso faz "Paramount.Channel.br" e
+    # "History-Channel-HD" receberem o mesmo tratamento dos nomes com espaços.
+    parts = re.split(r"([\s._/|:+-]+)", value.strip())
     kept: list[str] = []
     skip_next_hd = False
-    for token in tokens:
-        clean = re.sub(r"[^A-Za-z0-9]+", "", token).upper()
+    for part in parts:
+        if not part:
+            continue
+        if re.fullmatch(r"[\s._/|:+-]+", part):
+            kept.append(part)
+            continue
+        clean = re.sub(r"[^A-Za-z0-9]+", "", part).upper()
         if clean == "FULL":
             skip_next_hd = True
             continue
@@ -45,8 +62,11 @@ def strip_quality_markers(value: str) -> str:
         skip_next_hd = False
         if clean in QUALITY_TOKENS or re.fullmatch(r"\d{2,3}FPS", clean):
             continue
-        kept.append(token)
-    return re.sub(r"\s+", " ", " ".join(kept)).strip(" -_|:/")
+        kept.append(part)
+
+    value = "".join(kept)
+    value = re.sub(r"[\s._/|:+-]+", " ", value)
+    return value.strip(" -_|:/.")
 
 
 def normalize_name(value: str) -> str:

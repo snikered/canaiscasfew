@@ -21,7 +21,11 @@
       "name": "HISTORY",
       "aliases": [
         "HITORY",
-        "HISTORY"
+        "HISTORY",
+        "HISTORY CHANNEL",
+        "THE HISTORY CHANNEL",
+        "HISTORY CHANNEL HD",
+        "HISTORY CHANNEL FHD"
       ],
       "old_tvg_ids": [
         "São.Paulo/SP..The.History.Channel.br (src05)"
@@ -35,7 +39,12 @@
       "id": "auto.h2",
       "name": "H2",
       "aliases": [
-        "H2"
+        "H2",
+        "HISTORY 2",
+        "HISTORY2",
+        "HISTORY 2 HD",
+        "HISTORY 2 FHD",
+        "HISTORY II"
       ],
       "old_tvg_ids": [
         "São.Paulo/SP..History.2.HD.br (src05)"
@@ -203,7 +212,10 @@
       "id": "auto.paramountchannel",
       "name": "PARAMOUNT CHANNEL",
       "aliases": [
-        "PARAMOUNT CHANNEL"
+        "PARAMOUNT CHANNEL",
+        "PARAMOUNT",
+        "PARAMOUNT CHANNEL HD",
+        "PARAMOUNT CHANNEL FHD"
       ],
       "old_tvg_ids": [
         "Paramount.Channel.br (src05)"
@@ -245,7 +257,11 @@
       "id": "auto.usanetwork",
       "name": "USA NETWORK",
       "aliases": [
-        "USA NETWORK"
+        "USA NETWORK",
+        "USA",
+        "USA NETWORK HD",
+        "USA NETWORK FHD",
+        "USA NETWORK BR"
       ],
       "old_tvg_ids": [
         "USABR.br (m3u4u)"
@@ -1230,7 +1246,10 @@
       "id": "auto.adultswim",
       "name": "Adult Swim",
       "aliases": [
-        "Adult Swim"
+        "Adult Swim",
+        "ADULTSWIM",
+        "ADULT SWIM HD",
+        "ADULT SWIM FHD"
       ],
       "old_tvg_ids": [
         "Adult.Swim.HD.br (src05)"

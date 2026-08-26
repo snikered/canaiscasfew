@@ -24,7 +24,7 @@ PRIMARY_URL = os.environ.get(
 )
 SECONDARY_URL = os.environ.get(
     "SECONDARY_EPG_URL",
-    "https://www.open-epg.com/files/brazil1.xml",
+    "https://www.open-epg.com/files/brazil4.xml",
 )
 CATALOG_PATH = Path(os.environ.get("CHANNELS_FILE", "channels.json"))
 OVERRIDES_PATH = Path(os.environ.get("OVERRIDES_FILE", "overrides.json"))
@@ -193,13 +193,13 @@ def main() -> None:
     print("Baixando EPG principal...")
     primary = read_source("Genius", PRIMARY_URL)
     print(f"Genius: {len(primary.channels)} canais")
-    print("Baixando EPG secundário...")
+    print("Baixando EPG secundário (Open-EPG Brazil 4)...")
     secondary = read_source("Open-EPG", SECONDARY_URL)
     print(f"Open-EPG: {len(secondary.channels)} canais")
 
     output_root = ET.Element("tv", {
         "generator-info-name": "EPG automático por nome",
-        "source-info-name": "Genius principal + Open-EPG fallback",
+        "source-info-name": "Genius principal + Open-EPG Brazil 4 fallback",
     })
     report: list[dict[str, object]] = []
     selected_channels: list[tuple[dict[str, object], EpgSource, str, str, float]] = []
@@ -224,29 +224,40 @@ def main() -> None:
                 method = f"override inválido: {override_source}/{override_id}"
 
         if chosen_id is None:
-            # Ordem intencional: exato no principal, exato no secundário,
-            # aproximação no principal, aproximação no secundário.
+            # O Genius é realmente a fonte principal: tentamos correspondência
+            # exata E aproximada nele antes de consultar o Open-EPG. Assim um
+            # nome ligeiramente diferente no Genius não perde para um nome exato
+            # existente no fallback.
             exact_id, exact_reason = choose_exact(primary, aliases)
             if exact_id:
                 chosen_source, chosen_id = primary, exact_id
                 method, score = exact_reason, 1.0
-            else:
-                exact_id, exact_reason = choose_exact(secondary, aliases)
-                if exact_id:
-                    chosen_source, chosen_id = secondary, exact_id
-                    method, score = exact_reason, 1.0
 
         if chosen_id is None:
-            for source in (primary, secondary):
-                fuzzy_id, best_score, second_score, fuzzy_reason = best_fuzzy(source, aliases)
-                if (
-                    fuzzy_id
-                    and best_score >= FUZZY_THRESHOLD
-                    and (best_score - second_score) >= FUZZY_MARGIN
-                ):
-                    chosen_source, chosen_id = source, fuzzy_id
-                    method, score = fuzzy_reason, best_score
-                    break
+            fuzzy_id, best_score, second_score, fuzzy_reason = best_fuzzy(primary, aliases)
+            if (
+                fuzzy_id
+                and best_score >= FUZZY_THRESHOLD
+                and (best_score - second_score) >= FUZZY_MARGIN
+            ):
+                chosen_source, chosen_id = primary, fuzzy_id
+                method, score = fuzzy_reason, best_score
+
+        if chosen_id is None:
+            exact_id, exact_reason = choose_exact(secondary, aliases)
+            if exact_id:
+                chosen_source, chosen_id = secondary, exact_id
+                method, score = exact_reason, 1.0
+
+        if chosen_id is None:
+            fuzzy_id, best_score, second_score, fuzzy_reason = best_fuzzy(secondary, aliases)
+            if (
+                fuzzy_id
+                and best_score >= FUZZY_THRESHOLD
+                and (best_score - second_score) >= FUZZY_MARGIN
+            ):
+                chosen_source, chosen_id = secondary, fuzzy_id
+                method, score = fuzzy_reason, best_score
 
         if chosen_source is not None and chosen_id is not None:
             selected_channels.append((entry, chosen_source, chosen_id, method, score))

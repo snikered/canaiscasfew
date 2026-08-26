@@ -1,16 +1,26 @@
 # EPG automático: Genius + Open-EPG
 
-Este projeto usa o **EPG Genius/Curated como fonte principal** e o **Open-EPG Brazil 1 apenas para os canais ausentes**.
+Este projeto usa o **EPG Genius/Curated como fonte principal** e o **Open-EPG Brazil 4 apenas para os canais ausentes**.
 
 ## Regras de correspondência
 
 - remove os números sobrescritos `¹²³⁴` usados para identificar cópias do stream;
 - remove marcadores de qualidade/codec como `HD`, `FHD`, `4K`, `[H265]` e `HDR`;
+- durante a comparação, `CHANNEL` também é ignorado (`History Channel` = `History`, `Paramount Channel` = `Paramount`);
 - preserva números normais do nome: `HBO` continua diferente de `HBO 2`;
-- tenta nome exato no Genius;
-- depois tenta nome exato no Open-EPG;
-- só depois usa aproximação, com limite alto e proteção contra canais numerados;
+- tenta nome exato no Genius e, se necessário, aproximação segura **ainda no Genius**;
+- somente quando o Genius não encontra o canal é que consulta o Open-EPG Brazil 4;
+- usa limite alto e proteção contra canais numerados;
 - o arquivo final reescreve os IDs do XMLTV para os IDs `auto.*` usados na M3U corrigida.
+
+## Aliases específicos incluídos
+
+- `H2` também procura `History 2`;
+- `History` também procura `History Channel` / `The History Channel`;
+- `Paramount Channel` também aceita `Paramount`;
+- `USA Network` também aceita `USA`;
+- `Adult Swim` também aceita `AdultSwim`;
+- `Universal TV` foi mantido com a correspondência atual.
 
 ## Arquivos importantes
 
