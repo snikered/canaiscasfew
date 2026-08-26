@@ -82,6 +82,17 @@ def normalize_name(value: str) -> str:
     value = re.sub(r"\bAND\b", " E ", value)
     value = value.replace("&", " E ")
     value = re.sub(r"[^A-Z0-9]+", "", value)
+
+    # Equivalências conhecidas entre nomes da playlist e IDs/display-names
+    # das fontes XMLTV. Aplicadas somente na comparação; o nome exibido
+    # no player não é alterado.
+    if value == "CANALSONY":
+        value = "SONY"
+    # No EPG Genius, Sportv.br corresponde ao canal SporTV 1.
+    # Assim "SporTV", "Sportv.br" e "SporTV 1" caem na mesma chave.
+    if value == "SPORTV":
+        value = "SPORTV1"
+
     return value
 
 
