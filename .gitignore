@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+output/epg.xml
+output/epg.xml.gz
+output/report.json
+output/report.md

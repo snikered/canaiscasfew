@@ -1,0 +1,1560 @@
+{
+  "description": "Catálogo sem URLs dos streams; seguro para repositório público.",
+  "channel_count": 109,
+  "channels": [
+    {
+      "id": "auto.animalplanet",
+      "name": "ANIMAL PLANET",
+      "aliases": [
+        "ANIMAL PLANET"
+      ],
+      "old_tvg_ids": [
+        "ANIPB.br (m3u4u)"
+      ],
+      "groups": [
+        "DOCUMENTÁRIO"
+      ],
+      "playlist_entries": 4
+    },
+    {
+      "id": "auto.history",
+      "name": "HISTORY",
+      "aliases": [
+        "HITORY",
+        "HISTORY"
+      ],
+      "old_tvg_ids": [
+        "São.Paulo/SP..The.History.Channel.br (src05)"
+      ],
+      "groups": [
+        "DOCUMENTÁRIO"
+      ],
+      "playlist_entries": 4
+    },
+    {
+      "id": "auto.h2",
+      "name": "H2",
+      "aliases": [
+        "H2"
+      ],
+      "old_tvg_ids": [
+        "São.Paulo/SP..History.2.HD.br (src05)"
+      ],
+      "groups": [
+        "DOCUMENTÁRIO"
+      ],
+      "playlist_entries": 3
+    },
+    {
+      "id": "auto.arte1",
+      "name": "ARTE 1",
+      "aliases": [
+        "ARTE 1"
+      ],
+      "old_tvg_ids": [
+        "Arte.1.br (src05)"
+      ],
+      "groups": [
+        "DOCUMENTÁRIO"
+      ],
+      "playlist_entries": 3
+    },
+    {
+      "id": "auto.curta",
+      "name": "CURTA",
+      "aliases": [
+        "CURTA"
+      ],
+      "old_tvg_ids": [
+        "CURTA.br (m3u4u)"
+      ],
+      "groups": [
+        "DOCUMENTÁRIO"
+      ],
+      "playlist_entries": 3
+    },
+    {
+      "id": "auto.hgtv",
+      "name": "HGTV",
+      "aliases": [
+        "HGTV"
+      ],
+      "old_tvg_ids": [
+        "HGTVB.br (m3u4u)"
+      ],
+      "groups": [
+        "DOCUMENTÁRIO"
+      ],
+      "playlist_entries": 3
+    },
+    {
+      "id": "auto.aee",
+      "name": "A&E",
+      "aliases": [
+        "A&E"
+      ],
+      "old_tvg_ids": [
+        "AEBR.br (m3u4u)"
+      ],
+      "groups": [
+        "FILMES E SÉRIES"
+      ],
+      "playlist_entries": 4
+    },
+    {
+      "id": "auto.amc",
+      "name": "AMC",
+      "aliases": [
+        "AMC"
+      ],
+      "old_tvg_ids": [
+        "São.Paulo/SP..AMC.br (src05)"
+      ],
+      "groups": [
+        "FILMES E SÉRIES"
+      ],
+      "playlist_entries": 4
+    },
+    {
+      "id": "auto.axn",
+      "name": "AXN",
+      "aliases": [
+        "AXN"
+      ],
+      "old_tvg_ids": [
+        "AXN.br (src05)"
+      ],
+      "groups": [
+        "FILMES E SÉRIES"
+      ],
+      "playlist_entries": 3
+    },
+    {
+      "id": "auto.canalbrasil",
+      "name": "CANAL BRASIL",
+      "aliases": [
+        "CANAL BRASIL"
+      ],
+      "old_tvg_ids": [
+        "Canal.Brasil.br (src05)"
+      ],
+      "groups": [
+        "FILMES E SÉRIES"
+      ],
+      "playlist_entries": 2
+    },
+    {
+      "id": "auto.sony",
+      "name": "SONY",
+      "aliases": [
+        "SONY"
+      ],
+      "old_tvg_ids": [
+        "SETB.br (m3u4u)"
+      ],
+      "groups": [
+        "FILMES E SÉRIES"
+      ],
+      "playlist_entries": 3
+    },
+    {
+      "id": "auto.cinemax",
+      "name": "CINEMAX",
+      "aliases": [
+        "CINEMAX"
+      ],
+      "old_tvg_ids": [
+        "Cinemax.br (src05)"
+      ],
+      "groups": [
+        "FILMES E SÉRIES"
+      ],
+      "playlist_entries": 3
+    },
+    {
+      "id": "auto.filmearts",
+      "name": "FILM & ARTS",
+      "aliases": [
+        "FILM & ARTS"
+      ],
+      "old_tvg_ids": [
+        "Film.&.Arts.br (src05)"
+      ],
+      "groups": [
+        "FILMES E SÉRIES"
+      ],
+      "playlist_entries": 3
+    },
+    {
+      "id": "auto.megapix",
+      "name": "MEGAPIX",
+      "aliases": [
+        "MEGAPIX"
+      ],
+      "old_tvg_ids": [
+        "Megapix.br (src05)"
+      ],
+      "groups": [
+        "FILMES E SÉRIES"
+      ],
+      "playlist_entries": 4
+    },
+    {
+      "id": "auto.paramountchannel",
+      "name": "PARAMOUNT CHANNEL",
+      "aliases": [
+        "PARAMOUNT CHANNEL"
+      ],
+      "old_tvg_ids": [
+        "Paramount.Channel.br (src05)"
+      ],
+      "groups": [
+        "FILMES E SÉRIES"
+      ],
+      "playlist_entries": 3
+    },
+    {
+      "id": "auto.studiouniversal",
+      "name": "STUDIO UNIVERSAL",
+      "aliases": [
+        "STUDIO UNIVERSAL"
+      ],
+      "old_tvg_ids": [
+        "Studio.Universal.br (src05)"
+      ],
+      "groups": [
+        "FILMES E SÉRIES"
+      ],
+      "playlist_entries": 4
+    },
+    {
+      "id": "auto.space",
+      "name": "SPACE",
+      "aliases": [
+        "SPACE"
+      ],
+      "old_tvg_ids": [
+        "SPACE.br (src05)"
+      ],
+      "groups": [
+        "FILMES E SÉRIES"
+      ],
+      "playlist_entries": 4
+    },
+    {
+      "id": "auto.usanetwork",
+      "name": "USA NETWORK",
+      "aliases": [
+        "USA NETWORK"
+      ],
+      "old_tvg_ids": [
+        "USABR.br (m3u4u)"
+      ],
+      "groups": [
+        "FILMES E SÉRIES"
+      ],
+      "playlist_entries": 3
+    },
+    {
+      "id": "auto.futura",
+      "name": "FUTURA",
+      "aliases": [
+        "FUTURA"
+      ],
+      "old_tvg_ids": [
+        "FUTRA.br (m3u4u)"
+      ],
+      "groups": [
+        "FILMES E SÉRIES"
+      ],
+      "playlist_entries": 1
+    },
+    {
+      "id": "auto.tnt",
+      "name": "TNT",
+      "aliases": [
+        "TNT"
+      ],
+      "old_tvg_ids": [
+        "TNT.br (src05)"
+      ],
+      "groups": [
+        "FILMES E SÉRIES"
+      ],
+      "playlist_entries": 3
+    },
+    {
+      "id": "auto.tntseries",
+      "name": "TNT SERIES",
+      "aliases": [
+        "TNT SERIES"
+      ],
+      "old_tvg_ids": [
+        "TNT.Séries.br (src05)"
+      ],
+      "groups": [
+        "FILMES E SÉRIES"
+      ],
+      "playlist_entries": 2
+    },
+    {
+      "id": "auto.tntnovelas",
+      "name": "TNT NOVELAS",
+      "aliases": [
+        "TNT NOVELAS"
+      ],
+      "old_tvg_ids": [
+        "TNOBRSD.br (m3u4u)"
+      ],
+      "groups": [
+        "FILMES E SÉRIES"
+      ],
+      "playlist_entries": 4
+    },
+    {
+      "id": "auto.universaltv",
+      "name": "UNIVERSAL TV",
+      "aliases": [
+        "UNIVERSAL TV"
+      ],
+      "old_tvg_ids": [
+        "Universal.Channel.br (src05)"
+      ],
+      "groups": [
+        "FILMES E SÉRIES"
+      ],
+      "playlist_entries": 3
+    },
+    {
+      "id": "auto.warnerchannel",
+      "name": "WARNER CHANNEL",
+      "aliases": [
+        "WARNER CHANNEL"
+      ],
+      "old_tvg_ids": [
+        "Warner.Channel.br (src05)"
+      ],
+      "groups": [
+        "FILMES E SÉRIES"
+      ],
+      "playlist_entries": 3
+    },
+    {
+      "id": "auto.telecineaction",
+      "name": "TELECINE ACTION",
+      "aliases": [
+        "TELECINE ACTION"
+      ],
+      "old_tvg_ids": [
+        "TCA.br (m3u4u)"
+      ],
+      "groups": [
+        "TELECINE"
+      ],
+      "playlist_entries": 4
+    },
+    {
+      "id": "auto.telecinecult",
+      "name": "TELECINE CULT",
+      "aliases": [
+        "TELECINE CULT"
+      ],
+      "old_tvg_ids": [
+        "Telecine.Cult.br (src05)"
+      ],
+      "groups": [
+        "TELECINE"
+      ],
+      "playlist_entries": 4
+    },
+    {
+      "id": "auto.telecinefun",
+      "name": "TELECINE FUN",
+      "aliases": [
+        "TELECINE FUN"
+      ],
+      "old_tvg_ids": [
+        "Telecine.Fun.br (src05)"
+      ],
+      "groups": [
+        "TELECINE"
+      ],
+      "playlist_entries": 4
+    },
+    {
+      "id": "auto.telecinepipoca",
+      "name": "TELECINE PIPOCA",
+      "aliases": [
+        "TELECINE PIPOCA"
+      ],
+      "old_tvg_ids": [
+        "Telecine.Pipoca.br (src05)"
+      ],
+      "groups": [
+        "TELECINE"
+      ],
+      "playlist_entries": 4
+    },
+    {
+      "id": "auto.telecinepremium",
+      "name": "TELECINE PREMIUM",
+      "aliases": [
+        "TELECINE PREMIUM"
+      ],
+      "old_tvg_ids": [
+        "Telecine.Premium.br (src05)"
+      ],
+      "groups": [
+        "TELECINE"
+      ],
+      "playlist_entries": 4
+    },
+    {
+      "id": "auto.telecinetouch",
+      "name": "TELECINE TOUCH",
+      "aliases": [
+        "TELECINE TOUCH"
+      ],
+      "old_tvg_ids": [
+        "Telecine.Touch.br (src05)"
+      ],
+      "groups": [
+        "TELECINE"
+      ],
+      "playlist_entries": 4
+    },
+    {
+      "id": "auto.hbo",
+      "name": "HBO",
+      "aliases": [
+        "HBO"
+      ],
+      "old_tvg_ids": [
+        "HBO.br (src05)"
+      ],
+      "groups": [
+        "HBO"
+      ],
+      "playlist_entries": 3
+    },
+    {
+      "id": "auto.hbo2",
+      "name": "HBO 2",
+      "aliases": [
+        "HBO 2"
+      ],
+      "old_tvg_ids": [
+        "HBO.2.br (src05)"
+      ],
+      "groups": [
+        "HBO"
+      ],
+      "playlist_entries": 4
+    },
+    {
+      "id": "auto.hbofamily",
+      "name": "HBO FAMILY",
+      "aliases": [
+        "HBO FAMILY"
+      ],
+      "old_tvg_ids": [
+        "São.Paulo/SP..HBO.Family.br (src05)"
+      ],
+      "groups": [
+        "HBO"
+      ],
+      "playlist_entries": 4
+    },
+    {
+      "id": "auto.hbomundi",
+      "name": "HBO MUNDI",
+      "aliases": [
+        "HBO MUNDI"
+      ],
+      "old_tvg_ids": [
+        "HBOMUND.br (m3u4u)"
+      ],
+      "groups": [
+        "HBO"
+      ],
+      "playlist_entries": 4
+    },
+    {
+      "id": "auto.hboplus",
+      "name": "HBO PLUS",
+      "aliases": [
+        "HBO PLUS"
+      ],
+      "old_tvg_ids": [
+        "HBOPB.br (m3u4u)"
+      ],
+      "groups": [
+        "HBO"
+      ],
+      "playlist_entries": 4
+    },
+    {
+      "id": "auto.hbopop",
+      "name": "HBO POP",
+      "aliases": [
+        "HBO POP"
+      ],
+      "old_tvg_ids": [
+        "São.Paulo/SP..HBO.POP.HD.br (src05)"
+      ],
+      "groups": [
+        "HBO"
+      ],
+      "playlist_entries": 4
+    },
+    {
+      "id": "auto.hbosignature",
+      "name": "HBO SIGNATURE",
+      "aliases": [
+        "HBO SIGNATURE"
+      ],
+      "old_tvg_ids": [
+        "HBO.Signature.br (src05)"
+      ],
+      "groups": [
+        "HBO"
+      ],
+      "playlist_entries": 4
+    },
+    {
+      "id": "auto.hboxtreme",
+      "name": "HBO XTREME",
+      "aliases": [
+        "HBO XTREME"
+      ],
+      "old_tvg_ids": [
+        "São.Paulo/SP..HBO.Xtreme.br (src05)"
+      ],
+      "groups": [
+        "HBO"
+      ],
+      "playlist_entries": 4
+    },
+    {
+      "id": "auto.multishow",
+      "name": "MULTISHOW",
+      "aliases": [
+        "MULTISHOW"
+      ],
+      "old_tvg_ids": [
+        "Multishow.br (src05)"
+      ],
+      "groups": [
+        "VARIEDADES"
+      ],
+      "playlist_entries": 5
+    },
+    {
+      "id": "auto.gnt",
+      "name": "GNT",
+      "aliases": [
+        "GNT"
+      ],
+      "old_tvg_ids": [
+        "GNT.br (src05)"
+      ],
+      "groups": [
+        "VARIEDADES"
+      ],
+      "playlist_entries": 4
+    },
+    {
+      "id": "auto.musicboxbrasil",
+      "name": "MUSIC BOX BRASIL",
+      "aliases": [
+        "MUSIC BOX BRASIL"
+      ],
+      "old_tvg_ids": [
+        "São.Paulo/SP..Music.Box.Brazil.br (src05)"
+      ],
+      "groups": [
+        "VARIEDADES"
+      ],
+      "playlist_entries": 2
+    },
+    {
+      "id": "auto.bis",
+      "name": "BIS",
+      "aliases": [
+        "BIS"
+      ],
+      "old_tvg_ids": [
+        "Bis.br (src05)"
+      ],
+      "groups": [
+        "VARIEDADES"
+      ],
+      "playlist_entries": 2
+    },
+    {
+      "id": "auto.dogtv",
+      "name": "DOG TV",
+      "aliases": [
+        "DOG TV"
+      ],
+      "old_tvg_ids": [
+        "DOGTVB.br (m3u4u)"
+      ],
+      "groups": [
+        "VARIEDADES"
+      ],
+      "playlist_entries": 2
+    },
+    {
+      "id": "auto.e",
+      "name": "E!",
+      "aliases": [
+        "E!"
+      ],
+      "old_tvg_ids": [
+        "ETVB.br (m3u4u)"
+      ],
+      "groups": [
+        "VARIEDADES"
+      ],
+      "playlist_entries": 2
+    },
+    {
+      "id": "auto.fashiontv",
+      "name": "FashionTV",
+      "aliases": [
+        "FashionTV"
+      ],
+      "old_tvg_ids": [
+        "FASHBR.br (m3u4u)"
+      ],
+      "groups": [
+        "VARIEDADES"
+      ],
+      "playlist_entries": 2
+    },
+    {
+      "id": "auto.fishtv",
+      "name": "Fish TV",
+      "aliases": [
+        "Fish TV"
+      ],
+      "old_tvg_ids": [
+        "FISHHD.br (m3u4u)"
+      ],
+      "groups": [
+        "VARIEDADES"
+      ],
+      "playlist_entries": 2
+    },
+    {
+      "id": "auto.foodnetwork",
+      "name": "Food Network",
+      "aliases": [
+        "Food Network"
+      ],
+      "old_tvg_ids": [
+        "FNBRHD.br (m3u4u)"
+      ],
+      "groups": [
+        "VARIEDADES"
+      ],
+      "playlist_entries": 2
+    },
+    {
+      "id": "auto.lifetime",
+      "name": "Lifetime",
+      "aliases": [
+        "Lifetime"
+      ],
+      "old_tvg_ids": [
+        "Lifetime.br (src05)"
+      ],
+      "groups": [
+        "VARIEDADES"
+      ],
+      "playlist_entries": 5
+    },
+    {
+      "id": "auto.markket",
+      "name": "Markket",
+      "aliases": [
+        "Markket"
+      ],
+      "old_tvg_ids": [
+        "Markket.br (src09)"
+      ],
+      "groups": [
+        "VARIEDADES"
+      ],
+      "playlist_entries": 2
+    },
+    {
+      "id": "auto.megatv",
+      "name": "Mega TV",
+      "aliases": [
+        "Mega TV"
+      ],
+      "old_tvg_ids": [
+        "Mega TV (Brazil).br (src09)"
+      ],
+      "groups": [
+        "VARIEDADES"
+      ],
+      "playlist_entries": 1
+    },
+    {
+      "id": "auto.modoviagem",
+      "name": "Modo Viagem",
+      "aliases": [
+        "Modo Viagem"
+      ],
+      "old_tvg_ids": [
+        "MOVISD.br (m3u4u)"
+      ],
+      "groups": [
+        "VARIEDADES"
+      ],
+      "playlist_entries": 2
+    },
+    {
+      "id": "auto.off",
+      "name": "OFF",
+      "aliases": [
+        "OFF"
+      ],
+      "old_tvg_ids": [
+        "OFF.HD.br (src05)"
+      ],
+      "groups": [
+        "VARIEDADES"
+      ],
+      "playlist_entries": 3
+    },
+    {
+      "id": "auto.primeboxbrazil",
+      "name": "Prime Box Brazil",
+      "aliases": [
+        "Prime Box Brazil"
+      ],
+      "old_tvg_ids": [
+        "PRMBOXB.br (m3u4u)"
+      ],
+      "groups": [
+        "VARIEDADES"
+      ],
+      "playlist_entries": 2
+    },
+    {
+      "id": "auto.saborearte",
+      "name": "Sabor & Arte",
+      "aliases": [
+        "Sabor & Arte"
+      ],
+      "old_tvg_ids": [
+        "Sabor.&.Arte.br (src05)"
+      ],
+      "groups": [
+        "VARIEDADES"
+      ],
+      "playlist_entries": 2
+    },
+    {
+      "id": "auto.tlc",
+      "name": "TLC",
+      "aliases": [
+        "TLC"
+      ],
+      "old_tvg_ids": [
+        "TLC.br (src05)"
+      ],
+      "groups": [
+        "VARIEDADES"
+      ],
+      "playlist_entries": 2
+    },
+    {
+      "id": "auto.tracebrazuca",
+      "name": "Trace Brazuca",
+      "aliases": [
+        "Trace Brazuca"
+      ],
+      "old_tvg_ids": [
+        "Trace Brazuca.br (src09)"
+      ],
+      "groups": [
+        "VARIEDADES"
+      ],
+      "playlist_entries": 2
+    },
+    {
+      "id": "auto.travelboxbrazil",
+      "name": "Travel Box Brazil",
+      "aliases": [
+        "Travel Box Brazil"
+      ],
+      "old_tvg_ids": [
+        "Travel.Box.Brazil.br (src05)"
+      ],
+      "groups": [
+        "VARIEDADES"
+      ],
+      "playlist_entries": 2
+    },
+    {
+      "id": "auto.globoplaynovelas",
+      "name": "Globoplay Novelas",
+      "aliases": [
+        "Globoplay Novelas"
+      ],
+      "old_tvg_ids": [
+        "Viva.br"
+      ],
+      "groups": [
+        "VARIEDADES"
+      ],
+      "playlist_entries": 2
+    },
+    {
+      "id": "auto.woohoo",
+      "name": "WooHoo",
+      "aliases": [
+        "WooHoo"
+      ],
+      "old_tvg_ids": [
+        "Woohoo.br (src05)"
+      ],
+      "groups": [
+        "VARIEDADES"
+      ],
+      "playlist_entries": 2
+    },
+    {
+      "id": "auto.livetv",
+      "name": "Live TV",
+      "aliases": [
+        "Live TV"
+      ],
+      "old_tvg_ids": [
+        "Trace Brazuca.br (src09)"
+      ],
+      "groups": [
+        "VARIEDADES"
+      ],
+      "playlist_entries": 3
+    },
+    {
+      "id": "auto.id",
+      "name": "ID",
+      "aliases": [
+        "ID"
+      ],
+      "old_tvg_ids": [
+        "IDB.br (m3u4u)"
+      ],
+      "groups": [
+        "DISCOVERY"
+      ],
+      "playlist_entries": 3
+    },
+    {
+      "id": "auto.discoveryid",
+      "name": "DISCOVERY ID",
+      "aliases": [
+        "DISCOVERY ID"
+      ],
+      "old_tvg_ids": [
+        "67fcc0ef70dbe00de1b3deb1f8df83a7"
+      ],
+      "groups": [
+        "DISCOVERY"
+      ],
+      "playlist_entries": 1
+    },
+    {
+      "id": "auto.discoverychannel",
+      "name": "Discovery Channel",
+      "aliases": [
+        "DISCOVERY CHANNEL",
+        "Discovery Channel"
+      ],
+      "old_tvg_ids": [
+        "Discovery.Channel.br (src05)",
+        "e29f806eaafeca7c27164075b36632c0"
+      ],
+      "groups": [
+        "DISCOVERY"
+      ],
+      "playlist_entries": 4
+    },
+    {
+      "id": "auto.discoveryscience",
+      "name": "Discovery Science",
+      "aliases": [
+        "DISCOVERY SCIENCE",
+        "Discovery Science"
+      ],
+      "old_tvg_ids": [
+        "22a2824658680a39e8696e02fb8cb34d",
+        "Discovery.Science.br (src05)"
+      ],
+      "groups": [
+        "DISCOVERY"
+      ],
+      "playlist_entries": 4
+    },
+    {
+      "id": "auto.discoverytheater",
+      "name": "Discovery Theater",
+      "aliases": [
+        "DISCOVERY THEATER",
+        "Discovery Theater"
+      ],
+      "old_tvg_ids": [
+        "Discovery.HD.Theater.br (src05)",
+        "ce83d2eabfcab425926a03d0071e85ce"
+      ],
+      "groups": [
+        "DISCOVERY"
+      ],
+      "playlist_entries": 4
+    },
+    {
+      "id": "auto.discoveryworld",
+      "name": "Discovery World",
+      "aliases": [
+        "DISCOVERY WORLD",
+        "Discovery World"
+      ],
+      "old_tvg_ids": [
+        "2562574e5c1223acb63b1c6b48e53ae2",
+        "Discovery.World.br (src05)"
+      ],
+      "groups": [
+        "DISCOVERY"
+      ],
+      "playlist_entries": 4
+    },
+    {
+      "id": "auto.discoveryheh",
+      "name": "Discovery H&H",
+      "aliases": [
+        "DISCOVERY H&H",
+        "Discovery H&H"
+      ],
+      "old_tvg_ids": [
+        "9f69a7aab7bc08a257f8c70537c0f3fc",
+        "DHEAB.br (m3u4u)"
+      ],
+      "groups": [
+        "DISCOVERY"
+      ],
+      "playlist_entries": 4
+    },
+    {
+      "id": "auto.discoveryturbo",
+      "name": "Discovery Turbo",
+      "aliases": [
+        "DISCOVERY TURBO",
+        "Discovery Turbo"
+      ],
+      "old_tvg_ids": [
+        "Discovery.Turbo.br (src05)",
+        "db5244cc5810ef5c7920ea77642eb947"
+      ],
+      "groups": [
+        "DISCOVERY"
+      ],
+      "playlist_entries": 4
+    },
+    {
+      "id": "auto.bandnews",
+      "name": "Band News",
+      "aliases": [
+        "BAND NEWS",
+        "Band News"
+      ],
+      "old_tvg_ids": [
+        "58b2b0a13f424b344e401f10c71981fd",
+        "Band.News.br (src05)"
+      ],
+      "groups": [
+        "NOTÍCIAS"
+      ],
+      "playlist_entries": 3
+    },
+    {
+      "id": "auto.cnnbrasil",
+      "name": "CNN Brasil",
+      "aliases": [
+        "CNN BRASIL",
+        "CNN Brasil"
+      ],
+      "old_tvg_ids": [
+        "CNNB.br (m3u4u)",
+        "cd0c58163e21bad37ccb6f16b43bebef"
+      ],
+      "groups": [
+        "NOTÍCIAS"
+      ],
+      "playlist_entries": 4
+    },
+    {
+      "id": "auto.eurochannel",
+      "name": "Eurochannel",
+      "aliases": [
+        "Eurochannel"
+      ],
+      "old_tvg_ids": [
+        "Eurochannel.br (src05)"
+      ],
+      "groups": [
+        "NOTÍCIAS"
+      ],
+      "playlist_entries": 1
+    },
+    {
+      "id": "auto.france24",
+      "name": "France 24",
+      "aliases": [
+        "France 24"
+      ],
+      "old_tvg_ids": [
+        "FRANCE.24.HD.br (src05)"
+      ],
+      "groups": [
+        "NOTÍCIAS"
+      ],
+      "playlist_entries": 2
+    },
+    {
+      "id": "auto.globonews",
+      "name": "Globo News",
+      "aliases": [
+        "GLOBO NEWS",
+        "Globo News"
+      ],
+      "old_tvg_ids": [
+        "7febbe84b0edb3806d2d52afeb997fcd",
+        "Globo.News.br (src05)"
+      ],
+      "groups": [
+        "NOTÍCIAS"
+      ],
+      "playlist_entries": 3
+    },
+    {
+      "id": "auto.nhk",
+      "name": "NHK",
+      "aliases": [
+        "NHK"
+      ],
+      "old_tvg_ids": [
+        "aaff79db8057bd9782f27b25af31955e"
+      ],
+      "groups": [
+        "NOTÍCIAS"
+      ],
+      "playlist_entries": 1
+    },
+    {
+      "id": "auto.jovempannews",
+      "name": "Jovem Pan News",
+      "aliases": [
+        "JOVEM PAN NEWS",
+        "Jovem Pan News"
+      ],
+      "old_tvg_ids": [
+        "Jovem Pan News",
+        "Jovem.Pan.News.br (src05)"
+      ],
+      "groups": [
+        "NOTÍCIAS"
+      ],
+      "playlist_entries": 4
+    },
+    {
+      "id": "auto.recordnews",
+      "name": "Record News",
+      "aliases": [
+        "RECORD NEWS",
+        "Record News"
+      ],
+      "old_tvg_ids": [
+        "082475b399aec8632907af07ba460db6",
+        "Record.News.br (src05)"
+      ],
+      "groups": [
+        "NOTÍCIAS"
+      ],
+      "playlist_entries": 3
+    },
+    {
+      "id": "auto.tvgazetasp",
+      "name": "TV Gazeta SP",
+      "aliases": [
+        "TV Gazeta SP"
+      ],
+      "old_tvg_ids": [],
+      "groups": [
+        "NOTÍCIAS"
+      ],
+      "playlist_entries": 1
+    },
+    {
+      "id": "auto.cnbcbrasil",
+      "name": "CNBC Brasil",
+      "aliases": [
+        "CNBC Brasil"
+      ],
+      "old_tvg_ids": [],
+      "groups": [
+        "NOTÍCIAS"
+      ],
+      "playlist_entries": 2
+    },
+    {
+      "id": "auto.cnnbrasilmoney",
+      "name": "CNN Brasil Money",
+      "aliases": [
+        "CNN Brasil Money"
+      ],
+      "old_tvg_ids": [],
+      "groups": [
+        "NOTÍCIAS"
+      ],
+      "playlist_entries": 2
+    },
+    {
+      "id": "auto.cartoonnetwork",
+      "name": "Cartoon Network",
+      "aliases": [
+        "CARTOON NETWORK",
+        "Cartoon Network"
+      ],
+      "old_tvg_ids": [
+        "733e45ab710603516cdfec08dfb0ac92",
+        "Cartoon.Network.br (src05)"
+      ],
+      "groups": [
+        "INFANTIL"
+      ],
+      "playlist_entries": 6
+    },
+    {
+      "id": "auto.cartoonito",
+      "name": "Cartoonito",
+      "aliases": [
+        "Cartoonito"
+      ],
+      "old_tvg_ids": [
+        "CARTOB.br (m3u4u)"
+      ],
+      "groups": [
+        "INFANTIL"
+      ],
+      "playlist_entries": 5
+    },
+    {
+      "id": "auto.discoverykids",
+      "name": "Discovery Kids",
+      "aliases": [
+        "Discovery Kids"
+      ],
+      "old_tvg_ids": [
+        "Discovery.Kids.br (src05)"
+      ],
+      "groups": [
+        "INFANTIL"
+      ],
+      "playlist_entries": 5
+    },
+    {
+      "id": "auto.gloob",
+      "name": "Gloob",
+      "aliases": [
+        "Gloob"
+      ],
+      "old_tvg_ids": [
+        "Gloob.br (src05)"
+      ],
+      "groups": [
+        "INFANTIL"
+      ],
+      "playlist_entries": 5
+    },
+    {
+      "id": "auto.gloobinho",
+      "name": "Gloobinho",
+      "aliases": [
+        "Gloobinho"
+      ],
+      "old_tvg_ids": [
+        "Gloobinho.br"
+      ],
+      "groups": [
+        "INFANTIL"
+      ],
+      "playlist_entries": 5
+    },
+    {
+      "id": "auto.tvratimbum",
+      "name": "TV Ra-Tim-Bum",
+      "aliases": [
+        "TV Ra Tim Bum",
+        "TV Ra-Tim-Bum"
+      ],
+      "old_tvg_ids": [
+        "São.Paulo/SP..TV.Rá.Tim.Bum.br (src05)"
+      ],
+      "groups": [
+        "INFANTIL"
+      ],
+      "playlist_entries": 5
+    },
+    {
+      "id": "auto.zoomoo",
+      "name": "Zoomoo",
+      "aliases": [
+        "Zoomoo"
+      ],
+      "old_tvg_ids": [
+        "Zoomoo.br"
+      ],
+      "groups": [
+        "INFANTIL"
+      ],
+      "playlist_entries": 5
+    },
+    {
+      "id": "auto.adultswim",
+      "name": "Adult Swim",
+      "aliases": [
+        "Adult Swim"
+      ],
+      "old_tvg_ids": [
+        "Adult.Swim.HD.br (src05)"
+      ],
+      "groups": [
+        "INFANTIL"
+      ],
+      "playlist_entries": 5
+    },
+    {
+      "id": "auto.sportv1",
+      "name": "SPORTV 1",
+      "aliases": [
+        "SPORTV 1"
+      ],
+      "old_tvg_ids": [
+        "30c750ccff9c607ae24411eace4715ec"
+      ],
+      "groups": [
+        "ESPORTE",
+        "SPORTV"
+      ],
+      "playlist_entries": 2
+    },
+    {
+      "id": "auto.bandsports",
+      "name": "Band Sports",
+      "aliases": [
+        "BAND SPORTS",
+        "Band Sports"
+      ],
+      "old_tvg_ids": [
+        "8a5dd5aab0216b3b5ad01b401b611bbb",
+        "Bandsportshd.br"
+      ],
+      "groups": [
+        "ESPORTE"
+      ],
+      "playlist_entries": 6
+    },
+    {
+      "id": "auto.combate",
+      "name": "Combate",
+      "aliases": [
+        "COMBATE",
+        "Combate"
+      ],
+      "old_tvg_ids": [
+        "52e622950dcda02c65c715cd25ee7073",
+        "Combate.br"
+      ],
+      "groups": [
+        "ESPORTE"
+      ],
+      "playlist_entries": 6
+    },
+    {
+      "id": "auto.xsports",
+      "name": "X Sports",
+      "aliases": [
+        "X Sports"
+      ],
+      "old_tvg_ids": [],
+      "groups": [
+        "ESPORTE"
+      ],
+      "playlist_entries": 3
+    },
+    {
+      "id": "auto.espn2",
+      "name": "ESPN 2",
+      "aliases": [
+        "ESPN 2"
+      ],
+      "old_tvg_ids": [
+        "Espn.br"
+      ],
+      "groups": [
+        "ESPN"
+      ],
+      "playlist_entries": 5
+    },
+    {
+      "id": "auto.espn3",
+      "name": "ESPN 3",
+      "aliases": [
+        "ESPN 3"
+      ],
+      "old_tvg_ids": [
+        "ESPN+.br",
+        "aeab51e588f8e18a27e43aa5bb3d0827"
+      ],
+      "groups": [
+        "ESPN"
+      ],
+      "playlist_entries": 6
+    },
+    {
+      "id": "auto.espn4",
+      "name": "ESPN 4",
+      "aliases": [
+        "ESPN 4"
+      ],
+      "old_tvg_ids": [
+        "Foxsports.br",
+        "a3694659decfe49635161b993bc7c3a6"
+      ],
+      "groups": [
+        "ESPN"
+      ],
+      "playlist_entries": 6
+    },
+    {
+      "id": "auto.espn",
+      "name": "ESPN",
+      "aliases": [
+        "ESPN"
+      ],
+      "old_tvg_ids": [],
+      "groups": [
+        "ESPN"
+      ],
+      "playlist_entries": 5
+    },
+    {
+      "id": "auto.espn6",
+      "name": "ESPN 6",
+      "aliases": [
+        "ESPN 6"
+      ],
+      "old_tvg_ids": [
+        "ESPN Extra",
+        "Espnextra.br"
+      ],
+      "groups": [
+        "ESPN"
+      ],
+      "playlist_entries": 6
+    },
+    {
+      "id": "auto.espn5",
+      "name": "ESPN 5",
+      "aliases": [
+        "ESPN 5"
+      ],
+      "old_tvg_ids": [
+        "Foxsports2.br",
+        "f59c512e2fe682c1b91167de085bc7aa"
+      ],
+      "groups": [
+        "ESPN"
+      ],
+      "playlist_entries": 6
+    },
+    {
+      "id": "auto.premiere2",
+      "name": "Premiere 2",
+      "aliases": [
+        "Premiere 2"
+      ],
+      "old_tvg_ids": [
+        "Premiere2.br"
+      ],
+      "groups": [
+        "PREMIERE"
+      ],
+      "playlist_entries": 5
+    },
+    {
+      "id": "auto.premiere3",
+      "name": "Premiere 3",
+      "aliases": [
+        "Premiere 3"
+      ],
+      "old_tvg_ids": [
+        "Premiere3.br"
+      ],
+      "groups": [
+        "PREMIERE"
+      ],
+      "playlist_entries": 5
+    },
+    {
+      "id": "auto.premiere4",
+      "name": "Premiere 4",
+      "aliases": [
+        "Premiere 4"
+      ],
+      "old_tvg_ids": [
+        "Premiere4.br"
+      ],
+      "groups": [
+        "PREMIERE"
+      ],
+      "playlist_entries": 5
+    },
+    {
+      "id": "auto.premiere5",
+      "name": "Premiere 5",
+      "aliases": [
+        "Premiere 5"
+      ],
+      "old_tvg_ids": [
+        "Premiere5.br"
+      ],
+      "groups": [
+        "PREMIERE"
+      ],
+      "playlist_entries": 5
+    },
+    {
+      "id": "auto.premiere6",
+      "name": "Premiere 6",
+      "aliases": [
+        "Premiere 6"
+      ],
+      "old_tvg_ids": [
+        "Premiere6.br"
+      ],
+      "groups": [
+        "PREMIERE"
+      ],
+      "playlist_entries": 5
+    },
+    {
+      "id": "auto.premiere7",
+      "name": "Premiere 7",
+      "aliases": [
+        "Premiere 7"
+      ],
+      "old_tvg_ids": [
+        "Premiere7.br"
+      ],
+      "groups": [
+        "PREMIERE"
+      ],
+      "playlist_entries": 5
+    },
+    {
+      "id": "auto.premiere8",
+      "name": "Premiere 8",
+      "aliases": [
+        "Premiere 8"
+      ],
+      "old_tvg_ids": [
+        "Premiere8.br"
+      ],
+      "groups": [
+        "PREMIERE"
+      ],
+      "playlist_entries": 5
+    },
+    {
+      "id": "auto.premiereclubes",
+      "name": "Premiere Clubes",
+      "aliases": [
+        "Premiere Clubes"
+      ],
+      "old_tvg_ids": [
+        "Premiereclubes.br"
+      ],
+      "groups": [
+        "PREMIERE"
+      ],
+      "playlist_entries": 5
+    },
+    {
+      "id": "auto.sportv2",
+      "name": "SporTV 2",
+      "aliases": [
+        "SPORTV 2",
+        "SporTV 2"
+      ],
+      "old_tvg_ids": [
+        "2ab405ed6f10dd88a1783b89c5283b56",
+        "Sportv2.br"
+      ],
+      "groups": [
+        "SPORTV"
+      ],
+      "playlist_entries": 6
+    },
+    {
+      "id": "auto.sportv3",
+      "name": "SporTV 3",
+      "aliases": [
+        "SporTV3",
+        "SPORTV 3",
+        "SporTV 3"
+      ],
+      "old_tvg_ids": [
+        "70162c39a3bb1b387294c154927a4905",
+        "Sportv3.br"
+      ],
+      "groups": [
+        "SPORTV"
+      ],
+      "playlist_entries": 6
+    },
+    {
+      "id": "auto.sportv",
+      "name": "SporTV",
+      "aliases": [
+        "SporTV"
+      ],
+      "old_tvg_ids": [
+        "Sportv.br"
+      ],
+      "groups": [
+        "SPORTV"
+      ],
+      "playlist_entries": 5
+    },
+    {
+      "id": "auto.sportv4",
+      "name": "SporTV 4",
+      "aliases": [
+        "SporTV 4"
+      ],
+      "old_tvg_ids": [],
+      "groups": [
+        "SPORTV"
+      ],
+      "playlist_entries": 5
+    }
+  ]
+}
