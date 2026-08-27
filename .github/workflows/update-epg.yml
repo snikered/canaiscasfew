@@ -16,7 +16,7 @@ concurrency:
 jobs:
   atualizar:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     steps:
       - name: Baixar o repositório
         uses: actions/checkout@v6
@@ -26,7 +26,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Gerar EPG combinado
+      - name: Gerar EPG por consenso
         run: python merge_epg.py
 
       - name: Publicar somente o resultado na branch epg
