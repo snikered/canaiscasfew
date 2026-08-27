@@ -1,0 +1,52 @@
+name: Atualizar EPG
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 19 * * *"
+      timezone: "America/Maceio"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: atualizar-epg
+  cancel-in-progress: false
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Baixar o repositório
+        uses: actions/checkout@v6
+
+      - name: Preparar Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Gerar EPG combinado
+        run: python merge_epg.py
+
+      - name: Publicar somente o resultado na branch epg
+        shell: bash
+        run: |
+          set -e
+          rm -rf /tmp/epg-publicado
+          mkdir -p /tmp/epg-publicado
+          cp output/epg.xml.gz /tmp/epg-publicado/epg.xml.gz
+          cp output/report.md /tmp/epg-publicado/report.md
+          cp output/report.json /tmp/epg-publicado/report.json
+          cp output/validation.md /tmp/epg-publicado/validation.md
+          cp output/validation.json /tmp/epg-publicado/validation.json
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout --orphan publicacao-epg
+          git rm -rf .
+          cp /tmp/epg-publicado/* .
+          printf '# Saída automática\n\nArquivos gerados pelo workflow da branch main.\n' > README.md
+          git add epg.xml.gz report.md report.json validation.md validation.json README.md
+          git commit -m "Atualiza EPG automático"
+          git push --force origin HEAD:epg

@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Mescla EPG Genius + Open-EPG por nome, com o primeiro como prioridade."""
+"""Mescla Genius + Open-EPG por nome e valida a grade com até 4 fontes.
+
+Genius é a fonte principal, Open-EPG Brazil 4 é o único fallback de saída.
+EPGShare BR1 e IPTV-EPG BR são fontes independentes de coerência/validação.
+"""
 from __future__ import annotations
 
 import copy
@@ -10,6 +14,9 @@ import os
 import time
 import urllib.request
 import xml.etree.ElementTree as ET
+import re
+import unicodedata
+from datetime import datetime, timezone, timedelta
 from collections import defaultdict
 from dataclasses import dataclass
 from difflib import SequenceMatcher
@@ -25,6 +32,14 @@ PRIMARY_URL = os.environ.get(
 SECONDARY_URL = os.environ.get(
     "SECONDARY_EPG_URL",
     "https://www.open-epg.com/files/brazil4.xml",
+)
+TERTIARY_URL = os.environ.get(
+    "TERTIARY_EPG_URL",
+    "https://epgshare01.online/epgshare01/epg_ripper_BR1.xml.gz",
+)
+QUATERNARY_URL = os.environ.get(
+    "QUATERNARY_EPG_URL",
+    "https://iptv-epg.org/files/epg-br.xml",
 )
 CATALOG_PATH = Path(os.environ.get("CHANNELS_FILE", "channels.json"))
 OVERRIDES_PATH = Path(os.environ.get("OVERRIDES_FILE", "overrides.json"))
@@ -101,6 +116,14 @@ def read_source(label: str, url: str) -> EpgSource:
                 programs[channel_id].append(child)
 
     return EpgSource(label, root, channels, names, dict(programs), dict(exact_index))
+
+
+def read_optional_source(label: str, url: str) -> tuple[EpgSource | None, str | None]:
+    """Baixa uma fonte de validação sem impedir a geração do EPG se ela falhar."""
+    try:
+        return read_source(label, url), None
+    except Exception as exc:  # noqa: BLE001 - registramos a falha no relatório
+        return None, str(exc)
 
 
 def aliases_for(entry: dict[str, object]) -> list[str]:
@@ -184,6 +207,321 @@ def add_display_name_first(channel: ET.Element, name: str) -> None:
     channel.insert(0, display)
 
 
+
+def parse_xmltv_datetime(value: str) -> datetime | None:
+    """Converte timestamps XMLTV (YYYYmmddHHMMSS +ZZZZ) para datetime ciente de fuso."""
+    if not value:
+        return None
+    value = value.strip()
+    # XMLTV normalmente traz segundos, mas algumas fontes omitem.
+    for fmt in ("%Y%m%d%H%M%S %z", "%Y%m%d%H%M %z", "%Y%m%d%H%M%S", "%Y%m%d%H%M"):
+        try:
+            dt = datetime.strptime(value, fmt)
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            return dt
+        except ValueError:
+            pass
+    return None
+
+
+def programme_title(programme: ET.Element | None) -> str:
+    if programme is None:
+        return ""
+    for child in programme:
+        if local_tag(child) == "title" and (child.text or "").strip():
+            return (child.text or "").strip()
+    return ""
+
+
+def normalize_programme_title(value: str) -> str:
+    value = unicodedata.normalize("NFKD", value or "")
+    value = "".join(ch for ch in value if not unicodedata.combining(ch))
+    value = value.upper()
+    # Remove marcadores comuns que criam divergência sem indicar grade diferente.
+    value = re.sub(r"\b(?:HD|FHD|AO VIVO|LIVE|ESTREIA|INEDITO|INÉDITO)\b", " ", value)
+    value = re.sub(r"[^A-Z0-9]+", " ", value)
+    return re.sub(r"\s+", " ", value).strip()
+
+
+def programme_title_similarity(a: str, b: str) -> float:
+    a = normalize_programme_title(a)
+    b = normalize_programme_title(b)
+    if not a or not b:
+        return 0.0
+    if a == b:
+        return 1.0
+    return SequenceMatcher(None, a, b).ratio()
+
+
+def programme_rows(source: EpgSource, channel_id: str) -> list[tuple[datetime, datetime, str]]:
+    rows: list[tuple[datetime, datetime, str]] = []
+    for p in source.programs.get(channel_id, []):
+        start = parse_xmltv_datetime(p.attrib.get("start", ""))
+        stop = parse_xmltv_datetime(p.attrib.get("stop", ""))
+        if start is None or stop is None:
+            continue
+        rows.append((start, stop, programme_title(p)))
+    rows.sort(key=lambda x: x[0])
+    return rows
+
+
+def now_next_for(source: EpgSource, channel_id: str, now: datetime) -> tuple[dict | None, dict | None]:
+    current = None
+    next_item = None
+    for start, stop, title in programme_rows(source, channel_id):
+        if start <= now < stop:
+            current = {"start": start, "stop": stop, "title": title}
+            continue
+        if start > now:
+            next_item = {"start": start, "stop": stop, "title": title}
+            break
+    return current, next_item
+
+
+def alternate_match(source: EpgSource, aliases: list[str]) -> tuple[str | None, str]:
+    exact_id, reason = choose_exact(source, aliases)
+    if exact_id:
+        return exact_id, reason
+    fuzzy_id, best_score, second_score, fuzzy_reason = best_fuzzy(source, aliases)
+    if fuzzy_id and best_score >= FUZZY_THRESHOLD and (best_score - second_score) >= FUZZY_MARGIN:
+        return fuzzy_id, fuzzy_reason
+    return None, ""
+
+
+def cross_source_programme_agreement(
+    chosen_source: EpgSource,
+    chosen_id: str,
+    other_source: EpgSource,
+    other_id: str,
+) -> dict[str, object]:
+    """Compara títulos em horários equivalentes entre as duas fontes.
+
+    Isto não prova qual fonte está certa; serve para detectar divergências grandes,
+    que são úteis para flagrar um canal mapeado para o EPG errado.
+    """
+    a_rows = programme_rows(chosen_source, chosen_id)
+    b_rows = programme_rows(other_source, other_id)
+    if not a_rows or not b_rows:
+        return {"comparable": 0, "agreement": None, "average_similarity": None}
+
+    pairs: list[float] = []
+    # Comparamos somente programas que começam em horários próximos (até 15 min).
+    j = 0
+    for a_start, _a_stop, a_title in a_rows:
+        while j + 1 < len(b_rows) and b_rows[j + 1][0] <= a_start:
+            j += 1
+        candidates = []
+        for idx in (j - 1, j, j + 1):
+            if 0 <= idx < len(b_rows):
+                b_start, _b_stop, b_title = b_rows[idx]
+                delta = abs((b_start - a_start).total_seconds())
+                if delta <= 15 * 60:
+                    candidates.append((delta, b_title))
+        if candidates:
+            _, b_title = min(candidates, key=lambda x: x[0])
+            pairs.append(programme_title_similarity(a_title, b_title))
+
+    if not pairs:
+        return {"comparable": 0, "agreement": None, "average_similarity": None}
+    agreed = sum(1 for score in pairs if score >= 0.72)
+    return {
+        "comparable": len(pairs),
+        "agreement": round(agreed / len(pairs), 4),
+        "average_similarity": round(sum(pairs) / len(pairs), 4),
+    }
+
+
+def validate_selection(
+    entry: dict[str, object],
+    source: EpgSource,
+    source_id: str,
+    validation_sources: list[EpgSource],
+    now: datetime,
+) -> dict[str, object]:
+    aliases = aliases_for(entry)
+    rows = programme_rows(source, source_id)
+    current, next_item = now_next_for(source, source_id, now)
+
+    invalid_durations = 0
+    overlaps = 0
+    gaps = 0
+    previous_stop: datetime | None = None
+    for start, stop, _title in rows:
+        duration = stop - start
+        if duration.total_seconds() <= 0 or duration > timedelta(hours=12):
+            invalid_durations += 1
+        if previous_stop is not None:
+            if start < previous_stop - timedelta(seconds=30):
+                overlaps += 1
+            elif start > previous_stop + timedelta(minutes=30):
+                gaps += 1
+        if previous_stop is None or stop > previous_stop:
+            previous_stop = stop
+
+    future_end = max((stop for start, stop, _ in rows if stop > now), default=None)
+    future_hours = round(max(0.0, (future_end - now).total_seconds() / 3600), 1) if future_end else 0.0
+
+    comparisons: list[dict[str, object]] = []
+    for other_source in validation_sources:
+        if other_source is source:
+            continue
+        other_id, other_method = alternate_match(other_source, aliases)
+        comparison: dict[str, object] = {
+            "other_source": other_source.label,
+            "other_channel_id": other_id,
+            "other_match_method": other_method,
+            "comparable": 0,
+            "agreement": None,
+            "average_similarity": None,
+            "vote": "sem_dados",
+        }
+        if other_id:
+            comparison.update(cross_source_programme_agreement(source, source_id, other_source, other_id))
+            comparable = int(comparison.get("comparable") or 0)
+            agreement = comparison.get("agreement")
+            if comparable >= 3 and isinstance(agreement, float):
+                # O voto é relativamente permissivo; alertas fortes continuam usando
+                # faixas mais rígidas abaixo. Isso tolera pequenas diferenças de título.
+                comparison["vote"] = "concorda" if agreement >= 0.55 else "diverge"
+        comparisons.append(comparison)
+
+    # A própria fonte escolhida conta como um voto. Só entram no denominador as
+    # fontes independentes com ao menos 3 horários realmente comparáveis.
+    supporting_votes = 1
+    opposing_votes = 0
+    vote_sources = 1
+    comparable_source_agreements: list[float] = []
+    for comp in comparisons:
+        if comp.get("vote") == "concorda":
+            supporting_votes += 1
+            vote_sources += 1
+            comparable_source_agreements.append(float(comp["agreement"]))
+        elif comp.get("vote") == "diverge":
+            opposing_votes += 1
+            vote_sources += 1
+            comparable_source_agreements.append(float(comp["agreement"]))
+
+    available_matches = 1 + sum(1 for comp in comparisons if comp.get("other_channel_id"))
+    consensus_ratio = supporting_votes / vote_sources if vote_sources else 1.0
+    # 4/4 = 100. Poucas fontes disponíveis recebem leve penalidade, para não
+    # tratar 1/1 como tão forte quanto quatro fontes concordando.
+    coverage_factor = 0.70 + 0.30 * min(vote_sources, 4) / 4
+    confidence = round(100 * consensus_ratio * coverage_factor)
+
+    warnings: list[str] = []
+    severity = "ok"
+    if not rows:
+        warnings.append("nenhum programa na fonte escolhida")
+        severity = "suspeito"
+    if current is None:
+        warnings.append("sem programa cobrindo o horário atual")
+        if severity == "ok":
+            severity = "atencao"
+    if next_item is None:
+        warnings.append("sem próximo programa disponível")
+        if severity == "ok":
+            severity = "atencao"
+    if future_hours < 6:
+        warnings.append(f"pouca programação futura ({future_hours:.1f} h)")
+        if severity == "ok":
+            severity = "atencao"
+    if invalid_durations:
+        warnings.append(f"{invalid_durations} programa(s) com duração inválida/suspeita")
+        severity = "suspeito"
+    if overlaps >= 3:
+        warnings.append(f"{overlaps} sobreposições de horários")
+        severity = "suspeito"
+    if gaps >= 4:
+        warnings.append(f"{gaps} lacunas maiores que 30 min")
+        if severity == "ok":
+            severity = "atencao"
+
+    # Alertas por fonte individual. Com 3 árbitros independentes, uma divergência
+    # isolada vira atenção; duas ou mais fontes contra a escolhida viram suspeita.
+    divergent_labels: list[str] = []
+    weak_labels: list[str] = []
+    for comp in comparisons:
+        comparable = int(comp.get("comparable") or 0)
+        agreement = comp.get("agreement")
+        if comparable < 5 or not isinstance(agreement, float):
+            continue
+        if agreement < 0.30:
+            divergent_labels.append(str(comp.get("other_source")))
+        elif agreement < 0.55:
+            weak_labels.append(str(comp.get("other_source")))
+
+    if opposing_votes >= 2 or len(divergent_labels) >= 2:
+        warnings.append(
+            "a fonte escolhida diverge de múltiplas fontes independentes: "
+            + ", ".join(sorted(set(divergent_labels or [
+                str(c.get("other_source")) for c in comparisons if c.get("vote") == "diverge"
+            ])))
+        )
+        severity = "suspeito"
+    elif opposing_votes == 1 or divergent_labels:
+        label = (divergent_labels or [
+            str(c.get("other_source")) for c in comparisons if c.get("vote") == "diverge"
+        ])[0]
+        warnings.append(f"grade diverge de {label}; conferir a votação das outras fontes")
+        if severity == "ok":
+            severity = "atencao"
+    elif weak_labels:
+        warnings.append("concordância parcial com " + ", ".join(sorted(set(weak_labels))))
+        if severity == "ok":
+            severity = "atencao"
+
+    # Se temos 3+ fontes votando e a escolhida não tem maioria, é sinal forte.
+    if vote_sources >= 3 and supporting_votes <= opposing_votes:
+        warnings.append(
+            f"sem maioria para a fonte escolhida ({supporting_votes}/{vote_sources} votos favoráveis)"
+        )
+        severity = "suspeito"
+
+    def serialize_item(item: dict | None) -> dict | None:
+        if item is None:
+            return None
+        return {
+            "title": item["title"],
+            "start": item["start"].isoformat(),
+            "stop": item["stop"].isoformat(),
+        }
+
+    return {
+        "target_id": str(entry["id"]),
+        "name": str(entry["name"]),
+        "source": source.label,
+        "source_channel_id": source_id,
+        "status": severity,
+        "warnings": warnings,
+        "programmes": len(rows),
+        "future_hours": future_hours,
+        "overlaps": overlaps,
+        "gaps_over_30m": gaps,
+        "now": serialize_item(current),
+        "next": serialize_item(next_item),
+        "consensus": {
+            "supporting_votes": supporting_votes,
+            "opposing_votes": opposing_votes,
+            "vote_sources": vote_sources,
+            "available_channel_matches": available_matches,
+            "max_sources": len(validation_sources),
+            "confidence": confidence,
+        },
+        "cross_sources": comparisons,
+    }
+
+def fmt_local_time(value: str | None) -> str:
+    if not value:
+        return "—"
+    try:
+        dt = datetime.fromisoformat(value)
+        # America/Maceio não tem horário de verão atualmente; o relatório usa UTC-03.
+        local = dt.astimezone(timezone(timedelta(hours=-3)))
+        return local.strftime("%d/%m %H:%M")
+    except ValueError:
+        return value
+
 def main() -> None:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     catalog_data = json.loads(CATALOG_PATH.read_text("utf-8"))
@@ -197,9 +535,32 @@ def main() -> None:
     secondary = read_source("Open-EPG", SECONDARY_URL)
     print(f"Open-EPG: {len(secondary.channels)} canais")
 
+    optional_source_errors: dict[str, str] = {}
+    print("Baixando 3ª fonte de validação (EPGShare BR1)...")
+    tertiary, tertiary_error = read_optional_source("EPGShare BR1", TERTIARY_URL)
+    if tertiary is not None:
+        print(f"EPGShare BR1: {len(tertiary.channels)} canais")
+    else:
+        optional_source_errors["EPGShare BR1"] = tertiary_error or "falha desconhecida"
+        print(f"AVISO: EPGShare BR1 indisponível: {tertiary_error}")
+
+    print("Baixando 4ª fonte de validação (IPTV-EPG BR)...")
+    quaternary, quaternary_error = read_optional_source("IPTV-EPG BR", QUATERNARY_URL)
+    if quaternary is not None:
+        print(f"IPTV-EPG BR: {len(quaternary.channels)} canais")
+    else:
+        optional_source_errors["IPTV-EPG BR"] = quaternary_error or "falha desconhecida"
+        print(f"AVISO: IPTV-EPG BR indisponível: {quaternary_error}")
+
+    validation_sources = [primary, secondary]
+    if tertiary is not None:
+        validation_sources.append(tertiary)
+    if quaternary is not None:
+        validation_sources.append(quaternary)
+
     output_root = ET.Element("tv", {
         "generator-info-name": "EPG automático por nome",
-        "source-info-name": "Genius principal + Open-EPG Brazil 4 fallback",
+        "source-info-name": "Genius principal + Open-EPG Brazil 4 fallback; EPGShare/IPTV-EPG validadores",
     })
     report: list[dict[str, object]] = []
     selected_channels: list[tuple[dict[str, object], EpgSource, str, str, float]] = []
@@ -301,6 +662,12 @@ def main() -> None:
             output_root.append(programme)
             programme_count += 1
 
+    # Validação: estrutura, Agora/Próximo e votação independente entre até 4 fontes.
+    validation_now = datetime.now(timezone.utc)
+    validations: list[dict[str, object]] = []
+    for entry, source, source_id, _, _ in selected_channels:
+        validations.append(validate_selection(entry, source, source_id, validation_sources, validation_now))
+
     xml_payload = ET.tostring(output_root, encoding="utf-8", xml_declaration=True)
     xml_path = OUTPUT_DIR / "epg.xml"
     gz_path = OUTPUT_DIR / "epg.xml.gz"
@@ -315,11 +682,107 @@ def main() -> None:
         "matched_fallback": sum(1 for x in report if x["status"] == "fallback"),
         "missing": sum(1 for x in report if x["status"] == "missing"),
         "programmes": programme_count,
+        "validation_ok": sum(1 for x in validations if x["status"] == "ok"),
+        "validation_attention": sum(1 for x in validations if x["status"] == "atencao"),
+        "validation_suspicious": sum(1 for x in validations if x["status"] == "suspeito"),
     }
     (OUTPUT_DIR / "report.json").write_text(
         json.dumps({"summary": counts, "channels": report}, ensure_ascii=False, indent=2) + "\n",
         "utf-8",
     )
+
+    (OUTPUT_DIR / "validation.json").write_text(
+        json.dumps({
+            "generated_at": validation_now.isoformat(),
+            "summary": {
+                "ok": counts["validation_ok"],
+                "attention": counts["validation_attention"],
+                "suspicious": counts["validation_suspicious"],
+                "active_sources": [src.label for src in validation_sources],
+                "optional_source_errors": optional_source_errors,
+            },
+            "channels": validations,
+        }, ensure_ascii=False, indent=2) + "\n",
+        "utf-8",
+    )
+
+    validation_md = [
+        "# Validação da programação",
+        "",
+        "> A programação escolhida vem apenas de Genius/Open-EPG. EPGShare BR1 e IPTV-EPG BR atuam como árbitros independentes; quanto mais fontes concordarem, maior a confiança.",
+        "",
+        f"Gerado em: **{validation_now.astimezone(timezone(timedelta(hours=-3))).strftime('%d/%m/%Y %H:%M')} (Maceió)**",
+        f"Fontes ativas nesta execução: **{', '.join(src.label for src in validation_sources)}**",
+        "",
+        f"- ✅ OK: **{counts['validation_ok']}**",
+        f"- ⚠️ Atenção: **{counts['validation_attention']}**",
+        f"- 🚨 Suspeito: **{counts['validation_suspicious']}**",
+        "",
+    ]
+    if optional_source_errors:
+        validation_md.append("## Fontes de validação indisponíveis")
+        validation_md.append("")
+        for label, error in optional_source_errors.items():
+            validation_md.append(f"- ⚠️ **{label}:** {error}")
+        validation_md.append("")
+    validation_md.extend([
+        "## Canais que merecem conferência",
+        "",
+    ])
+    flagged = [x for x in validations if x["status"] != "ok"]
+    flagged.sort(key=lambda x: (0 if x["status"] == "suspeito" else 1, str(x["name"])))
+    for item in flagged:
+        icon = "🚨" if item["status"] == "suspeito" else "⚠️"
+        current = item.get("now") or {}
+        nxt = item.get("next") or {}
+        validation_md.append(
+            f"### {icon} {item['name']} — {item['source']} / `{item['source_channel_id']}`"
+        )
+        validation_md.append("")
+        validation_md.append(
+            f"- **Agora:** {current.get('title', '—')} ({fmt_local_time(current.get('start'))}–{fmt_local_time(current.get('stop'))})"
+        )
+        validation_md.append(
+            f"- **Próximo:** {nxt.get('title', '—')} ({fmt_local_time(nxt.get('start'))}–{fmt_local_time(nxt.get('stop'))})"
+        )
+        consensus = item.get("consensus") or {}
+        validation_md.append(
+            f"- **Votação:** {consensus.get('supporting_votes', 1)}/{consensus.get('vote_sources', 1)} fontes comparáveis apoiam a grade escolhida · confiança **{consensus.get('confidence', 0)}%**"
+        )
+        for comp in item.get("cross_sources", []) or []:
+            if comp.get("other_channel_id"):
+                agreement = comp.get("agreement")
+                vote = comp.get("vote")
+                vote_icon = "✅" if vote == "concorda" else ("❌" if vote == "diverge" else "➖")
+                if isinstance(agreement, float):
+                    validation_md.append(
+                        f"- {vote_icon} **{comp.get('other_source')}:** `{comp.get('other_channel_id')}` — {agreement*100:.0f}% em {comp.get('comparable')} horários"
+                    )
+                else:
+                    validation_md.append(
+                        f"- ➖ **{comp.get('other_source')}:** `{comp.get('other_channel_id')}` (sem horários suficientes para votar)"
+                    )
+            else:
+                validation_md.append(f"- ➖ **{comp.get('other_source')}:** canal não encontrado com segurança")
+        for warning in item.get("warnings", []):
+            validation_md.append(f"- **Alerta:** {warning}")
+        validation_md.append("")
+    if not flagged:
+        validation_md.append("Nenhum alerta automático nesta execução.")
+        validation_md.append("")
+
+    validation_md.extend(["## Agora / Próximo — todos os canais", ""])
+    for item in sorted(validations, key=lambda x: str(x["name"])):
+        current = item.get("now") or {}
+        nxt = item.get("next") or {}
+        icon = "✅" if item["status"] == "ok" else ("🚨" if item["status"] == "suspeito" else "⚠️")
+        consensus = item.get("consensus") or {}
+        validation_md.append(
+            f"- {icon} **{item['name']}** ({item['source']}): "
+            f"Agora **{current.get('title', '—')}** → Próximo **{nxt.get('title', '—')}** · "
+            f"votos **{consensus.get('supporting_votes', 1)}/{consensus.get('vote_sources', 1)}** · confiança **{consensus.get('confidence', 0)}%**"
+        )
+    (OUTPUT_DIR / "validation.md").write_text("\n".join(validation_md) + "\n", "utf-8")
 
     markdown = [
         "# Relatório do EPG automático",
@@ -329,6 +792,9 @@ def main() -> None:
         f"- Adicionados pelo Open-EPG: **{counts['matched_fallback']}**",
         f"- Sem correspondência segura: **{counts['missing']}**",
         f"- Programas gravados: **{counts['programmes']}**",
+        f"- Validação: ✅ **{counts['validation_ok']}** OK · ⚠️ **{counts['validation_attention']}** atenção · 🚨 **{counts['validation_suspicious']}** suspeitos",
+        "",
+        "Veja **validation.md** para Agora/Próximo, votação de até 4 fontes e os alertas de programação.",
         "",
         "## Fallback Open-EPG",
         "",
