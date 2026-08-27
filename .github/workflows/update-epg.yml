@@ -16,8 +16,7 @@ concurrency:
 jobs:
   atualizar:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-
+    timeout-minutes: 30
     steps:
       - name: Baixar o repositório
         uses: actions/checkout@v6
@@ -34,24 +33,20 @@ jobs:
         shell: bash
         run: |
           set -e
-
           rm -rf /tmp/epg-publicado
           mkdir -p /tmp/epg-publicado
-
           cp output/epg.xml.gz /tmp/epg-publicado/epg.xml.gz
           cp output/report.md /tmp/epg-publicado/report.md
           cp output/report.json /tmp/epg-publicado/report.json
+          cp output/validation.md /tmp/epg-publicado/validation.md
+          cp output/validation.json /tmp/epg-publicado/validation.json
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
           git checkout --orphan publicacao-epg
           git rm -rf .
-
           cp /tmp/epg-publicado/* .
-
           printf '# Saída automática\n\nArquivos gerados pelo workflow da branch main.\n' > README.md
-
-          git add epg.xml.gz report.md report.json README.md
+          git add epg.xml.gz report.md report.json validation.md validation.json README.md
           git commit -m "Atualiza EPG automático"
           git push --force origin HEAD:epg
