@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import html
 import re
 import unicodedata
 from difflib import SequenceMatcher
@@ -10,9 +11,7 @@ from difflib import SequenceMatcher
 SUPERSCRIPT_DIGITS = "⁰¹²³⁴⁵⁶⁷⁸⁹"
 QUALITY_TOKENS = {
     "HD", "FHD", "FULLHD", "FULL", "UHD", "4K", "8K", "SD",
-    # Para casar, por exemplo, "History Channel" com "History" e
-    # "Paramount Channel" com "Paramount". É tratado como marcador
-    # genérico, assim como HD/FHD, apenas durante a comparação.
+    # CHANNEL é ignorado somente durante a comparação.
     "CHANNEL",
     "H264", "H265", "HEVC", "AVC", "HDR", "HDR10", "DV",
     "FPS", "50FPS", "60FPS", "30FPS", "25FPS",
@@ -26,23 +25,15 @@ def remove_superscript_markers(value: str) -> str:
 
 
 def strip_quality_markers(value: str) -> str:
-    """Remove marcadores de cópia/qualidade e o termo genérico CHANNEL.
-
-    Funciona também quando os termos vêm separados por ponto, hífen ou
-    underscore em IDs XMLTV. Números normais (HBO 2, ESPN 4 etc.) permanecem.
-    """
-    value = remove_superscript_markers(value)
-    # Marcadores de cópia no fim, como "Discovery HD (2)".
+    """Remove marcadores de cópia/qualidade, preservando números reais."""
+    value = html.unescape(remove_superscript_markers(value or ""))
     value = re.sub(r"\s*\(\s*\d+\s*\)\s*$", "", value)
-    # Remove colchetes quando usados para codec/qualidade.
     value = re.sub(
         r"\[\s*(?:H\.?26[45]|HEVC|AVC|HD|FHD|UHD|4K|8K|HDR\+?|\d+\s*FPS)\s*\]",
         " ", value, flags=re.IGNORECASE,
     )
     value = re.sub(r"HDR\+", " HDR ", value, flags=re.IGNORECASE)
 
-    # Separa apenas para a comparação. Isso faz "Paramount.Channel.br" e
-    # "History-Channel-HD" receberem o mesmo tratamento dos nomes com espaços.
     parts = re.split(r"([\s._/|:+-]+)", value.strip())
     kept: list[str] = []
     skip_next_hd = False
@@ -66,30 +57,39 @@ def strip_quality_markers(value: str) -> str:
 
     value = "".join(kept)
     value = re.sub(r"[\s._/|:+-]+", " ", value)
-    return value.strip(" -_|:/.")
+    return value.strip(" -_|:/.\t\r\n")
 
 
 def normalize_name(value: str) -> str:
-    """Normalização forte para comparação, preservando números reais como HBO 2."""
+    """Normalização forte para comparação, preservando números reais.
+
+    Regras importantes:
+    - ¹²³⁴ são marcadores de cópia e somem;
+    - HBO e HBO 2 continuam diferentes;
+    - & e AND são equivalentes;
+    - A&E / A&amp;E.br / A and E caem numa chave específica, sem virar um
+      nome genérico que possa colidir com outro canal curto.
+    """
     value = strip_quality_markers(value)
     value = unicodedata.normalize("NFKD", value)
     value = "".join(ch for ch in value if not unicodedata.combining(ch))
-    value = value.upper()
-    # XMLTVs diferentes escrevem a conjunção de formas distintas.
-    # Exemplos: "FILM & ARTS" x "Film And Arts.br" e
-    # "Sabor & Arte" x "Sabor And Arte.br".
-    # Canonizamos AND para o mesmo token usado por &, sem alterar nomes exibidos.
-    value = re.sub(r"\bAND\b", " E ", value)
-    value = value.replace("&", " E ")
+    value = value.upper().strip()
+
+    # Caso especial solicitado. Fazemos antes da regra genérica de &/AND.
+    ae_probe = re.sub(r"[._/-]+", " ", value)
+    ae_probe = re.sub(r"\s+", " ", ae_probe).strip()
+    if re.fullmatch(r"A\s*(?:&|AND)\s*E", ae_probe):
+        return "AANDE"
+
+    # Conjunção em inglês e símbolo usam a mesma forma canônica.
+    value = re.sub(r"\bAND\b", " AND ", value)
+    value = value.replace("&", " AND ")
     value = re.sub(r"[^A-Z0-9]+", "", value)
 
-    # Equivalências conhecidas entre nomes da playlist e IDs/display-names
-    # das fontes XMLTV. Aplicadas somente na comparação; o nome exibido
-    # no player não é alterado.
+    # Equivalências conhecidas, somente para comparação.
     if value == "CANALSONY":
         value = "SONY"
-    # No EPG Genius, Sportv.br corresponde ao canal SporTV 1.
-    # Assim "SporTV", "Sportv.br" e "SporTV 1" caem na mesma chave.
+    # Sportv.br é o SporTV 1; outros SporTV numerados continuam distintos.
     if value == "SPORTV":
         value = "SPORTV1"
 
@@ -97,6 +97,7 @@ def normalize_name(value: str) -> str:
 
 
 def normalize_source_id(value: str) -> str:
+    value = html.unescape(value or "")
     value = re.sub(r"\s*\((?:M3U4U|SRC\d+)\)\s*$", "", value, flags=re.I)
     value = re.sub(r"(?:^|[./_-])(?:BR|BRAZIL)(?:$|[./_-])", " ", value, flags=re.I)
     value = re.sub(r"\.(?:BR|COM|NET|ORG)$", "", value, flags=re.I)
@@ -115,7 +116,6 @@ def similarity(left: str, right: str) -> float:
     if a == b:
         return 1.0
     ratio = SequenceMatcher(None, a, b).ratio()
-    # Bônus pequeno quando um nome contém o outro, mas sem cruzar numeração.
     if min(len(a), len(b)) >= 5 and (a in b or b in a):
         ratio = max(ratio, min(len(a), len(b)) / max(len(a), len(b)))
     return ratio
