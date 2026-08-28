@@ -1,6 +1,7 @@
+output/
+playlist.m3u
+playlist-fixed.m3u
+*.m3u8
 __pycache__/
 *.pyc
-output/epg.xml
-output/epg.xml.gz
-output/report.json
-output/report.md
+# Não coloque M3Us originais no repo. Arquivos *.safe.m3u são permitidos em learning/.

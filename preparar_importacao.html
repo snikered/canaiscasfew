@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Preparar M3U para aprendizado do EPG</title>
+<style>
+body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;max-width:850px;margin:40px auto;padding:0 18px;line-height:1.45}button,input{font:inherit}button{padding:10px 16px;margin:8px 8px 8px 0}.box{border:1px solid #bbb;border-radius:12px;padding:18px;margin:18px 0}pre{white-space:pre-wrap;word-break:break-word}.ok{font-weight:700}
+</style>
+</head><body>
+<h1>Preparar lista para o dicionário EPG</h1>
+<p>Este arquivo lê a M3U <strong>somente no seu aparelho</strong> e gera uma versão <code>.safe.m3u</code> sem URLs de stream, usuário, senha ou token. O arquivo seguro pode ser enviado à pasta <code>learning/</code> do GitHub.</p>
+<div class="box">
+<input id="file" type="file" accept=".m3u,.m3u8,text/plain"><br>
+<button id="go">Gerar arquivo seguro</button>
+<pre id="status">Escolha uma M3U.</pre>
+</div>
+<script>
+const SUP=/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g;
+const vod=/\b(FILMES?|MOVIES?|S[ÉE]RIES?|NOVELAS?|DORAMAS?|NETFLIX|AMAZON\s*PRIME|PRIME\s*VIDEO|GLOBOPLAY|DISNEY\s*(PLUS|\+)|APPLE(\s*TV)?\s*(PLUS|\+)|HBO\s*MAX|PARAMOUNT\s*(PLUS|\+)|DISCOVERY\s*(PLUS|\+)|CURSOS?|ANIMES?|TEMPORADA|EPIS[ÓO]DIO)\b/i;
+const live=/\b(CANAIS?|ABERTOS?|GLOBOS?|RECORD(TV)?|SBT|BAND|VARIEDADES?|ESPORTES?|SPORTS?|SPORTV|ESPN|PREMIERE|PPV|NOT[ÍI]CIAS?|INFANTIS?|DOCUMENT[ÁA]RIOS?|TELECINE|RELIGIOSOS?|M[ÚU]SICA|MUSIC)\b/i;
+const pseudo=/\b(24\s*H(ORAS?|RS)?|CINE\s+(FILMES|S[ÉE]RIES|DESENHOS|NOVELAS)|JOGOS?\s+DO\s+DIA)\b/i;
+function attrs(line){const o={};for(const m of line.matchAll(/([\w-]+)="([^"]*)"/g))o[m[1]]=m[2];return o}
+function esc(s){return String(s||'').replaceAll('&','&amp;').replaceAll('"','&quot;')}
+async function eachLine(file, fn){const rd=file.stream().getReader(), dec=new TextDecoder();let buf='';while(true){const {value,done}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});let i;while((i=buf.indexOf('\n'))>=0){let line=buf.slice(0,i).replace(/\r$/,'');buf=buf.slice(i+1);fn(line)}}buf+=dec.decode();if(buf)fn(buf.replace(/\r$/,''))}
+function candidate(name,group,id,count){const g=(group||'').replace(SUP,'').trim();const G=g.toUpperCase();const explicit=/(CANAIS|ABERTOS|GLOBOS|PPV|PAY.?PER.?VIEW|ESPORTES|SPORTV|ESPN|PREMIERE|RECORDTV)/i.test(g);let isVod=vod.test(g)||((/PARAMOUNT\+|DISCOVERY\+|SBT\+|STAR\+|APPLE\+/i.test(g))&&!/PPV|CANAIS/i.test(g))||/^LEGENDADOS?$/i.test(g);if(count>600&&!explicit)return false;if(pseudo.test(g)&&!/GLOBOSAT FILMES|FILMES E S[ÉE]RIES|CANAIS LEGENDADOS/i.test(g))return false;if(isVod&&!/CANAIS|PPV/i.test(g))return false;if(live.test(g)||/GLOBOSAT FILMES|FILMES E S[ÉE]RIES|CANAIS LEGENDADOS/i.test(g))return true;if(id&&!isVod)return true;return false}
+document.getElementById('go').onclick=async()=>{const f=document.getElementById('file').files[0],st=document.getElementById('status');if(!f){st.textContent='Escolha uma M3U primeiro.';return}st.textContent='1/2: analisando grupos…';const gc=new Map();let total=0;await eachLine(f,l=>{if(!l.startsWith('#EXTINF'))return;total++;const a=attrs(l),g=(a['group-title']||'');gc.set(g,(gc.get(g)||0)+1)});st.textContent='2/2: removendo streams e VOD…';const out=['#EXTM3U'];let kept=0;await eachLine(f,l=>{if(!l.startsWith('#EXTINF'))return;const a=attrs(l);const name=displayName(l,a['tvg-name']||'').trim();const g=a['group-title']||'',id=a['tvg-id']||'',tn=a['tvg-name']||name;if(!candidate(name,g,id,gc.get(g)||0))return;out.push(`#EXTINF:-1 tvg-id="${esc(id)}" tvg-name="${esc(tn)}" group-title="${esc(g)}",${name}`);kept++});const blob=new Blob([out.join('\n')+'\n'],{type:'audio/x-mpegurl'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=f.name.replace(/\.m3u8?$/i,'')+'-canais.safe.m3u';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);st.innerHTML=`<span class="ok">Pronto.</span> ${total.toLocaleString('pt-BR')} entradas lidas; ${kept.toLocaleString('pt-BR')} candidatas a EPG mantidas. Nenhuma URL de stream foi exportada.`}
+</script>
+</body></html>

@@ -17,9 +17,17 @@ from epg_utils import normalize_name, remove_superscript_markers, stable_channel
 ATTR_RE = re.compile(r'([\w-]+)="([^"]*)"')
 
 
-def parse_extinf(line: str) -> tuple[dict[str, str], str]:
+def parse_extinf(line: str):
     attrs = dict(ATTR_RE.findall(line))
-    name = line.split(",", 1)[1].strip() if "," in line else ""
+    in_quote = False
+    separator = -1
+    for i, ch in enumerate(line):
+        if ch == '"':
+            in_quote = not in_quote
+        elif ch == ',' and not in_quote:
+            separator = i
+            break
+    name = line[separator + 1:].strip() if separator >= 0 else attrs.get('tvg-name', '').strip()
     return attrs, name
 
 

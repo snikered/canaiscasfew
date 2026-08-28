@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "description": "Dicionário semântico persistente. O nome identifica o canal; tvg-id aprendido é apenas compatibilidade.",
+  "channels": {
+    "AANDE": {"name": "A&E", "aliases": ["A&E", "A and E", "A&amp;E.br", "A E"]},
+    "SONY": {"name": "Sony", "aliases": ["Sony", "Canal Sony", "Sony Channel", "CanalSony.br"]},
+    "SPORTV1": {"name": "SporTV 1", "aliases": ["SporTV", "SporTV 1", "Sportv.br"]},
+    "HISTORY": {"name": "History", "aliases": ["History", "History Channel", "The History Channel"]},
+    "HISTORY2": {"name": "History 2", "aliases": ["H2", "History 2", "History2"]},
+    "PARAMOUNT": {"name": "Paramount Channel", "aliases": ["Paramount", "Paramount Channel"]},
+    "USANETWORK": {"name": "USA Network", "aliases": ["USA", "USA Network"]},
+    "ADULTSWIM": {"name": "Adult Swim", "aliases": ["Adult Swim", "AdultSwim"]},
+    "FILMANDARTS": {"name": "Film & Arts", "aliases": ["Film & Arts", "Film And Arts", "Film And Arts.br"]},
+    "SABORANDARTE": {"name": "Sabor & Arte", "aliases": ["Sabor & Arte", "Sabor And Arte", "Sabor And Arte.br"]},
+    "DISCOVERYHOMEANDHEALTH": {"name": "Discovery Home & Health", "aliases": ["Discovery H&H", "Discovery Home & Health", "Discovery Home and Health"]},
+    "HBOPLUS": {"name": "HBO Plus", "aliases": ["HBO +", "HBO+", "HBO Plus"]},
+    "AGROPLUS": {"name": "Agro+", "aliases": ["Agro+", "Agro Plus", "AgroPlus.br"]},
+    "UNIVERSALTV": {"name": "Universal TV", "aliases": ["Universal TV", "Universal"]},
+    "AMC": {"name": "AMC", "aliases": ["AMC"]},
+    "ANIMALPLANET": {"name": "Animal Planet", "aliases": ["Animal Planet"]}
+  }
+}

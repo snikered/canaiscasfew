@@ -1,5 +1,5 @@
 {
-  "_comment": "Use somente para corrigir casos ambíguos. O channel_id precisa existir na fonte escolhida.",
+  "_comment": "Use somente para forçar um caso que você conferiu manualmente. source aceita primary, secondary, tertiary, quaternary ou quinary.",
   "by_target_id": {
   }
 }

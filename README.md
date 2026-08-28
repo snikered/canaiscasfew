@@ -1,108 +1,134 @@
-# EPG Universal v9 — multi-M3U, nome primeiro
+# EPG Universal v10 — dicionário persistente e aprendizado de M3U
 
-Esta versão foi feita para listas com `tvg-id` vazio, estranho, hash, errado ou diferente entre qualidades.
+Esta versão não precisa mais de uma M3U em cada atualização diária.
 
-## Regra central
+## Arquitetura
 
-O **nome do canal é a identidade**. `tvg-id` antigo não decide qual canal é; ele é reaproveitado apenas como alias de compatibilidade depois que o canal é reconhecido pelo nome.
+- `channel_dictionary.json` — regras semânticas permanentes e aliases conhecidos.
+- `learned_ids.json` — memória aprendida de M3Us: nomes, aliases e tvg-id vistos.
+- `channels.json` — catálogo compilado dos dois arquivos acima. É gerado automaticamente.
+- `learn_channels.py` — aprende uma ou várias M3Us sem guardar URLs de stream.
+- `compile_dictionary.py` — compila o dicionário para o formato consumido pelo gerador.
+- `merge_epg.py` — encontra os canais nas 5 fontes, compara a programação e escolhe a grade por consenso.
+- `preparar_importacao.html` — transforma uma M3U local em arquivo seguro para aprendizado, sem URLs dos streams.
 
-O EPG final escolhe a grade por consenso entre 5 fontes:
+## Fontes EPG
 
-1. Genius / Curated
-2. Open-EPG Brazil 4
-3. EPGShare BR1
-4. IPTV-EPG BR
-5. EPGShare BR2
+1. Genius / Curated — principal na ordem de desempate.
+2. Open-EPG Brazil4.
+3. EPGShare BR1.
+4. IPTV-EPG Brasil.
+5. EPGShare BR2.
 
-BR1 e BR2 dividem peso por pertencerem à mesma família EPGShare.
+A prioridade só desempata. Se outras fontes concordarem melhor entre si, a fonte usada pode mudar canal a canal.
+BR1 e BR2 pertencem à mesma família EPGShare e compartilham peso no cálculo decisivo.
 
-## Melhorias da v9
+## Como o dicionário aprende
 
-- aceita **uma ou várias M3Us ao mesmo tempo**;
-- `channels.json` é reconstruído em cada Action a partir das listas atuais; não existe fallback silencioso para catálogo antigo;
-- reúne todos os `tvg-id` encontrados para o mesmo canal em listas diferentes;
-- `tvg-id` errado não é usado para identificar o canal;
-- entradas com `tvg-id=""` recebem aliases XMLTV baseados no nome exato e no `tvg-name`;
-- vários `<display-name>` são publicados para melhorar o casamento por nome;
-- `HBO +` / `HBO PLUS` ficam separados de `HBO`;
-- `AGRO+` / `AgroPlus.br` são equivalentes;
-- `DISCOVERY H&H` = `Discovery Home & Health` = `Discovery Home and Health`;
-- IDs EPGShare como `São.Paulo/SP..AMC.br` são interpretados como `AMC`;
-- continua ignorando `¹²³`, HD, FHD, SD, UHD, 4K, HDR, HDR+, `[H265]`, `FHD [H265]`, HEVC etc.;
-- preserva números reais: `HBO` != `HBO 2`, `SporTV 1` != `SporTV 2`.
+O nome do canal é a identidade principal. O `tvg-id` é compatibilidade, não verdade.
 
-## Configurar uma lista
+Exemplo: se várias listas apresentarem:
 
-No GitHub:
+- `AMC FHD` + `AMC.br`
+- `AMC HDR+` + `5e9860...`
+- `AMC HD` + `São.Paulo/SP..AMC.br (src05)`
 
-`Settings > Secrets and variables > Actions > New repository secret`
+as três relações são armazenadas sob a identidade `AMC`. O EPG final pode publicar a mesma grade em todos esses IDs.
 
-Crie:
+Um `tvg-id` só é promovido se estiver associado a uma única identidade de canal. Se o mesmo ID aparecer em canais diferentes, ele entra em `ambiguous_ids` e não é publicado automaticamente.
 
-- nome: `M3U_URL`
-- valor: URL privada/pública da sua M3U
+## Normalização de nomes
 
-A URL não é escrita no repositório.
+O identificador pelo nome ignora marcadores de qualidade/cópia como:
 
-## Configurar várias listas
+- `HD`, `FHD`, `SD`, `4K`, `8K`, `UHD`
+- `HDR`, `HDR+`, `HDR10+`
+- `[H265]`, `H265`, `H.265`, `HEVC`, AVC
+- marcadores sobrescritos `¹²³⁴...`
 
-Crie o Secret `M3U_URLS` e coloque **uma URL por linha**:
+Números normais são preservados: `HBO` != `HBO 2`; `SporTV 1` != `SporTV 2`.
+O `+` semântico também é preservado: `HBO +` = `HBO Plus`, mas é diferente de `HBO`.
+
+Há aliases conhecidos para casos como A&E/A and E, H2/History 2, Canal Sony/Sony, SporTV/SporTV 1, Discovery H&H/Home & Health, etc.
+
+## Atualização diária do EPG
+
+O workflow `.github/workflows/update-epg.yml` faz apenas:
+
+1. compila `channel_dictionary.json` + `learned_ids.json`;
+2. baixa as 5 fontes EPG;
+3. encontra cada canal pelo nome;
+4. compara a grade entre as fontes;
+5. escolhe a fonte com maior consenso;
+6. publica `epg.xml.gz`, `report.md` e `validation.md` na branch `epg`.
+
+Nenhuma M3U é necessária nessa rotina.
+
+## Ensinar uma lista nova — método recomendado (URL como Secret)
+
+Use este método quando sua lista possui uma URL. A URL e as credenciais não ficam no repositório.
+
+1. Abra o repositório no GitHub.
+2. Vá em `Settings`.
+3. Entre em `Secrets and variables` > `Actions`.
+4. Clique em `New repository secret`.
+5. Nome: `LEARN_M3U_URLS`.
+6. No valor, coloque uma URL por linha. Também pode usar `Nome|URL`:
 
 ```text
-https://servidor/lista1.m3u
-https://servidor/lista2.m3u
-https://servidor/lista3.m3u
+Lista A|https://servidor/lista.m3u
+Lista B|https://outro-servidor/lista.m3u
 ```
 
-Também pode nomear cada uma usando `NOME|URL`:
+7. Salve o Secret.
+8. Vá em `Actions`.
+9. Abra `Aprender canais de M3U`.
+10. Clique em `Run workflow` e confirme `main`.
+11. O Action baixa as listas temporariamente, aprende nomes/IDs, atualiza `learned_ids.json` e `channels.json`, e grava somente esses metadados no repositório.
+12. Depois rode `Atualizar EPG Universal` para gerar o novo EPG imediatamente. Caso contrário, ele entrará na próxima atualização agendada.
 
-```text
-Casa|https://servidor/lista1.m3u
-TVBox|https://servidor/lista2.m3u
-Celular|https://servidor/lista3.m3u
+O Secret pode ficar salvo para reaprender a lista futuramente ou pode ser removido após a importação.
+
+## Ensinar uma lista local sem colocar streams no GitHub
+
+Não envie a M3U original para um repositório público: ela costuma conter usuário, senha/token e URLs dos streams.
+
+1. Baixe/abra `preparar_importacao.html` no PC ou Android.
+2. Clique em escolher arquivo e selecione a M3U original.
+3. Clique em `Gerar arquivo seguro`.
+4. Será criado algo como `minha-lista-canais.safe.m3u`.
+5. Esse arquivo contém apenas `tvg-id`, `tvg-name`, grupo e nome do canal. URLs de streams, credenciais e logos não são exportados.
+6. No GitHub abra a pasta `learning`.
+7. `Add file` > `Upload files`.
+8. Envie o arquivo `*.safe.m3u` e faça `Commit changes` na `main`.
+9. Vá em `Actions` > `Aprender canais de M3U` > `Run workflow`.
+10. O Action incorpora o aprendizado em `learned_ids.json` e recompila `channels.json`.
+11. Rode `Atualizar EPG Universal`.
+
+O arquivo `.safe.m3u` pode ser apagado depois; o aprendizado permanece no `learned_ids.json`.
+
+## Se o repositório for privado
+
+O workflow também consegue ler arquivos `learning/*.safe.m3u`. Mesmo em repositório privado, ainda é preferível não versionar uma M3U original com credenciais. Use Secret ou o arquivo sanitizado.
+
+## Como adicionar uma regra manual
+
+Edite apenas `channel_dictionary.json` quando houver uma ambiguidade semântica real. Exemplo:
+
+```json
+"SONY": {
+  "name": "Sony",
+  "aliases": ["Sony", "Canal Sony", "Sony Channel"]
+}
 ```
 
-`M3U_URL` e `M3U_URLS` podem coexistir. URLs repetidas são descartadas.
+Não é necessário cadastrar qualidades como FHD/HDR+/H265; a normalização já remove esses marcadores.
 
-## Saída
+## Relatórios
 
 Na branch `epg`:
 
-- `epg.xml.gz` — EPG universal;
-- `report.md` — correspondências e fonte escolhida;
-- `validation.md` — Agora/Próximo, coerência e confiança;
-- JSONs equivalentes.
+- `report.md` — fonte escolhida, canais sem EPG, trocas feitas por consenso e aproximações.
+- `validation.md` — Agora/Próximo, saúde da grade e concordância entre fontes.
 
-A Action **não publica as M3Us**, pois elas podem conter URLs/credenciais.
-
-## Como os IDs são publicados
-
-Para um Animal Planet que aparece nas listas com:
-
-```text
-e6782d4e82ac2a0a70cd8332cae1997c
-476c98e227890f9477494c87171291cb
-```
-
-os dois IDs recebem a mesma programação encontrada pelo nome `ANIMAL PLANET`.
-
-Quando `tvg-id` está vazio, a v9 também cria aliases pelo nome, por exemplo:
-
-```text
-DISCOVERY SCIENCE FHD
-DISCOVERY SCIENCE
-```
-
-Isso melhora a compatibilidade com players que fazem fallback pelo nome. Não existe garantia universal para `tvg-id=""`, porque o comportamento final depende do player; a M3U corrigida automática continua sendo gerada temporariamente pela Action, mas não é publicada por segurança.
-
-## Atualizar
-
-Substitua no repositório:
-
-- `merge_epg.py`
-- `epg_utils.py`
-- `extract_channels.py`
-- `.github/workflows/update-epg.yml`
-- `README.md`
-
-Depois rode `Actions > Atualizar EPG Universal > Run workflow`.
+Use esses relatórios para descobrir aliases que realmente precisam entrar no dicionário manual.
