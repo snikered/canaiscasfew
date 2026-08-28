@@ -16,11 +16,12 @@ concurrency:
 jobs:
   atualizar:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 55
     env:
-      # Se existir, a lista é baixada a cada execução e reconhecida pelo NOME.
-      # Cadastre em Settings > Secrets and variables > Actions > Secrets como M3U_URL.
+      # Compatibilidade: uma URL única.
       M3U_URL: ${{ secrets.M3U_URL }}
+      # Universal multi-lista: uma URL por linha. Opcional: NOME|https://url...
+      M3U_URLS: ${{ secrets.M3U_URLS }}
 
     steps:
       - name: Baixar o repositório
@@ -31,50 +32,90 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Reconhecer automaticamente qualquer M3U pelo nome
+      - name: Baixar e catalogar todas as M3Us pelo nome
         shell: bash
         run: |
           set -euo pipefail
           EPG_PUBLIC_URL="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/epg/epg.xml.gz"
+          mkdir -p /tmp/playlists /tmp/fixed-playlists
 
-          if [ -n "${M3U_URL:-}" ]; then
-            echo "M3U_URL configurada: baixando a playlist sem gravá-la no repositório..."
-            python - <<'PY'
-          import os, urllib.request
-          url = os.environ["M3U_URL"]
-          req = urllib.request.Request(url, headers={"User-Agent": "EPG-Universal/1.0"})
-          with urllib.request.urlopen(req, timeout=180) as r:
-              data = r.read()
-          open("/tmp/input.m3u", "wb").write(data)
-          print(f"Playlist baixada: {len(data)} bytes")
+          python - <<'PY'
+          import os, pathlib, re, urllib.request
+
+          out = pathlib.Path('/tmp/playlists')
+          rows = []
+          legacy = os.environ.get('M3U_URL', '').strip()
+          if legacy:
+              rows.append(('principal', legacy))
+
+          for i, raw in enumerate(os.environ.get('M3U_URLS', '').splitlines(), 1):
+              raw = raw.strip()
+              if not raw or raw.startswith('#'):
+                  continue
+              if '|' in raw:
+                  name, url = raw.split('|', 1)
+                  name, url = name.strip(), url.strip()
+              else:
+                  name, url = f'lista-{i:02d}', raw
+              if url:
+                  rows.append((name, url))
+
+          # Remove URLs repetidas sem expô-las no log.
+          unique = []
+          seen = set()
+          for name, url in rows:
+              if url in seen:
+                  continue
+              seen.add(url)
+              unique.append((name, url))
+
+          for i, (name, url) in enumerate(unique, 1):
+              safe = re.sub(r'[^A-Za-z0-9._-]+', '-', name).strip('-._') or f'lista-{i:02d}'
+              path = out / f'{i:02d}-{safe}.m3u'
+              req = urllib.request.Request(url, headers={'User-Agent': 'EPG-Universal/2.0'})
+              with urllib.request.urlopen(req, timeout=180) as r:
+                  data = r.read()
+              path.write_bytes(data)
+              print(f'Lista {i}: {len(data)} bytes baixados como {path.name}')
           PY
-          elif [ -f "playlist.m3u" ]; then
-            echo "Usando playlist.m3u do repositório. ATENÇÃO: não faça isso em repo público se houver credenciais."
-            cp playlist.m3u /tmp/input.m3u
-          else
-            echo "Nenhuma M3U dinâmica configurada; usando channels.json existente como catálogo de fallback."
-            echo "CHANNELS_FILE=channels.json" >> "$GITHUB_ENV"
-            exit 0
+
+          shopt -s nullglob
+          FILES=(/tmp/playlists/*.m3u)
+
+          # Também aceita playlists locais no repo, útil em repositório PRIVADO.
+          if [ ${#FILES[@]} -eq 0 ]; then
+            [ -f playlist.m3u ] && cp playlist.m3u /tmp/playlists/00-playlist.m3u
+            for f in playlists/*.m3u; do
+              [ -f "$f" ] || continue
+              cp "$f" "/tmp/playlists/local-$(basename "$f")"
+            done
+            FILES=(/tmp/playlists/*.m3u)
           fi
 
-          python extract_channels.py /tmp/input.m3u \
+          if [ ${#FILES[@]} -eq 0 ]; then
+            echo "ERRO: nenhuma M3U configurada. Cadastre M3U_URL ou M3U_URLS em Settings > Secrets and variables > Actions."
+            echo "A v9 não usa channels.json antigo como fallback, para impedir catálogo desatualizado."
+            exit 1
+          fi
+
+          python extract_channels.py "${FILES[@]}" \
             --catalog /tmp/channels-universal.json \
-            --fixed-playlist /tmp/playlist-fixed.m3u \
+            --fixed-dir /tmp/fixed-playlists \
             --epg-url "$EPG_PUBLIC_URL"
 
           echo "CHANNELS_FILE=/tmp/channels-universal.json" >> "$GITHUB_ENV"
-          echo "FIXED_PLAYLIST=/tmp/playlist-fixed.m3u" >> "$GITHUB_ENV"
+          echo "FIXED_PLAYLIST_DIR=/tmp/fixed-playlists" >> "$GITHUB_ENV"
 
-      - name: Gerar EPG universal por nome e consenso
+      - name: Gerar EPG universal por nome e consenso de 5 fontes
         run: python merge_epg.py
 
-      - name: Resumo da M3U corrigida
-        if: ${{ env.FIXED_PLAYLIST != '' }}
+      - name: Informar sobre listas corrigidas
+        if: ${{ env.FIXED_PLAYLIST_DIR != '' }}
         shell: bash
         run: |
-          echo "Uma playlist corrigida foi gerada automaticamente em /tmp/playlist-fixed.m3u."
-          echo "Ela NÃO será publicada na branch epg para não expor URLs/credenciais dos streams."
-          echo "O epg.xml.gz já publica compatibilidade com tvg-id antigos exclusivos, portanto listas com IDs preenchidos normalmente não precisam ser alteradas."
+          echo "As M3Us corrigidas foram geradas apenas temporariamente em /tmp/fixed-playlists."
+          echo "Elas NÃO são publicadas para evitar expor URLs/credenciais."
+          echo "O EPG publicado inclui IDs antigos exclusivos e aliases de nome para entradas sem tvg-id."
 
       - name: Publicar somente EPG e relatórios na branch epg
         shell: bash
@@ -93,7 +134,7 @@ jobs:
           git checkout --orphan publicacao-epg
           git rm -rf .
           cp /tmp/epg-publicado/* .
-          printf '# Saída automática do EPG Universal\n\nIdentificação por nome + consenso de 5 fontes.\n' > README.md
+          printf '# Saída automática do EPG Universal\n\nIdentificação por nome + consenso de 5 fontes + compatibilidade multi-M3U.\n' > README.md
           git add epg.xml.gz report.md report.json validation.md validation.json README.md
           git commit -m "Atualiza EPG universal automático"
           git push --force origin HEAD:epg
