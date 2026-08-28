@@ -1,0 +1,104 @@
+name: Aprender canais de M3U
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: aprender-canais
+  cancel-in-progress: false
+
+jobs:
+  aprender:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      # Opcional e recomendado para listas remotas. Uma URL por linha.
+      # Pode usar: Nome da lista|https://endereco/lista.m3u
+      LEARN_M3U_URLS: ${{ secrets.LEARN_M3U_URLS }}
+
+    steps:
+      - name: Baixar o repositório
+        uses: actions/checkout@v6
+        with:
+          ref: main
+
+      - name: Preparar Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Reunir listas para aprendizado
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/learn
+
+          python - <<'PY'
+          import os, pathlib, re, urllib.request
+          out = pathlib.Path('/tmp/learn')
+          rows = []
+          for i, raw in enumerate(os.environ.get('LEARN_M3U_URLS', '').splitlines(), 1):
+              raw = raw.strip()
+              if not raw or raw.startswith('#'):
+                  continue
+              if '|' in raw:
+                  name, url = raw.split('|', 1)
+                  name, url = name.strip(), url.strip()
+              else:
+                  name, url = f'remota-{i:02d}', raw
+              if url:
+                  rows.append((name, url))
+
+          seen = set()
+          for i, (name, url) in enumerate(rows, 1):
+              if url in seen:
+                  continue
+              seen.add(url)
+              safe = re.sub(r'[^A-Za-z0-9._-]+', '-', name).strip('-._') or f'remota-{i:02d}'
+              path = out / f'{i:02d}-{safe}.m3u'
+              req = urllib.request.Request(url, headers={'User-Agent': 'EPG-Universal-Learner/1.0'})
+              with urllib.request.urlopen(req, timeout=180) as r:
+                  path.write_bytes(r.read())
+              print(f'Lista remota {i} baixada para aprendizado ({path.name}).')
+          PY
+
+          # Arquivos sanitizados criados pelo preparar_importacao.html.
+          shopt -s nullglob
+          for f in learning/*.safe.m3u; do
+            cp "$f" "/tmp/learn/$(basename "$f")"
+          done
+
+          FILES=(/tmp/learn/*.m3u)
+          if [ ${#FILES[@]} -eq 0 ]; then
+            echo "Nenhuma lista para aprender. Use o Secret LEARN_M3U_URLS ou envie um arquivo *.safe.m3u para a pasta learning/."
+            exit 1
+          fi
+
+          printf '%s\n' "${FILES[@]}" > /tmp/learn-files.txt
+
+      - name: Aprender nomes e IDs sem guardar streams
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t FILES < /tmp/learn-files.txt
+          python learn_channels.py "${FILES[@]}" \
+            --dictionary channel_dictionary.json \
+            --learned learned_ids.json
+          python compile_dictionary.py --catalog channels.json
+
+      - name: Salvar aprendizado no dicionário
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add learned_ids.json channels.json
+          if git diff --cached --quiet; then
+            echo "Nenhum aprendizado novo para salvar."
+            exit 0
+          fi
+          git commit -m "Aprende canais e tvg-id de novas M3Us"
+          git push origin HEAD:main
