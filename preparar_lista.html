@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Preparador M3U — EPG Universal</title>
+<style>
+body{font-family:system-ui,Segoe UI,Arial,sans-serif;max-width:820px;margin:32px auto;padding:0 16px;line-height:1.45;background:#111;color:#eee}
+.card{background:#1b1b1b;border:1px solid #333;border-radius:14px;padding:20px;margin:16px 0}input,button{font:inherit}input[type=text]{width:100%;box-sizing:border-box;padding:10px;border-radius:8px;border:1px solid #444;background:#101010;color:#fff}button{padding:10px 14px;border:0;border-radius:9px;cursor:pointer;margin:6px 6px 0 0}button:disabled{opacity:.45;cursor:not-allowed}.ok{color:#8ee39b}.warn{color:#ffd27a}code{background:#222;padding:2px 5px;border-radius:5px}.small{opacity:.75;font-size:.92rem}</style>
+</head>
+<body>
+<h1>Preparador M3U — EPG Universal</h1>
+<p>Escolha qualquer M3U. O processamento acontece <strong>somente no seu navegador</strong>. Nenhuma URL de stream é enviada para lugar nenhum.</p>
+<div class="card">
+  <label><strong>1. Escolha a M3U</strong></label><br><br>
+  <input id="file" type="file" accept=".m3u,.m3u8,text/plain">
+  <br><br>
+  <label><strong>2. URL do seu EPG final</strong> (opcional)</label><br><br>
+  <input id="epg" type="text" placeholder="https://raw.githubusercontent.com/USUARIO/REPO/epg/epg.xml.gz">
+  <br><br>
+  <button id="process" disabled>Processar automaticamente</button>
+</div>
+<div id="result" class="card" hidden></div>
+<script>
+const supers='⁰¹²³⁴⁵⁶⁷⁸⁹';
+const quality=new Set(['HD','FHD','FULLHD','FULL','UHD','4K','8K','SD','CHANNEL','H264','H265','H266','HEVC','AVC','HDR','HDR10','HDR10PLUS','DV','DOLBYVISION','FPS','50FPS','60FPS','30FPS','25FPS','VIP','BACKUP','BKP','ALT','TESTE','TEST','RAW']);
+const fileEl=document.getElementById('file'), processBtn=document.getElementById('process'), result=document.getElementById('result');
+fileEl.addEventListener('change',()=>processBtn.disabled=!fileEl.files.length);
+function unescapeHtml(s){const t=document.createElement('textarea');t.innerHTML=s;return t.value}
+function stripQuality(s){
+  s=unescapeHtml(s||''); for(const c of supers)s=s.split(c).join('');
+  s=s.replace(/\s*\(\s*\d+\s*\)\s*$/g,' ')
+     .replace(/\[\s*(?:H\s*\.?\s*26[456]|HEVC|AVC|HD|FHD|FULL\s*HD|UHD|4K|8K|SD|HDR(?:10)?\s*\+?|HDR10\s*PLUS|\d+\s*FPS)\s*\]/gi,' ')
+     .replace(/\bH\s*\.?\s*26[456]\b/gi,' H265 ')
+     .replace(/\bHDR\s*10\s*\+/gi,' HDR10PLUS ')
+     .replace(/\bHDR\s*\+/gi,' HDR ')
+     .replace(/\+/g,' PLUS ');
+  let parts=s.trim().split(/([\s._/|:\-]+)/), out=[], skip=false;
+  for(const p of parts){if(!p)continue;if(/^[\s._/|:\-]+$/.test(p)){out.push(p);continue}const c=p.replace(/[^A-Za-z0-9]+/g,'').toUpperCase();if(c==='FULL'){skip=true;continue}if(skip&&c==='HD'){skip=false;continue}skip=false;if(quality.has(c)||/^\d{2,3}FPS$/.test(c))continue;out.push(p)}
+  return out.join('').replace(/[\s._/|:\-]+/g,' ').trim();
+}
+function norm(s){
+  s=stripQuality(s).normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toUpperCase().trim().replace(/(?:[._/-]|\s)+BR$/,'');
+  let p=s.replace(/[._/-]+/g,' ').replace(/\s+/g,' ').trim(); if(/^A\s*(?:&|AND|E)\s*E$/.test(p))return 'AANDE';
+  s=s.replace(/&/g,' AND ').replace(/\bAND\b/g,' AND '); if(s.trim().split(/\s+/).length>=3)s=s.replace(/\bE\b/g,' AND ');
+  s=s.replace(/[^A-Z0-9]+/g,''); const m={CANALSONY:'SONY',SONYCHANNEL:'SONY',SPORTV:'SPORTV1',H2:'HISTORY2',HISTORYII:'HISTORY2',USA:'USANETWORK',PARAMOUNTCHANNEL:'PARAMOUNT',DISCOVERYHANDH:'DISCOVERYHOMEANDHEALTH',DISCOVERYHOMEHEALTH:'DISCOVERYHOMEANDHEALTH'}; return m[s]||s;
+}
+function attrs(line){let o={},r=/([\w-]+)="([^"]*)"/g,m;while((m=r.exec(line)))o[m[1]]=m[2];return o}
+function replaceId(line,id){if(/\btvg-id="[^"]*"/.test(line))return line.replace(/\btvg-id="[^"]*"/,`tvg-id="${id}"`);let c=line.indexOf(',');return c<0?line+` tvg-id="${id}"`:line.slice(0,c)+` tvg-id="${id}"`+line.slice(c)}
+function safeId(n,used){let slug=(n||'canal').toLowerCase().replace(/[^a-z0-9]+/g,'.').replace(/^\.+|\.+$/g,'')||'canal',base='auto.'+slug,id=base,k=2;while(used.has(id))id=base+'.'+k++;used.add(id);return id}
+function download(name,text,type='text/plain'){let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+processBtn.onclick=async()=>{
+  const text=await fileEl.files[0].text(), lines=text.split(/\r?\n/), recs=[];
+  lines.forEach((line,i)=>{if(!line.startsWith('#EXTINF'))return;const a=attrs(line), comma=line.indexOf(','), original=comma>=0?line.slice(comma+1).trim():'',clean=stripQuality(original)||original;recs.push({i,original,clean,n:norm(clean),old:a['tvg-id']||'',tvgName:a['tvg-name']||'',group:a['group-title']||''})});
+  const groups=new Map();for(const r of recs){const k=r.n||'SEM_NOME_'+r.i;if(!groups.has(k))groups.set(k,[]);groups.get(k).push(r)}
+  const used=new Set(), map=new Map(), channels=[];
+  for(const items of groups.values()){
+    let freq=new Map();items.forEach(x=>freq.set(x.clean,(freq.get(x.clean)||0)+1));let canonical=[...freq].sort((a,b)=>b[1]-a[1])[0]?.[0]||items[0].original;let id=safeId(norm(canonical).toLowerCase(),used);items.forEach(x=>map.set(x.i,id));
+    channels.push({id,name:canonical,aliases:[...new Set(items.flatMap(x=>[x.clean,x.tvgName]).filter(Boolean))].sort(),original_names:[...new Set(items.map(x=>x.original).filter(Boolean))].sort(),old_tvg_ids:[...new Set(items.map(x=>x.old).filter(Boolean))].sort(),blank_tvg_id_names:[...new Set(items.filter(x=>!x.old).map(x=>x.original).filter(Boolean))].sort(),blank_tvg_id_tvg_names:[...new Set(items.filter(x=>!x.old).map(x=>x.tvgName).filter(Boolean))].sort(),blank_tvg_id_entries:items.filter(x=>!x.old).length,groups:[...new Set(items.map(x=>x.group).filter(Boolean))].sort(),playlist_entries:items.length,identity_basis:'channel_name'});
+  }
+  let fixed=lines.map((l,i)=>map.has(i)?replaceId(l,map.get(i)):l), epg=document.getElementById('epg').value.trim();
+  if(epg){if(fixed[0]?.replace(/^\uFEFF/,'').startsWith('#EXTM3U'))fixed[0]=fixed[0].replace(/\s+(?:url-tvg|x-tvg-url)="[^"]*"/gi,'').trim()+` url-tvg="${epg}"`;else fixed.unshift(`#EXTM3U url-tvg="${epg}"`)}
+  const catalog=JSON.stringify({description:'Catálogo universal baseado no nome; sem URLs de streams.',identity_basis:'channel_name',old_tvg_id_policy:'compatibility_only_never_trusted_over_name',channel_count:channels.length,channels},null,2)+'\n';
+  const blanks=recs.filter(x=>!x.old).length;
+  result.hidden=false;result.innerHTML=`<div class="ok"><strong>Pronto.</strong></div><p>Entradas: <strong>${recs.length}</strong><br>Canais reconhecidos pelo nome: <strong>${channels.length}</strong><br>Entradas que estavam sem tvg-id: <strong>${blanks}</strong></p><button id="dm3u">Baixar playlist-fixed.m3u</button><button id="djson">Baixar channels.json</button><p class="small">Você não editou nenhum ID; todos foram criados automaticamente pelo nome.</p>`;
+  document.getElementById('dm3u').onclick=()=>download('playlist-fixed.m3u',fixed.join('\n')+'\n','audio/x-mpegurl');
+  document.getElementById('djson').onclick=()=>download('channels.json',catalog,'application/json');
+};
+</script>
+</body>
+</html>

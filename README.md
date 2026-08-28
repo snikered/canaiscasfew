@@ -1,76 +1,108 @@
-# EPG automático: Genius + Open-EPG
+# EPG Universal v9 — multi-M3U, nome primeiro
 
-Este projeto usa o **EPG Genius/Curated como fonte principal** e o **Open-EPG Brazil 4 apenas para os canais ausentes**.
+Esta versão foi feita para listas com `tvg-id` vazio, estranho, hash, errado ou diferente entre qualidades.
 
-## Regras de correspondência
+## Regra central
 
-- remove os números sobrescritos `¹²³⁴` usados para identificar cópias do stream;
-- remove marcadores de qualidade/codec como `HD`, `FHD`, `4K`, `[H265]` e `HDR`;
-- durante a comparação, `CHANNEL` também é ignorado (`History Channel` = `History`, `Paramount Channel` = `Paramount`);
-- preserva números normais do nome: `HBO` continua diferente de `HBO 2`;
-- tenta nome exato no Genius e, se necessário, aproximação segura **ainda no Genius**;
-- somente quando o Genius não encontra o canal é que consulta o Open-EPG Brazil 4;
-- usa limite alto e proteção contra canais numerados;
-- o arquivo final reescreve os IDs do XMLTV para os IDs `auto.*` usados na M3U corrigida.
+O **nome do canal é a identidade**. `tvg-id` antigo não decide qual canal é; ele é reaproveitado apenas como alias de compatibilidade depois que o canal é reconhecido pelo nome.
 
-## Aliases específicos incluídos
+O EPG final escolhe a grade por consenso entre 5 fontes:
 
-- `H2` também procura `History 2`;
-- `History` também procura `History Channel` / `The History Channel`;
-- `Paramount Channel` também aceita `Paramount`;
-- `USA Network` também aceita `USA`;
-- `Adult Swim` também aceita `AdultSwim`;
-- `Universal TV` foi mantido com a correspondência atual.
+1. Genius / Curated
+2. Open-EPG Brazil 4
+3. EPGShare BR1
+4. IPTV-EPG BR
+5. EPGShare BR2
 
-## Arquivos importantes
+BR1 e BR2 dividem peso por pertencerem à mesma família EPGShare.
 
-- `channels.json`: nomes e IDs da sua lista, sem qualquer URL de stream;
-- `merge_epg.py`: baixa, reconhece e mescla os EPGs;
-- `overrides.json`: correções manuais para casos ambíguos;
-- branch `epg` / `epg.xml.gz`: EPG final para cadastrar no m3u4u/player;
-- branch `epg` / `report.md`: canais encontrados, fallback e canais ainda sem guia.
+## Melhorias da v9
 
-A branch `epg` é recriada a cada atualização e guarda somente a versão mais recente, evitando que o histórico do repositório cresça diariamente.
+- aceita **uma ou várias M3Us ao mesmo tempo**;
+- `channels.json` é reconstruído em cada Action a partir das listas atuais; não existe fallback silencioso para catálogo antigo;
+- reúne todos os `tvg-id` encontrados para o mesmo canal em listas diferentes;
+- `tvg-id` errado não é usado para identificar o canal;
+- entradas com `tvg-id=""` recebem aliases XMLTV baseados no nome exato e no `tvg-name`;
+- vários `<display-name>` são publicados para melhorar o casamento por nome;
+- `HBO +` / `HBO PLUS` ficam separados de `HBO`;
+- `AGRO+` / `AgroPlus.br` são equivalentes;
+- `DISCOVERY H&H` = `Discovery Home & Health` = `Discovery Home and Health`;
+- IDs EPGShare como `São.Paulo/SP..AMC.br` são interpretados como `AMC`;
+- continua ignorando `¹²³`, HD, FHD, SD, UHD, 4K, HDR, HDR+, `[H265]`, `FHD [H265]`, HEVC etc.;
+- preserva números reais: `HBO` != `HBO 2`, `SporTV 1` != `SporTV 2`.
 
-## Como colocar no GitHub
+## Configurar uma lista
 
-1. Crie um repositório **público** vazio, por exemplo `meu-epg`.
-2. Envie somente o conteúdo desta pasta para o repositório.
-3. Abra **Actions**, escolha **Atualizar EPG** e clique em **Run workflow**.
-4. Depois da execução, o endereço do guia será:
+No GitHub:
+
+`Settings > Secrets and variables > Actions > New repository secret`
+
+Crie:
+
+- nome: `M3U_URL`
+- valor: URL privada/pública da sua M3U
+
+A URL não é escrita no repositório.
+
+## Configurar várias listas
+
+Crie o Secret `M3U_URLS` e coloque **uma URL por linha**:
 
 ```text
-https://raw.githubusercontent.com/SEU_USUARIO/meu-epg/epg/epg.xml.gz
+https://servidor/lista1.m3u
+https://servidor/lista2.m3u
+https://servidor/lista3.m3u
 ```
 
-5. No m3u4u, substitua o EPG antigo por esse endereço uma única vez.
-6. Importe a `lista-tvg-id-corrigido.m3u` fornecida separadamente. Não coloque essa M3U no repositório público, pois ela contém os endereços privados dos streams.
+Também pode nomear cada uma usando `NOME|URL`:
 
-A atualização automática roda diariamente às 19:30 no horário de Maceió/Brasília e também pode ser executada manualmente.
-
-## Corrigindo um canal ambíguo
-
-Depois da primeira execução, abra `output/report.md`. Para forçar uma associação, edite `overrides.json`:
-
-```json
-{
-  "by_target_id": {
-    "auto.nome-do-canal": {
-      "source": "secondary",
-      "channel_id": "ID.EXATO.DO.OPEN.EPG"
-    }
-  }
-}
+```text
+Casa|https://servidor/lista1.m3u
+TVBox|https://servidor/lista2.m3u
+Celular|https://servidor/lista3.m3u
 ```
 
-`source` aceita `primary` ou `secondary`.
+`M3U_URL` e `M3U_URLS` podem coexistir. URLs repetidas são descartadas.
 
-## Atualizando o catálogo no futuro
+## Saída
 
-Quando sua lista mudar, rode localmente:
+Na branch `epg`:
 
-```bash
-python extract_channels.py sua-lista.m3u --catalog channels.json --fixed-playlist lista-corrigida.m3u
+- `epg.xml.gz` — EPG universal;
+- `report.md` — correspondências e fonte escolhida;
+- `validation.md` — Agora/Próximo, coerência e confiança;
+- JSONs equivalentes.
+
+A Action **não publica as M3Us**, pois elas podem conter URLs/credenciais.
+
+## Como os IDs são publicados
+
+Para um Animal Planet que aparece nas listas com:
+
+```text
+e6782d4e82ac2a0a70cd8332cae1997c
+476c98e227890f9477494c87171291cb
 ```
 
-Depois envie o novo `channels.json` ao GitHub e importe a nova M3U corrigida no serviço/player.
+os dois IDs recebem a mesma programação encontrada pelo nome `ANIMAL PLANET`.
+
+Quando `tvg-id` está vazio, a v9 também cria aliases pelo nome, por exemplo:
+
+```text
+DISCOVERY SCIENCE FHD
+DISCOVERY SCIENCE
+```
+
+Isso melhora a compatibilidade com players que fazem fallback pelo nome. Não existe garantia universal para `tvg-id=""`, porque o comportamento final depende do player; a M3U corrigida automática continua sendo gerada temporariamente pela Action, mas não é publicada por segurança.
+
+## Atualizar
+
+Substitua no repositório:
+
+- `merge_epg.py`
+- `epg_utils.py`
+- `extract_channels.py`
+- `.github/workflows/update-epg.yml`
+- `README.md`
+
+Depois rode `Actions > Atualizar EPG Universal > Run workflow`.

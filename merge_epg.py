@@ -725,21 +725,33 @@ def make_validation(
 
 
 
-def build_compatibility_ids(entries: list[dict[str, object]]) -> tuple[dict[str, list[str]], dict[str, list[str]]]:
-    """Mapeia IDs antigos da M3U para o canal reconhecido pelo NOME.
+def _compatibility_candidates(entry: dict[str, object]) -> list[str]:
+    """IDs que podem ligar uma M3U existente ao XML sem editar a lista.
 
-    Um tvg-id antigo pode estar semanticamente errado; isso não importa para
-    compatibilidade. Se ele for exclusivo de um único canal da playlist, o XML
-    final publica a grade correta também sob esse ID. Se o mesmo ID antigo for
-    reutilizado por canais diferentes, ele é considerado ambíguo e não é usado.
+    Inclui tvg-id antigos e, somente nas entradas que vieram sem tvg-id, o nome
+    exato/tvg-name. Muitos players tentam casar pelo nome quando tvg-id está vazio.
+    """
+    values: list[str] = []
+    values.extend(str(x).strip() for x in entry.get("old_tvg_ids", []) or [])
+    values.extend(str(x).strip() for x in entry.get("blank_tvg_id_names", []) or [])
+    values.extend(str(x).strip() for x in entry.get("blank_tvg_id_tvg_names", []) or [])
+    # Nome limpo também ajuda players que retiram qualidade antes do casamento.
+    if int(entry.get("blank_tvg_id_entries", 0) or 0) > 0:
+        values.append(str(entry.get("name", "")).strip())
+    return [v for v in dict.fromkeys(values) if v and len(v) <= 220]
+
+
+def build_compatibility_ids(entries: list[dict[str, object]]) -> tuple[dict[str, list[str]], dict[str, list[str]]]:
+    """Publica a mesma grade sob IDs/nome-alias exclusivos de todas as M3Us.
+
+    Se um ID/nome for reutilizado por canais diferentes, ele é descartado para
+    evitar que um guia errado vença silenciosamente.
     """
     owners: dict[str, set[str]] = defaultdict(set)
     for entry in entries:
         target_id = str(entry.get("id", ""))
-        for old_id in entry.get("old_tvg_ids", []) or []:
-            old_id = str(old_id).strip()
-            if old_id:
-                owners[old_id].add(target_id)
+        for candidate in _compatibility_candidates(entry):
+            owners[candidate].add(target_id)
 
     by_target: dict[str, list[str]] = {}
     ambiguous: dict[str, list[str]] = {}
@@ -747,15 +759,13 @@ def build_compatibility_ids(entries: list[dict[str, object]]) -> tuple[dict[str,
         target_id = str(entry.get("id", ""))
         ids = [target_id]
         bad: list[str] = []
-        for old_id in entry.get("old_tvg_ids", []) or []:
-            old_id = str(old_id).strip()
-            if not old_id or old_id == target_id:
+        for candidate in _compatibility_candidates(entry):
+            if candidate == target_id:
                 continue
-            if len(owners.get(old_id, set())) == 1:
-                ids.append(old_id)
+            if len(owners.get(candidate, set())) == 1:
+                ids.append(candidate)
             else:
-                bad.append(old_id)
-        # Remove duplicatas preservando ordem.
+                bad.append(candidate)
         by_target[target_id] = list(dict.fromkeys(ids))
         if bad:
             ambiguous[target_id] = sorted(set(bad))
@@ -875,7 +885,15 @@ def main() -> None:
         for output_id in ids_for_channel:
             channel = copy.deepcopy(chosen.match.source.channels[chosen.match.channel_id])
             channel.attrib["id"] = output_id
-            add_display_name_first(channel, str(entry["name"]))
+            # Mantém vários nomes conhecidos do canal para players que fazem
+            # associação por nome/display-name em vez de tvg-id.
+            display_aliases = [
+                str(entry.get("name", "")),
+                *(str(x) for x in entry.get("aliases", []) or []),
+                *(str(x) for x in entry.get("original_names", []) or []),
+            ]
+            for display_name in reversed(list(dict.fromkeys(x for x in display_aliases if x))):
+                add_display_name_first(channel, display_name)
             output_root.append(channel)
 
     programme_count = 0
@@ -904,8 +922,8 @@ def main() -> None:
         "matched": sum(1 for row in report_rows if row["status"] == "matched"),
         "missing": sum(1 for row in report_rows if row["status"] == "missing"),
         "programmes": programme_count,
-        "compatibility_old_tvg_ids": compatibility_alias_count,
-        "ambiguous_old_tvg_ids_skipped": sum(len(v) for v in ambiguous_old_ids.values()),
+        "compatibility_ids_and_name_aliases": compatibility_alias_count,
+        "ambiguous_compatibility_aliases_skipped": sum(len(v) for v in ambiguous_old_ids.values()),
         "selection_changed_by_consensus": sum(
             1 for row in report_rows if row.get("changed_from_first_available")
         ),
@@ -942,8 +960,8 @@ def main() -> None:
         f"- Sem EPG seguro: **{counts['missing']}**",
         f"- Canais cuja fonte mudou por consenso: **{counts['selection_changed_by_consensus']}**",
         f"- Programas gravados: **{counts['programmes']}**",
-        f"- IDs antigos compatíveis publicados automaticamente: **{counts['compatibility_old_tvg_ids']}**",
-        f"- IDs antigos ambíguos ignorados: **{counts['ambiguous_old_tvg_ids_skipped']}**",
+        f"- IDs/aliases de compatibilidade publicados automaticamente: **{counts['compatibility_ids_and_name_aliases']}**",
+        f"- IDs/aliases ambíguos ignorados: **{counts['ambiguous_compatibility_aliases_skipped']}**",
         "",
         "## Fonte escolhida por canal",
         "",
