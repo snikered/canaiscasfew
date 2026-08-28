@@ -16,7 +16,13 @@ concurrency:
 jobs:
   atualizar:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 45
+    env:
+      PYTHONUNBUFFERED: "1"
+      DOWNLOAD_WORKERS: "5"
+      GZIP_LEVEL: "6"
+      OUTPUT_PAST_HOURS: "12"
+      WRITE_PLAIN_XML: "0"
 
     steps:
       - name: Baixar o repositório
@@ -34,7 +40,7 @@ jobs:
           python compile_dictionary.py --catalog /tmp/channels-universal.json
           echo "CHANNELS_FILE=/tmp/channels-universal.json" >> "$GITHUB_ENV"
 
-      - name: Gerar EPG por nome e consenso de 5 fontes
+      - name: Gerar EPG otimizado por nome e consenso de 5 fontes
         run: python merge_epg.py
 
       - name: Publicar somente EPG e relatórios na branch epg
