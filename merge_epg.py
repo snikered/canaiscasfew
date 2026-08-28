@@ -24,13 +24,16 @@ import time
 import unicodedata
 import urllib.request
 import xml.etree.ElementTree as ET
-from collections import defaultdict
+from collections import Counter, defaultdict
 from dataclasses import dataclass
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 from difflib import SequenceMatcher
+from functools import lru_cache
 from pathlib import Path
 from statistics import mean
 from typing import Iterable
+from xml.sax.saxutils import quoteattr
 
 from epg_utils import digit_signature, normalize_name, normalize_source_id
 
@@ -42,6 +45,10 @@ FUZZY_MARGIN = float(os.environ.get("FUZZY_MARGIN", "0.035"))
 AGREEMENT_THRESHOLD = float(os.environ.get("AGREEMENT_THRESHOLD", "0.55"))
 MIN_COMPARABLE_PROGRAMMES = int(os.environ.get("MIN_COMPARABLE_PROGRAMMES", "3"))
 TVG_ID_NAME_THRESHOLD = float(os.environ.get("TVG_ID_NAME_THRESHOLD", "0.72"))
+DOWNLOAD_WORKERS = max(1, int(os.environ.get("DOWNLOAD_WORKERS", "5")))
+GZIP_LEVEL = max(1, min(9, int(os.environ.get("GZIP_LEVEL", "6"))))
+OUTPUT_PAST_HOURS = max(0, int(os.environ.get("OUTPUT_PAST_HOURS", "12")))
+WRITE_PLAIN_XML = os.environ.get("WRITE_PLAIN_XML", "0").strip().lower() in {"1", "true", "yes"}
 
 
 @dataclass(frozen=True)
@@ -92,14 +99,26 @@ SOURCE_SPECS = [
 ]
 
 
+@dataclass(frozen=True)
+class ProgrammeRow:
+    start: datetime
+    stop: datetime
+    title: str
+    normalized_title: str
+    element: ET.Element
+
+
 @dataclass
 class EpgSource:
     spec: SourceSpec
-    root: ET.Element
     channels: dict[str, ET.Element]
     names: dict[str, list[str]]
+    normalized_names: dict[str, list[str]]
     programs: dict[str, list[ET.Element]]
+    rows: dict[str, list[ProgrammeRow]]
     exact_index: dict[str, set[str]]
+    fuzzy_index: dict[tuple[str, ...], dict[str, set[str]]]
+    normalized_id_index: dict[str, set[str]]
 
     @property
     def label(self) -> str:
@@ -125,6 +144,7 @@ class CandidateEvaluation:
     weighted_ratio: float
     avg_support_agreement: float
     health_score: float
+    health: dict[str, object]
     confidence: int
     comparisons: list[dict[str, object]]
 
@@ -159,9 +179,15 @@ def read_source(spec: SourceSpec) -> EpgSource:
     root = ET.fromstring(payload)
     channels: dict[str, ET.Element] = {}
     names: dict[str, list[str]] = {}
+    normalized_names: dict[str, list[str]] = {}
     programs: dict[str, list[ET.Element]] = defaultdict(list)
+    rows: dict[str, list[ProgrammeRow]] = defaultdict(list)
     exact_index: dict[str, set[str]] = defaultdict(set)
+    fuzzy_index: dict[tuple[str, ...], dict[str, set[str]]] = defaultdict(lambda: defaultdict(set))
+    normalized_id_index: dict[str, set[str]] = defaultdict(set)
 
+    # Uma única passagem: datas e títulos são parseados uma vez e reutilizados
+    # em todas as comparações/validações posteriores.
     for child in root:
         tag = local_tag(child)
         if tag == "channel":
@@ -175,16 +201,56 @@ def read_source(spec: SourceSpec) -> EpgSource:
                 if local_tag(node) == "display-name" and (node.text or "").strip()
             ]
             names[channel_id] = display_names
+
+            norm_candidates: list[str] = []
             for candidate in [*display_names, channel_id, normalize_source_id(channel_id)]:
                 normalized = normalize_name(candidate)
-                if normalized:
-                    exact_index[normalized].add(channel_id)
+                if not normalized or normalized in norm_candidates:
+                    continue
+                norm_candidates.append(normalized)
+                exact_index[normalized].add(channel_id)
+                fuzzy_index[digit_signature(normalized)][normalized].add(channel_id)
+            normalized_names[channel_id] = norm_candidates
+
+            normalized_id = normalize_source_id(channel_id)
+            if normalized_id:
+                normalized_id_index[normalized_id].add(channel_id)
+
         elif tag == "programme":
             channel_id = child.attrib.get("channel", "").strip()
-            if channel_id:
-                programs[channel_id].append(child)
+            if not channel_id:
+                continue
+            start = parse_xmltv_datetime(child.attrib.get("start", ""))
+            stop = parse_xmltv_datetime(child.attrib.get("stop", ""))
+            if start is None or stop is None:
+                continue
+            title = programme_title(child)
+            programs[channel_id].append(child)
+            rows[channel_id].append(ProgrammeRow(
+                start=start,
+                stop=stop,
+                title=title,
+                normalized_title=normalize_programme_title(title),
+                element=child,
+            ))
 
-    return EpgSource(spec, root, channels, names, dict(programs), dict(exact_index))
+    for channel_rows in rows.values():
+        channel_rows.sort(key=lambda item: item.start)
+
+    # Libera a lista de filhos da raiz; os elementos relevantes já estão
+    # referenciados pelos índices acima.
+    root.clear()
+    return EpgSource(
+        spec=spec,
+        channels=channels,
+        names=names,
+        normalized_names=normalized_names,
+        programs=dict(programs),
+        rows=dict(rows),
+        exact_index=dict(exact_index),
+        fuzzy_index={sig: dict(items) for sig, items in fuzzy_index.items()},
+        normalized_id_index=dict(normalized_id_index),
+    )
 
 
 def read_optional_source(spec: SourceSpec) -> tuple[EpgSource | None, str | None]:
@@ -233,51 +299,69 @@ def choose_exact(source: EpgSource, aliases: Iterable[str]) -> tuple[str | None,
     return None, ""
 
 
+def _sequence_ratio_upper_bound(left: str, right: str, left_counter: Counter[str] | None = None) -> float:
+    """Limite superior seguro para SequenceMatcher sem executar o algoritmo caro."""
+    if not left or not right:
+        return 0.0
+    length_bound = (2.0 * min(len(left), len(right))) / (len(left) + len(right))
+    if length_bound < (FUZZY_THRESHOLD - FUZZY_MARGIN):
+        return length_bound
+    lc = left_counter or Counter(left)
+    rc = Counter(right)
+    common = sum(min(count, rc.get(ch, 0)) for ch, count in lc.items())
+    char_bound = (2.0 * common) / (len(left) + len(right))
+    return min(length_bound, char_bound)
+
+
 def best_fuzzy(source: EpgSource, aliases: list[str]) -> tuple[str | None, float, float, str]:
     if not aliases:
         return None, 0.0, 0.0, ""
-    scored: list[tuple[float, str, str, str]] = []
-    for channel_id, names in source.names.items():
-        candidates = [*names, channel_id, normalize_source_id(channel_id)]
-        best_for_channel = (0.0, "", "")
-        for alias in aliases:
-            # Evita aproximação perigosa para nomes curtos (H2, TNT, TLC, USA etc.).
-            if len(alias) < 4:
+
+    # Mantém o mesmo SequenceMatcher/threshold da v10, mas só executa a
+    # comparação quando um limite matemático mostra que o candidato ainda
+    # pode afetar o resultado (best ou margem do segundo colocado).
+    relevant_floor = FUZZY_THRESHOLD - FUZZY_MARGIN
+    best_by_channel: dict[str, tuple[float, str, str]] = {}
+    for alias in aliases:
+        if len(alias) < 4:
+            continue
+        alias_counter = Counter(alias)
+        bucket = source.fuzzy_index.get(digit_signature(alias), {})
+        for normalized_candidate, channel_ids in bucket.items():
+            if _sequence_ratio_upper_bound(alias, normalized_candidate, alias_counter) < relevant_floor:
                 continue
-            for candidate in candidates:
-                normalized_candidate = normalize_name(candidate)
-                if not normalized_candidate:
-                    continue
-                if digit_signature(alias) != digit_signature(normalized_candidate):
-                    continue
-                ratio = SequenceMatcher(None, alias, normalized_candidate).ratio()
-                if ratio > best_for_channel[0]:
-                    best_for_channel = (ratio, alias, normalized_candidate)
-        if best_for_channel[0] > 0:
-            scored.append((best_for_channel[0], channel_id, best_for_channel[1], best_for_channel[2]))
-    if not scored:
+            ratio = SequenceMatcher(None, alias, normalized_candidate).ratio()
+            if ratio < relevant_floor:
+                continue
+            for channel_id in channel_ids:
+                old = best_by_channel.get(channel_id)
+                if old is None or ratio > old[0]:
+                    best_by_channel[channel_id] = (ratio, alias, normalized_candidate)
+
+    if not best_by_channel:
         return None, 0.0, 0.0, ""
-    scored.sort(reverse=True)
+    scored = sorted(
+        ((score, channel_id, alias, candidate)
+         for channel_id, (score, alias, candidate) in best_by_channel.items()),
+        reverse=True,
+    )
     best = scored[0]
     second_score = scored[1][0] if len(scored) > 1 else 0.0
-    return (
-        best[1], best[0], second_score,
-        f"aproximação {best[0]:.3f}: {best[2]} ~ {best[3]}",
-    )
+    return best[1], best[0], second_score, f"aproximação {best[0]:.3f}: {best[2]} ~ {best[3]}"
 
 
 def _name_compatibility(source: EpgSource, channel_id: str, aliases: list[str]) -> float:
     """Confirma se um candidato de tvg-id parece ser o mesmo canal pelo nome."""
-    candidates = source.names.get(channel_id, [])
+    candidates = source.normalized_names.get(channel_id, [])
     best = 0.0
     for alias in aliases:
-        for candidate in candidates:
-            candidate_norm = normalize_name(candidate)
-            if not candidate_norm or digit_signature(alias) != digit_signature(candidate_norm):
+        alias_sig = digit_signature(alias)
+        for candidate_norm in candidates:
+            if alias_sig != digit_signature(candidate_norm):
                 continue
-            best = max(best, SequenceMatcher(None, alias, candidate_norm).ratio())
             if alias == candidate_norm:
                 return 1.0
+            best = max(best, SequenceMatcher(None, alias, candidate_norm).ratio())
     return best
 
 
@@ -286,19 +370,20 @@ def match_by_safe_tvg_id_hint(
     aliases: list[str],
     old_ids: list[str],
 ) -> ChannelMatch | None:
-    """Usa tvg-id somente se o próprio NOME do EPG confirmar a identidade.
-
-    Assim `tvg-id=discovery...` numa entrada chamada `HBO 2` é ignorado em vez
-    de contaminar a correspondência universal.
-    """
+    """Usa tvg-id só se o nome confirmar, com lookup O(1) por índice."""
     if not old_ids or not aliases:
         return None
-    normalized_hints = {normalize_source_id(value) for value in old_ids if normalize_source_id(value)}
-    raw_hints = {value.strip() for value in old_ids if value.strip()}
+    candidate_ids: set[str] = set()
+    for value in old_ids:
+        raw = value.strip()
+        if raw in source.channels:
+            candidate_ids.add(raw)
+        normalized = normalize_source_id(raw)
+        if normalized:
+            candidate_ids.update(source.normalized_id_index.get(normalized, set()))
+
     candidates: list[tuple[float, str]] = []
-    for channel_id in source.channels:
-        if channel_id not in raw_hints and normalize_source_id(channel_id) not in normalized_hints:
-            continue
+    for channel_id in candidate_ids:
         compatibility = _name_compatibility(source, channel_id, aliases)
         if compatibility >= TVG_ID_NAME_THRESHOLD:
             candidates.append((compatibility, channel_id))
@@ -306,12 +391,7 @@ def match_by_safe_tvg_id_hint(
         return None
     candidates.sort(reverse=True)
     score, channel_id = candidates[0]
-    return ChannelMatch(
-        source,
-        channel_id,
-        f"tvg-id antigo confirmado pelo nome ({score:.3f})",
-        score,
-    )
+    return ChannelMatch(source, channel_id, f"tvg-id antigo confirmado pelo nome ({score:.3f})", score)
 
 
 def find_match(source: EpgSource, aliases: list[str], old_ids: list[str] | None = None) -> ChannelMatch | None:
@@ -356,6 +436,26 @@ def parse_xmltv_datetime(value: str) -> datetime | None:
     if not value:
         return None
     value = value.strip()
+
+    # Caminho rápido para XMLTV padrão: YYYYMMDDHHMM[SS] [+/-HHMM].
+    match = re.match(r"^(\d{12}|\d{14})(?:\s*([+-]\d{4}))?", value)
+    if match:
+        digits, offset = match.groups()
+        try:
+            second = int(digits[12:14]) if len(digits) == 14 else 0
+            tz = timezone.utc
+            if offset:
+                sign = 1 if offset[0] == "+" else -1
+                delta = timedelta(hours=int(offset[1:3]), minutes=int(offset[3:5]))
+                tz = timezone(sign * delta)
+            return datetime(
+                int(digits[0:4]), int(digits[4:6]), int(digits[6:8]),
+                int(digits[8:10]), int(digits[10:12]), second, tzinfo=tz,
+            )
+        except ValueError:
+            pass
+
+    # Compatibilidade com fontes fora do padrão esperado.
     for fmt in ("%Y%m%d%H%M%S %z", "%Y%m%d%H%M %z", "%Y%m%d%H%M%S", "%Y%m%d%H%M"):
         try:
             dt = datetime.strptime(value, fmt)
@@ -374,6 +474,7 @@ def programme_title(programme: ET.Element | None) -> str:
     return ""
 
 
+@lru_cache(maxsize=200000)
 def normalize_programme_title(value: str) -> str:
     value = unicodedata.normalize("NFKD", value or "")
     value = "".join(ch for ch in value if not unicodedata.combining(ch))
@@ -394,29 +495,25 @@ def programme_title_similarity(a: str, b: str) -> float:
     return SequenceMatcher(None, a, b).ratio()
 
 
-def programme_rows(source: EpgSource, channel_id: str) -> list[tuple[datetime, datetime, str]]:
-    rows: list[tuple[datetime, datetime, str]] = []
-    for p in source.programs.get(channel_id, []):
-        start = parse_xmltv_datetime(p.attrib.get("start", ""))
-        stop = parse_xmltv_datetime(p.attrib.get("stop", ""))
-        if start is None or stop is None:
-            continue
-        rows.append((start, stop, programme_title(p)))
-    rows.sort(key=lambda x: x[0])
-    return rows
+def programme_rows(source: EpgSource, channel_id: str) -> list[ProgrammeRow]:
+    return source.rows.get(channel_id, [])
 
 
 def now_next_for(source: EpgSource, channel_id: str, now: datetime) -> tuple[dict | None, dict | None]:
     current = None
     next_item = None
-    for start, stop, title in programme_rows(source, channel_id):
-        if start <= now < stop:
-            current = {"start": start, "stop": stop, "title": title}
-        elif start > now and next_item is None:
-            next_item = {"start": start, "stop": stop, "title": title}
+    for row in programme_rows(source, channel_id):
+        if row.start <= now < row.stop:
+            current = {"start": row.start, "stop": row.stop, "title": row.title}
+        elif row.start > now and next_item is None:
+            next_item = {"start": row.start, "stop": row.stop, "title": row.title}
             if current is not None:
                 break
     return current, next_item
+
+
+_AGREEMENT_CACHE: dict[tuple[str, str, str, str], dict[str, object]] = {}
+_HEALTH_CACHE: dict[tuple[str, str], dict[str, object]] = {}
 
 
 def cross_source_programme_agreement(
@@ -426,54 +523,83 @@ def cross_source_programme_agreement(
     b_id: str,
     now: datetime,
 ) -> dict[str, object]:
-    """Compara títulos na janela atual/futura, tolerando pequenos deslocamentos."""
+    """Mesmo critério da v10, mas com janela deslizante em vez de O(n²)."""
+    left_key = (a_source.spec.key, a_id)
+    right_key = (b_source.spec.key, b_id)
+    cache_key = (*left_key, *right_key) if left_key <= right_key else (*right_key, *left_key)
+    cached = _AGREEMENT_CACHE.get(cache_key)
+    if cached is not None:
+        return cached
+
     window_start = now - timedelta(hours=6)
     window_end = now + timedelta(hours=36)
-    a_rows = [r for r in programme_rows(a_source, a_id) if r[1] >= window_start and r[0] <= window_end]
-    b_rows = [r for r in programme_rows(b_source, b_id) if r[1] >= window_start and r[0] <= window_end]
+    a_rows = [r for r in programme_rows(a_source, a_id) if r.stop >= window_start and r.start <= window_end]
+    b_rows = [r for r in programme_rows(b_source, b_id) if r.stop >= window_start and r.start <= window_end]
     if not a_rows or not b_rows:
-        return {"comparable": 0, "agreement": None, "average_similarity": None}
+        result = {"comparable": 0, "agreement": None, "average_similarity": None}
+        _AGREEMENT_CACHE[cache_key] = result
+        return result
 
     similarities: list[float] = []
-    for a_start, a_stop, a_title in a_rows:
-        best: tuple[float, float] | None = None  # (time score, title similarity)
-        for b_start, b_stop, b_title in b_rows:
-            if b_start > a_stop + timedelta(minutes=20):
+    b_floor = 0
+    tolerance = timedelta(minutes=20)
+    for a_row in a_rows:
+        while b_floor < len(b_rows) and b_rows[b_floor].stop < a_row.start - tolerance:
+            b_floor += 1
+
+        best: tuple[float, float] | None = None
+        idx = b_floor
+        while idx < len(b_rows):
+            b_row = b_rows[idx]
+            if b_row.start > a_row.stop + tolerance:
                 break
-            if b_stop < a_start - timedelta(minutes=20):
-                continue
-            overlap = max(0.0, (min(a_stop, b_stop) - max(a_start, b_start)).total_seconds())
-            shorter = max(1.0, min((a_stop - a_start).total_seconds(), (b_stop - b_start).total_seconds()))
+            overlap = max(0.0, (min(a_row.stop, b_row.stop) - max(a_row.start, b_row.start)).total_seconds())
+            shorter = max(1.0, min((a_row.stop - a_row.start).total_seconds(), (b_row.stop - b_row.start).total_seconds()))
             overlap_ratio = overlap / shorter
-            start_delta = abs((b_start - a_start).total_seconds())
-            if overlap_ratio < 0.35 and start_delta > 20 * 60:
-                continue
-            time_score = max(overlap_ratio, max(0.0, 1.0 - start_delta / (20 * 60)))
-            title_score = programme_title_similarity(a_title, b_title)
-            candidate = (time_score, title_score)
-            if best is None or candidate > best:
-                best = candidate
+            start_delta = abs((b_row.start - a_row.start).total_seconds())
+            if overlap_ratio >= 0.35 or start_delta <= 20 * 60:
+                time_score = max(overlap_ratio, max(0.0, 1.0 - start_delta / (20 * 60)))
+                if a_row.normalized_title and b_row.normalized_title:
+                    if a_row.normalized_title == b_row.normalized_title:
+                        title_score = 1.0
+                    else:
+                        title_score = SequenceMatcher(None, a_row.normalized_title, b_row.normalized_title).ratio()
+                else:
+                    title_score = 0.0
+                candidate = (time_score, title_score)
+                if best is None or candidate > best:
+                    best = candidate
+            idx += 1
         if best is not None:
             similarities.append(best[1])
 
     if not similarities:
-        return {"comparable": 0, "agreement": None, "average_similarity": None}
+        result = {"comparable": 0, "agreement": None, "average_similarity": None}
+        _AGREEMENT_CACHE[cache_key] = result
+        return result
     agreed = sum(1 for score in similarities if score >= 0.68)
-    return {
+    result = {
         "comparable": len(similarities),
         "agreement": round(agreed / len(similarities), 4),
         "average_similarity": round(mean(similarities), 4),
     }
+    _AGREEMENT_CACHE[cache_key] = result
+    return result
 
 
 def schedule_health(source: EpgSource, channel_id: str, now: datetime) -> dict[str, object]:
+    cache_key = (source.spec.key, channel_id)
+    cached = _HEALTH_CACHE.get(cache_key)
+    if cached is not None:
+        return cached
     rows = programme_rows(source, channel_id)
     current, next_item = now_next_for(source, channel_id, now)
     invalid = 0
     overlaps = 0
     gaps = 0
     previous_stop: datetime | None = None
-    for start, stop, _ in rows:
+    for row in rows:
+        start, stop = row.start, row.stop
         duration = stop - start
         if duration.total_seconds() <= 0 or duration > timedelta(hours=12):
             invalid += 1
@@ -485,7 +611,7 @@ def schedule_health(source: EpgSource, channel_id: str, now: datetime) -> dict[s
         if previous_stop is None or stop > previous_stop:
             previous_stop = stop
 
-    future_end = max((stop for _start, stop, _ in rows if stop > now), default=None)
+    future_end = max((row.stop for row in rows if row.stop > now), default=None)
     future_hours = max(0.0, (future_end - now).total_seconds() / 3600) if future_end else 0.0
 
     score = 0.0
@@ -495,7 +621,7 @@ def schedule_health(source: EpgSource, channel_id: str, now: datetime) -> dict[s
     score += 0.20 * min(len(rows) / 10.0, 1.0)
     score -= min(0.25, invalid * 0.08 + overlaps * 0.02 + max(0, gaps - 3) * 0.01)
     score = max(0.0, min(1.0, score))
-    return {
+    result = {
         "score": round(score, 4),
         "rows": len(rows),
         "current": current,
@@ -505,6 +631,8 @@ def schedule_health(source: EpgSource, channel_id: str, now: datetime) -> dict[s
         "overlaps": overlaps,
         "gaps": gaps,
     }
+    _HEALTH_CACHE[cache_key] = result
+    return result
 
 
 def evaluate_candidates(
@@ -591,6 +719,7 @@ def evaluate_candidates(
             weighted_ratio=round(weighted_ratio, 4),
             avg_support_agreement=round(avg_support, 4),
             health_score=round(health_score, 4),
+            health=health_by_source[match.source.spec.key],
             confidence=confidence,
             comparisons=comparisons,
         ))
@@ -638,7 +767,7 @@ def make_validation(
     all_evaluations: list[CandidateEvaluation],
     now: datetime,
 ) -> dict[str, object]:
-    health = schedule_health(chosen.match.source, chosen.match.channel_id, now)
+    health = chosen.health
     warnings: list[str] = []
 
     if not health["rows"]:
@@ -771,24 +900,122 @@ def build_compatibility_ids(entries: list[dict[str, object]]) -> tuple[dict[str,
             ambiguous[target_id] = sorted(set(bad))
     return by_target, ambiguous
 
+def write_epg_stream(
+    selected: list[tuple[dict[str, object], CandidateEvaluation, list[CandidateEvaluation], bool]],
+    compatibility_ids: dict[str, list[str]],
+    now: datetime,
+) -> tuple[int, int]:
+    """Escreve XMLTV diretamente no gzip, sem árvore gigante nem deepcopy de programas."""
+    gzip_path = OUTPUT_DIR / "epg.xml.gz"
+    plain_path = OUTPUT_DIR / "epg.xml"
+    plain = plain_path.open("wb") if WRITE_PLAIN_XML else None
+    programme_count = 0
+    compatibility_alias_count = 0
+    cutoff = now - timedelta(hours=OUTPUT_PAST_HOURS)
+
+    with gzip_path.open("wb") as raw_gzip:
+        with gzip.GzipFile(
+            filename="epg.xml", mode="wb", fileobj=raw_gzip, mtime=0, compresslevel=GZIP_LEVEL,
+        ) as gz:
+            def emit(data: bytes) -> None:
+                gz.write(data)
+                if plain is not None:
+                    plain.write(data)
+
+            generator = "EPG universal automático por nome + consenso de 5 fontes"
+            source_name = "Identificação por nome + seleção canal a canal por consenso de 5 fontes"
+            header = (
+                "<?xml version='1.0' encoding='utf-8'?>\n"
+                f"<tv generator-info-name={quoteattr(generator)} source-info-name={quoteattr(source_name)}>\n"
+            ).encode("utf-8")
+            emit(header)
+
+            for entry, chosen, _evaluations, _forced in selected:
+                target_id = str(entry["id"])
+                ids_for_channel = compatibility_ids.get(target_id, [target_id])
+                compatibility_alias_count += max(0, len(ids_for_channel) - 1)
+                display_aliases = [
+                    str(entry.get("name", "")),
+                    *(str(x) for x in entry.get("aliases", []) or []),
+                    *(str(x) for x in entry.get("original_names", []) or []),
+                ]
+                display_aliases = list(dict.fromkeys(x for x in display_aliases if x))
+                for output_id in ids_for_channel:
+                    channel = copy.deepcopy(chosen.match.source.channels[chosen.match.channel_id])
+                    channel.attrib["id"] = output_id
+                    for display_name in reversed(display_aliases):
+                        add_display_name_first(channel, display_name)
+                    emit(ET.tostring(channel, encoding="utf-8"))
+                    emit(b"\n")
+
+            for entry, chosen, _evaluations, _forced in selected:
+                target_id = str(entry["id"])
+                ids_for_channel = compatibility_ids.get(target_id, [target_id])
+                rows = chosen.match.source.rows.get(chosen.match.channel_id, [])
+                for row in rows:
+                    if row.stop < cutoff:
+                        continue
+                    original = row.element
+                    old_channel = original.attrib.get("channel")
+                    try:
+                        for output_id in ids_for_channel:
+                            original.attrib["channel"] = output_id
+                            emit(ET.tostring(original, encoding="utf-8"))
+                            emit(b"\n")
+                            programme_count += 1
+                    finally:
+                        if old_channel is None:
+                            original.attrib.pop("channel", None)
+                        else:
+                            original.attrib["channel"] = old_channel
+
+            emit(b"</tv>\n")
+
+    if plain is not None:
+        plain.close()
+    elif plain_path.exists():
+        plain_path.unlink()
+    return programme_count, compatibility_alias_count
+
+
 def main() -> None:
+    run_start = time.perf_counter()
+    timings: dict[str, float] = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+    stage_start = time.perf_counter()
     catalog_data = json.loads(CATALOG_PATH.read_text("utf-8"))
     entries = catalog_data.get("channels", [])
     overrides = json.loads(OVERRIDES_PATH.read_text("utf-8")) if OVERRIDES_PATH.exists() else {}
     compatibility_ids, ambiguous_old_ids = build_compatibility_ids(entries)
+    timings["catalogo"] = round(time.perf_counter() - stage_start, 3)
+
+    stage_start = time.perf_counter()
+    print(f"Carregando {len(SOURCE_SPECS)} fontes em paralelo (até {DOWNLOAD_WORKERS} workers)...")
+    loaded: dict[int, tuple[EpgSource | None, str | None]] = {}
+    with ThreadPoolExecutor(max_workers=min(DOWNLOAD_WORKERS, len(SOURCE_SPECS))) as executor:
+        future_map = {executor.submit(read_optional_source, spec): spec for spec in SOURCE_SPECS}
+        for future in as_completed(future_map):
+            spec = future_map[future]
+            try:
+                source, error = future.result()
+            except Exception as exc:  # pragma: no cover - proteção extra
+                source, error = None, str(exc)
+            loaded[spec.priority] = (source, error)
+            if source is not None:
+                print(f"✓ {spec.label}: {len(source.channels)} canais / {sum(len(v) for v in source.rows.values())} programas")
+            else:
+                print(f"⚠ {spec.label}: {error}")
 
     active_sources: list[EpgSource] = []
     source_errors: dict[str, str] = {}
     for spec in SOURCE_SPECS:
-        print(f"Baixando {spec.priority}ª fonte: {spec.label}...")
-        source, error = read_optional_source(spec)
+        source, error = loaded.get(spec.priority, (None, "fonte não retornou resultado"))
         if source is not None:
             active_sources.append(source)
-            print(f"{spec.label}: {len(source.channels)} canais")
         else:
             source_errors[spec.label] = error or "falha desconhecida"
-            print(f"AVISO: {spec.label} indisponível: {error}")
+    timings["download_e_indexacao_fontes"] = round(time.perf_counter() - stage_start, 3)
 
     if not active_sources:
         raise RuntimeError("Nenhuma das cinco fontes de EPG pôde ser carregada.")
@@ -797,11 +1024,8 @@ def main() -> None:
     max_active_vote_weight = sum(source.spec.vote_weight for source in active_sources)
     now = datetime.now(timezone.utc)
 
-    output_root = ET.Element("tv", {
-        "generator-info-name": "EPG universal automático por nome + consenso de 5 fontes",
-        "source-info-name": "Identificação por nome + seleção canal a canal por consenso de 5 fontes",
-    })
 
+    stage_start = time.perf_counter()
     selected: list[tuple[dict[str, object], CandidateEvaluation, list[CandidateEvaluation], bool]] = []
     report_rows: list[dict[str, object]] = []
     validations: list[dict[str, object]] = []
@@ -874,44 +1098,11 @@ def main() -> None:
         })
         validations.append(make_validation(entry, chosen, evaluations, now))
 
-    # Publica cada canal no ID interno e, quando seguro, também nos tvg-id
-    # antigos da M3U. Assim IDs estranhos/errados continuam funcionando sem
-    # edição manual, pois recebem a grade encontrada pelo NOME do canal.
-    compatibility_alias_count = 0
-    for entry, chosen, _evaluations, _forced in selected:
-        target_id = str(entry["id"])
-        ids_for_channel = compatibility_ids.get(target_id, [target_id])
-        compatibility_alias_count += max(0, len(ids_for_channel) - 1)
-        for output_id in ids_for_channel:
-            channel = copy.deepcopy(chosen.match.source.channels[chosen.match.channel_id])
-            channel.attrib["id"] = output_id
-            # Mantém vários nomes conhecidos do canal para players que fazem
-            # associação por nome/display-name em vez de tvg-id.
-            display_aliases = [
-                str(entry.get("name", "")),
-                *(str(x) for x in entry.get("aliases", []) or []),
-                *(str(x) for x in entry.get("original_names", []) or []),
-            ]
-            for display_name in reversed(list(dict.fromkeys(x for x in display_aliases if x))):
-                add_display_name_first(channel, display_name)
-            output_root.append(channel)
+    timings["matching_consenso_validacao"] = round(time.perf_counter() - stage_start, 3)
 
-    programme_count = 0
-    for entry, chosen, _evaluations, _forced in selected:
-        target_id = str(entry["id"])
-        ids_for_channel = compatibility_ids.get(target_id, [target_id])
-        for original in chosen.match.source.programs.get(chosen.match.channel_id, []):
-            for output_id in ids_for_channel:
-                programme = copy.deepcopy(original)
-                programme.attrib["channel"] = output_id
-                output_root.append(programme)
-                programme_count += 1
-
-    xml_payload = ET.tostring(output_root, encoding="utf-8", xml_declaration=True)
-    (OUTPUT_DIR / "epg.xml").write_bytes(xml_payload)
-    with (OUTPUT_DIR / "epg.xml.gz").open("wb") as raw_file:
-        with gzip.GzipFile(filename="epg.xml", mode="wb", fileobj=raw_file, mtime=0, compresslevel=9) as gz_file:
-            gz_file.write(xml_payload)
+    stage_start = time.perf_counter()
+    programme_count, compatibility_alias_count = write_epg_stream(selected, compatibility_ids, now)
+    timings["serializacao_e_gzip"] = round(time.perf_counter() - stage_start, 3)
 
     source_counts = {
         source.label: sum(1 for row in report_rows if row.get("source") == source.label)
@@ -930,6 +1121,7 @@ def main() -> None:
         "validation_ok": sum(1 for item in validations if item["status"] == "ok"),
         "validation_attention": sum(1 for item in validations if item["status"] == "atencao"),
         "validation_suspicious": sum(1 for item in validations if item["status"] == "suspeito"),
+        "timing_seconds": timings,
         "selected_by_source": source_counts,
     }
 
@@ -971,6 +1163,11 @@ def main() -> None:
     if source_errors:
         report_md.extend(["", "## Fontes indisponíveis nesta execução", ""])
         report_md.extend(f"- ⚠️ **{label}:** {error}" for label, error in source_errors.items())
+
+    report_md.extend(["", "## Desempenho da execução", ""])
+    for label, seconds in timings.items():
+        report_md.append(f"- **{label.replace('_', ' ').title()}:** {seconds:.2f} s")
+    report_md.append(f"- **Total até gerar os arquivos principais:** {time.perf_counter() - run_start:.2f} s")
 
     switched_rows = [row for row in report_rows if row.get("changed_from_first_available")]
     report_md.extend(["", "## Fonte alterada automaticamente por consenso", ""])
@@ -1077,6 +1274,13 @@ def main() -> None:
         )
     (OUTPUT_DIR / "validation.md").write_text("\n".join(validation_md) + "\n", "utf-8")
 
+    timings["total"] = round(time.perf_counter() - run_start, 3)
+    counts["timing_seconds"] = timings
+    # Regrava JSON final para incluir o tempo total, sem alterar o conteúdo funcional.
+    (OUTPUT_DIR / "report.json").write_text(
+        json.dumps({"summary": counts, "source_errors": source_errors, "channels": report_rows}, ensure_ascii=False, indent=2) + "\n",
+        "utf-8",
+    )
     print(json.dumps(counts, ensure_ascii=False, indent=2))
 
 

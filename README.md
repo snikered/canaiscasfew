@@ -1,6 +1,23 @@
-# EPG Universal v10 — dicionário persistente e aprendizado de M3U
+# EPG Universal v11 — dicionário persistente + motor otimizado
 
 Esta versão não precisa mais de uma M3U em cada atualização diária.
+
+## Otimizações de desempenho da v11
+
+A lógica de identificação e consenso é a mesma da v10. A v11 muda principalmente **como** o trabalho é executado:
+
+- baixa/processa as 5 fontes em paralelo;
+- datas e títulos dos programas são parseados uma única vez;
+- comparação de grades usa janela deslizante em vez de varrer a lista inteira repetidamente;
+- resultados de saúde/concordância são cacheados;
+- fuzzy continua usando o mesmo `SequenceMatcher`, threshold e margem, mas elimina candidatos matematicamente incapazes de atingir a nota mínima;
+- `tvg-id` antigo usa índice direto em vez de procurar em todos os canais da fonte;
+- o XML final é escrito diretamente em `epg.xml.gz`, sem montar uma árvore gigante e sem `deepcopy()` para cada programa;
+- gzip padrão passou de nível 9 para nível 6, reduzindo bastante CPU com pequena diferença de tamanho;
+- programas encerrados há mais de 12 horas não são republicados no XML final; isso não altera a votação/validação e reduz o arquivo;
+- `report.md` e `report.json` agora mostram o tempo gasto por etapa.
+
+Por padrão a rotina diária gera apenas `epg.xml.gz` (que é o arquivo publicado). Se precisar também do XML sem compressão, defina `WRITE_PLAIN_XML=1`.
 
 ## Arquitetura
 

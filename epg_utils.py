@@ -10,6 +10,7 @@ import html
 import re
 import unicodedata
 from difflib import SequenceMatcher
+from functools import lru_cache
 
 SUPERSCRIPT_DIGITS = "⁰¹²³⁴⁵⁶⁷⁸⁹"
 QUALITY_TOKENS = {
@@ -27,6 +28,7 @@ def remove_superscript_markers(value: str) -> str:
     return (value or "").translate(str.maketrans("", "", SUPERSCRIPT_DIGITS))
 
 
+@lru_cache(maxsize=100000)
 def strip_quality_markers(value: str) -> str:
     """Remove qualidade/codec preservando símbolos que fazem parte do canal.
 
@@ -85,6 +87,7 @@ def _basic_letters(value: str) -> str:
     return value.upper().strip()
 
 
+@lru_cache(maxsize=100000)
 def normalize_name(value: str) -> str:
     """Gera chave canônica pelo nome, sem confiar em tvg-id.
 
@@ -127,6 +130,7 @@ def normalize_name(value: str) -> str:
     return alias_map.get(value, value)
 
 
+@lru_cache(maxsize=100000)
 def normalize_source_id(value: str) -> str:
     """Extrai a parte que parece nome de canal de IDs de provedores.
 
@@ -148,10 +152,12 @@ def normalize_source_id(value: str) -> str:
     return normalize_name(value)
 
 
+@lru_cache(maxsize=100000)
 def digit_signature(value: str) -> tuple[str, ...]:
     return tuple(re.findall(r"\d+", normalize_name(value)))
 
 
+@lru_cache(maxsize=100000)
 def similarity(left: str, right: str) -> float:
     a, b = normalize_name(left), normalize_name(right)
     if not a or not b or digit_signature(a) != digit_signature(b):
