@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""EPG multi-fonte com seleção automática por consenso por canal.
+"""EPG universal multi-fonte com seleção automática por consenso por canal.
 
 Fontes padrão (ordem de preferência/desempate):
 1. Genius / Curated
@@ -8,10 +8,10 @@ Fontes padrão (ordem de preferência/desempate):
 4. IPTV-EPG BR
 5. EPGShare BR2
 
-A fonte final pode mudar canal a canal. A seleção privilegia a programação que
-recebe mais apoio independente das outras fontes. BR1 e BR2 continuam aparecendo
-como dois votos no relatório, mas compartilham o peso da família EPGShare para
-não contar o mesmo provedor duas vezes como se fosse totalmente independente.
+A identidade principal vem do NOME do canal da M3U. O tvg-id original é apenas uma
+pista secundária e só é aceito quando o nome do canal no EPG também é compatível.
+A fonte final pode mudar canal a canal conforme o consenso da programação. BR1 e
+BR2 compartilham o peso da família EPGShare para não duplicar influência.
 """
 from __future__ import annotations
 
@@ -41,6 +41,7 @@ FUZZY_THRESHOLD = float(os.environ.get("FUZZY_THRESHOLD", "0.90"))
 FUZZY_MARGIN = float(os.environ.get("FUZZY_MARGIN", "0.035"))
 AGREEMENT_THRESHOLD = float(os.environ.get("AGREEMENT_THRESHOLD", "0.55"))
 MIN_COMPARABLE_PROGRAMMES = int(os.environ.get("MIN_COMPARABLE_PROGRAMMES", "3"))
+TVG_ID_NAME_THRESHOLD = float(os.environ.get("TVG_ID_NAME_THRESHOLD", "0.72"))
 
 
 @dataclass(frozen=True)
@@ -194,9 +195,13 @@ def read_optional_source(spec: SourceSpec) -> tuple[EpgSource | None, str | None
 
 
 def aliases_for(entry: dict[str, object]) -> list[str]:
+    """Retorna SOMENTE aliases derivados do nome.
+
+    IDs antigos não entram aqui de propósito: em listas universais eles podem
+    estar vazios, trocados ou apontando para outro canal.
+    """
     values: list[str] = [str(entry.get("name", ""))]
     values.extend(str(x) for x in entry.get("aliases", []) or [])
-    values.extend(normalize_source_id(str(x)) for x in entry.get("old_tvg_ids", []) or [])
     output: list[str] = []
     seen: set[str] = set()
     for value in values:
@@ -204,6 +209,18 @@ def aliases_for(entry: dict[str, object]) -> list[str]:
         if normalized and normalized not in seen:
             output.append(normalized)
             seen.add(normalized)
+    return output
+
+
+def old_id_hints_for(entry: dict[str, object]) -> list[str]:
+    """IDs antigos são pistas fracas; nunca substituem uma divergência de nome."""
+    output: list[str] = []
+    seen: set[str] = set()
+    for value in entry.get("old_tvg_ids", []) or []:
+        raw = str(value).strip()
+        if raw and raw not in seen:
+            output.append(raw)
+            seen.add(raw)
     return output
 
 
@@ -249,7 +266,56 @@ def best_fuzzy(source: EpgSource, aliases: list[str]) -> tuple[str | None, float
     )
 
 
-def find_match(source: EpgSource, aliases: list[str]) -> ChannelMatch | None:
+def _name_compatibility(source: EpgSource, channel_id: str, aliases: list[str]) -> float:
+    """Confirma se um candidato de tvg-id parece ser o mesmo canal pelo nome."""
+    candidates = source.names.get(channel_id, [])
+    best = 0.0
+    for alias in aliases:
+        for candidate in candidates:
+            candidate_norm = normalize_name(candidate)
+            if not candidate_norm or digit_signature(alias) != digit_signature(candidate_norm):
+                continue
+            best = max(best, SequenceMatcher(None, alias, candidate_norm).ratio())
+            if alias == candidate_norm:
+                return 1.0
+    return best
+
+
+def match_by_safe_tvg_id_hint(
+    source: EpgSource,
+    aliases: list[str],
+    old_ids: list[str],
+) -> ChannelMatch | None:
+    """Usa tvg-id somente se o próprio NOME do EPG confirmar a identidade.
+
+    Assim `tvg-id=discovery...` numa entrada chamada `HBO 2` é ignorado em vez
+    de contaminar a correspondência universal.
+    """
+    if not old_ids or not aliases:
+        return None
+    normalized_hints = {normalize_source_id(value) for value in old_ids if normalize_source_id(value)}
+    raw_hints = {value.strip() for value in old_ids if value.strip()}
+    candidates: list[tuple[float, str]] = []
+    for channel_id in source.channels:
+        if channel_id not in raw_hints and normalize_source_id(channel_id) not in normalized_hints:
+            continue
+        compatibility = _name_compatibility(source, channel_id, aliases)
+        if compatibility >= TVG_ID_NAME_THRESHOLD:
+            candidates.append((compatibility, channel_id))
+    if not candidates:
+        return None
+    candidates.sort(reverse=True)
+    score, channel_id = candidates[0]
+    return ChannelMatch(
+        source,
+        channel_id,
+        f"tvg-id antigo confirmado pelo nome ({score:.3f})",
+        score,
+    )
+
+
+def find_match(source: EpgSource, aliases: list[str], old_ids: list[str] | None = None) -> ChannelMatch | None:
+    # 1) Nome exato; 2) nome aproximado seguro; 3) tvg-id apenas como pista confirmada pelo nome.
     exact_id, reason = choose_exact(source, aliases)
     if exact_id:
         return ChannelMatch(source, exact_id, reason, 1.0)
@@ -260,7 +326,7 @@ def find_match(source: EpgSource, aliases: list[str]) -> ChannelMatch | None:
         and (best_score - second_score) >= FUZZY_MARGIN
     ):
         return ChannelMatch(source, fuzzy_id, fuzzy_reason, best_score)
-    return None
+    return match_by_safe_tvg_id_hint(source, aliases, old_ids or [])
 
 
 def manual_override(overrides: dict[str, object], target_id: str) -> tuple[str | None, str | None]:
@@ -658,11 +724,49 @@ def make_validation(
     }
 
 
+
+def build_compatibility_ids(entries: list[dict[str, object]]) -> tuple[dict[str, list[str]], dict[str, list[str]]]:
+    """Mapeia IDs antigos da M3U para o canal reconhecido pelo NOME.
+
+    Um tvg-id antigo pode estar semanticamente errado; isso não importa para
+    compatibilidade. Se ele for exclusivo de um único canal da playlist, o XML
+    final publica a grade correta também sob esse ID. Se o mesmo ID antigo for
+    reutilizado por canais diferentes, ele é considerado ambíguo e não é usado.
+    """
+    owners: dict[str, set[str]] = defaultdict(set)
+    for entry in entries:
+        target_id = str(entry.get("id", ""))
+        for old_id in entry.get("old_tvg_ids", []) or []:
+            old_id = str(old_id).strip()
+            if old_id:
+                owners[old_id].add(target_id)
+
+    by_target: dict[str, list[str]] = {}
+    ambiguous: dict[str, list[str]] = {}
+    for entry in entries:
+        target_id = str(entry.get("id", ""))
+        ids = [target_id]
+        bad: list[str] = []
+        for old_id in entry.get("old_tvg_ids", []) or []:
+            old_id = str(old_id).strip()
+            if not old_id or old_id == target_id:
+                continue
+            if len(owners.get(old_id, set())) == 1:
+                ids.append(old_id)
+            else:
+                bad.append(old_id)
+        # Remove duplicatas preservando ordem.
+        by_target[target_id] = list(dict.fromkeys(ids))
+        if bad:
+            ambiguous[target_id] = sorted(set(bad))
+    return by_target, ambiguous
+
 def main() -> None:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     catalog_data = json.loads(CATALOG_PATH.read_text("utf-8"))
     entries = catalog_data.get("channels", [])
     overrides = json.loads(OVERRIDES_PATH.read_text("utf-8")) if OVERRIDES_PATH.exists() else {}
+    compatibility_ids, ambiguous_old_ids = build_compatibility_ids(entries)
 
     active_sources: list[EpgSource] = []
     source_errors: dict[str, str] = {}
@@ -684,8 +788,8 @@ def main() -> None:
     now = datetime.now(timezone.utc)
 
     output_root = ET.Element("tv", {
-        "generator-info-name": "EPG automático por consenso de 5 fontes",
-        "source-info-name": "Seleção canal a canal por consenso: Genius, Open-EPG, EPGShare BR1/BR2 e IPTV-EPG",
+        "generator-info-name": "EPG universal automático por nome + consenso de 5 fontes",
+        "source-info-name": "Identificação por nome + seleção canal a canal por consenso de 5 fontes",
     })
 
     selected: list[tuple[dict[str, object], CandidateEvaluation, list[CandidateEvaluation], bool]] = []
@@ -696,7 +800,8 @@ def main() -> None:
         target_id = str(entry["id"])
         visible_name = str(entry["name"])
         aliases = aliases_for(entry)
-        matches = [m for source in active_sources if (m := find_match(source, aliases)) is not None]
+        old_id_hints = old_id_hints_for(entry)
+        matches = [m for source in active_sources if (m := find_match(source, aliases, old_id_hints)) is not None]
 
         override_source_key, override_id = manual_override(overrides, target_id)
         forced = False
@@ -759,22 +864,30 @@ def main() -> None:
         })
         validations.append(make_validation(entry, chosen, evaluations, now))
 
-    # Canais primeiro, programas depois.
+    # Publica cada canal no ID interno e, quando seguro, também nos tvg-id
+    # antigos da M3U. Assim IDs estranhos/errados continuam funcionando sem
+    # edição manual, pois recebem a grade encontrada pelo NOME do canal.
+    compatibility_alias_count = 0
     for entry, chosen, _evaluations, _forced in selected:
         target_id = str(entry["id"])
-        channel = copy.deepcopy(chosen.match.source.channels[chosen.match.channel_id])
-        channel.attrib["id"] = target_id
-        add_display_name_first(channel, str(entry["name"]))
-        output_root.append(channel)
+        ids_for_channel = compatibility_ids.get(target_id, [target_id])
+        compatibility_alias_count += max(0, len(ids_for_channel) - 1)
+        for output_id in ids_for_channel:
+            channel = copy.deepcopy(chosen.match.source.channels[chosen.match.channel_id])
+            channel.attrib["id"] = output_id
+            add_display_name_first(channel, str(entry["name"]))
+            output_root.append(channel)
 
     programme_count = 0
     for entry, chosen, _evaluations, _forced in selected:
         target_id = str(entry["id"])
+        ids_for_channel = compatibility_ids.get(target_id, [target_id])
         for original in chosen.match.source.programs.get(chosen.match.channel_id, []):
-            programme = copy.deepcopy(original)
-            programme.attrib["channel"] = target_id
-            output_root.append(programme)
-            programme_count += 1
+            for output_id in ids_for_channel:
+                programme = copy.deepcopy(original)
+                programme.attrib["channel"] = output_id
+                output_root.append(programme)
+                programme_count += 1
 
     xml_payload = ET.tostring(output_root, encoding="utf-8", xml_declaration=True)
     (OUTPUT_DIR / "epg.xml").write_bytes(xml_payload)
@@ -791,6 +904,8 @@ def main() -> None:
         "matched": sum(1 for row in report_rows if row["status"] == "matched"),
         "missing": sum(1 for row in report_rows if row["status"] == "missing"),
         "programmes": programme_count,
+        "compatibility_old_tvg_ids": compatibility_alias_count,
+        "ambiguous_old_tvg_ids_skipped": sum(len(v) for v in ambiguous_old_ids.values()),
         "selection_changed_by_consensus": sum(
             1 for row in report_rows if row.get("changed_from_first_available")
         ),
@@ -820,13 +935,15 @@ def main() -> None:
     )
 
     report_md = [
-        "# Relatório do EPG automático — consenso multi-fonte",
+        "# Relatório do EPG universal — identificação por nome + consenso multi-fonte",
         "",
-        f"- Canais do catálogo: **{counts['playlist_channels']}**",
+        f"- Canais identificados pelo nome: **{counts['playlist_channels']}**",
         f"- Encontrados: **{counts['matched']}**",
         f"- Sem EPG seguro: **{counts['missing']}**",
         f"- Canais cuja fonte mudou por consenso: **{counts['selection_changed_by_consensus']}**",
         f"- Programas gravados: **{counts['programmes']}**",
+        f"- IDs antigos compatíveis publicados automaticamente: **{counts['compatibility_old_tvg_ids']}**",
+        f"- IDs antigos ambíguos ignorados: **{counts['ambiguous_old_tvg_ids_skipped']}**",
         "",
         "## Fonte escolhida por canal",
         "",
@@ -849,6 +966,14 @@ def main() -> None:
     else:
         report_md.append("Nenhum canal precisou trocar a primeira fonte disponível.")
 
+    if ambiguous_old_ids:
+        report_md.extend(["", "## tvg-id antigos ambíguos ignorados", ""])
+        report_md.append("Estes IDs apareciam em mais de um canal diferente. O script não os reutilizou para evitar EPG errado; a `playlist-fixed.m3u` automática resolve esses casos.")
+        for entry in entries:
+            tid = str(entry.get("id", ""))
+            for old_id in ambiguous_old_ids.get(tid, []):
+                report_md.append(f"- **{entry.get('name', tid)}** — `{old_id}`")
+
     missing_rows = [row for row in report_rows if row["status"] == "missing"]
     report_md.extend(["", "## Sem EPG", ""])
     report_md.extend(f"- `{row['target_id']}` — {row['name']}" for row in missing_rows)
@@ -868,7 +993,7 @@ def main() -> None:
     validation_md = [
         "# Validação e consenso da programação",
         "",
-        "> A fonte final pode mudar para cada canal. A grade com maior apoio independente é escolhida; a ordem Genius → Open → EPGShare BR1 → IPTV-EPG → EPGShare BR2 só desempata evidência equivalente.",
+        "> A identidade do canal vem primeiro do **nome da M3U**. O `tvg-id` antigo só é usado como pista quando o nome do EPG confirma a mesma identidade. Depois, a grade com maior apoio independente é escolhida.",
         "",
         "> BR1 e BR2 aparecem como dois votos visíveis, porém juntos valem no máximo o peso de uma família EPGShare no cálculo decisivo. Isso reduz o risco de duplicar influência do mesmo provedor.",
         "",

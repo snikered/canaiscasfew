@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Funções compartilhadas para normalização de nomes de canais."""
+"""Normalização universal de nomes de canais.
+
+Regra principal: o NOME é a identidade. tvg-id antigo é somente compatibilidade.
+"""
 from __future__ import annotations
 
 import hashlib
@@ -11,28 +14,38 @@ from difflib import SequenceMatcher
 SUPERSCRIPT_DIGITS = "⁰¹²³⁴⁵⁶⁷⁸⁹"
 QUALITY_TOKENS = {
     "HD", "FHD", "FULLHD", "FULL", "UHD", "4K", "8K", "SD",
-    # CHANNEL é ignorado somente durante a comparação.
-    "CHANNEL",
-    "H264", "H265", "HEVC", "AVC", "HDR", "HDR10", "DV",
+    "CHANNEL",  # regra solicitada: tratado como qualidade/complemento
+    "H264", "H265", "H266", "HEVC", "AVC",
+    "HDR", "HDR10", "HDR10PLUS", "DV", "DOLBYVISION",
     "FPS", "50FPS", "60FPS", "30FPS", "25FPS",
     "VIP", "BACKUP", "BKP", "ALT", "TESTE", "TEST", "RAW",
 }
 
 
 def remove_superscript_markers(value: str) -> str:
-    """Remove apenas algarismos sobrescritos; números normais são preservados."""
-    return value.translate(str.maketrans("", "", SUPERSCRIPT_DIGITS))
+    """Remove ¹²³⁴... usados como marcador de cópia; números normais ficam."""
+    return (value or "").translate(str.maketrans("", "", SUPERSCRIPT_DIGITS))
 
 
 def strip_quality_markers(value: str) -> str:
-    """Remove marcadores de cópia/qualidade, preservando números reais."""
+    """Remove marcadores de qualidade/codec sem apagar números reais.
+
+    Remove, entre outros: HDR+, SD, [H265], FHD [H265], H.265, HD, FHD,
+    UHD, 4K, 8K, HEVC, AVC e FPS.
+    """
     value = html.unescape(remove_superscript_markers(value or ""))
     value = re.sub(r"\s*\(\s*\d+\s*\)\s*$", "", value)
+
+    # Colchetes: [H265], [H.265], [FHD], [HDR+], [60 FPS] etc.
     value = re.sub(
-        r"\[\s*(?:H\.?26[45]|HEVC|AVC|HD|FHD|UHD|4K|8K|HDR\+?|\d+\s*FPS)\s*\]",
+        r"\[\s*(?:H\s*\.?\s*26[456]|HEVC|AVC|HD|FHD|FULL\s*HD|UHD|4K|8K|SD|HDR(?:10)?\s*\+?|HDR10\s*PLUS|\d+\s*FPS)\s*\]",
         " ", value, flags=re.IGNORECASE,
     )
-    value = re.sub(r"HDR\+", " HDR ", value, flags=re.IGNORECASE)
+    # Codecs fora de colchetes: H265 / H.265 / H 265.
+    value = re.sub(r"\bH\s*\.?\s*26[456]\b", " H265 ", value, flags=re.IGNORECASE)
+    # HDR+ / HDR10+ antes da tokenização.
+    value = re.sub(r"\bHDR\s*10\s*\+", " HDR10PLUS ", value, flags=re.IGNORECASE)
+    value = re.sub(r"\bHDR\s*\+", " HDR ", value, flags=re.IGNORECASE)
 
     parts = re.split(r"([\s._/|:+-]+)", value.strip())
     kept: list[str] = []
@@ -60,43 +73,60 @@ def strip_quality_markers(value: str) -> str:
     return value.strip(" -_|:/.\t\r\n")
 
 
-def normalize_name(value: str) -> str:
-    """Normalização forte para comparação, preservando números reais.
-
-    Regras importantes:
-    - ¹²³⁴ são marcadores de cópia e somem;
-    - HBO e HBO 2 continuam diferentes;
-    - & e AND são equivalentes;
-    - A&E / A&amp;E.br / A and E caem numa chave específica, sem virar um
-      nome genérico que possa colidir com outro canal curto.
-    """
-    value = strip_quality_markers(value)
+def _basic_letters(value: str) -> str:
     value = unicodedata.normalize("NFKD", value)
     value = "".join(ch for ch in value if not unicodedata.combining(ch))
-    value = value.upper().strip()
+    return value.upper().strip()
 
-    # Caso especial solicitado. Fazemos antes da regra genérica de &/AND.
+
+def normalize_name(value: str) -> str:
+    """Gera chave canônica baseada no nome do canal.
+
+    Regras conservadoras:
+    - remove ¹²³⁴, HD/FHD/HDR+/SD/[H265]/FHD [H265]/4K etc.;
+    - preserva números reais: HBO != HBO 2, SporTV 2 != SporTV 3;
+    - & / AND (e 'E' entre palavras) são equivalentes;
+    - A&E / A&amp;E.br / A and E são equivalentes;
+    - Canal Sony = Sony;
+    - SporTV = SporTV 1;
+    - H2 = History 2;
+    - USA = USA Network.
+    """
+    value = _basic_letters(strip_quality_markers(value))
+
+    # Limpa sufixo .br que às vezes vem no ID/nome da fonte.
+    value = re.sub(r"(?:[._/-]|\s)+BR$", "", value)
+
+    # A&E merece regra dedicada por ser muito curto.
     ae_probe = re.sub(r"[._/-]+", " ", value)
     ae_probe = re.sub(r"\s+", " ", ae_probe).strip()
-    if re.fullmatch(r"A\s*(?:&|AND)\s*E", ae_probe):
+    if re.fullmatch(r"A\s*(?:&|AND|E)\s*E", ae_probe):
         return "AANDE"
 
-    # Conjunção em inglês e símbolo usam a mesma forma canônica.
-    value = re.sub(r"\bAND\b", " AND ", value)
+    # Conjunções. 'E' só vira AND quando está entre partes de um nome maior;
+    # o canal E!/E isolado não é alterado.
     value = value.replace("&", " AND ")
+    value = re.sub(r"\bAND\b", " AND ", value)
+    if len(value.split()) >= 3:
+        value = re.sub(r"\bE\b", " AND ", value)
+
     value = re.sub(r"[^A-Z0-9]+", "", value)
 
-    # Equivalências conhecidas, somente para comparação.
-    if value == "CANALSONY":
-        value = "SONY"
-    # Sportv.br é o SporTV 1; outros SporTV numerados continuam distintos.
-    if value == "SPORTV":
-        value = "SPORTV1"
-
-    return value
+    # Aliases universais conhecidos e deliberadamente restritos.
+    alias_map = {
+        "CANALSONY": "SONY",
+        "SONYCHANNEL": "SONY",
+        "SPORTV": "SPORTV1",
+        "H2": "HISTORY2",
+        "HISTORYII": "HISTORY2",
+        "USA": "USANETWORK",
+        "PARAMOUNTCHANNEL": "PARAMOUNT",
+    }
+    return alias_map.get(value, value)
 
 
 def normalize_source_id(value: str) -> str:
+    """Normaliza ID de provedor como pista de nome, nunca como verdade absoluta."""
     value = html.unescape(value or "")
     value = re.sub(r"\s*\((?:M3U4U|SRC\d+)\)\s*$", "", value, flags=re.I)
     value = re.sub(r"(?:^|[./_-])(?:BR|BRAZIL)(?:$|[./_-])", " ", value, flags=re.I)
@@ -105,7 +135,6 @@ def normalize_source_id(value: str) -> str:
 
 
 def digit_signature(value: str) -> tuple[str, ...]:
-    """Distingue HBO de HBO 2 e mantém canais numerados separados."""
     return tuple(re.findall(r"\d+", normalize_name(value)))
 
 
@@ -122,6 +151,7 @@ def similarity(left: str, right: str) -> float:
 
 
 def stable_channel_id(name: str, used: set[str] | None = None) -> str:
+    """ID interno determinístico criado do nome, independente do tvg-id original."""
     norm = normalize_name(name).lower() or "canal"
     slug = re.sub(r"[^a-z0-9]+", ".", norm).strip(".")
     candidate = f"auto.{slug}"
