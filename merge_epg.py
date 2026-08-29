@@ -50,6 +50,20 @@ GZIP_LEVEL = max(1, min(9, int(os.environ.get("GZIP_LEVEL", "6"))))
 OUTPUT_PAST_HOURS = max(0, int(os.environ.get("OUTPUT_PAST_HOURS", "12")))
 WRITE_PLAIN_XML = os.environ.get("WRITE_PLAIN_XML", "0").strip().lower() in {"1", "true", "yes"}
 
+# Compatibilidade com IDs internos gerados pelas versões antigas do projeto.
+# Isso permite atualizar o EPG sem obrigar o usuário a regravar M3Us já prontas.
+LEGACY_INTERNAL_IDS: dict[str, tuple[str, ...]] = {
+    "auto.history2": ("auto.h2",),
+    "auto.aande": ("auto.aee",),
+    "auto.filmandarts": ("auto.filmearts",),
+    "auto.paramount": ("auto.paramountchannel",),
+    "auto.warner": ("auto.warnerchannel",),
+    "auto.saborandarte": ("auto.saborearte",),
+    "auto.discovery": ("auto.discoverychannel",),
+    "auto.discoveryhomeandhealth": ("auto.discoveryheh",),
+    "auto.sportv1": ("auto.sportv",),
+}
+
 
 @dataclass(frozen=True)
 class SourceSpec:
@@ -220,22 +234,46 @@ def read_source(spec: SourceSpec) -> EpgSource:
             channel_id = child.attrib.get("channel", "").strip()
             if not channel_id:
                 continue
+
+            # IMPORTANTE: preserve o <programme> original mesmo quando a fonte
+            # omite `stop` ou usa um horário fora do formato que conseguimos
+            # interpretar. A v10 fazia isso; a v11 rápida acabou descartando
+            # esses elementos cedo demais, deixando alguns canais com 0 grade.
+            programs[channel_id].append(child)
+
             start = parse_xmltv_datetime(child.attrib.get("start", ""))
             stop = parse_xmltv_datetime(child.attrib.get("stop", ""))
-            if start is None or stop is None:
+            if start is None:
                 continue
             title = programme_title(child)
-            programs[channel_id].append(child)
+            # Stop ausente é inferido depois pelo início do próximo programa.
             rows[channel_id].append(ProgrammeRow(
                 start=start,
-                stop=stop,
+                stop=stop or start,
                 title=title,
                 normalized_title=normalize_programme_title(title),
                 element=child,
             ))
 
-    for channel_rows in rows.values():
+    # Algumas fontes XMLTV omitem `stop`. Para validação/consenso, inferimos o
+    # fim pelo próximo `start`; no último item usamos 2h. O XML original não é
+    # alterado e continua sendo publicado como veio da fonte.
+    for channel_id, channel_rows in rows.items():
         channel_rows.sort(key=lambda item: item.start)
+        fixed_rows: list[ProgrammeRow] = []
+        for idx, row in enumerate(channel_rows):
+            stop = row.stop
+            if stop <= row.start:
+                next_start = channel_rows[idx + 1].start if idx + 1 < len(channel_rows) else None
+                if next_start is not None and next_start > row.start:
+                    stop = next_start
+                else:
+                    stop = row.start + timedelta(hours=2)
+            fixed_rows.append(ProgrammeRow(
+                start=row.start, stop=stop, title=row.title,
+                normalized_title=row.normalized_title, element=row.element,
+            ))
+        rows[channel_id] = fixed_rows
 
     # Libera a lista de filhos da raiz; os elementos relevantes já estão
     # referenciados pelos índices acima.
@@ -432,13 +470,14 @@ def add_display_name_first(channel: ET.Element, name: str) -> None:
     channel.insert(0, display)
 
 
+@lru_cache(maxsize=500000)
 def parse_xmltv_datetime(value: str) -> datetime | None:
     if not value:
         return None
     value = value.strip()
 
     # Caminho rápido para XMLTV padrão: YYYYMMDDHHMM[SS] [+/-HHMM].
-    match = re.match(r"^(\d{12}|\d{14})(?:\s*([+-]\d{4}))?", value)
+    match = re.match(r"^(\d{14}|\d{12})(?:\s*([+-]\d{4}))?(?:\s+.*)?$", value)
     if match:
         digits, offset = match.groups()
         try:
@@ -726,8 +765,12 @@ def evaluate_candidates(
 
     # Consenso independente manda; a ordem das fontes só desempata evidência
     # equivalente. Isso permite trocar Genius por Open/EPGShare/IPTV por canal.
-    def rank(ev: CandidateEvaluation) -> tuple[float, int, float, float, float, float, int]:
+    def rank(ev: CandidateEvaluation) -> tuple[int, float, int, float, float, float, float, int]:
+        # Uma fonte sem nenhum <programme> nunca deve vencer outra que possui
+        # grade. Isso corrige casos como canal existente no XML mas sem agenda.
+        has_programmes = int(bool(ev.match.source.programs.get(ev.match.channel_id)))
         return (
+            has_programmes,
             ev.support_weight,
             ev.support_families,
             ev.weighted_ratio,
@@ -861,6 +904,8 @@ def _compatibility_candidates(entry: dict[str, object]) -> list[str]:
     exato/tvg-name. Muitos players tentam casar pelo nome quando tvg-id está vazio.
     """
     values: list[str] = []
+    target_id = str(entry.get("id", "")).strip()
+    values.extend(LEGACY_INTERNAL_IDS.get(target_id, ()))
     values.extend(str(x).strip() for x in entry.get("old_tvg_ids", []) or [])
     values.extend(str(x).strip() for x in entry.get("blank_tvg_id_names", []) or [])
     values.extend(str(x).strip() for x in entry.get("blank_tvg_id_tvg_names", []) or [])
@@ -951,11 +996,16 @@ def write_epg_stream(
             for entry, chosen, _evaluations, _forced in selected:
                 target_id = str(entry["id"])
                 ids_for_channel = compatibility_ids.get(target_id, [target_id])
-                rows = chosen.match.source.rows.get(chosen.match.channel_id, [])
-                for row in rows:
-                    if row.stop < cutoff:
+                # Publica todos os <programme> originais. Horários válidos e
+                # antigos ainda são filtrados; itens com `stop` ausente não são
+                # descartados só por não entrarem no índice de validação.
+                for original in chosen.match.source.programs.get(chosen.match.channel_id, []):
+                    stop = parse_xmltv_datetime(original.attrib.get("stop", ""))
+                    start = parse_xmltv_datetime(original.attrib.get("start", ""))
+                    if stop is not None and stop < cutoff:
                         continue
-                    original = row.element
+                    if stop is None and start is not None and start < cutoff:
+                        continue
                     old_channel = original.attrib.get("channel")
                     try:
                         for output_id in ids_for_channel:
