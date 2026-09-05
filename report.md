@@ -1,0 +1,3275 @@
+# Relatório do EPG universal — identificação por nome + consenso multi-fonte
+
+- Canais identificados pelo nome: **3310**
+- Encontrados: **320**
+- Sem EPG seguro: **2990**
+- Canais cuja fonte mudou por consenso: **110**
+- Programas gravados: **436298**
+- IDs/aliases de compatibilidade publicados automaticamente: **3220**
+- IDs/aliases ambíguos ignorados: **66**
+
+## Fonte escolhida por canal
+
+- **Genius:** 79 canal(is)
+- **Open-EPG Brazil 4:** 108 canal(is)
+- **EPGShare BR1:** 28 canal(is)
+- **IPTV-EPG BR:** 90 canal(is)
+- **EPGShare BR2:** 15 canal(is)
+
+## Desempenho da execução
+
+- **Catalogo:** 0.06 s
+- **Download E Indexacao Fontes:** 3.99 s
+- **Matching Consenso Validacao:** 7.27 s
+- **Serializacao E Gzip:** 17.03 s
+- **Total até gerar os arquivos principais:** 28.40 s
+
+## Fonte alterada automaticamente por consenso
+
+- **SporTV 1**: Genius → **IPTV-EPG BR** · votos 2/5 · peso 1.5/4.0 · confiança 63%
+- **Cartoon Network**: Genius → **EPGShare BR1** · votos 3/4 · peso 2.0/3.0 · confiança 72%
+- **Combate**: Genius → **IPTV-EPG BR** · votos 2/3 · peso 2.0/2.5 · confiança 69%
+- **ESPN 2**: Open-EPG Brazil 4 → **EPGShare BR2** · votos 4/4 · peso 3.0/3.0 · confiança 86%
+- **ESPN 3**: Open-EPG Brazil 4 → **EPGShare BR1** · votos 4/4 · peso 3.0/3.0 · confiança 85%
+- **Premiere 5**: Open-EPG Brazil 4 → **IPTV-EPG BR** · votos 2/2 · peso 2.0/2.0 · confiança 78%
+- **Premiere 6**: Open-EPG Brazil 4 → **IPTV-EPG BR** · votos 2/2 · peso 2.0/2.0 · confiança 78%
+- **AMC**: Genius → **EPGShare BR1** · votos 3/4 · peso 2.0/3.0 · confiança 72%
+- **SporTV 2**: Genius → **Open-EPG Brazil 4** · votos 1/5 · peso 1.0/4.0 · confiança 44%
+- **Discovery**: Genius → **IPTV-EPG BR** · votos 4/5 · peso 3.0/4.0 · confiança 82%
+- **ESPN 6**: Open-EPG Brazil 4 → **EPGShare BR1** · votos 2/3 · peso 1.5/2.5 · confiança 61%
+- **History**: Genius → **IPTV-EPG BR** · votos 4/5 · peso 3.0/4.0 · confiança 82%
+- **Animal Planet**: Genius → **IPTV-EPG BR** · votos 4/5 · peso 3.0/4.0 · confiança 84%
+- **Discovery Kids**: Genius → **EPGShare BR1** · votos 3/5 · peso 2.0/4.0 · confiança 69%
+- **Discovery Turbo**: Genius → **EPGShare BR2** · votos 3/4 · peso 2.0/3.0 · confiança 71%
+- **ESPN 4**: Open-EPG Brazil 4 → **IPTV-EPG BR** · votos 3/4 · peso 2.0/3.0 · confiança 71%
+- **ESPN 5**: Open-EPG Brazil 4 → **IPTV-EPG BR** · votos 3/4 · peso 2.0/3.0 · confiança 72%
+- **HGTV**: Genius → **IPTV-EPG BR** · votos 3/4 · peso 2.5/3.5 · confiança 79%
+- **Gloob**: Genius → **IPTV-EPG BR** · votos 4/5 · peso 3.0/4.0 · confiança 83%
+- **HBO 2**: Genius → **Open-EPG Brazil 4** · votos 4/5 · peso 3.0/4.0 · confiança 85%
+- **History 2**: Genius → **IPTV-EPG BR** · votos 3/3 · peso 2.5/2.5 · confiança 79%
+- **A&E**: Genius → **IPTV-EPG BR** · votos 2/4 · peso 1.5/3.5 · confiança 65%
+- **Band Sports**: Genius → **EPGShare BR2** · votos 3/5 · peso 2.5/4.0 · confiança 73%
+- **HBO Family**: Genius → **Open-EPG Brazil 4** · votos 4/5 · peso 3.0/4.0 · confiança 86%
+- **SporTV 3**: Genius → **Open-EPG Brazil 4** · votos 1/5 · peso 1.0/4.0 · confiança 44%
+- **TNT**: Genius → **IPTV-EPG BR** · votos 3/5 · peso 3.0/4.0 · confiança 83%
+- **Universal TV**: Genius → **IPTV-EPG BR** · votos 2/4 · peso 1.5/3.5 · confiança 60%
+- **AXN**: Genius → **IPTV-EPG BR** · votos 2/4 · peso 1.5/3.5 · confiança 65%
+- **Band News**: Genius → **IPTV-EPG BR** · votos 3/4 · peso 2.0/3.0 · confiança 72%
+- **Discovery Science**: Genius → **EPGShare BR1** · votos 3/5 · peso 2.0/4.0 · confiança 73%
+- **HBO Plus**: Genius → **EPGShare BR1** · votos 3/4 · peso 2.0/3.0 · confiança 72%
+- **Multishow**: Genius → **EPGShare BR1** · votos 3/5 · peso 2.0/4.0 · confiança 70%
+- **HBO Signature**: Genius → **IPTV-EPG BR** · votos 4/5 · peso 3.0/4.0 · confiança 82%
+- **Sony**: Genius → **Open-EPG Brazil 4** · votos 2/4 · peso 2.0/3.5 · confiança 68%
+- **Space**: Genius → **Open-EPG Brazil 4** · votos 2/5 · peso 2.0/4.0 · confiança 66%
+- **Studio Universal**: Genius → **IPTV-EPG BR** · votos 4/5 · peso 3.0/4.0 · confiança 83%
+- **Cartoonito**: Genius → **EPGShare BR1** · votos 2/4 · peso 1.5/3.5 · confiança 63%
+- **Cinemax**: Genius → **IPTV-EPG BR** · votos 3/5 · peso 2.5/4.0 · confiança 78%
+- **TNT Series**: Genius → **IPTV-EPG BR** · votos 2/4 · peso 1.5/3.5 · confiança 63%
+- **WARNER**: Genius → **EPGShare BR2** · votos 2/3 · peso 1.5/2.5 · confiança 63%
+- **ESPN**: Open-EPG Brazil 4 → **EPGShare BR1** · votos 4/4 · peso 3.0/3.0 · confiança 87%
+- **Gloobinho**: Open-EPG Brazil 4 → **EPGShare BR1** · votos 2/3 · peso 1.5/2.5 · confiança 64%
+- **GNT**: Genius → **IPTV-EPG BR** · votos 4/5 · peso 3.0/4.0 · confiança 83%
+- **RedeTV**: Genius → **IPTV-EPG BR** · votos 4/5 · peso 3.0/4.0 · confiança 85%
+- **Canal Brasil**: Genius → **EPGShare BR2** · votos 4/5 · peso 3.0/4.0 · confiança 82%
+- **Discovery World**: Genius → **EPGShare BR1** · votos 4/5 · peso 3.0/4.0 · confiança 84%
+- **BIS**: Genius → **IPTV-EPG BR** · votos 4/5 · peso 3.0/4.0 · confiança 83%
+- **Telecine Action**: Genius → **Open-EPG Brazil 4** · votos 3/4 · peso 2.5/3.5 · confiança 79%
+- **Telecine Pipoca**: Genius → **Open-EPG Brazil 4** · votos 3/4 · peso 2.5/3.5 · confiança 78%
+- **Telecine Premium**: Genius → **IPTV-EPG BR** · votos 2/3 · peso 1.5/2.5 · confiança 64%
+- **TV Ra Tim Bum**: Open-EPG Brazil 4 → **EPGShare BR1** · votos 2/3 · peso 1.5/2.5 · confiança 65%
+- **OFF**: Open-EPG Brazil 4 → **IPTV-EPG BR** · votos 2/3 · peso 1.5/2.5 · confiança 64%
+- **TLC**: Genius → **IPTV-EPG BR** · votos 3/4 · peso 2.5/3.5 · confiança 80%
+- **Discovery Theater**: Genius → **EPGShare BR2** · votos 3/5 · peso 2.0/4.0 · confiança 72%
+- **Telecine Cult**: Genius → **Open-EPG Brazil 4** · votos 3/4 · peso 2.5/3.5 · confiança 79%
+- **Telecine Fun**: Genius → **Open-EPG Brazil 4** · votos 3/4 · peso 2.5/3.5 · confiança 79%
+- **Jovem Pan News**: Genius → **IPTV-EPG BR** · votos 3/3 · peso 2.5/2.5 · confiança 82%
+- **Rede Vida**: Genius → **Open-EPG Brazil 4** · votos 3/4 · peso 2.5/3.5 · confiança 76%
+- **Arte 1**: Genius → **IPTV-EPG BR** · votos 3/4 · peso 2.5/3.5 · confiança 75%
+- **Film & Arts**: Open-EPG Brazil 4 → **EPGShare BR1** · votos 4/4 · peso 3.0/3.0 · confiança 84%
+- **SBT SP**: Genius → **IPTV-EPG BR** · votos 1/1 · peso 1.0/1.0 · confiança 56%
+- **WooHoo**: Genius → **IPTV-EPG BR** · votos 2/3 · peso 1.5/2.5 · confiança 64%
+- **Futura**: Genius → **EPGShare BR1** · votos 3/5 · peso 2.0/4.0 · confiança 72%
+- **TOONCAST**: Genius → **IPTV-EPG BR** · votos 3/4 · peso 2.5/3.5 · confiança 77%
+- **Zoomoo**: Genius → **IPTV-EPG BR** · votos 1/3 · peso 1.0/2.5 · confiança 43%
+- **SBT RJ**: Genius → **IPTV-EPG BR** · votos 1/1 · peso 1.0/1.0 · confiança 56%
+- **Travel Box Brazil**: Open-EPG Brazil 4 → **IPTV-EPG BR** · votos 3/3 · peso 2.5/2.5 · confiança 80%
+- **TV Brasil**: Genius → **IPTV-EPG BR** · votos 3/5 · peso 2.5/4.0 · confiança 76%
+- **Canal do Boi**: EPGShare BR1 → **IPTV-EPG BR** · votos 1/2 · peso 1.0/1.5 · confiança 48%
+- **CNN Brasil Money**: Open-EPG Brazil 4 → **IPTV-EPG BR** · votos 1/1 · peso 1.0/1.0 · confiança 55%
+- **TV CULTURA**: Genius → **IPTV-EPG BR** · votos 4/4 · peso 3.5/3.5 · confiança 93%
+- **DISCOVERY ID**: Genius → **IPTV-EPG BR** · votos 1/2 · peso 1.0/2.0 · confiança 44%
+- **Music Box Brazil**: Open-EPG Brazil 4 → **IPTV-EPG BR** · votos 1/1 · peso 1.0/1.0 · confiança 56%
+- **TCM**: Genius → **IPTV-EPG BR** · votos 3/4 · peso 2.5/3.5 · confiança 78%
+- **Sabor & Arte**: Open-EPG Brazil 4 → **IPTV-EPG BR** · votos 3/3 · peso 2.5/2.5 · confiança 81%
+- **TV SENADO**: EPGShare BR1 → **IPTV-EPG BR** · votos 2/2 · peso 1.5/1.5 · confiança 71%
+- **TV TRIBUNA SANTOS**: Open-EPG Brazil 4 → **IPTV-EPG BR** · votos 1/1 · peso 1.0/1.0 · confiança 56%
+- **BAND CAMPINAS**: Open-EPG Brazil 4 → **IPTV-EPG BR** · votos 1/1 · peso 1.0/1.0 · confiança 56%
+- **GB SP**: Open-EPG Brazil 4 → **IPTV-EPG BR** · votos 1/1 · peso 1.0/1.0 · confiança 55%
+- **TV CÃ‚MARA**: EPGShare BR1 → **IPTV-EPG BR** · votos 1/1 · peso 1.0/1.0 · confiança 56%
+- **BAND**: Genius → **EPGShare BR2** · votos 2/3 · peso 1.0/2.0 · confiança 51%
+- **EPTV CAMPINAS**: Open-EPG Brazil 4 → **IPTV-EPG BR** · votos 1/1 · peso 1.0/1.0 · confiança 56%
+- **Music Box Brasil**: Open-EPG Brazil 4 → **IPTV-EPG BR** · votos 2/2 · peso 1.5/1.5 · confiança 69%
+- **TV TEM SOROCABA**: Open-EPG Brazil 4 → **IPTV-EPG BR** · votos 1/1 · peso 1.0/1.0 · confiança 56%
+- **TV JUSTICA**: EPGShare BR1 → **EPGShare BR2** · votos 3/3 · peso 2.0/2.0 · confiança 75%
+- **NICK JR**: EPGShare BR1 → **IPTV-EPG BR** · votos 1/1 · peso 1.0/1.0 · confiança 56%
+- **POLISHOP TV**: Open-EPG Brazil 4 → **IPTV-EPG BR** · votos 1/1 · peso 1.0/1.0 · confiança 56%
+- **SBT BRASILIA**: Genius → **IPTV-EPG BR** · votos 1/1 · peso 1.0/1.0 · confiança 56%
+- **SONY MOVIES**: Open-EPG Brazil 4 → **EPGShare BR1** · votos 1/1 · peso 0.5/0.5 · confiança 52%
+- **WOHOO**: Genius → **IPTV-EPG BR** · votos 2/3 · peso 1.5/2.5 · confiança 64%
+- **CNN INTERNACIONAL**: EPGShare BR1 → **EPGShare BR2** · votos 1/1 · peso 0.5/0.5 · confiança 51%
+- **Cultura**: Genius → **IPTV-EPG BR** · votos 3/3 · peso 3.0/3.0 · confiança 89%
+- **JOVEN PAN NEWS**: Genius → **IPTV-EPG BR** · votos 3/3 · peso 2.5/2.5 · confiança 81%
+- **REDE GLOBO SP**: Open-EPG Brazil 4 → **IPTV-EPG BR** · votos 1/1 · peso 1.0/1.0 · confiança 55%
+- **TRAVEL BOX BRASIL**: Open-EPG Brazil 4 → **IPTV-EPG BR** · votos 3/3 · peso 2.5/2.5 · confiança 80%
+- **WARNER TV**: Open-EPG Brazil 4 → **EPGShare BR2** · votos 1/1 · peso 0.5/0.5 · confiança 51%
+- **Discovery Theather**: Genius → **EPGShare BR2** · votos 3/5 · peso 2.0/4.0 · confiança 71%
+- **Telecine Action [LEG]**: Genius → **Open-EPG Brazil 4** · votos 3/4 · peso 2.5/3.5 · confiança 78%
+- **Telecine Pipoca [LEG]**: Genius → **Open-EPG Brazil 4** · votos 3/4 · peso 2.5/3.5 · confiança 77%
+- **Telecine Premium [LEG]**: Genius → **IPTV-EPG BR** · votos 2/3 · peso 1.5/2.5 · confiança 63%
+- **TV ESCOLA>>>**: EPGShare BR1 → **EPGShare BR2** · votos 1/1 · peso 0.5/0.5 · confiança 49%
+- **ZOOMOO KIDS**: EPGShare BR1 → **IPTV-EPG BR** · votos 1/2 · peso 1.0/1.5 · confiança 46%
+- **MTV Live**: EPGShare BR1 → **IPTV-EPG BR** · votos 1/1 · peso 1.0/1.0 · confiança 56%
+- **TVE BRASIL>>>**: Genius → **IPTV-EPG BR** · votos 3/4 · peso 2.5/3.5 · confiança 76%
+- **ZOOMO**: Genius → **IPTV-EPG BR** · votos 1/2 · peso 1.0/2.0 · confiança 44%
+- **CNN**: Open-EPG Brazil 4 → **IPTV-EPG BR** · votos 1/1 · peso 1.0/1.0 · confiança 56%
+- **DISCOVERY SCIENCE US**: Genius → **IPTV-EPG BR** · votos 2/4 · peso 1.5/3.5 · confiança 64%
+- **HITORY**: Genius → **EPGShare BR1** · votos 2/4 · peso 1.0/3.0 · confiança 56%
+- **PT CARTOON NETWORK**: Genius → **IPTV-EPG BR** · votos 2/3 · peso 1.5/2.5 · confiança 63%
+- **PT DISCOVERY**: Genius → **Open-EPG Brazil 4** · votos 2/3 · peso 1.5/2.5 · confiança 59%
+
+## tvg-id antigos ambíguos ignorados
+
+Estes IDs apareciam em mais de um canal diferente. O script não os reutilizou para evitar EPG errado; a `playlist-fixed.m3u` automática resolve esses casos.
+- **CNN Brasil** — `CNN Brasil SD`
+- **WARNER** — `Warner Channel HD`
+- **ESPN** — `ESPN`
+- **Discovery Theater** — `Discovery Theater HD`
+- **GLOBO SP** — `Globo SP SD`
+- **Zoomoo** — `Zoomoo SD`
+- **GLOBO MINAS** — `Globo Minas FHD`
+- **GLOBO MINAS** — `Globo Minas HD`
+- **GLOBO NORDESTE** — `Globo Nordeste SD`
+- **CNN Brasil Money** — `CNN Brasil SD`
+- **Globo Brasilia** — `Globo Brasilia SD`
+- **Music Box Brazil** — `Music Box Brazil HD`
+- **Prime Box Brazil** — `Prime Box Brazil HD`
+- **TV Gazeta SP** — `TV Gazeta SP SD`
+- **ESPN 1** — `ESPN`
+- **TV GAZETA** — `TV Gazeta SP SD`
+- **Music Box Brasil** — `Music Box Brazil HD`
+- **Globo RBS TV Caxias do Sul** — `Globo RBS TV Caxias do Sul SD`
+- **Prime Box Brasil** — `Prime Box Brazil HD`
+- **Globo NSC TV Blumenau** — `Globo NSC TV Blumenau SD`
+- **Globo NSC TV Criciuma** — `Globo NSC TV Criciuma SD`
+- **Globo RBS TV Passo Fundo** — `Globo RBS TV Passo Fundo SD`
+- **Globo RBS TV Santa Maria** — `Globo RBS TV Santa Maria SD`
+- **Globo TV Vanguarda Taubate** — `Globo TV Vanguarda Taubate SD`
+- **Globo EPTV Sul de Minas** — `Globo EPTV Sul de Minas SD`
+- **Globo RPC Cascavel** — `Globo RPC Cascavel SD`
+- **Globo RPC Londrina** — `Globo RPC Londrina SD`
+- **Globo TV Asa Branca** — `Globo TV Asa Branca SD`
+- **Globo TV Cabo Branco** — `Globo TV Cabo Branco SD`
+- **Globo TV Integracao Araxa** — `Globo TV Integracao Araxa SD`
+- **Globo TV Integracao Uberlandia** — `Globo TV Integracao Uberlandia SD`
+- **Globo TV Subae** — `Globo TV Subae SD`
+- **Globo TV Sudoeste** — `Globo TV Sudoeste SD`
+- **REDE GLOBO BRASILIA** — `Globo Brasilia SD`
+- **REDE GLOBO MINAS** — `Globo Minas FHD`
+- **REDE GLOBO MINAS** — `Globo Minas HD`
+- **REDE GLOBO SP** — `Globo SP SD`
+- **WARNER TV** — `Warner Channel HD`
+- **Discovery Theather** — `Discovery Theater HD`
+- **Globo NSC TV Centro Oeste** — `Globo NSC TV Centro Oeste SD`
+- **Globo RPC TV Ponta Grossa** — `Globo RPC TV Ponta Grossa SD`
+- **Globo TV Gazeta Alagoas** — `Globo TV Gazeta Alagoas SD`
+- **Globo TV Morena** — `Globo TV Morena SD`
+- **Globo TV Sergipe** — `Globo TV Sergipe SD`
+- **REDE GLOBO EPTV SUL DE MINAS** — `Globo EPTV Sul de Minas SD`
+- **REDE GLOBO NORDESTE** — `Globo Nordeste SD`
+- **REDE GLOBO NSC TV BLUMENAU** — `Globo NSC TV Blumenau SD`
+- **REDE GLOBO NSC TV CENTRO OESTE** — `Globo NSC TV Centro Oeste SD`
+- **REDE GLOBO NSC TV CRICIUMA** — `Globo NSC TV Criciuma SD`
+- **REDE GLOBO RBS TV CAXIAS DO SUL** — `Globo RBS TV Caxias do Sul SD`
+- **REDE GLOBO RBS TV PASSO FUNDO** — `Globo RBS TV Passo Fundo SD`
+- **REDE GLOBO RBS TV SANTA MARIA** — `Globo RBS TV Santa Maria SD`
+- **REDE GLOBO RPC CASCAVEL** — `Globo RPC Cascavel SD`
+- **REDE GLOBO RPC LONDRINA** — `Globo RPC Londrina SD`
+- **REDE GLOBO RPC PONTA GROSSA** — `Globo RPC TV Ponta Grossa SD`
+- **REDE GLOBO TV ASA BRANCA** — `Globo TV Asa Branca SD`
+- **REDE GLOBO TV CABO BRANCO** — `Globo TV Cabo Branco SD`
+- **REDE GLOBO TV GAZETA ALAGOAS** — `Globo TV Gazeta Alagoas SD`
+- **REDE GLOBO TV INTEGRAÃ‡ÃƒO ARAXÃ** — `Globo TV Integracao Araxa SD`
+- **REDE GLOBO TV INTEGRAÃ‡ÃƒO UBERLÃ‚NDIA** — `Globo TV Integracao Uberlandia SD`
+- **REDE GLOBO TV MORENA** — `Globo TV Morena SD`
+- **REDE GLOBO TV SERGIPE** — `Globo TV Sergipe SD`
+- **REDE GLOBO TV SUBAÉ** — `Globo TV Subae SD`
+- **REDE GLOBO TV SUDOESTE** — `Globo TV Sudoeste SD`
+- **REDE GLOBO TV VANGUARDA TAUBATÉ** — `Globo TV Vanguarda Taubate SD`
+- **ZOOMOO KIDS** — `Zoomoo SD`
+
+## Sem EPG
+
+- `auto.sportv4` — SporTV 4
+- `auto.dazn1` — DAZN 1
+- `auto.dazn2` — DAZN 2
+- `auto.tracebrazuca` — Trace Brazuca
+- `auto.globorpccuritiba` — GLOBO RPC CURITIBA
+- `auto.premiere1` — PREMIERE 1
+- `auto.tvgazetasp` — TV Gazeta SP
+- `auto.tvintegracaojuizdefora` — TV INTEGRAÇAO JUIZ DE FORA
+- `auto.cnbcbrasil` — CNBC Brasil
+- `auto.espn1` — ESPN 1
+- `auto.homeandhealth` — HOME & HEALTH
+- `auto.paieterno` — Pai Eterno
+- `auto.recordtvthathicampinas` — RecordTV Thathi Campinas
+- `auto.tcaction` — TC ACTION
+- `auto.tcpremium` — TC PREMIUM
+- `auto.tvdiario` — TV DIÃRIO
+- `auto.ufcfightpass` — UFC Fight Pass
+- `auto.paramountplus1` — Paramount PLUS 1
+- `auto.paramountplus2` — Paramount PLUS 2
+- `auto.paramountplus3` — Paramount PLUS 3
+- `auto.paramountplus4` — Paramount PLUS 4
+- `auto.sportynet1` — SportyNet 1
+- `auto.sportynet2` — SportyNet 2
+- `auto.sportynet3` — SportyNet 3
+- `auto.tcpipoca` — TC PIPOCA
+- `auto.tctouch` — TC TOUCH
+- `auto.canalsonyleg` — Canal Sony [LEG]
+- `auto.cazetv1` — CAZÉ TV 1
+- `auto.cazetv2` — CAZÉ TV 2
+- `auto.cazetv3` — CAZÉ TV 3
+- `auto.gbnordeste` — GB NORDESTE
+- `auto.hboplusleg` — HBO Plus [LEG]
+- `auto.intertvaltolitoral` — INTER TV ALTO LITORAL
+- `auto.intertvcabuginatal` — INTER TV CABUGI NATAL
+- `auto.intertvserramar` — INTER TV SERRA MAR
+- `auto.livetv` — Live TV
+- `auto.nsctvchapeco` — NSC TV CHAPECO
+- `auto.recordminas` — RECORD MINAS
+- `auto.rpcfozdoiguacu` — RPC FOZ DO IGUACU
+- `auto.tcfun` — TC FUN
+- `auto.theater` — THEATER
+- `auto.tvmirantesaoluis` — TV MIRANTE SAO LUIS
+- `auto.tvvanguardataubate` — TV VANGUARDA TAUBATE
+- `auto.gbrbsportoalegre` — GB RBS PORTO ALEGRE
+- `auto.globointertvcostabranca` — Globo Inter TV Costa Branca
+- `auto.globonscflorianopolis` — GLOBO NSC FLORIANÓPOLIS
+- `auto.globotembauru` — GLOBO TEM BAURU
+- `auto.hboleg` — HBO [LEG]
+- `auto.hbomais` — HBO MAIS
+- `auto.hbopopleg` — HBO Pop [LEG]
+- `auto.megapixleg` — Megapix [LEG]
+- `auto.recordtvitapoan` — RecordTV Itapoan
+- `auto.recordtvparaibatvcorreio` — RECORDTV PARAIBA TV CORREIO
+- `auto.sportynet4` — SportyNet 4
+- `auto.tntleg` — TNT [LEG]
+- `auto.tvsantacruz` — TV SANTA CRUZ
+- `auto.warnerleg` — Warner [LEG]
+- `auto.axnleg` — AXN [LEG]
+- `auto.disneyplus1` — Disney PLUS 1
+- `auto.disneyplus2` — Disney PLUS 2
+- `auto.disneyplus3` — Disney PLUS 3
+- `auto.disneyplus4` — Disney PLUS 4
+- `auto.gbminas` — GB MINAS
+- `auto.gbnscflorianopolis` — GB NSC FLORIANOPOLIS
+- `auto.gbrpccuritiba` — GB RPC CURITIBA
+- `auto.gbtvbahia` — GB TV BAHIA
+- `auto.gbtvcentroamerica` — GB TV CENTRO AMERICA
+- `auto.gbtvgazetavitoria` — GB TV GAZETA VITORIA
+- `auto.gbtvliberalbelem` — GB TV LIBERAL BELEM
+- `auto.globoeptvribeiraopreto` — Globo EPTV Ribeirao Preto
+- `auto.globointertvgrandeminas` — Globo Inter TV Grande Minas
+- `auto.globorbstvcaxiasdosul` — Globo RBS TV Caxias do Sul
+- `auto.globorpcparanavai` — Globo RPC Paranavai
+- `auto.globosjrp` — GLOBO SJRP
+- `auto.globotvalvoradadosul` — Globo TV Alvorada do Sul
+- `auto.globotvgranderio` — Globo TV Grande Rio
+- `auto.globotvverdesmarescariri` — Globo TV Verdes Mares Cariri
+- `auto.globoverdesmares` — GLOBO VERDES MARES
+- `auto.hbo1` — HBO 1
+- `auto.hbomundileg` — HBO Mundi [LEG]
+- `auto.hboxtremeleg` — HBO Xtreme [LEG]
+- `auto.ligafutsal1` — Liga Futsal 1
+- `auto.ligafutsal2` — Liga Futsal 2
+- `auto.max` — MAX
+- `auto.nscjoinville` — NSC JOINVILLE
+- `auto.rbspelotas` — RBS PELOTAS
+- `auto.recordbahia` — RECORD BAHIA
+- `auto.recordbelem` — RECORD BELEM
+- `auto.recordtvbelem` — RECORD TV BELEM
+- `auto.recordtvguararapes` — RecordTV Guararapes
+- `auto.recordtvleste` — RecordTV Leste
+- `auto.recordtvpiauia10` — RecordTV Piaui A10
+- `auto.rpctvpontagrossa` — RPC TV PONTA GROSSA
+- `auto.sbtserradourada` — SBT SERRA DOURADA
+- `auto.sbtvtvsantoscampinas` — SBT VTV Santos Campinas
+- `auto.spaceleg` — Space [LEG]
+- `auto.sportynet01` — SPORTYNET 01
+- `auto.sportynet02` — SPORTYNET 02
+- `auto.sportynet03` — SPORTYNET 03
+- `auto.tntseriesleg` — TNT Series [LEG]
+- `auto.tvasabranca` — TV ASA BRANCA
+- `auto.tvclubeteresina` — TV CLUBE TERESINA
+- `auto.tvfronteirapprudente` — TV FRONTEIRA P PRUDENTE
+- `auto.tvtemsjriopreto` — TV TEM S J RIO PRETO
+- `auto.tvvanguardasjcampos` — TV VANGUARDA S J CAMPOS
+- `auto.world` — WORLD
+- `auto.amorincondicionalahistoriadeoseias` — Amor Incondicional A Historia de Oseias
+- `auto.bandbahia` — BAND BAHIA
+- `auto.bandnordeste` — BAND NORDESTE
+- `auto.bandtvtribunarecife` — BAND TV TRIBUNA RECIFE
+- `auto.bjjstars` — BJJ STARS
+- `auto.canalgoat2` — Canal Goat 2
+- `auto.cnnespanhol` — CNN ESPANHOL
+- `auto.dazn3` — DAZN 3
+- `auto.formula1tv` — Formula 1 TV
+- `auto.furacaolive` — Furacao Live
+- `auto.gbtvanhanguera` — GB TV ANHANGUERA
+- `auto.globoamazonicariobranco` — GLOBO AMAZÔNICA RIO BRANCO
+- `auto.globocabobranco` — GLOBO CABO BRANCO
+- `auto.globocentroamerica` — GLOBO CENTRO AMÉRICA
+- `auto.globoeptvsaocarlos` — Globo EPTV Sao Carlos
+- `auto.globointergrandeminas` — GLOBO INTER GRANDE MINAS
+- `auto.globointertvaltolitoral` — Globo Inter TV Alto Litoral
+- `auto.globointertvcabugi` — Globo Inter TV Cabugi
+- `auto.globomorena` — GLOBO MORENA
+- `auto.globonsctvblumenau` — Globo NSC TV Blumenau
+- `auto.globonsctvchapeco` — Globo NSC TV Chapeco
+- `auto.globonsctvcriciuma` — Globo NSC TV Criciuma
+- `auto.globonsctvjoinville` — Globo NSC TV Joinville
+- `auto.globopernambuco` — GLOBO PERNAMBUCO
+- `auto.globorbstvpassofundo` — Globo RBS TV Passo Fundo
+- `auto.globorbstvpelotas` — Globo RBS TV Pelotas
+- `auto.globorbstvsantamaria` — Globo RBS TV Santa Maria
+- `auto.globoredeamazonasarquemes` — Globo Rede Amazonas Arquemes
+- `auto.globorpcfozdoiguacu` — GLOBO RPC FOZ DO IGUACU
+- `auto.globorpcpontagrossa` — GLOBO RPC PONTA GROSSA
+- `auto.globorpctvmaringa` — Globo RPC TV Maringa
+- `auto.globosergipe` — GLOBO SERGIPE
+- `auto.globotvcentroamerica` — Globo TV Centro America
+- `auto.globotvclubeteresina` — Globo TV Clube Teresina
+- `auto.globotvintegracaouberaba` — Globo TV Integracao Uberaba
+- `auto.globotvmirantecocais` — Globo TV Mirante Cocais
+- `auto.globotvmirantesaoluis` — Globo TV Mirante Sao Luis
+- `auto.globotvriosul` — Globo TV Rio Sul
+- `auto.globotvtemitapetininga` — Globo TV TEM Itapetininga
+- `auto.globotvvanguardataubate` — Globo TV Vanguarda Taubate
+- `auto.globovangsjcampos` — GLOBO VANG S J CAMPOS
+- `auto.hbosignatureleg` — HBO Signature [LEG]
+- `auto.idealtv` — Ideal TV
+- `auto.ligafutsal3` — Liga Futsal 3
+- `auto.ligafutsal4` — Liga Futsal 4
+- `auto.malhacaofast` — MALHACAO FAST
+- `auto.nbaleaguepass2` — NBA League Pass 2
+- `auto.nbaleaguepass3` — NBA League Pass 3
+- `auto.nbaleaguepass4` — NBA League Pass 4
+- `auto.nsctvblumenau` — NSC TV BLUMENAU
+- `auto.nsctvcentrooeste` — NSC TV CENTRO OESTE
+- `auto.nsctvcriciuma` — NSC TV CRICIUMA
+- `auto.plus18sexyhot` — [ PLUS 18] Sexy Hot
+- `auto.rbstvcaxiasdosul` — RBS TV CAXIAS DO SUL
+- `auto.rbstvpassofundo` — RBS TV PASSO FUNDO
+- `auto.rbstvsantamaria` — RBS TV SANTA MARIA
+- `auto.recorditapoan` — RECORD ITAPOAN
+- `auto.recordtvmg` — RECORDTV MG
+- `auto.recordtvrjinterior` — RECORDTV RJ INTERIOR
+- `auto.recordtvroraima` — RecordTV Roraima
+- `auto.rpccascavel` — RPC CASCAVEL
+- `auto.rpclondrina` — RPC LONDRINA
+- `auto.sbttvalterosa` — SBT TV ALTEROSA
+- `auto.sportynet04` — SPORTYNET 04
+- `auto.syfyusanetwork` — SYFY USA NETWORK
+- `auto.tccult` — TC CULT
+- `auto.tctouchleg` — TC TOUCH [LEG]*
+- `auto.tvcidaderecordtv` — TV Cidade RecordTV
+- `auto.tvintegracaouberaba` — TV INTEGRACAO UBERABA
+- `auto.tvintegracaouberlandia` — TV INTEGRACAO UBERLANDIA
+- `auto.tvmirantecocais` — TV MIRANTE COCAIS
+- `auto.tvsubae` — TV SUBAE
+- `auto.amazonesportes1` — AMAZON ESPORTES 1
+- `auto.amazonesportes2` — AMAZON ESPORTES 2
+- `auto.amazonesportes3` — AMAZON ESPORTES 3
+- `auto.amazonesportes4` — AMAZON ESPORTES 4
+- `auto.appletvplus1` — APPLE TV PLUS 1
+- `auto.appletvplus2` — APPLE TV PLUS 2
+- `auto.appletvplus3` — APPLE TV PLUS 3
+- `auto.appletvplus4` — APPLE TV PLUS 4
+- `auto.bandnatal` — BAND NATAL
+- `auto.cazetv01` — CAZE TV 01
+- `auto.cazetv02` — CAZE TV 02
+- `auto.cazetv03` — CAZE TV 03
+- `auto.dazn4` — DAZN 4
+- `auto.globoepribeiraopreto` — GLOBO EPRIBEIRAO PRETO
+- `auto.globoepsuldeminas` — GLOBO EPSUL DE MINAS
+- `auto.globoeptvsuldeminas` — Globo EPTV Sul de Minas
+- `auto.globoflorianopolis` — GLOBO FLORIANOPOLIS
+- `auto.globogazetavitoria` — GLOBO GAZETA VITÓRIA
+- `auto.globointegjuizdefora` — GLOBO INTEG JUIZ DE FORA
+- `auto.globointercabugi` — GLOBO INTER CABUGI
+- `auto.globointerdosvales` — GLOBO INTER DOS VALES
+- `auto.globointertvserramar` — Globo Inter TV Serra Mar
+- `auto.globorbstvcruzalta` — Globo RBS TV Cruz Alta
+- `auto.globorbstverechim` — Globo RBS TV Erechim
+- `auto.globorbstvsantarosa` — Globo RBS TV Santa Rosa
+- `auto.globorbstvuruguaiana` — Globo RBS TV Uruguaiana
+- `auto.globoredeamazonasmacapa` — Globo Rede Amazonas Macapa
+- `auto.globorpclondrina` — Globo RPC Londrina
+- `auto.globorpcmaringa` — GLOBO RPC MARINGA
+- `auto.globotvasabranca` — Globo TV Asa Branca
+- `auto.globotvcabobranco` — Globo TV Cabo Branco
+- `auto.globotvintegracaoaraxa` — Globo TV Integracao Araxa
+- `auto.globotvintegracaojuizdefora` — Globo TV Integracao Juiz de Fora
+- `auto.globotvintegracaouberlandia` — Globo TV Integracao Uberlandia
+- `auto.globotvliberalbelem` — Globo TV Liberal Belem
+- `auto.globotvliberalcastanhal` — Globo TV Liberal Castanhal
+- `auto.globotvliberalmaraba` — Globo TV Liberal Maraba
+- `auto.globotvmiranteimperatriz` — Globo TV Mirante Imperatriz
+- `auto.globotvmorenapontapora` — Globo TV Morena Ponta Pora
+- `auto.globotvsaofrancisco` — Globo TV Sao Francisco
+- `auto.globotvsubae` — Globo TV Subae
+- `auto.globotvsudoeste` — Globo TV Sudoeste
+- `auto.globotvverdesmares` — Globo TV Verdes Mares
+- `auto.idinvestigationdiscovery` — ID INVESTIGATION DISCOVERY
+- `auto.mariamadalena` — Maria Madalena
+- `auto.nscblumenau` — NSC BLUMENAU
+- `auto.nsports1` — NSPORTS 1
+- `auto.nsports2` — NSPORTS 2
+- `auto.paramountplus01` — PARAMOUNT PLUS 01
+- `auto.paramountplus02` — PARAMOUNT PLUS 02
+- `auto.paramountplus03` — PARAMOUNT PLUS 03
+- `auto.paramountplus04` — PARAMOUNT PLUS 04
+- `auto.plus18playboytv` — [ PLUS 18] Playboy TV
+- `auto.rbstvportoalegre` — RBS TV PORTO ALEGRE
+- `auto.recordlitoralvaledoparnaiba` — RECORD LITORAL VALE DO PARNAIBA
+- `auto.recordsictvrondonia` — RECORD SIC TV RONDONIA
+- `auto.recordtvatalaia` — RECORD TV ATALAIA
+- `auto.recordtvcidadeceara` — RECORD TV CIDADE CEARA
+- `auto.recordtvvilareal` — RecordTV Vila Real
+- `auto.redeglobominas` — REDE GLOBO MINAS
+- `auto.redegloboriodejaneiro` — REDE GLOBO RIO DE JANEIRO
+- `auto.sbtpara` — SBT PARA
+- `auto.sbtpiaui` — SBT PIAUI
+- `auto.sbttvjangadeiroceara` — SBT TV JANGADEIRO CEARÃ
+- `auto.starplus1` — STAR PLUS 1
+- `auto.starplus2` — STAR PLUS 2
+- `auto.starplus3` — STAR PLUS 3
+- `auto.tccultleg` — TC CULT [LEG]*
+- `auto.tcpipocaleg` — TC PIPOCA [LEG]*
+- `auto.tcpremiumleg` — TC PREMIUM [LEG]*
+- `auto.tvdiariofortaleza` — TV DIARIO FORTALEZA
+- `auto.tvtemsaojosedoriopreto` — TV TEM SAO JOSE DO RIO PRETO
+- `auto.tvuniao` — TV Uniao
+- `auto.tvvanguardasjdoscampos` — TV VANGUARDA S J DOS CAMPOS
+- `auto.ufcppv` — UFC PPV
+- `auto.4dultswin` — 4DULT SWIN
+- `auto.90minutosnoparaiso` — 90 Minutos no Paraíso
+- `auto.acaminhodafe` — A Caminho da Fe
+- `auto.acolheitadafe` — A Colheita da Fé
+- `auto.acriacao` — A Criação
+- `auto.anaumaadaptacaodaseriereis` — Ana Uma Adaptacao da Serie Reis
+- `auto.aoracaonaofalha` — A Oração Não Falha
+- `auto.apaixaodecristo` — A Paixao de Cristo
+- `auto.appletv01` — APPLE TV 01
+- `auto.appletv02` — APPLE TV 02
+- `auto.aprovadefogo` — A Prova de Fogo
+- `auto.bandceara` — BAND CEARA
+- `auto.bandmg` — BAND MG
+- `auto.bandpa` — BAND PA
+- `auto.bandrecife` — BAND RECIFE
+- `auto.barrabas` — BARRABÁS
+- `auto.barretos2026` — Barretos 2026
+- `auto.brasileiraoseriea` — Brasileirao Serie A
+- `auto.brasileiraoseriec1` — Brasileirao Serie C 1
+- `auto.brasileiraoseriec2` — Brasileirao Serie C 2
+- `auto.brasileiraoseriec3` — Brasileirao Serie C 3
+- `auto.canalgoat` — Canal Goat
+- `auto.canaluol` — CANAL UOL
+- `auto.cartasparadeus` — Cartas Para Deus
+- `auto.cazetv04` — CAZE TV 04
+- `auto.cazetv4` — CAZÉ TV 4
+- `auto.cnbctimesbrasil` — CNBC TIMES BRASIL
+- `auto.combrasil` — COM BRASIL
+- `auto.copadobrasil1` — Copa do Brasil 1
+- `auto.copadobrasil2` — Copa do Brasil 2
+- `auto.copadobrasil3` — Copa do Brasil 3
+- `auto.copadobrasil4` — Copa do Brasil 4
+- `auto.corajosos` — Corajosos
+- `auto.davi` — Davi
+- `auto.deixadosparatras2comandotribulacao` — Deixados para Trás 2 Comando Tribulação
+- `auto.deixadosparatras3mundoemguerra` — Deixados para Trás 3 Mundo em Guerra
+- `auto.deixadosparatrasanovageracao` — Deixados para Trás A Nova Geração
+- `auto.desafiandogigantes` — Desafiando Gigantes
+- `auto.deusnaoestamorto` — Deus Nao Esta Morto
+- `auto.deusnaoestamorto2` — Deus Nao Esta Morto 2
+- `auto.discoveryidinvestigacao` — Discovery ID INVESTIGAÇÃO
+- `auto.disneyespn1` — DISNEY ESPN 1
+- `auto.disneyplus01` — DISNEY PLUS 01
+- `auto.disneyplus02` — DISNEY PLUS 02
+- `auto.emdefesadecristo` — Em Defesa de Cristo
+- `auto.entreavingancaandoperdao` — Entre A Vingança e O Perdão
+- `auto.entrevistacomdeus` — Entrevista com Deus
+- `auto.eusopossoimaginar` — Eu Só Posso Imaginar
+- `auto.fcftv1` — FCF TV 1
+- `auto.fcftv2` — FCF TV 2
+- `auto.gbredeamazonicamanaus` — GB REDE AMAZONICA MANAUS
+- `auto.gbtvredeamazonicaboavista` — GB TV REDE AMAZONICA BOA VISTA
+- `auto.gbtvredeamazonicamacapa` — GB TV REDE AMAZONICA MACAPA
+- `auto.gbtvredeamazonicaportovelho` — GB TV REDE AMAZONICA PORTO VELHO
+- `auto.gefast` — GE Fast
+- `auto.genesis` — Gênesis
+- `auto.globoamapa` — GLOBO AMAPÁ
+- `auto.globoamazonicarondonia` — GLOBO AMAZONICA RONDONIA
+- `auto.globodiariomogidascruzes` — GLOBO DIARIO MOGI DAS CRUZES
+- `auto.globofronteirapaulista` — GLOBO FRONTEIRA PAULISTA
+- `auto.globogazetavitoriaes` — GLOBO GAZETA VITORIA ES
+- `auto.globointegaraxa` — GLOBO INTEG ARAXÁ
+- `auto.globointeguberlandia` — GLOBO INTEG UBERLÂNDIA
+- `auto.globointeraltolitoral` — GLOBO INTER ALTO LITORAL
+- `auto.globointertvdosvales` — Globo Inter TV dos Vales
+- `auto.globonscblumenau` — GLOBO NSC BLUMENAU
+- `auto.globonscchapeco` — GLOBO NSC CHAPECO
+- `auto.globonsccriciuma` — GLOBO NSC CRICIUMA
+- `auto.globonsctvcentrooeste` — Globo NSC TV Centro Oeste
+- `auto.globonsctvflorianopolis` — Globo NSC TV Florianopolis
+- `auto.globorbspassofundo` — GLOBO RBS PASSO FUNDO
+- `auto.globorbspelotas` — GLOBO RBS PELOTAS
+- `auto.globorbstvbage` — Globo RBS TV Bage
+- `auto.globorbstvsantacruzdosul` — Globo RBS TV Santa Cruz do Sul
+- `auto.globoredeamazonicaamapa` — Globo Rede Amazonica Amapa
+- `auto.globoredeamazonicaboavista` — Globo Rede Amazonica Boa Vista
+- `auto.globoredeamazonicamanaus` — Globo Rede Amazonica Manaus
+- `auto.globoredeamazonicaportovelho` — Globo Rede Amazonica Porto Velho
+- `auto.globoredeamazonicariobranco` — Globo Rede Amazonica Rio Branco
+- `auto.globoredebahia` — Globo Rede Bahia
+- `auto.globoredebahiatvoeste` — Globo Rede Bahia TV Oeste
+- `auto.globoredebahiatvsantacruz` — Globo Rede Bahia TV Santa Cruz
+- `auto.globorpctvcuritiba` — Globo RPC TV Curitiba
+- `auto.globorpctvfozdoiguacu` — Globo RPC TV Foz do Iguacu
+- `auto.globorpctvguarapuava` — Globo RPC TV Guarapuava
+- `auto.globorpctvpontagrossa` — Globo RPC TV Ponta Grossa
+- `auto.globosalvador` — GLOBO SALVADOR
+- `auto.globoserramar` — GLOBO SERRA MAR
+- `auto.globoteresina` — GLOBO TERESINA
+- `auto.globotvanhangueraanapolis` — Globo TV Anhanguera Anapolis
+- `auto.globotvanhangueraitumbiara` — Globo TV Anhanguera Itumbiara
+- `auto.globotvanhangueraluziania` — Globo TV Anhanguera Luziania
+- `auto.globotvanhanguerapalmas` — Globo TV Anhanguera Palmas
+- `auto.globotvanhanguerarioverde` — Globo TV Anhanguera Rio Verde
+- `auto.globotvcentroamericarondonopolis` — Globo TV Centro America Rondonopolis
+- `auto.globotvcentroamericasinop` — Globo TV Centro America Sinop
+- `auto.globotvdiariomogidascruzes` — Globo TV Diario Mogi das Cruzes
+- `auto.globotvfronteirapresidenteprudente` — Globo TV Fronteira Presidente Prudente
+- `auto.globotvgazetaalagoas` — Globo TV Gazeta Alagoas
+- `auto.globotvgazetadealagoas` — GLOBO TV GAZETA DE ALAGOAS
+- `auto.globotvgazetasul` — Globo TV Gazeta Sul
+- `auto.globotvintegracaoituiutaba` — Globo TV Integracao Ituiutaba
+- `auto.globotvmorena` — Globo TV Morena
+- `auto.globotvparaiba` — Globo TV Paraiba
+- `auto.globotvsergipe` — Globo TV Sergipe
+- `auto.globovangtaubate` — GLOBO VANG TAUBATE
+- `auto.goat` — GOAT
+- `auto.goat2` — GOAT 2
+- `auto.hbomax1` — HBO MAX 1
+- `auto.hbomax2` — HBO MAX 2
+- `auto.hbomax3` — HBO MAX 3
+- `auto.hbomax4` — HBO MAX 4
+- `auto.hbomax5` — HBO MAX 5
+- `auto.igrejauniversal` — IGREJA UNIVERSAL
+- `auto.intertvaraxa` — INTER TV ARAXÁ
+- `auto.jesusahistoriadonascimento` — Jesus A História do Nascimento
+- `auto.joseandmaria` — José e Maria
+- `auto.leaguecup` — League Cup
+- `auto.lutero` — Lutero
+- `auto.maisquevencedores` — Mais que Vencedores
+- `auto.mariaandjoseumaadaptacaodanovelajesus` — Maria e José Uma Adaptação da Novela Jesus
+- `auto.max01` — MAX 01
+- `auto.max02` — MAX 02
+- `auto.max03` — MAX 03
+- `auto.max04` — MAX 04
+- `auto.max05` — MAX 05
+- `auto.max06` — MAX 06
+- `auto.max1` — Max 1
+- `auto.max2` — Max 2
+- `auto.max3` — Max 3
+- `auto.max4` — Max 4
+- `auto.max5` — Max 5
+- `auto.max6` — Max 6
+- `auto.maxspace` — MAX SPACE
+- `auto.maxtnt` — MAX TNT
+- `auto.milagresdoparaiso` — Milagres do Paraiso
+- `auto.moises` — Moisés
+- `auto.mrolympiatv` — Mr Olympia TV
+- `auto.musictop` — MUSIC TOP
+- `auto.nbaleaguepass1` — NBA League Pass 1
+- `auto.nbaleaguepass5` — NBA League Pass 5
+- `auto.nbaleaguepass6` — NBA League Pass 6
+- `auto.nfl1` — NFL 1
+- `auto.nfl2` — NFL 2
+- `auto.nfl3` — NFL 3
+- `auto.nfl4` — NFL 4
+- `auto.nfl5` — NFL 5
+- `auto.nfl6` — NFL 6
+- `auto.noe` — Noe
+- `auto.oceuanddeverdade` — O Ceu e de Verdade
+- `auto.odespertardafe` — O Despertar da Fé
+- `auto.ofazendeiroanddeus` — O Fazendeiro e Deus
+- `auto.ojovemmessias` — O Jovem Messias
+- `auto.olympiatv` — OLYMPIA TV
+- `auto.ondeestadeus` — Onde Esta Deus
+- `auto.onefootball1` — OneFootball 1
+- `auto.operegrinoumajornadaparaoceu` — O Peregrino Uma Jornada para o Céu
+- `auto.osalvador` — O Salvador
+- `auto.osdezmandamentos` — Os Dez Mandamentos
+- `auto.osdezmandamentosofilme` — Os Dez Mandamentos O Filme
+- `auto.osoldadodecristo` — O Soldado de Cristo
+- `auto.paulodetarsoandahistoriadocristianismoprimitivo` — Paulo de Tarso e A História do Cristianismo Primitivo
+- `auto.pinoquio` — PINÓQUIO
+- `auto.primevideo1` — PRIME VIDEO 1
+- `auto.primevideo2` — PRIME VIDEO 2
+- `auto.quartodeguerra` — Quarto de Guerra
+- `auto.rbscaxiasdosul` — RBS CAXIAS DO SUL
+- `auto.recordtvbauru` — RECORD TV BAURU
+- `auto.recordtvcabralia` — RECORD TV CABRÃLIA
+- `auto.recordtvdf` — RECORDTV DF
+- `auto.recordtvfrancaandribeirao` — RECORDTV FRANCA E RIBEIRAO
+- `auto.recordtvgo` — RECORDTV GO
+- `auto.recordtvlitoralvaledoparaiba` — RECORDTV LITORAL VALE DO PARAIBA
+- `auto.recordtvlitoralvaledoparnaiba` — RecordTV Litoral Vale do Parnaiba
+- `auto.recordtvparanaibauberlandia` — RECORDTV PARANAIBA UBERLANDIA
+- `auto.recordtvribeirao` — RecordTV Ribeirao
+- `auto.recordtvriodejaneiro` — RECORD TV RIO DE JANEIRO
+- `auto.recordtvsaojosedoriopreto` — RECORDTV SAO JOSE DO RIO PRETO
+- `auto.recordtvspinterior` — RECORDTV SP INTERIOR
+- `auto.recordtvtropical` — RECORD TV TROPICAL
+- `auto.recordtvuberlandia` — RECORDTV UBERLANDIA
+- `auto.redegloboamazanicamacapa` — REDE GLOBO AMAZÃ”NICA MACAPÃ
+- `auto.redegloboamazonicaboavista` — REDE GLOBO AMAZÔNICA BOA VISTA
+- `auto.redegloboamazonicamanaus` — REDE GLOBO AMAZÔNICA MANAUS
+- `auto.redegloboamazonicaportovelho` — REDE GLOBO AMAZÔNICA PORTO VELHO
+- `auto.redegloboamazonicariobranco` — REDE GLOBO AMAZÔNICA RIO BRANCO
+- `auto.redegloboeptvcampinas` — REDE GLOBO EPTV CAMPINAS
+- `auto.redegloboeptvcentralsaocarlos` — REDE GLOBO EPTV CENTRAL SÃƒO CARLOS
+- `auto.redegloboeptvribeirao` — REDE GLOBO EPTV RIBEIRÃƒO
+- `auto.redegloboeptvsuldeminas` — REDE GLOBO EPTV SUL DE MINAS
+- `auto.redeglobointertvaltolitoral` — REDE GLOBO INTERTV ALTO LITORAL
+- `auto.redeglobointertvcabuginatal` — REDE GLOBO INTER TV CABUGI NATAL
+- `auto.redeglobointertvcostabranca` — REDE GLOBO INTERTV COSTA BRANCA
+- `auto.redeglobointertvdosvalescoronelfabriciano` — REDE GLOBO INTERTV DOS VALES CORONEL FABRICIANO
+- `auto.redeglobointertvgrandeminas` — REDE GLOBO INTERTV GRANDE MINAS
+- `auto.redeglobointertvserramar` — REDE GLOBO INTERTV SERRA MAR
+- `auto.redeglobonordeste` — REDE GLOBO NORDESTE
+- `auto.redeglobonscflorianopolis` — REDE GLOBO NSC FLORIANÓPOLIS
+- `auto.redeglobonsctvblumenau` — REDE GLOBO NSC TV BLUMENAU
+- `auto.redeglobonsctvcentrooeste` — REDE GLOBO NSC TV CENTRO OESTE
+- `auto.redeglobonsctvchapeco` — REDE GLOBO NSC TV CHAPECO
+- `auto.redeglobonsctvcriciuma` — REDE GLOBO NSC TV CRICIUMA
+- `auto.redeglobonsctvjoinville` — REDE GLOBO NSC TV JOINVILLE
+- `auto.redegloborbstvcaxiasdosul` — REDE GLOBO RBS TV CAXIAS DO SUL
+- `auto.redegloborbstvcruzalta` — REDE GLOBO RBS TV CRUZ ALTA
+- `auto.redegloborbstverechim` — REDE GLOBO RBS TV ERECHIM
+- `auto.redegloborbstvpassofundo` — REDE GLOBO RBS TV PASSO FUNDO
+- `auto.redegloborbstvpelotas` — REDE GLOBO RBS TV PELOTAS
+- `auto.redegloborbstvportoalegre` — REDE GLOBO RBS TV PORTO ALEGRE
+- `auto.redegloborbstvriogrande` — REDE GLOBO RBS TV RIO GRANDE
+- `auto.redegloborbstvsantamaria` — REDE GLOBO RBS TV SANTA MARIA
+- `auto.redegloborbstvsantarosa` — REDE GLOBO RBS TV SANTA ROSA
+- `auto.redegloborbstvuruguaiana` — REDE GLOBO RBS TV URUGUAIANA
+- `auto.redegloborpccascavel` — REDE GLOBO RPC CASCAVEL
+- `auto.redegloborpccuritiba` — REDE GLOBO RPC CURITIBA
+- `auto.redegloborpcfozdoiguacu` — REDE GLOBO RPC FOZ DO IGUAÇU
+- `auto.redegloborpcguarapuava` — REDE GLOBO RPC GUARAPUAVA
+- `auto.redegloborpclondrina` — REDE GLOBO RPC LONDRINA
+- `auto.redegloborpcmaringa` — REDE GLOBO RPC MARINGA
+- `auto.redegloborpcparanavai` — REDE GLOBO RPC PARANAVAI
+- `auto.redegloborpcpontagrossa` — REDE GLOBO RPC PONTA GROSSA
+- `auto.redeglobotvanhangueragoiania` — REDE GLOBO TV ANHANGUERA GOIÃ‚NIA
+- `auto.redeglobotvanhanguerapalmas` — REDE GLOBO TV ANHANGUERA PALMAS
+- `auto.redeglobotvanhanguerarioverde` — REDE GLOBO TV ANHANGUERA RIO VERDE
+- `auto.redeglobotvasabranca` — REDE GLOBO TV ASA BRANCA
+- `auto.redeglobotvbahia` — REDE GLOBO TV BAHIA
+- `auto.redeglobotvcabobranco` — REDE GLOBO TV CABO BRANCO
+- `auto.redeglobotvcentroamerica` — REDE GLOBO TV CENTRO AMÉRICA
+- `auto.redeglobotvgazetaalagoas` — REDE GLOBO TV GAZETA ALAGOAS
+- `auto.redeglobotvgazetanoroeste` — REDE GLOBO TV GAZETA NOROESTE
+- `auto.redeglobotvintegraaaoaraxa` — REDE GLOBO TV INTEGRAÃ‡ÃƒO ARAXÃ
+- `auto.redeglobotvintegraaaouberlandia` — REDE GLOBO TV INTEGRAÃ‡ÃƒO UBERLÃ‚NDIA
+- `auto.redeglobotvliberal` — REDE GLOBO TV LIBERAL
+- `auto.redeglobotvmorena` — REDE GLOBO TV MORENA
+- `auto.redeglobotvsantacruz` — REDE GLOBO TV SANTA CRUZ
+- `auto.redeglobotvsergipe` — REDE GLOBO TV SERGIPE
+- `auto.redeglobotvsubae` — REDE GLOBO TV SUBAÉ
+- `auto.redeglobotvsudoeste` — REDE GLOBO TV SUDOESTE
+- `auto.redeglobotvtemitapetininga` — REDE GLOBO TV TEM ITAPETININGA
+- `auto.redeglobotvtemsaojosadoriopreto` — REDE GLOBO TV TEM SÃƒO JOSÃ‰ DO RIO PRETO
+- `auto.redeglobotvvanguardasaojosadoscampos` — REDE GLOBO TV VANGUARDA SÃƒO JOSÃ‰ DOS CAMPOS
+- `auto.redeglobotvvanguardataubate` — REDE GLOBO TV VANGUARDA TAUBATÉ
+- `auto.redeglobotvverdesmares` — REDE GLOBO TV VERDES MARES
+- `auto.sansao` — Sansao
+- `auto.sbtamazonas` — SBT AMAZONAS
+- `auto.sbtmgtvalterosa` — SBT MG TV ALTEROSA
+- `auto.sbtredemassa` — SBT REDE MASSA
+- `auto.sbtrn` — SBT RN
+- `auto.sbtscc` — SBT SCC
+- `auto.sbtthathivale` — SBT Thathi Vale
+- `auto.sbttvaratubahia` — SBT TV ARATU BAHIA
+- `auto.sbttvdifusoracaxias` — SBT TV DIFUSORA CAXIAS
+- `auto.sbttvjornalrecife` — SBT TV JORNAL RECIFE
+- `auto.sbttvrj` — SBT TV RJ
+- `auto.sbttvsp` — SBT TV SP
+- `auto.sbtvtvcampinas` — SBT VTV CAMPINAS
+- `auto.superacaoomilagredafe` — Superação O Milagre da Fé
+- `auto.talentoandfe` — Talento e Fé
+- `auto.tcactionleg` — TC ACTION [LEG]*
+- `auto.telecinecultleg` — Telecine Cult [LEG]
+- `auto.telecinefunleg` — Telecine Fun [LEG]
+- `auto.telecinetouchleg` — Telecine Touch [LEG]
+- `auto.tvintegracaoaraxa` — TV INTEGRAÇÃO ARAXA
+- `auto.tvmorenacampogrande` — TV MORENA CAMPO GRANDE
+- `auto.tvsudoeste` — TV SUDOESTE
+- `auto.tvuniaofortaleza` — TV Uniao Fortaleza
+- `auto.tvverdesmarescariri` — TV VERDES MARES CARIRI
+- `auto.umabatalhadefe` — Uma Batalha de Fé
+- `auto.umajornadadeperdao` — Uma Jornada de Perdão
+- `auto.umaprovadefe` — Uma Prova De Fé
+- `auto.umaprovadefe2voltandoparacasa` — Uma Prova de Fé 2 Voltando para Casa
+- `auto.umaquestaodefe` — Uma Questao de Fe
+- `auto.voceacredita` — Você Acredita
+- `auto.xxxaplayboytv` — XXX â€¢ PLAYBOY TV
+- `auto.acabana` — A Cabana
+- `auto.aesperadeummilagre` — A Espera de um Milagre
+- `auto.aestreladebelem` — A Estrela de Belem
+- `auto.afantasticafabricadechocolate` — A FANTASTICA FABRICA DE CHOCOLATE
+- `auto.afilhadopastor` — A Filha do Pastor
+- `auto.ahistoriadeesther` — A História de Esther
+- `auto.ahistoriadefatima` — A História de Fátima
+- `auto.aluzdivina` — A Luz Divina
+- `auto.appletv03` — APPLE TV 03
+- `auto.appletv04` — APPLE TV 04
+- `auto.aprofeciacelestina` — A Profecia Celestina
+- `auto.araxamg` — ARAXA MG
+- `auto.ashistoriasdejonathansperry` — As Histórias De Jonathan Sperry
+- `auto.astartarugasninja` — AS TARTARUGAS NINJA
+- `auto.avirada` — A Virada
+- `auto.bahiasalvador` — BAHIA SALVADOR
+- `auto.bandbrasalia` — BAND BRASÃLIA
+- `auto.bandcascavelpr` — BAND CASCAVEL PR
+- `auto.bandcascaveltvtaroba` — BAND CASCAVEL TV TAROBA
+- `auto.bandparaaba` — BAND PARAÃBA
+- `auto.bandribeiraopreto` — Band Ribeirao Preto
+- `auto.bandtv` — BANDTV
+- `auto.beinsports1` — BEIN SPORTS 1
+- `auto.beinsports2` — BEIN SPORTS 2
+- `auto.beinsports3` — BEIN SPORTS 3
+- `auto.beinsports4` — BEIN SPORTS 4
+- `auto.beinsports5` — BEIN SPORTS 5
+- `auto.beinsports6` — BEIN SPORTS 6
+- `auto.beinsports7` — BEIN SPORTS 7
+- `auto.boasnovas` — BOAS NOVAS
+- `auto.brasilia` — BRASILIA
+- `auto.bravuraindomita` — BRAVURA INDÔMITA
+- `auto.canalboi` — CANAL BOI
+- `auto.canalgoat1` — Canal GOAT 1
+- `auto.canalgoat3` — Canal GOAT 3
+- `auto.canalgoat4` — CANAL GOAT 4
+- `auto.cnnportugal` — CNN PORTUGAL
+- `auto.conversandocomdeus` — Conversando com Deus
+- `auto.davidvsgoliasabatalhadafe` — David Vs Golias A Batalha da Fe
+- `auto.dazn01` — DAZN 01
+- `auto.dazn02` — DAZN 02
+- `auto.dazn5` — DAZN 5
+- `auto.dazn6` — DAZN 6
+- `auto.dazn7` — DAZN 7
+- `auto.dazn8` — DAZN 8
+- `auto.deixadosparatras` — Deixados para Trás
+- `auto.destemida` — DESTEMIDA
+- `auto.deusnaoestamorto3` — Deus Nao Esta Morto 3
+- `auto.disney01` — DISNEY 01
+- `auto.disney02` — DISNEY 02
+- `auto.disney03` — DISNEY 03
+- `auto.disney04` — DISNEY 04
+- `auto.disney05` — DISNEY 05
+- `auto.disney06` — DISNEY 06
+- `auto.disney07` — DISNEY 07
+- `auto.disney08` — DISNEY 08
+- `auto.disney09` — DISNEY 09
+- `auto.disneyclassic1` — DISNEY CLASSIC 1
+- `auto.disneyclassic2` — DISNEY CLASSIC 2
+- `auto.disneyplus03` — DISNEY PLUS 03
+- `auto.disneyplus04` — DISNEY PLUS 04
+- `auto.disneyplus05` — DISNEY PLUS 05
+- `auto.disneyplus06` — DISNEY PLUS 06
+- `auto.disneyplus07` — DISNEY PLUS 07
+- `auto.disneyplus08` — DISNEY PLUS 08
+- `auto.disneyplus09` — DISNEY PLUS 09
+- `auto.disneyplus10` — DISNEY PLUS 10
+- `auto.disneyplus11` — DISNEY PLUS 11
+- `auto.disneyplus12` — DISNEY PLUS 12
+- `auto.disneyplus13` — DISNEY PLUS 13
+- `auto.elevensports05` — ELEVEN SPORTS 05
+- `auto.emblemadafe` — Emblema da Fe
+- `auto.eptvsaocarlos` — EPTV SAO CARLOS
+- `auto.euacredito` — Eu Acredito
+- `auto.floraandfilhomusicaemfamilia` — FLORA E FILHO MÚSICA EM FAMÍLIA
+- `auto.furacaotv` — FURACAO TV
+- `auto.gbtvmorena` — GB TV MORENA
+- `auto.gbtvredeamazonicamanaus` — GB TV REDE AMAZONICA MANAUS
+- `auto.gbtvredeamazonicariobranco` — GB TV REDE AMAZONICA RIO BRANCO
+- `auto.globoalagoas` — GLOBO ALAGOAS
+- `auto.globoaltamira` — GLOBO ALTAMIRA
+- `auto.globoamazonicamanaus` — GLOBO AMAZÔNICA MANAUS
+- `auto.globoaragua` — GLOBO ARAGUA
+- `auto.globoaraxa` — GLOBO ARAXA
+- `auto.globobalsas` — GLOBO BALSAS
+- `auto.globoboavista` — GLOBO BOA VISTA
+- `auto.globocampinagrande` — GLOBO CAMPINA GRANDE
+- `auto.globoceara` — GLOBO CEARÁ
+- `auto.globocruzalta` — GLOBO CRUZ ALTA
+- `auto.globoepsaocarlos` — GLOBO EPSÃO CARLOS
+- `auto.globoerechim` — GLOBO ERECHIM
+- `auto.globogazetaalagoas` — GLOBO GAZETA ALAGOAS
+- `auto.globogazetasul` — GLOBO GAZETA SUL
+- `auto.globogovernadorvaladares` — GLOBO GOVERNADOR VALADARES
+- `auto.globogurupi` — GLOBO GURUPI
+- `auto.globointerpt` — GLOBO INTER PT
+- `auto.globoituiutaba` — GLOBO ITUIUTABA
+- `auto.globoitumbiara` — GLOBO ITUMBIARA
+- `auto.globojuazeiro` — GLOBO JUAZEIRO
+- `auto.globolinhares` — GLOBO LINHARES
+- `auto.globomacapa` — GLOBO MACAPA
+- `auto.globomaceio` — GLOBO MACEIO
+- `auto.globomanacapuru` — GLOBO MANACAPURU
+- `auto.globomaraba` — GLOBO MARABA
+- `auto.globomaranhao` — GLOBO MARANHÃO
+- `auto.globomirantesaoluis` — GLOBO MIRANTE SÃO LUIS
+- `auto.globomogidascruzes` — GLOBO MOGI DAS CRUZES
+- `auto.globomontesclaros` — GLOBO MONTES CLAROS
+- `auto.globonatal` — GLOBO NATAL
+- `auto.globonscjoinville` — GLOBO NSC JOINVILLE
+- `auto.globopontapora` — GLOBO PONTA PORA
+- `auto.globorbscaxiasdosul` — GLOBO RBS CAXIAS DO SUL
+- `auto.globoresende` — GLOBO RESENDE
+- `auto.globorioverde` — GLOBO RIO VERDE
+- `auto.globororaima` — GLOBO RORAIMA
+- `auto.globosantacruz` — GLOBO SANTA CRUZ
+- `auto.globosatplus` — GLOBOSAT PLUS
+- `auto.globotangaradaserra` — GLOBO TANGARA DA SERRA
+- `auto.globotvgazetasules` — GLOBO TV GAZETA SUL ES
+- `auto.globotvmirante` — GLOBO TV MIRANTE
+- `auto.globotvmorenacampogrande` — GLOBO TV MORENA CAMPO GRANDE
+- `auto.globotvredeamazonicamanaus` — GLOBO TV REDE AMAZONICA MANAUS
+- `auto.globotvredeamazonicariobranco` — GLOBO TV REDE AMAZÔNICA RIO BRANCO
+- `auto.globotvsantacruz` — GLOBO TV SANTA CRUZ
+- `auto.globouberaba` — GLOBO UBERABA
+- `auto.globouberlandia` — GLOBO UBERLANDIA
+- `auto.globovitoria` — GLOBO VITÓRIA
+- `auto.goattv1` — GOAT TV 1
+- `auto.goattv2` — GOAT TV 2
+- `auto.golf` — GOLF
+- `auto.gracaandperdao` — Graça e Perdão
+- `auto.graceentreafeandafama` — Grace Entre a Fe e a Fama
+- `auto.hbomax6` — HBO MAX 6
+- `auto.hellboy` — HELLBOY
+- `auto.homensanddeuses` — Homens e Deuses
+- `auto.igrejamundial` — IGREJA MUNDIAL
+- `auto.inabalavelatrajetoriadeamynewhouse` — Inabalável A Trajetória de Amy Newhouse
+- `auto.integracaodivinopolis` — INTEGRACAO DIVINOPOLIS
+- `auto.intertvcostabranca` — INTER TV COSTA BRANCA
+- `auto.jesus` — Jesus
+- `auto.jesusdenazare1` — Jesus De Nazare 1
+- `auto.jesusdenazare2` — Jesus De Nazare 2
+- `auto.jesusdenazare3` — Jesus De Nazare 3
+- `auto.jesusdenazare4` — Jesus De Nazare 4
+- `auto.maedofilhodedeus` — Mãe do Filho de Deus
+- `auto.max07` — MAX 07
+- `auto.max08` — MAX 08
+- `auto.milagresdejesusofilme` — Milagres de Jesus O Filme
+- `auto.minasgerais` — MINAS GERAIS
+- `auto.nadaaperder2` — Nada A Perder 2
+- `auto.nbaleaguepass01` — NBA League Pass 01
+- `auto.nbaleaguepass01ppv` — NBA LEAGUE PASS 01 (PPV)
+- `auto.nbaleaguepass02` — NBA League Pass 02
+- `auto.nbaleaguepass02ppv` — NBA LEAGUE PASS 02 (PPV)
+- `auto.nbaleaguepass03` — NBA League Pass 03
+- `auto.nbaleaguepass03ppv` — NBA LEAGUE PASS 03 (PPV)
+- `auto.nbaleaguepass04` — NBA League Pass 04
+- `auto.nbaleaguepass04ppv` — NBA LEAGUE PASS 04 (PPV)
+- `auto.nbaleaguepass05` — NBA League Pass 05
+- `auto.nbaleaguepass05ppv` — NBA LEAGUE PASS 05 (PPV)
+- `auto.nbaleaguepass06` — NBA League Pass 06
+- `auto.nbaleaguepass06ppv` — NBA LEAGUE PASS 06 (PPV)
+- `auto.nbaleaguepass07ppv` — NBA LEAGUE PASS 07 (PPV)
+- `auto.nbaleaguepass08ppv` — NBA LEAGUE PASS 08 (PPV)
+- `auto.nbaleaguepass09ppv` — NBA LEAGUE PASS 09 (PPV)
+- `auto.nbaleaguepass10ppv` — NBA LEAGUE PASS 10 (PPV)
+- `auto.nflnetworkusa` — NFL NETWORK USA
+- `auto.nflredzoneusa` — NFL REDZONE USA
+- `auto.ngt` — NGT
+- `auto.nordesterecife` — NORDESTE RECIFE
+- `auto.nossolar` — Nosso Lar
+- `auto.notempodedeus` — No Tempo de Deus
+- `auto.nsctvflorianopolis` — NSC TV FLORIANOPOLIS
+- `auto.nsctvjoinville` — NSC TV JOINVILLE
+- `auto.nsports3` — NSPORTS 3
+- `auto.oencontroperfeito` — O Encontro Perfeito
+- `auto.oevangelhosegundojoao` — O Evangelho Segundo João
+- `auto.olivrodegenesis` — O Livro de Gênesis
+- `auto.omilagredefatima` — O Milagre de Fátima
+- `auto.opastor` — O Pastor
+- `auto.opoderdagraca` — O Poder da Graça
+- `auto.oracoesparabobby` — Orações Para Bobby
+- `auto.oretornodemarypoppins` — O Retorno de Mary Poppins
+- `auto.papafranciscoumhomemdepalavra` — Papa Francisco Um Homem de Palavra
+- `auto.paulooapostolodecristo` — Paulo O Apostolo de Cristo
+- `auto.payperviewesportes1` — PAY PER VIEW ESPORTES 1
+- `auto.pbtvparaiba` — PB TV PARAIBA
+- `auto.pedroaredencao` — Pedro A Redenção
+- `auto.peppapig` — PEPPA PIG
+- `auto.primevideo01` — PRIME VIDEO 01
+- `auto.primevideo02` — PRIME VIDEO 02
+- `auto.primevideo03` — PRIME VIDEO 03
+- `auto.primevideo04` — PRIME VIDEO 04
+- `auto.primevideo3` — PRIME VIDEO 3
+- `auto.primevideoamazon5` — PRIME VIDEO AMAZON 5
+- `auto.primevideoamazon6` — PRIME VIDEO AMAZON 6
+- `auto.primevideoamazon7` — PRIME VIDEO AMAZON 7
+- `auto.primevideoamazon8` — PRIME VIDEO AMAZON 8
+- `auto.primevideoamazon9` — PRIME VIDEO AMAZON 9
+- `auto.profissaoreporters01e09` — Profissao Reporter S01E09
+- `auto.ptdazn4` — PT DAZN 4
+- `auto.ptsportingtv` — PT SPORTING TV
+- `auto.ptsporttv1` — PT SPORT TV 1
+- `auto.ptsporttv2` — PT SPORT TV 2
+- `auto.ptsporttv3` — PT SPORT TV 3
+- `auto.ptsporttv4` — PT SPORT TV 4
+- `auto.ptsporttv5` — PT SPORT TV 5
+- `auto.ptsporttv6` — PT SPORT TV 6
+- `auto.ptsporttvplus` — PT SPORT TV PLUS
+- `auto.raiitaliaradiofm` — RAI ITALIA RADIO FM
+- `auto.rbstvcruzalta` — RBS TV CRUZ ALTA
+- `auto.rbstvpelota` — RBS TV PELOTA
+- `auto.recordbaitapoan` — RECORD BA ITAPOAN
+- `auto.recordcabralia` — RECORD CABRALIA
+- `auto.recordparanaibadeuberiandia` — RECORD PARANAIBA DE UBERIANDIA
+- `auto.recordparanaibauberlandiabr2` — RECORD PARANAIBA UBERLANDIA (BR2)
+- `auto.recordric` — RECORD RIC
+- `auto.recordsjriopreto` — RECORD SJ RIO PRETO
+- `auto.recordsjrpreto` — RECORD SJR PRETO
+- `auto.recordtvba` — RECORDTV BA
+- `auto.recordtvbrasalia` — RECORD TV BRASÃLIA
+- `auto.recordtvcampodosgoytacazes` — RECORD TV CAMPO DOS GOYTACAZES
+- `auto.recordtvcidadesaoluis` — RECORD TV CIDADE SÃƒO LUIS
+- `auto.recordtvcorreio` — RECORD TV CORREIO
+- `auto.recordtvflorianapolis` — RECORD TV FLORIANÃ“POLIS
+- `auto.recordtvfortaleza` — RECORD TV FORTALEZA
+- `auto.recordtvfranca` — RECORDTV FRANCA
+- `auto.recordtvmt` — RECORD TV MT
+- `auto.recordtvpajuaara` — RECORD TV PAJUÃ‡ARA
+- `auto.recordtvparanaibadeuberlandia` — RecordTV Paranaiba de Uberlandia
+- `auto.recordtvpiauai` — RECORDTV PIAUAI
+- `auto.recordtvribeiraopreto` — RECORD TV RIBEIRÃƒO PRETO
+- `auto.recordtvsantosandvale` — RECORD TV SANTOS E VALE
+- `auto.recordtvvilarea` — RECORD TV VILA REA
+- `auto.recordtvvitaria` — RECORD TV VITÃ“RIA
+- `auto.recordvilareal` — RECORD VILA REAL
+- `auto.redeamazonicaariquemes` — REDE AMAZONICA ARIQUEMES
+- `auto.redeamazonicacoari` — REDE AMAZONICA COARI
+- `auto.redeamazonicahumaita` — REDE AMAZONICA HUMAITA
+- `auto.redeamazonicaitacotiara` — REDE AMAZONICA ITACOTIARA
+- `auto.redeamazonicajiparana` — REDE AMAZONICA JI PARANA
+- `auto.redeamazonicamanaus` — REDE AMAZONICA MANAUS
+- `auto.redeamazonicaparintins` — REDE AMAZONICA PARINTINS
+- `auto.redeamazonicaportovelho` — REDE AMAZONICA PORTO VELHO
+- `auto.redeamazonicariobranco` — REDE AMAZONICA RIO BRANCO
+- `auto.redeamazonicarondonia` — REDE AMAZONICA RONDONIA
+- `auto.redeamazonicavilhena` — REDE AMAZONICA VILHENA
+- `auto.redeboasnovas` — REDE BOAS NOVAS
+- `auto.redeboavista` — REDE BOA VISTA
+- `auto.redeglobotvanhangueraanapolis` — REDE GLOBO TV ANHANGUERA ANÁPOLIS
+- `auto.redeglobotvdiario` — REDE GLOBO TV DIARIO
+- `auto.redeglobotvtembauru` — REDE GLOBO TV TEM BAURU
+- `auto.redemacapa` — REDE MACAPA
+- `auto.redemaisfamalia` — REDE MAIS FAMÃLIA
+- `auto.redetvbrasilia` — REDE TV BRASILIA
+- `auto.redetvmais` — REDETV MAIS
+- `auto.redetvpampa` — REDETV PAMPA
+- `auto.redetvparana` — REDETV PARANÃ
+- `auto.rftv` — RFTV
+- `auto.riodejaneiro` — RIO DE JANEIRO
+- `auto.rpccuritiba` — RPC CURITIBA
+- `auto.rpcpontagrossa` — RPC PONTA GROSSA
+- `auto.saopaulo` — SAO PAULO
+- `auto.sbtalagoastvpontaverde` — SBT ALAGOAS TV PONTA VERDE
+- `auto.sbtalterosamg` — SBT ALTEROSA MG
+- `auto.sbtitapoan` — SBT ITAPOAN
+- `auto.sbtjangadeiroce` — SBT JANGADEIRO CE
+- `auto.sbtma` — SBT MA
+- `auto.sbtmaringa` — SBT MARINGA
+- `auto.sbtminas` — SBT MINAS
+- `auto.sbtmt` — SBT MT
+- `auto.sbtpe` — SBT PE
+- `auto.sbtribeiraopreto` — SBT Ribeirao Preto
+- `auto.sbtriberaopreto` — SBT RIBERAO PRETO
+- `auto.sbtriobr2` — SBT RIO (BR2)
+- `auto.sbtsaoluismaranhao` — SBT SAO LUIS MARANHAO
+- `auto.sbtsc` — SBT SC
+- `auto.sbttvaratu` — SBT TV ARATU
+- `auto.sbttvbsb` — SBT TV BSB
+- `auto.sbttvdifusorasaoluas` — SBT TV DIFUSORA SÃƒO LUÃS
+- `auto.sbttvpara` — SBT TV PARÃ
+- `auto.sbttvredemassaparana` — SBT TV REDE MASSA PARANÃ
+- `auto.sbtvtvsp` — SBT VTV SP
+- `auto.sesctv` — SESCTV
+- `auto.starplus4` — STAR PLUS 4
+- `auto.starplus5` — STAR PLUS 5
+- `auto.starplus6` — STAR PLUS 6
+- `auto.starplus7` — STAR PLUS 7
+- `auto.starplus8` — STAR PLUS 8
+- `auto.tbcbrasilcentralgo` — TBC BRASIL CENTRAL GO
+- `auto.tcfunleg` — TC FUN [LEG]*
+- `auto.tcmplay` — TCM PLAY
+- `auto.thevoicebrasils10e07` — The Voice Brasil S10E07
+- `auto.tntsports` — TNT SPORTS
+- `auto.toptv` — TOP TV
+- `auto.tvalvorada` — TV ALVORADA
+- `auto.tvanhangueraanapolis` — TV ANHANGUERA ANAPOLIS
+- `auto.tvanhangueracatalao` — TV ANHANGUERA CATALAO
+- `auto.tvanhangueragoias` — TV ANHANGUERA GOIAS
+- `auto.tvanhangueragurupi` — TV ANHANGUERA GURUPI
+- `auto.tvanhangueraitumbiara` — TV ANHANGUERA ITUMBIARA
+- `auto.tvanhanguerajatai` — TV ANHANGUERA JATAI
+- `auto.tvanhangueraluziania` — TV ANHANGUERA LUZIANIA
+- `auto.tvanhangueraporangatu` — TV ANHANGUERA PORANGATU
+- `auto.tvanhanguerarioverde` — TV ANHANGUERA RIO VERDE
+- `auto.tvasabrancacaruaru` — TV ASA BRANCA CARUARU
+- `auto.tvbrusque` — TV BRUSQUE
+- `auto.tvcentroamericacuiaba` — TV CENTRO AMERICA CUIABA
+- `auto.tvcentroamericanorte` — TV CENTRO AMERICA NORTE
+- `auto.tvcentroamericasul` — TV CENTRO AMERICA SUL
+- `auto.tvcentroamericatangaradaserra` — TV CENTRO AMERICA TANGARA DA SERRA
+- `auto.tvdiarioce` — TV DIARIO CE>>>
+- `auto.tvfronteirapresidenteprudente` — TV FRONTEIRA PRESIDENTE PRUDENTE
+- `auto.tvgazetaesvitoria` — TV GAZETA ES VITORIA
+- `auto.tvgazetavitoriaes` — TV Gazeta Vitoria ES
+- `auto.tvgideoes` — TV GIDEOES
+- `auto.tvgranderio` — TV GRANDE RIO
+- `auto.tvjustiaa` — TV JUSTIÃ‡A
+- `auto.tvliberalbelem` — TV LIBERAL BELEM
+- `auto.tvliberalcastanhal` — TV LIBERAL CASTANHAL
+- `auto.tvliberalmaraba` — TV LIBERAL MARABA
+- `auto.tvliberalparagominas` — TV LIBERAL PARAGOMINAS
+- `auto.tvliberalparauapebas` — TV LIBERAL PARAUAPEBAS
+- `auto.tvmeionorte` — TV MEIO NORTE
+- `auto.tvmirantebalsas` — TV MIRANTE BALSAS
+- `auto.tvmiranteimperatriz` — TV MIRANTE IMPERATRIZ
+- `auto.tvmorenacorumba` — TV MORENA CORUMBA
+- `auto.tvmorenams` — TV MORENA MS
+- `auto.tvmorenapontapora` — TV MORENA PONTA PORA
+- `auto.tvparaiba` — TV PARAIBA
+- `auto.tvplenitude` — TV PLENITUDE
+- `auto.tvpublica` — TV PUBLICA
+- `auto.tvsaofrancisco` — TV SAO FRANCISCO
+- `auto.tvsergipearacaju` — TV SERGIPE ARACAJU
+- `auto.tvtapajos` — TV TAPAJOS
+- `auto.tvverdesmaresceara` — TV VERDES MARES CEARA
+- `auto.tvverdesmaresfortaleza` — TV VERDES MARES FORTALEZA
+- `auto.ufcfightpass2` — UFC FIGHT PASS 2
+- `auto.ufconabc8hillvsrountreejr` — UFC on ABC 8 Hill vs Rountree Jr
+- `auto.ufctv` — UFC TV
+- `auto.ukeurosport1` — UK EUROSPORT 1
+- `auto.umalicaodevida` — Uma Licao de Vida
+- `auto.umavidacomproposito` — Uma Vida com Proposito
+- `auto.umcoracaoqueperdoa` — Um Coração que Perdoa
+- `auto.verdesmarescairi` — VERDES MARES CAIRI
+- `auto.xxxavenus` — XXX â€¢ VENUS
+- `auto.101dalmatas` — 101 DÁLMATAS
+- `auto.10exerciciosquetodohomemdevefazeremcasa` — 10 exercícios que todo homem deve fazer em casa
+- `auto.10horasparaonatal` — 10 HORAS PARA O NATAL
+- `auto.13omusical` — 13 O MUSICAL
+- `auto.15mincardiointenso` — 15 min Cardio Intenso
+- `auto.1917` — 1917
+- `auto.1918abatalhadekruty` — 1918 – A BATALHA DE KRUTY
+- `auto.2001umaodisseianoespaco` — 2001 UMA ODISSÉIA NO ESPAÇO
+- `auto.2067` — 2067
+- `auto.24hachantageando` — 24H â€¢ CHANTAGEANDO
+- `auto.24hpararelaxardormir` — 24H PARA RELAXAR DORMIR
+- `auto.24hpararelaxarnatureza1` — 24H PARA RELAXAR NATUREZA 1
+- `auto.24hpararelaxarnatureza2` — 24H PARA RELAXAR NATUREZA 2
+- `auto.24hpararelaxarnatureza3` — 24H PARA RELAXAR NATUREZA 3
+- `auto.24hpararelaxarnatureza4` — 24H PARA RELAXAR NATUREZA 4
+- `auto.24hpararelaxaroceano` — 24H PARA RELAXAR OCEANO
+- `auto.24hplus18acasadasbrasileirinhaspack01` — [24H] [ PLUS 18] A Casa das Brasileirinhas [Pack 01]
+- `auto.24hplus18acasadasbrasileirinhaspack02` — [24H] [ PLUS 18] A Casa das Brasileirinhas [Pack 02]
+- `auto.24hplus18acasadasbrasileirinhaspack03` — [24H] [ PLUS 18] A Casa das Brasileirinhas [Pack 03]
+- `auto.24hplus18acasadasbrasileirinhaspack04` — [24H] [ PLUS 18] A Casa das Brasileirinhas [Pack 04]
+- `auto.24hplus18acasadasbrasileirinhaspack05` — [24H] [ PLUS 18] A Casa das Brasileirinhas [Pack 05]
+- `auto.24hplus18allanalpack01` — [24H] [ PLUS 18] All Anal [Pack 01]
+- `auto.24hplus18allanalpack02` — [24H] [ PLUS 18] All Anal [Pack 02]
+- `auto.24hplus18allanalpack03` — [24H] [ PLUS 18] All Anal [Pack 03]
+- `auto.24hplus18allanalpack04` — [24H] [ PLUS 18] All Anal [Pack 04]
+- `auto.24hplus18allanalpack05` — [24H] [ PLUS 18] All Anal [Pack 05]
+- `auto.24hplus18allanalpack06` — [24H] [ PLUS 18] All Anal [Pack 06]
+- `auto.24hplus18allanalpack07` — [24H] [ PLUS 18] All Anal [Pack 07]
+- `auto.24hplus18analonly` — [24H] [ PLUS 18] Anal Only
+- `auto.24hplus18defudelidadepack01` — [24H] [ PLUS 18] de Fudelidade [Pack 01]
+- `auto.24hplus18defudelidadepack02` — [24H] [ PLUS 18] de Fudelidade [Pack 02]
+- `auto.24hplus18defudelidadepack03` — [24H] [ PLUS 18] de Fudelidade [Pack 03]
+- `auto.24hplus18filmesadultospack01` — [24H] [ PLUS 18] Filmes Adultos [Pack 01]
+- `auto.24hplus18filmesadultospack02` — [24H] [ PLUS 18] Filmes Adultos [Pack 02]
+- `auto.24hplus18filmesadultospack03` — [24H] [ PLUS 18] Filmes Adultos [Pack 03]
+- `auto.24hplus18filmesadultospack04` — [24H] [ PLUS 18] Filmes Adultos [Pack 04]
+- `auto.24hplus18filmesadultospack05` — [24H] [ PLUS 18] Filmes Adultos [Pack 05]
+- `auto.24hplus18filmesadultospack06` — [24H] [ PLUS 18] Filmes Adultos [Pack 06]
+- `auto.24hplus18filmesadultospack07` — [24H] [ PLUS 18] Filmes Adultos [Pack 07]
+- `auto.24hplus18filmesadultospack08` — [24H] [ PLUS 18] Filmes Adultos [Pack 08]
+- `auto.24hplus18filmesadultospack09` — [24H] [ PLUS 18] Filmes Adultos [Pack 09]
+- `auto.24hplus18filmesadultospack10` — [24H] [ PLUS 18] Filmes Adultos [Pack 10]
+- `auto.24hplus18filmesadultospack11` — [24H] [ PLUS 18] Filmes Adultos [Pack 11]
+- `auto.24hplus18filmesadultospack12` — [24H] [ PLUS 18] Filmes Adultos [Pack 12]
+- `auto.24hplus18filmesadultospack13` — [24H] [ PLUS 18] Filmes Adultos [Pack 13]
+- `auto.24hplus18filmesadultospack14` — [24H] [ PLUS 18] Filmes Adultos [Pack 14]
+- `auto.24hplus18filmesadultospack15` — [24H] [ PLUS 18] Filmes Adultos [Pack 15]
+- `auto.24hplus18filmesadultospack16` — [24H] [ PLUS 18] Filmes Adultos [Pack 16]
+- `auto.24hplus18filmesadultospack17` — [24H] [ PLUS 18] Filmes Adultos [Pack 17]
+- `auto.24hplus18filmesadultospack18` — [24H] [ PLUS 18] Filmes Adultos [Pack 18]
+- `auto.24hplus18filmesadultospack19` — [24H] [ PLUS 18] Filmes Adultos [Pack 19]
+- `auto.24hplus18filmesadultospack20` — [24H] [ PLUS 18] Filmes Adultos [Pack 20]
+- `auto.24hplus18filmesadultospack21` — [24H] [ PLUS 18] Filmes Adultos [Pack 21]
+- `auto.24hplus18filmesadultospack22` — [24H] [ PLUS 18] Filmes Adultos [Pack 22]
+- `auto.24hplus18filmesadultospack23` — [24H] [ PLUS 18] Filmes Adultos [Pack 23]
+- `auto.24hplus18filmesadultospack24` — [24H] [ PLUS 18] Filmes Adultos [Pack 24]
+- `auto.24hplus18filmesadultospack25` — [24H] [ PLUS 18] Filmes Adultos [Pack 25]
+- `auto.24hplus18filmesadultospack26` — [24H] [ PLUS 18] Filmes Adultos [Pack 26]
+- `auto.24hplus18filmesadultospack27` — [24H] [ PLUS 18] Filmes Adultos [Pack 27]
+- `auto.24hplus18filmesadultospack28` — [24H] [ PLUS 18] Filmes Adultos [Pack 28]
+- `auto.24hplus18filmesadultospack29` — [24H] [ PLUS 18] Filmes Adultos [Pack 29]
+- `auto.24hplus18filmesadultospack30` — [24H] [ PLUS 18] Filmes Adultos [Pack 30]
+- `auto.24hplus18filmesadultospack31` — [24H] [ PLUS 18] Filmes Adultos [Pack 31]
+- `auto.24hplus18filmesadultospack32` — [24H] [ PLUS 18] Filmes Adultos [Pack 32]
+- `auto.24hplus18filmesadultospack33` — [24H] [ PLUS 18] Filmes Adultos [Pack 33]
+- `auto.24hplus18filmestranspack01` — [24H] [ PLUS 18] Filmes Trans [Pack 01]
+- `auto.24hplus18filmestranspack02` — [24H] [ PLUS 18] Filmes Trans [Pack 02]
+- `auto.24hplus18filmestranspack03` — [24H] [ PLUS 18] Filmes Trans [Pack 03]
+- `auto.24hplus18filmestranspack04` — [24H] [ PLUS 18] Filmes Trans [Pack 04]
+- `auto.24hplus18filmestranspack05` — [24H] [ PLUS 18] Filmes Trans [Pack 05]
+- `auto.24hplus18filmestranspack06` — [24H] [ PLUS 18] Filmes Trans [Pack 06]
+- `auto.24hplus18filmestranspack07` — [24H] [ PLUS 18] Filmes Trans [Pack 07]
+- `auto.24hplus18filmestranspack08` — [24H] [ PLUS 18] Filmes Trans [Pack 08]
+- `auto.24hplus18filmestranspack09` — [24H] [ PLUS 18] Filmes Trans [Pack 09]
+- `auto.24hplus18filmestranspack10` — [24H] [ PLUS 18] Filmes Trans [Pack 10]
+- `auto.24hplus18filmestranspack11` — [24H] [ PLUS 18] Filmes Trans [Pack 11]
+- `auto.24hplus18filmestranspack12` — [24H] [ PLUS 18] Filmes Trans [Pack 12]
+- `auto.24hplus18filmestranspack13` — [24H] [ PLUS 18] Filmes Trans [Pack 13]
+- `auto.24hplus18filmestranspack15` — [24H] [ PLUS 18] Filmes Trans [Pack 15]
+- `auto.24hplus18filmestranspack16` — [24H] [ PLUS 18] Filmes Trans [Pack 16]
+- `auto.24hplus18fuckstudiespack01` — [24H] [ PLUS 18] Fuck Studies [Pack 01]
+- `auto.24hplus18fuckstudiespack02` — [24H] [ PLUS 18] Fuck Studies [Pack 02]
+- `auto.24hplus18fuckstudiespack03` — [24H] [ PLUS 18] Fuck Studies [Pack 03]
+- `auto.24hplus18homossexualmasculinopack01` — [24H] [ PLUS 18] Homossexual Masculino [Pack 01]
+- `auto.24hplus18homossexualmasculinopack02` — [24H] [ PLUS 18] Homossexual Masculino [Pack 02]
+- `auto.24hplus18interesseiras` — [24H] [ PLUS 18] Interesseiras
+- `auto.24hplus18letstryanalpack01` — [24H] [ PLUS 18] Lets Try Anal [Pack 01]
+- `auto.24hplus18letstryanalpack02` — [24H] [ PLUS 18] Lets Try Anal [Pack 02]
+- `auto.24hplus18letstryanalpack03` — [24H] [ PLUS 18] Lets Try Anal [Pack 03]
+- `auto.24hplus18missaxpack01` — [24H] [ PLUS 18] MissaX [Pack 01]
+- `auto.24hplus18missaxpack02` — [24H] [ PLUS 18] MissaX [Pack 02]
+- `auto.24hplus18missaxpack03` — [24H] [ PLUS 18] MissaX [Pack 03]
+- `auto.24hplus18missaxpack04` — [24H] [ PLUS 18] MissaX [Pack 04]
+- `auto.24hplus18missaxpack05` — [24H] [ PLUS 18] MissaX [Pack 05]
+- `auto.24hplus18missaxpack06` — [24H] [ PLUS 18] MissaX [Pack 06]
+- `auto.24hplus18missaxpack07` — [24H] [ PLUS 18] MissaX [Pack 07]
+- `auto.24hplus18missaxpack08` — [24H] [ PLUS 18] MissaX [Pack 08]
+- `auto.24hplus18missaxpack09` — [24H] [ PLUS 18] MissaX [Pack 09]
+- `auto.24hplus18pornhubyinyleon` — [24H] [ PLUS 18] Pornhub Yinyleon
+- `auto.24hplus18tweetneypack01` — [24H] [ PLUS 18] Tweetney [Pack 01]
+- `auto.300` — 300
+- `auto.300aascensaodoimperio` — 300 A ASCENSAO DO IMPERIO
+- `auto.30222019leg` — 3022 (2019) LEG
+- `auto.30mindancafit` — 30 Min Dança Fit
+- `auto.40noites` — 40 NOITES
+- `auto.7melhoresexerciciosemcasa` — 7 melhores exercícios em casa
+- `auto.aabelhinhamayaandoovodourado` — A Abelhinha Maya e O Ovo Dourado
+- `auto.aaguiapousou` — A ÁGUIA POUSOU
+- `auto.abaladadebusterscruggs` — A BALADA DE BUSTER SCRUGGS
+- `auto.abatalhadeshindisi` — A BATALHA DE SHINDISI
+- `auto.abelaadormecida` — A Bela Adormecida
+- `auto.abelaandafera` — A BELA E A FERA
+- `auto.abigailandacidadeproibida` — ABIGAIL E A CIDADE PROIBIDA
+- `auto.abraao` — ABRAÃO
+- `auto.abrasuasasas` — ABRA SUAS ASAS
+- `auto.abravurademolly` — A BRAVURA DE MOLLY
+- `auto.abudhabisports1` — ABU DHABI SPORTS 1
+- `auto.abudhabisports2` — ABU DHABI SPORTS 2
+- `auto.acamaradomedo` — A CÂMARA DO MEDO
+- `auto.acasaassombradaemmichigan` — A Casa Assombrada em Michigan
+- `auto.acasadepraia` — A CASA DE PRAIA
+- `auto.acertandootom` — ACERTANDO O TOM
+- `auto.aconferencia` — A CONFERÊNCIA
+- `auto.acorquecaiudoespaco` — A COR QUE CAIU DO ESPACO
+- `auto.acozinheiracuriosareceitaassassina` — A COZINHEIRA CURIOSA RECEITA ASSASSINA
+- `auto.adamaandovagabundo` — A DAMA E O VAGABUNDO
+- `auto.adastrarumoasestrelas` — AD ASTRA RUMO ÀS ESTRELAS
+- `auto.adrianavarejaoentrecarnesandmares` — Adriana Varejao Entre Carnes e Mares
+- `auto.advogadododiabo` — ADVOGADO DO DIABO
+- `auto.aeradeouro` — A ERA DE OURO
+- `auto.aescoladobemanddomal` — A ESCOLA DO BEM E DO MAL
+- `auto.aesperadosbarbaros` — À ESPERA DOS BÁRBAROS
+- `auto.aestrelaguia` — A ESTRELA GUIA
+- `auto.afaceocultadamedicina` — A Face Oculta da Medicina
+- `auto.afamilianoel` — A FAMÍLIA NOEL
+- `auto.afamilianoel2` — A FAMÍLIA NOEL 2
+- `auto.afera` — A FERA
+- `auto.afilhadorei` — A FILHA DO REI
+- `auto.afitacassete` — A FITA CASSETE
+- `auto.aflorestadoescalpe` — A FLORESTA DO ESCALPE
+- `auto.aforjaopoderdatransformacao` — A FORJA – O PODER DA TRANSFORMAÇÃO
+- `auto.agarotainvisivel` — A GAROTA INVISÍVEL
+- `auto.agrobrasiltv` — AGROBRASILTV
+- `auto.agrocanal` — AGRO CANAL
+- `auto.agulhanopalheirotemporal` — AGULHA NO PALHEIRO TEMPORAL
+- `auto.ahistoriadedaniel` — A HISTÓRIA DE DANIEL
+- `auto.ahistoriadeester` — A HISTÓRIA DE ESTER
+- `auto.ahistoriadejoseandjaco` — A HISTORIA DE JOSE E JACO
+- `auto.ailhadafantasia` — A ILHA DA FANTASIA
+- `auto.ainquilina` — A INQUILINA
+- `auto.ainvasaoocupacaoalienigena` — A INVASÃO OCUPAÇÃO ALIENÍGENA
+- `auto.ajangada` — A JANGADA
+- `auto.ajornadadehankwilliams` — A JORNADA DE HANK WILLIAMS
+- `auto.ak47aarmaquemudouomundo` — AK 47 A ARMA QUE MUDOU O MUNDO
+- `auto.aladdin` — ALADDIN
+- `auto.alemdaliberdade` — ALÉM DA LIBERDADE
+- `auto.alendadeladydragon` — a Lenda de Lady Dragon
+- `auto.alendadocavaleironegro` — A LENDA DO CAVALEIRO NEGRO
+- `auto.alendadocavaleiroverde` — A LENDA DO CAVALEIRO VERDE
+- `auto.aliceandpeterondenascemossonhos` — ALICE E PETER ONDE NASCEM OS SONHOS
+- `auto.aliceatravesdoespelho` — ALICE ATRAVÉS DO ESPELHO
+- `auto.alicenomundodainternet` — ALICE NO MUNDO DA INTERNET
+- `auto.alicenopaisdasmaravilhas` — ALICE NO PAÍS DAS MARAVILHAS
+- `auto.alinebarroslivequarentena` — ALINE BARROS LIVE QUARENTENA
+- `auto.alongacaminhadadebillylynn` — A LONGA CAMINHADA DE BILLY LYNN
+- `auto.alongamentoandflexibilidade` — Alongamento e flexibilidade
+- `auto.alphacodeleg` — ALPHA CODE LEG
+- `auto.altitudesportsusa` — ALTITUDE SPORTS USA
+- `auto.amaiorhistoriadetodosostempos` — A MAIOR HISTORIA DE TODOS OS TEMPOS
+- `auto.amaldicaodelizzieborden` — A Maldição de Lizzie Borden
+- `auto.amaldicoada` — AMALDIÇOADA
+- `auto.amazonprimevideo06` — AMAZON PRIME VIDEO 06
+- `auto.amazonsat` — AMAZON SAT
+- `auto.ameacanoespaco` — AMEACA NO ESPACO
+- `auto.ameninaandoleao` — A MENINA E O LEÃO
+- `auto.ameninaqueacreditaemmilagres` — A MENINA QUE ACREDITA EM MILAGRES
+- `auto.americantraitorthetrialofaxissally2021leg` — AMERICAN TRAITOR THE TRIAL OF AXIS SALLY (2021) LEG
+- `auto.amigos` — Amigos
+- `auto.amina` — AMINA
+- `auto.amorandmonstros` — AMOR E MONSTROS
+- `auto.amorderedencao` — AMOR DE REDENÇÃO
+- `auto.amsterdam` — AMSTERDAM
+- `auto.amulhernajanela` — A MULHER NA JANELA
+- `auto.andavidacontinua` — E A VIDA CONTINUA
+- `auto.andorinhasandamazonas` — ANDORINHAS E AMAZONAS
+- `auto.andproibidoamar` — É PROIBIDO AMAR
+- `auto.animaisfantasticosandondehabitam` — ANIMAIS FANTÁSTICOS E ONDE HABITAM
+- `auto.animaisfantasticososcrimesdegrindelwald` — ANIMAIS FANTÁSTICOS OS CRIMES DE GRINDELWALD
+- `auto.animaisfantasticosossegredosdedumbledore` — ANIMAIS FANTÁSTICOS OS SEGREDOS DE DUMBLEDORE
+- `auto.aniquilacao` — ANIQUILAÇÃO
+- `auto.annefrankminhamelhoramiga` — ANNE FRANK, MINHA MELHOR AMIGA
+- `auto.anon` — ANON
+- `auto.anonsensechristmaswithsabrinacarpenter2024leg` — A NONSENSE CHRISTMAS WITH SABRINA CARPENTER (2024) LEG
+- `auto.anualdecacaamonstros` — ANUAL DE CAÇA A MONSTROS
+- `auto.anuvemrosa` — A NUVEM ROSA
+- `auto.aoitavanoite` — A OITAVA NOITE
+- `auto.aoladodecristo` — AO LADO DE CRISTO
+- `auto.aonda` — A ONDA
+- `auto.apenasumachance` — APENAS UMA CHANCE
+- `auto.apex` — APEX
+- `auto.apocalypsenow` — APOCALYPSE NOW
+- `auto.apollo10andmeioaventuranaeraespacial` — APOLLO 10 E MEIO AVENTURA NA ERA ESPACIAL
+- `auto.appaloosaumacidadesemlei` — APPALOOSA UMA CIDADE SEM LEI
+- `auto.appletvplus` — APPLE TV PLUS *
+- `auto.apresenca` — A PRESENCA
+- `auto.apresentandonate` — APRESENTANDO, NATE
+- `auto.aprincesa` — A PRINCESA
+- `auto.aprincesaencantadaoreinodamusica` — A Princesa Encantada O Reino da Música
+- `auto.aprocuradaliberdade` — À PROCURA DA LIBERDADE
+- `auto.aproposta` — A PROPOSTA
+- `auto.archive2020leg` — ARCHIVE (2020) LEG
+- `auto.arevolucaodosgames` — A Revolucao dos Games
+- `auto.armadilhadotempo` — ARMADILHA DO TEMPO
+- `auto.armaduradedeus` — ARMADURA DE DEUS
+- `auto.armasecreta` — ARMA SECRETA
+- `auto.artemisfowlomundosecreto` — ARTEMIS FOWL O MUNDO SECRETO
+- `auto.asagacrepusculoamanhecerparte1` — A SAGA CREPUSCULO AMANHECER PARTE 1
+- `auto.asagacrepusculoamanhecerparte2` — A SAGA CREPUSCULO AMANHECER PARTE 2
+- `auto.asagacrepusculoeclipse` — A SAGA CREPUSCULO ECLIPSE
+- `auto.asagacrepusculoluanova` — A SAGA CREPUSCULO LUA NOVA
+- `auto.asaventurasdeichabodandsrsapo` — As Aventuras De Ichabod E Sr Sapo
+- `auto.asaventurasdepaddington` — AS AVENTURAS DE PADDINGTON
+- `auto.asaventurasdepaddington2` — AS AVENTURAS DE PADDINGTON 2
+- `auto.asbruxasdeeastwick` — AS BRUXAS DE EASTWICK
+- `auto.ascartasdemadreteresa` — AS CARTAS DE MADRE TERESA
+- `auto.ascronicasdenarniaaviagemdoperegrinodaalvorada` — AS CRÔNICAS DE NÁRNIA A VIAGEM DO PEREGRINO DA ALVORADA
+- `auto.ascronicasdenarniaoleaoafeiticeiraandoguardaroupa` — AS CRÓNICAS DE NÁRNIA O LEÃO, A FEITICEIRA E O GUARDA ROUPA
+- `auto.ascronicasdenarniaprincipecaspian` — AS CRÔNICAS DE NÁRNIA PRÍNCIPE CASPIAN
+- `auto.asloucasaventurasdejameswest` — AS LOUCAS AVENTURAS DE JAMES WEST
+- `auto.asniperrussa` — A SNIPER RUSSA
+- `auto.asombraandaescuridao` — A SOMBRA E A ESCURIDÃO
+- `auto.asperipeciasdeumratinhodetetive` — As Peripécias de um Ratinho Detetive
+- `auto.assassinatonasminascarter` — Assassinato nas Minas Carter
+- `auto.astartarugasninjaoretorno` — AS TARTARUGAS NINJA O RETORNO
+- `auto.ataquedoscaes` — ATAQUE DOS CÃES
+- `auto.ateoultimohomem` — ATE O ULTIMO HOMEM
+- `auto.atodecoragem` — ATO DE CORAGEM
+- `auto.atodovapordestinoasturias` — À TODO VAPOR! DESTINO ASTÚRIAS
+- `auto.atrasdalinhafugaparadunkirk` — ATRÁS DA LINHA FUGA PARA DUNKIRK
+- `auto.attraction2ainvasao` — ATTRACTION 2 A INVASÃO
+- `auto.audioqueteentrega` — Áudio Que Te Entrega
+- `auto.aultimaceia` — A ULTIMA CEIA
+- `auto.aultimatentacaodecristo` — A ÚLTIMA TENTAÇÃO DE CRISTO
+- `auto.autoesportes01e01` — Auto Esporte S01E01
+- `auto.autoesportes01e02` — Auto Esporte S01E02
+- `auto.autoesportes01e03` — Auto Esporte S01E03
+- `auto.autoesportes01e04` — Auto Esporte S01E04
+- `auto.autoesportes01e05` — Auto Esporte S01E05
+- `auto.autoesportes01e06` — Auto Esporte S01E06
+- `auto.autoesportes01e07` — Auto Esporte S01E07
+- `auto.autoesportes01e08` — Auto Esporte S01E08
+- `auto.autoesportes01e09` — Auto Esporte S01E09
+- `auto.autoesportes01e10` — Auto Esporte S01E10
+- `auto.autoesportes01e11` — Auto Esporte S01E11
+- `auto.autoesportes01e12` — Auto Esporte S01E12
+- `auto.autoesportes01e13` — Auto Esporte S01E13
+- `auto.autoesportes01e14` — Auto Esporte S01E14
+- `auto.autoesportes01e15` — Auto Esporte S01E15
+- `auto.autoesportes01e16` — Auto Esporte S01E16
+- `auto.autoesportes01e17` — Auto Esporte S01E17
+- `auto.autoesportes01e18` — Auto Esporte S01E18
+- `auto.autoesportes01e19` — Auto Esporte S01E19
+- `auto.avancado` — Avançado
+- `auto.aventuraemduasrodas` — AVENTURA EM DUAS RODAS
+- `auto.aventurasdebetty` — Aventuras de Betty
+- `auto.avingancadeleftybrown` — A VINGANÇA DE LEFTY BROWN
+- `auto.avozsupremadoblues` — A VOZ SUPREMA DO BLUES
+- `auto.awake` — AWAKE
+- `auto.babylooneytunesaventurasmusicais` — BABY LOONEY TUNES AVENTURAS MUSICAIS
+- `auto.backtoblack` — BACK TO BLACK
+- `auto.bahtv` — BAH! TV
+- `auto.ballysportsflorida` — BALLY SPORTS FLORIDA
+- `auto.bandbelem` — BAND BELEM
+- `auto.bandbsb` — BAND BSB
+- `auto.bandcascavel` — BAND CASCAVEL
+- `auto.bandfhdb` — BAND FHDB
+- `auto.bandgoiania` — BAND GOIANIA
+- `auto.bandhdb` — BAND HDB
+- `auto.bandidas` — BANDIDAS
+- `auto.bandidooreidamusica` — BANDIDO O REI DA MÚSICA
+- `auto.bandpara` — BAND PARA
+- `auto.bandparaiba` — BAND PARAIBA
+- `auto.bandparana` — BAND PARANA
+- `auto.bandpr` — BAND PR
+- `auto.bandrn` — BAND RN
+- `auto.bandsctvbv` — BAND SC TVBV
+- `auto.bandsdb` — BAND SDB
+- `auto.bandsergipe` — BAND SERGIPE
+- `auto.bandsjc` — BAND SJC
+- `auto.bandtvarapuanpb` — BAND TV ARAPUAN (PB)
+- `auto.bandtvgoiania` — BAND TV GOIANIA
+- `auto.barbieandassapatilhasmagicas` — Barbie e as Sapatilhas Magicas
+- `auto.barbieandastresmosqueteiras` — Barbie e as Tres Mosqueteiras
+- `auto.barbieandchelseaoaniversarioperdido` — Barbie & Chelsea O Aniversário Perdido
+- `auto.barbieandocastelodediamante` — Barbie e o Castelo de Diamante
+- `auto.barbieandosegredodasfadas` — Barbie e o Segredo das Fadas
+- `auto.barbieemvidadesereia` — Barbie Em Vida De Sereia
+- `auto.barbiesuperprincesa` — Barbie Super Princesa
+- `auto.beatlesosreisdoieieie` — BEATLES OS REIS DO IÊ IÊ IÊ
+- `auto.beethovenfabrication2025leg` — BEETHOVEN FABRICATION (2025) LEG
+- `auto.belaandrebelde` — BELA E REBELDE
+- `auto.belchiorapenasumcoracaoselvagem` — Belchior Apenas um Coracao Selvagem
+- `auto.belezaavassaladora` — BELEZA AVASSALADORA
+- `auto.bemvindoaselva` — BEM VINDO À SELVA
+- `auto.benji` — Benji
+- `auto.bettermanahistoriaderobbiewilliams` — BETTER MAN A HISTÓRIA DE ROBBIE WILLIAMS
+- `auto.bigkillacidadedomedo` — BIG KILL A CIDADE DO MEDO
+- `auto.billandtedencareamusica` — BILL & TED ENCARE A MÚSICA
+- `auto.bjorkcornucopia2025leg` — BJORK CORNUCOPIA (2025) LEG
+- `auto.blackiskingleg` — BLACK IS KING LEG
+- `auto.blackoutabatalhafinal` — BLACKOUT A BATALHA FINAL
+- `auto.bluemoonmusicaandsolidao` — BLUE MOON MUSICA E SOLIDAO
+- `auto.bobmarleyonelove` — BOB MARLEY ONE LOVE
+- `auto.bohemianrhapsody` — BOHEMIAN RHAPSODY
+- `auto.bossleveloultimonivel2021leg` — BOSS LEVEL O ÚLTIMO NÍVEL (2021) LEG
+- `auto.botadinhasaliente` — Botadinha Saliente
+- `auto.boxkidstv` — BOX KIDS TV
+- `auto.brancadeneveandosseteanoes` — Branca de Neve e os Sete Anoes
+- `auto.brtvmax` — BRTVMAX
+- `auto.brunoandmarronelivequarentena` — BRUNO E MARRONE LIVE QUARENTENA
+- `auto.buscasangrenta` — BUSCA SANGRENTA
+- `auto.buzineporjesussalveasuaalma` — BUZINE POR JESUS SALVE A SUA ALMA
+- `auto.cacafantasmasolegado` — CAÇA FANTASMAS O LEGADO
+- `auto.cactusjackovilao` — CACTUS JACK, O VILÃO
+- `auto.cadillacrecords` — CADILLAC RECORDS
+- `auto.cahillxerifedooeste` — CAHILL, XERIFE DO OESTE
+- `auto.caixapreta` — CAIXA PRETA
+- `auto.caldeiraocommions01e01` — Caldeirao Com Mion S01E01
+- `auto.caldeiraocommions01e02` — Caldeirao Com Mion S01E02
+- `auto.caldeiraocommions01e03` — Caldeirao Com Mion S01E03
+- `auto.caldeiraocommions01e04` — Caldeirao Com Mion S01E04
+- `auto.caldeiraocommions01e05` — Caldeirao Com Mion S01E05
+- `auto.caldeiraocommions01e06` — Caldeirao Com Mion S01E06
+- `auto.caldeiraocommions01e07` — Caldeirao Com Mion S01E07
+- `auto.caldeiraocommions01e08` — Caldeirao Com Mion S01E08
+- `auto.caldeiraocommions01e09` — Caldeirao Com Mion S01E09
+- `auto.caldeiraocommions01e10` — Caldeirao Com Mion S01E10
+- `auto.caldeiraocommions01e11` — Caldeirao Com Mion S01E11
+- `auto.calisteniaavancado` — Calistenia Avançado
+- `auto.calisteniaintermediario` — Calistenia Intermediário
+- `auto.callinthecheapskates` — Call in the Cheapskates
+- `auto.caminhadaemcasa` — Caminhada em casa
+- `auto.caminhosasperos` — CAMINHOS ÁSPEROS
+- `auto.caminhosdamemoria2021leg` — CAMINHOS DA MEMÓRIA (2021) LEG
+- `auto.camprock` — CAMP ROCK
+- `auto.camprock2thefinaljam` — CAMP ROCK 2 THE FINAL JAM
+- `auto.canalfutura` — CANAL FUTURA BR
+- `auto.canalgoat01` — CANAL GOAT 01
+- `auto.canalgoat02` — CANAL GOAT 02
+- `auto.canalgoat03` — CANAL GOAT 03
+- `auto.canalgoat10` — CANAL GOAT 10
+- `auto.canalgoat11` — CANAL GOAT 11
+- `auto.canalgoat12` — CANAL GOAT 12
+- `auto.canalgoat5` — CANAL GOAT 5
+- `auto.canalgoat6` — CANAL GOAT 6
+- `auto.canalgoat7` — CANAL GOAT 7
+- `auto.canalgoat8` — CANAL GOAT 8
+- `auto.canalgoat9` — CANAL GOAT 9
+- `auto.canalpromessas` — CANAL PROMESSAS
+- `auto.cancaoparamarion` — CANÇÃO PARA MARION
+- `auto.cantandodegalooresgatedosovinhos` — Cantando de Galo O Resgate dos Ovinhos
+- `auto.capitamarvel` — CAPITA MARVEL
+- `auto.capitanova` — CAPITÃ NOVA
+- `auto.capitaoamericaguerracivil` — CAPITÃO AMÉRICA GUERRA CIVIL
+- `auto.capitaoamericaoprimeirovingador` — CAPITÃO AMÉRICA O PRIMEIRO VINGADOR
+- `auto.capitaoamericaosoldadoinvernal` — CAPITÃO AMÉRICA O SOLDADO INVERNAL
+- `auto.caravanadacoragemumaaventuraewok` — CARAVANA DA CORAGEM UMA AVENTURA EWOK
+- `auto.carmenahiphopera` — CARMEN A HIP HOPERA
+- `auto.carmilla2020leg` — CARMILLA (2020) LEG
+- `auto.carrorei` — CARRO REI
+- `auto.carrosselofilme` — Carrossel O Filme
+- `auto.cats` — CATS
+- `auto.catve` — CATVE
+- `auto.cavalodeguerra` — CAVALO DE GUERRA
+- `auto.cazetv05` — CAZE TV 05
+- `auto.cazetv06` — CAZE TV 06
+- `auto.cazetv16` — CAZÉ TV 16
+- `auto.cazetv17` — CAZÉ TV 17
+- `auto.cazetv18` — CAZÉ TV 18
+- `auto.cazetv6` — CAZÉ TV 6
+- `auto.cazetv7` — CAZÉ TV 7
+- `auto.cazetv8` — CAZÉ TV 8
+- `auto.cazetv9` — CAZÉ TV 9
+- `auto.cbsmiami4wfor` — CBS MIAMI 4 WFOR
+- `auto.cbsnewyork` — CBS NEW YORK
+- `auto.cbssportsnetwork` — CBS SPORTS NETWORK
+- `auto.centraltoptv` — CENTRALTOP TV
+- `auto.centraltv` — CENTRAL TV
+- `auto.cheechandchongsheywatchthis` — Cheech & Chongs Hey Watch This
+- `auto.cheiadegraca` — CHEIA DE GRAÇA
+- `auto.chevalier` — CHEVALIER
+- `auto.chiaralubichoamorvencetudo` — CHIARA LUBICH O AMOR VENCE TUDO
+- `auto.choruslineembuscadafama` — CHORUS LINE EM BUSCA DA FAMA
+- `auto.christopherrobinumreencontroinesquecivel` — CHRISTOPHER ROBIN UM REENCONTRO INESQUECÍVEL
+- `auto.cinderela` — CINDERELA
+- `auto.cinderelaiiiumavoltanotempo` — Cinderela III Uma Volta no Tempo
+- `auto.cinderelaiiossonhosserealizam` — Cinderela II Os Sonhos se Realizam
+- `auto.cineacao` — CINE ACAO
+- `auto.cinesky01` — CINE SKY 01
+- `auto.cinesky02` — CINE SKY 02
+- `auto.cinesky03` — CINE SKY 03
+- `auto.cinesky04` — CINE SKY 04
+- `auto.cinesky05` — CINE SKY 05
+- `auto.cinesky07` — CINE SKY 07
+- `auto.cinesky08` — CINE SKY 08
+- `auto.cinesky09` — CINE SKY 09
+- `auto.cinesucessos` — CINE SUCESSOS
+- `auto.cinesuspense` — CINE SUSPENSE
+- `auto.cineterror` — CINE TERROR
+- `auto.claraandfranciscoparte01` — CLARA E FRANCISCO PARTE 01
+- `auto.claraandfranciscoparte02` — CLARA E FRANCISCO PARTE 02
+- `auto.cliffordogigantecaovermelho` — CLIFFORD, O GIGANTE CÃO VERMELHO
+- `auto.climax` — Climax
+- `auto.clouds` — CLOUDS
+- `auto.cnnenespanol` — CNN EN ESPANOL
+- `auto.code8renegados` — CODE 8 RENEGADOS
+- `auto.colonizadores2021leg` — COLONIZADORES (2021) LEG
+- `auto.comboiodesalandacucar` — COMBOIO DE SAL E AÇUCAR
+- `auto.comeaway2020leg` — COME AWAY (2020) LEG
+- `auto.comoandbomsedivertir` — Como é Bom se Divertir
+- `auto.completoqueimargordura` — Completo queimar gordura
+- `auto.conanobarbaro` — CONAN, O BÁRBARO
+- `auto.conexaoescobar` — CONEXÃO ESCOBAR
+- `auto.contosdobigmack` — Contos do Big Mack
+- `auto.convencaodasbruxas` — CONVENÇÃO DAS BRUXAS
+- `auto.cosmoballosguardioesdouniverso` — COSMOBALL OS GUARDIÕES DO UNIVERSO
+- `auto.covid21lethalvirus2021leg` — COVID 21 LETHAL VIRUS (2021) LEG
+- `auto.cowboysandaliens` — COWBOYS & ALIENS
+- `auto.crepusculo` — CREPUSCULO
+- `auto.crescernaoandbrincadeira` — CRESCER NÃO É BRINCADEIRA
+- `auto.crimesciberneticos` — CRIMES CIBERNÉTICOS
+- `auto.criminososandanjos` — CRIMINOSOS E ANJOS
+- `auto.crymachoocaminhoparaaredencao` — CRY MACHO O CAMINHO PARA A REDENÇÃO
+- `auto.crymachoocaminhopararedencao2021leg` — CRY MACHO O CAMINHO PARA REDENÇÃO (2021) LEG
+- `auto.cwbostonwlvi` — CW BOSTON WLVI
+- `auto.cwpix11newyork` — CW PIX11 NEW YORK
+- `auto.dakota` — DAKOTA
+- `auto.dancacomlobos` — DANÇA COM LOBOS
+- `auto.dancarina` — Dançarina
+- `auto.davidandosduendesdenatal` — DAVID E OS DUENDES DE NATAL
+- `auto.davivsgoliasabatalhadafe` — DAVI VS GOLIAS A BATALHA DA FÉ
+- `auto.dazn03` — DAZN 03
+- `auto.dazn04` — DAZN 04
+- `auto.dazn11` — DAZN 11
+- `auto.dazn12` — DAZN 12
+- `auto.dazn13` — DAZN 13
+- `auto.dazn14` — DAZN 14
+- `auto.dazn15` — DAZN 15
+- `auto.dazn9` — DAZN 9
+- `auto.deadwood` — DEADWOOD
+- `auto.deixadosparatrasofilme` — DEIXADOS PARA TRÁS O FILME
+- `auto.denovonatal` — DE NOVO NATAL?
+- `auto.descendentes` — DESCENDENTES
+- `auto.descendentes2` — DESCENDENTES 2
+- `auto.descendentes3` — DESCENDENTES 3
+- `auto.desencantada` — DESENCANTADA
+- `auto.desimpedidos` — DESIMPEDIDOS
+- `auto.deskysportsf1` — DE SKY SPORTS F1
+- `auto.desperateriders` — DESPERATE RIDERS
+- `auto.despertardatalimite` — Despertar Data Limite
+- `auto.deusdaguerra` — DEUS DA GUERRA
+- `auto.deusnaoestamortoemdeusconfiamos2024leg` — DEUS NAO ESTA MORTO EM DEUS CONFIAMOS (2024) LEG
+- `auto.deusnaoestamortooproximocapitulo` — DEUS NAO ESTA MORTO O PROXIMO CAPITULO
+- `auto.deusnaoestamortoumaluznaescuridao` — DEUS NAO ESTA MORTO UMA LUZ NA ESCURIDAO
+- `auto.devoltaparaofuturo` — DE VOLTA PARA O FUTURO
+- `auto.devoltaparaofuturoii` — DE VOLTA PARA O FUTURO II
+- `auto.devoltaparaofuturoiii` — DE VOLTA PARA O FUTURO III
+- `auto.diablo` — DIABLO
+- `auto.diadosim` — DIA DO SIM
+- `auto.diariosimplesandfacil` — Diário simples e fácil
+- `auto.diewolfgang2020leg` — DIE WOLF GÄNG (2020) LEG
+- `auto.discoibizalocomia2024leg` — DISCO, IBIZA, LOCOMÍA (2024) LEG
+- `auto.discoverylifeus` — DISCOVERY LIFE US
+- `auto.disforia` — DISFORIA
+- `auto.disneyplus14` — DISNEY PLUS 14
+- `auto.djangolivre` — DJANGO LIVRE
+- `auto.djdennislivequarentena` — DJ DENNIS LIVE QUARENTENA
+- `auto.djtv` — DJTV
+- `auto.dofundodocoracao` — DO FUNDO DO CORAÇÃO
+- `auto.doisnilos` — Dois Nilos
+- `auto.doispapas` — DOIS PAPAS
+- `auto.dolittle` — DOLITTLE
+- `auto.domingaocomhucks01e01` — Domingao Com Huck S01E01
+- `auto.domingaocomhucks01e02` — Domingao Com Huck S01E02
+- `auto.domingaocomhucks01e03` — Domingao Com Huck S01E03
+- `auto.domingaocomhucks01e04` — Domingao Com Huck S01E04
+- `auto.domingaocomhucks01e05` — Domingao Com Huck S01E05
+- `auto.domingaocomhucks01e06` — Domingao Com Huck S01E06
+- `auto.domingaocomhucks01e07` — Domingao Com Huck S01E07
+- `auto.domingaocomhucks01e08` — Domingao Com Huck S01E08
+- `auto.domingaocomhucks01e09` — Domingao Com Huck S01E09
+- `auto.domingaocomhucks01e10` — Domingao Com Huck S01E10
+- `auto.domingaocomhucks01e11` — Domingao Com Huck S01E11
+- `auto.doraandacidadeperdida` — DORA E A CIDADE PERDIDA
+- `auto.doutorestranho` — DOUTOR ESTRANHO
+- `auto.doutorestranhonomultiversodaloucura` — DOUTOR ESTRANHO NO MULTIVERSO DA LOUCURA
+- `auto.dozeanddemais` — DOZE É DEMAIS
+- `auto.dpa3ofilmeumaaventuranofimdomundo` — D P A 3 O FILME UMA AVENTURA NO FIM DO MUNDO
+- `auto.dpafast` — DPA FAST
+- `auto.dreamgirlsembuscadeumsonho` — DREAMGIRLS EM BUSCA DE UM SONHO
+- `auto.dual` — DUAL
+- `auto.duascoroas` — Duas Coroas
+- `auto.duelodebravos` — DUELO DE BRAVOS
+- `auto.dumbo` — DUMBO
+- `auto.duna` — DUNA
+- `auto.eladancaeudanco6` — ELA DANÇA, EU DANÇO 6
+- `auto.eldorado` — EL DORADO
+- `auto.elevensports01` — ELEVEN SPORTS 01
+- `auto.elevensports02` — ELEVEN SPORTS 02
+- `auto.elevensports03` — ELEVEN SPORTS 03
+- `auto.elevensports04` — ELEVEN SPORTS 04
+- `auto.elevensports1` — Eleven Sports 1
+- `auto.elevensports2` — Eleven Sports 2
+- `auto.elevensports3` — Eleven Sports 3
+- `auto.elevensports4` — Eleven Sports 4
+- `auto.eliteevangelico24h` — ELITE EVANGELICO 24H
+- `auto.elizabetharainhaportrasdacoroa` — Elizabeth A Rainha Por Trás da Coroa
+- `auto.elvis` — ELVIS
+- `auto.embuscadacartaproibida` — EM BUSCA DA CARTA PROIBIDA
+- `auto.embuscadajustica` — EM BUSCA DA JUSTIÇA
+- `auto.embuscadeohana` — EM BUSCA DE 'OHANA
+- `auto.embuscadocastelodourado` — EM BUSCA DO CASTELO DOURADO
+- `auto.embuscadoparaiso` — EM BUSCA DO PARAISO
+- `auto.emicidaamareloaovivo` — EMICIDA AMARELO – AO VIVO
+- `auto.emmaumameninadefe` — EMMA UMA MENINA DE FÉ
+- `auto.emseuspassosoquefariajesus` — EM SEUS PASSOS, O QUE FARIA JESUS?
+- `auto.emumbairrodenovayork2021leg` — EM UM BAIRRO DE NOVA YORK (2021) LEG
+- `auto.encontrandoocaminho` — ENCONTRANDO O CAMINHO
+- `auto.encontrodecasais` — ENCONTRO DE CASAIS
+- `auto.endiabrado` — ENDIABRADO
+- `auto.enolaholmes` — ENOLA HOLMES
+- `auto.enolaholmes2` — ENOLA HOLMES 2
+- `auto.enquantoestivermosjuntos` — ENQUANTO ESTIVERMOS JUNTOS
+- `auto.ensinandoaviver` — ENSINANDO A VIVER
+- `auto.entretendo` — ENTRETENDO
+- `auto.eptvararaquara` — EPTV ARARAQUARA
+- `auto.eraumavezcarnaval` — Era Uma Vez Carnaval
+- `auto.eraumaveznooeste` — ERA UMA VEZ NO OESTE
+- `auto.eraumavezumcontodefadas` — ERA UMA VEZ UM CONTO DE FADAS
+- `auto.eraumavezumcontodefadas2022leg` — ERA UMA VEZ UM CONTO DE FADAS (2022) LEG
+- `auto.eraumavezumgenio` — ERA UMA VEZ UM GÊNIO
+- `auto.escolhasdocoracao` — ESCOLHAS DO CORAÇÃO
+- `auto.eseurosport1` — ES EUROSPORT 1
+- `auto.eseurosport2` — ES EUROSPORT 2
+- `auto.esmovistarf1` — ES MOVISTAR F1
+- `auto.espadadedeusaultimacruzada` — ESPADA DE DEUS A ÚLTIMA CRUZADA
+- `auto.espiritojovem` — ESPIRITO JOVEM
+- `auto.esqueceramdemimnolardocelar` — ESQUECERAM DE MIM NO LAR, DOCE LAR
+- `auto.esqueceramdenos` — ESQUECERAM DE NÓS
+- `auto.esterarainhadapersia` — ESTER, A RAINHA DA PÉRSIA
+- `auto.estranhopassageirosputnik` — ESTRANHO PASSAGEIRO SPUTNIK
+- `auto.estrelasalemdotempo` — ESTRELAS ALÉM DO TEMPO
+- `auto.eternos` — ETERNOS
+- `auto.euronewsespanhol` — EURONEWS ESPANHOL
+- `auto.euronewsingles` — EURONEWS INGLÊS
+- `auto.euronewsportugues` — EURONEWS PORTUGUÊS
+- `auto.eusoutodasasmeninas` — EU SOU TODAS AS MENINAS
+- `auto.evereste` — EVERESTE
+- `auto.ewoksabatalhadeendor` — EWOKS A BATALHA DE ENDOR
+- `auto.exododeusesandreis` — ÊXODO DEUSES E REIS
+- `auto.expedicaokontiki` — EXPEDIÇÃO KON TIKI
+- `auto.fadamadrinha` — FADA MADRINHA
+- `auto.fama` — FAMA
+- `auto.fantasmasnacasabranca` — Fantasmas na Casa Branca
+- `auto.fantasticos01e01` — Fantastico S01E01
+- `auto.fantasticos01e02` — Fantastico S01E02
+- `auto.fantasticos01e03` — Fantastico S01E03
+- `auto.fantasticos01e04` — Fantastico S01E04
+- `auto.fantasticos01e05` — Fantastico S01E05
+- `auto.fantasticos01e06` — Fantastico S01E06
+- `auto.fantasticos01e07` — Fantastico S01E07
+- `auto.fantasticos01e08` — Fantastico S01E08
+- `auto.fantasticos01e09` — Fantastico S01E09
+- `auto.fantasticos01e10` — Fantastico S01E10
+- `auto.fantasticos01e11` — Fantastico S01E11
+- `auto.farofadagkayodocumentario` — Farofa da GKay O Documentario
+- `auto.fatima` — FÁTIMA
+- `auto.fatimaahistoriadeummilagre` — FÁTIMA A HISTÓRIA DE UM MILAGRE
+- `auto.feelthebeat` — FEEL THE BEAT
+- `auto.feparaoimpossivel` — FE PARA O IMPOSSIVEL
+- `auto.fifaplus1` — FIFA PLUS 1
+- `auto.fifaplus2` — FIFA PLUS 2
+- `auto.fifaplus3` — FIFA PLUS 3
+- `auto.filhosdaguerra` — FILHOS DA GUERRA
+- `auto.filhosdoodio` — FILHOS DO ÓDIO
+- `auto.fimdostempos` — FIM DOS TEMPOS
+- `auto.finch` — FINCH
+- `auto.floraandulysses` — FLORA E ULYSSES
+- `auto.flummelsextintos` — Flummels Extintos!
+- `auto.fomedepoder` — FOME DE PODER
+- `auto.formula12024round01australiatl1` — Formula 1 (2024) Round 01 Australia TL1
+- `auto.formula12024round01australiatl2` — Formula 1 (2024) Round 01 Australia TL2
+- `auto.formula12024round01australiatl3` — Formula 1 (2024) Round 01 Australia TL3
+- `auto.formula12024round22lasvegas` — Formula 1 (2024) Round 22 Las Vegas
+- `auto.formula12024round22lasvegasgrandprixqualifying` — Formula 1 (2024) Round 22 Las Vegas Grand Prix Qualifying
+- `auto.formula12024round23catar` — Formula 1 (2024) Round 23 Catar
+- `auto.formula12024round24abudhabi` — Formula 1 (2024) Round 24 Abu Dhabi
+- `auto.formula12024round24abudhabiprixqualifying` — Formula 1 (2024) Round 24 Abu Dhabi Prix Qualifying
+- `auto.formula12025round01australiagrandprix` — Formula 1 (2025) Round 01 Australia Grand Prix
+- `auto.formula12025round01australiagrandprixqualifying` — Formula 1 (2025) Round 01 Australia Grand Prix Qualifying
+- `auto.formula12025round01chinacorrida` — Formula 1 (2025) Round 01 China Corrida
+- `auto.formula12025round01chinacorridasprint` — Formula 1 (2025) Round 01 China CorridaSprint
+- `auto.formula12025round01chinaquali` — Formula 1 (2025) Round 01 China Quali
+- `auto.formula12025round01chinaqualisprint` — Formula 1 (2025) Round 01 China QualiSprint
+- `auto.formula12025round01chinatl1` — Formula 1 (2025) Round 01 China TL1
+- `auto.formula12025round02chinacorridasprint` — Formula 1 (2025) Round 02 China Corrida Sprint
+- `auto.formula12025round02chinagrandprix` — Formula 1 (2025) Round 02 China Grand Prix
+- `auto.formula12025round03japaocorridabandeirantes` — Formula 1 (2025) Round 03 Japao Corrida Bandeirantes
+- `auto.formula12025round03japaograndprix` — Formula 1 (2025) Round 03 Japao Grand Prix
+- `auto.formula12025round03japaograndprixqualifying` — Formula 1 (2025) Round 03 Japao Grand Prix Qualifying
+- `auto.formula12025round03japaoquali` — Formula 1 (2025) Round 03 Japao Quali
+- `auto.formula12025round03japaotl1` — Formula 1 (2025) Round 03 Japao TL1
+- `auto.formula12025round03japaotl2` — Formula 1 (2025) Round 03 Japao TL2
+- `auto.formula12025round03japaotl3` — Formula 1 (2025) Round 03 Japao TL3
+- `auto.formula12025round04bahraintl1` — Formula 1 (2025) Round 04 Bahrain TL1
+- `auto.formula12025round04bahraintl2` — Formula 1 (2025) Round 04 Bahrain TL2
+- `auto.formula12025round04bahraintl3` — Formula 1 (2025) Round 04 Bahrain TL3
+- `auto.formula12025round04bahreingrandprix` — Formula 1 (2025) Round 04 Bahrein Grand Prix
+- `auto.formula12025round04bahreingrandprixqualifying` — Formula 1 (2025) Round 04 Bahrein Grand Prix Qualifying
+- `auto.formula12025round05arabiasauditacorridabandeirantes` — Formula 1 (2025) Round 05 ArabiaSaudita Corrida Bandeirantes
+- `auto.formula12025round05arabiasauditagrandprix` — Formula 1 (2025) Round 05 Arabia Saudita Grand Prix
+- `auto.formula12025round05arabiasauditagrandprixqualifying` — Formula 1 (2025) Round 05 Arabia Saudita Grand Prix Qualifying
+- `auto.formula12025round05arabiasauditaquali` — Formula 1 (2025) Round 05 ArabiaSaudita Quali
+- `auto.formula12025round05arabiasauditaracef1tvinternational` — Formula 1 (2025) Round 05 ArabiaSaudita Race F1TV International
+- `auto.formula12025round05arabiasauditatl1` — Formula 1 (2025) Round 05 ArabiaSaudita TL1
+- `auto.formula12025round05arabiasauditatl2` — Formula 1 (2025) Round 05 ArabiaSaudita TL2
+- `auto.formula12025round05arabiasauditatl3` — Formula 1 (2025) Round 05 ArabiaSaudita TL3
+- `auto.formula12025round06miamicorridabandeirantes` — Formula 1 (2025) Round 06 Miami Corrida Bandeirantes
+- `auto.formula12025round06miamigrandprix` — Formula 1 (2025) Round 06 Miami Grand Prix
+- `auto.formula12025round06miamigrandprixqualifying` — Formula 1 (2025) Round 06 Miami Grand Prix Qualifying
+- `auto.formula12025round06miamiquali` — Formula 1 (2025) Round 06 Miami Quali
+- `auto.formula12025round06miamiqualisprint` — Formula 1 (2025) Round 06 Miami QualiSprint
+- `auto.formula12025round06miamisprint` — Formula 1 (2025) Round 06 Miami Sprint
+- `auto.formula12025round06miamisprintrace` — Formula 1 (2025) Round 06 Miami SprintRace
+- `auto.formula12025round06miamitl1` — Formula 1 (2025) Round 06 Miami TL1
+- `auto.formula12025round07italiagrandprix` — Formula 1 (2025) Round 07 Italia Grand Prix
+- `auto.formula12025round07italiagrandprixqualifying` — Formula 1 (2025) Round 07 Italia Grand Prix Qualifying
+- `auto.formula12025round07sanmarinocorridabandeirantes` — Formula 1 (2025) Round 07 SanMarino Corrida Bandeirantes
+- `auto.formula12025round07sanmarinoquali` — Formula 1 (2025) Round 07 SanMarino Quali
+- `auto.formula12025round07sanmarinotl1` — Formula 1 (2025) Round 07 SanMarino TL1
+- `auto.formula12025round07sanmarinotl2` — Formula 1 (2025) Round 07 SanMarino TL2
+- `auto.formula12025round07sanmarinotl3` — Formula 1 (2025) Round 07 SanMarino TL3
+- `auto.formula12025round08monacocorridabandeirantes` — Formula 1 (2025) Round 08 Monaco Corrida Bandeirantes
+- `auto.formula12025round08monacograndprix` — Formula 1 (2025) Round 08 Monaco Grand Prix
+- `auto.formula12025round08monacograndprixqualifying` — Formula 1 (2025) Round 08 Monaco Grand Prix Qualifying
+- `auto.formula12025round08monacoquali` — Formula 1 (2025) Round 08 Monaco Quali
+- `auto.formula12025round08monacotl1` — Formula 1 (2025) Round 08 Monaco TL1
+- `auto.formula12025round08monacotl2` — Formula 1 (2025) Round 08 Monaco TL2
+- `auto.formula12025round08monacotl3` — Formula 1 (2025) Round 08 Monaco TL3
+- `auto.formula12025round09espanhagrandprix` — Formula 1 (2025) Round 09 Espanha Grand Prix
+- `auto.formula12025round09espanhagrandprixqualifying` — Formula 1 (2025) Round 09 Espanha Grand Prix Qualifying
+- `auto.formula12025round09espanhaquali` — Formula 1 (2025) Round 09 Espanha Quali
+- `auto.formula12025round09espanhatl1` — Formula 1 (2025) Round 09 Espanha TL1
+- `auto.formula12025round09espanhatl2` — Formula 1 (2025) Round 09 Espanha TL2
+- `auto.formula12025round09espanhatl3` — Formula 1 (2025) Round 09 Espanha TL3
+- `auto.formula12025round10canadagrandprix` — Formula 1 (2025) Round 10 Canada Grand Prix
+- `auto.formula12025round10canadagrandprixqualifying` — Formula 1 (2025) Round 10 Canada Grand Prix Qualifying
+- `auto.formula12025round10canadatl1` — Formula 1 (2025) Round10 Canada TL1
+- `auto.formula12025round10canadatl2` — Formula 1 (2025) Round10 Canada TL2
+- `auto.formula12025round11austriacorridabandeirantes` — Formula 1 (2025) Round 11 Austria Corrida Bandeirantes
+- `auto.formula12025round11austriagrandprix` — Formula 1 (2025) Round 11 Austria Grand Prix
+- `auto.formula12025round11austriagrandprixqualifying` — Formula 1 (2025) Round 11 Austria Grand Prix Qualifying
+- `auto.formula12025round11austriatl1` — Formula 1 (2025) Round 11 Austria TL1
+- `auto.formula12025round11austriatl2` — Formula 1 (2025) Round 11 Austria TL2
+- `auto.formula12025round11austriatl3` — Formula 1 (2025) Round 11 Austria TL3
+- `auto.formula12025round12inglaterragrandprix` — Formula 1 (2025) Round 12 Inglaterra Grand Prix
+- `auto.formula12025round12inglaterragrandprixqualifying` — Formula 1 (2025) Round 12 Inglaterra Grand Prix Qualifying
+- `auto.formula12025round12inglaterraquali` — Formula 1 (2025) Round 12 Inglaterra Quali
+- `auto.formula12025round12inglaterratl1` — Formula 1 (2025) Round 12 Inglaterra TL1
+- `auto.formula12025round12inglaterratl2` — Formula 1 (2025) Round 12 Inglaterra TL2
+- `auto.formula12025round12inglaterratl3` — Formula 1 (2025) Round 12 Inglaterra TL3
+- `auto.formula12025round13belgicagrandprix` — Formula 1 (2025) Round 13 Belgica Grand Prix
+- `auto.formula12025round13belgicaqualisprint` — Formula 1 (2025) Round13 Belgica QualiSprint
+- `auto.formula12025round13belgicasprint` — Formula 1 (2025) Round 13 Belgica Sprint
+- `auto.formula12025round13belgicatl1` — Formula 1 (2025) Round13 Belgica TL1
+- `auto.formula12025round14hungriagrandprix` — Formula 1 (2025) Round 14 Hungria Grand Prix
+- `auto.formula12025round14hungriagrandprixqualifying` — Formula 1 (2025) Round 14 Hungria Grand Prix Qualifying
+- `auto.formula12025round14hungriatl1` — Formula 1 (2025) Round 14 Hungria TL1
+- `auto.formula12025round14hungriatl2` — Formula 1 (2025) Round 14 Hungria TL2
+- `auto.formula12025round14hungriatl3` — Formula 1 (2025) Round 14 Hungria TL3
+- `auto.formula12025round15holandagrandprix` — Formula 1 (2025) Round 15 Holanda Grand Prix
+- `auto.formula12025round15holandagrandprixqualifying` — Formula 1 (2025) Round 15 Holanda Grand Prix Qualifying
+- `auto.formula12025round15holandatl1` — Formula 1 (2025) Round 15 Holanda TL1
+- `auto.formula12025round15holandatl2` — Formula 1 (2025) Round 15 Holanda TL2
+- `auto.formula12025round16italiagrandprix` — Formula 1 (2025) Round 16 Italia Grand Prix
+- `auto.formula12025round16italiagrandprixqualifying` — Formula 1 (2025) Round 16 Italia Grand Prix Qualifying
+- `auto.formula12025round17azerbaijaograndprix` — Formula 1 (2025) Round 17 Azerbaijao Grand Prix
+- `auto.formula12025round17azerbaijaograndprixqualifying` — Formula 1 (2025) Round 17 Azerbaijao Grand Prix Qualifying
+- `auto.formula12025round18singapuragrandprix` — Formula 1 (2025) Round 18 Singapura Grand Prix
+- `auto.formula12025round18singapuragrandprixqualifying` — Formula 1 (2025) Round 18 Singapura Grand Prix Qualifying
+- `auto.formula12025round19usagrandprix` — Formula 1 (2025) Round 19 USA Grand Prix
+- `auto.formula12025round19usagrandprixqualifying` — Formula 1 (2025) Round 19 USA Grand Prix Qualifying
+- `auto.formula12025round19usasprint` — Formula 1 (2025) Round 19 USA Sprint
+- `auto.formula12025round20mexicograndprix` — Formula 1 (2025) Round 20 Mexico Grand Prix
+- `auto.formula12025round20mexicograndprixqualifying` — Formula 1 (2025) Round 20 Mexico Grand Prix Qualifying
+- `auto.formula12025round21bragrandprix` — Formula 1 (2025) Round 21 BRA Grand Prix
+- `auto.formula12025round21bragrandprixqualifying` — Formula 1 (2025) Round 21 BRA Grand Prix Qualifying
+- `auto.formula12025round21brasilclassificacaosprint` — Formula 1 (2025) Round 21 Brasil ClassificacaoSprint
+- `auto.formula12025round21brasiltl1` — Formula 1 (2025) Round 21 Brasil TL1
+- `auto.formula12025round21brasprint` — Formula 1 (2025) Round 21 BRA Sprint
+- `auto.formula12025round22lasvegasgrandprix` — Formula 1 (2025) Round 22 Las Vegas Grand Prix
+- `auto.formula12025round22lasvegasgrandprixqualifying` — Formula 1 (2025) Round 22 Las Vegas Grand Prix Qualifying
+- `auto.formula12025round23catargrandprix` — Formula 1 (2025) Round 23 Catar Grand Prix
+- `auto.formula12025round23catargrandprixqualifying` — Formula 1 (2025) Round 23 Catar Grand Prix Qualifying
+- `auto.formula12025round23catarsprint` — Formula 1 (2025) Round 23 Catar Sprint
+- `auto.formula12025round24abudhabicorridabandeirantes` — Formula 1 (2025) Round 24 AbuDhabi Corrida Bandeirantes
+- `auto.formula12025round24abudhabigrandprix` — Formula 1 (2025) Round 24 Abu Dhabi Grand Prix
+- `auto.formula12025round24abudhabigrandprixqualifying` — Formula 1 (2025) Round 24 Abu Dhabi Grand Prix Qualifying
+- `auto.formula12025round24abudhabiquali` — Formula 1 (2025) Round 24 AbuDhabi Quali
+- `auto.formula12025round24abudhabitl1` — Formula 1 (2025) Round 24 AbuDhabi TL1
+- `auto.formula12025round24abudhabitl2` — Formula 1 (2025) Round 24 AbuDhabi TL2
+- `auto.formula12025round24abudhabitl3` — Formula 1 (2025) Round 24 AbuDhabi TL3
+- `auto.formula12026round01australiacorridasportv` — Formula 1 2026 Round 01 Australia Corrida Sportv
+- `auto.formula12026round01australiaquali` — Formula 1 2026 Round 01 Australia Quali
+- `auto.formula12026round01australiatl1` — Formula 1 2026 Round 01 Australia TL1
+- `auto.formula12026round01australiatl2` — Formula 1 2026 Round 01 Australia TL2
+- `auto.formula12026round01australiatl3` — Formula 1 2026 Round 01 Australia TL3
+- `auto.formula12026round02chinaclassificacaosprintsportv` — Formula 1 2026 Round 02 China ClassificacaoSprint Sportv
+- `auto.formula12026round02chinacorridasprintsportv` — Formula 1 2026 Round 02 China Corrida Sprint Sportv
+- `auto.formula12026round02chinaqualisportv` — Formula 1 2026 Round 02 China Quali Sportv
+- `auto.formula12026round02chinatl1sportv` — Formula 1 2026 Round 02 China TL1 Sportv
+- `auto.foxnewyork5wnyw` — FOX NEW YORK 5 WNYW
+- `auto.foxtrotsix2020leg` — FOXTROT SIX (2020) LEG
+- `auto.freeguyassumindoocontrole` — FREE GUY ASSUMINDO O CONTROLE
+- `auto.fronteiraestelar2020leg` — FRONTEIRA ESTELAR (2020) LEG
+- `auto.frozenomusical2025leg` — FROZEN O MUSICAL (2025) LEG
+- `auto.fubosportsusa` — FUBO SPORTS USA
+- `auto.fugapelafronteira` — FUGA PELA FRONTEIRA
+- `auto.fukushimaameacanuclear` — FUKUSHIMA AMEAÇA NUCLEAR
+- `auto.furacaoplay` — FURACÃO PLAY
+- `auto.gagachromaticaball2024leg` — GAGA CHROMATICA BALL (2024) LEG
+- `auto.galinhapintadinha` — Galinha Pintadinha
+- `auto.galinhapintadinha2` — Galinha Pintadinha 2
+- `auto.galinhapintadinha3` — Galinha Pintadinha 3
+- `auto.galinhapintadinha4` — Galinha Pintadinha 4
+- `auto.galinhapintadinhaminivolume7` — Galinha Pintadinha Mini Volume 7
+- `auto.gandhi` — GANDHI
+- `auto.gasparzinhoofantasminhacamarada` — GASPARZINHO, O FANTASMINHA CAMARADA
+- `auto.gbusa` — GB USA
+- `auto.getcrazy` — GET CRAZY
+- `auto.ghostlab` — GHOST LAB
+- `auto.gigantesemluta` — GIGANTES EM LUTA
+- `auto.globoamazonicaitacoatiara` — GLOBO AMAZONICA ITACOATIARA
+- `auto.globoamazonicamacapa` — GLOBO AMAZÔNICA MACAPÁ
+- `auto.globoamazonicaparintins` — GLOBO AMAZONICA PARINTINS
+- `auto.globoamazonicaportovelho` — GLOBO AMAZÔNICA PORTO VELHO
+- `auto.globoanhangueraanapolis` — GLOBO ANHANGUERA ANAPOLIS
+- `auto.globoanhangueracatalao` — GLOBO ANHANGUERA CATALAO
+- `auto.globoanhangueraitumbiara` — GLOBO ANHANGUERA ITUMBIARA
+- `auto.globoanhanguerajatai` — GLOBO ANHANGUERA JATAI
+- `auto.globoanhangueraluziania` — GLOBO ANHANGUERA LUZIANIA
+- `auto.globoanhangueraporangatu` — GLOBO ANHANGUERA PORANGATU
+- `auto.globoanhangueratocantins` — GLOBO ANHANGUERA TOCANTINS
+- `auto.globoasabranca` — GLOBO ASA BRANCA
+- `auto.globobage` — GLOBO BAGE
+- `auto.globobelemliberal` — GLOBO BELÉM LIBERAL
+- `auto.globoboavistaroraima` — GLOBO BOA VISTA RORAIMA
+- `auto.globocacoal` — GLOBO CACOAL
+- `auto.globodiariofortaleza` — GLOBO DIÁRIO FORTALEZA
+- `auto.globodivinopolis` — GLOBO DIVINÓPOLIS
+- `auto.globogazetaes` — GLOBO GAZETA ES
+- `auto.globogazetasules` — GLOBO GAZETA SUL ES
+- `auto.globointertvcelfabriciano` — GLOBO INTERTV CEL FABRICIANO
+- `auto.globointertvgovvaladares` — GLOBO INTERTV GOV VALADARES
+- `auto.globojuazeirobahia` — GLOBO JUAZEIRO BAHIA
+- `auto.globojuazeirodonorte` — GLOBO JUAZEIRO DO NORTE
+- `auto.globomg` — GLOBO MG
+- `auto.globomirantecocais` — GLOBO MIRANTE COCAIS
+- `auto.globonacional` — GLOBO NACIONAL
+- `auto.globonow` — GLOBO NOW
+- `auto.globonsccentrooeste` — GLOBO NSC CENTRO OESTE
+- `auto.globooestebarreirasbahia` — GLOBO OESTE BARREIRAS BAHIA
+- `auto.globoplusgefutebol1` — GLOBO PLUS GE FUTEBOL 1
+- `auto.globoplusgefutebol2` — GLOBO PLUS GE FUTEBOL 2
+- `auto.globoportovelho` — GLOBO PORTO VELHO
+- `auto.globorbssantamaria` — GLOBO RBS SANTA MARIA
+- `auto.globoreporters01e01` — Globo Reporter S01E01
+- `auto.globoreporters01e02` — Globo Reporter S01E02
+- `auto.globoreporters01e03` — Globo Reporter S01E03
+- `auto.globoreporters01e04` — Globo Reporter S01E04
+- `auto.globoreporters01e05` — Globo Reporter S01E05
+- `auto.globoreporters01e06` — Globo Reporter S01E06
+- `auto.globoreporters01e07` — Globo Reporter S01E07
+- `auto.globoreporters01e08` — Globo Reporter S01E08
+- `auto.globoreporters01e09` — Globo Reporter S01E09
+- `auto.globoreporters01e10` — Globo Reporter S01E10
+- `auto.globoreporters01e11` — Globo Reporter S01E11
+- `auto.globoriosul` — GLOBO RIO SUL
+- `auto.globorjaltolitoral` — GLOBO RJ ALTO LITORAL
+- `auto.globorjinterior` — GLOBO RJ INTERIOR
+- `auto.globorpcguarapuava` — GLOBO RPC GUARAPUAVA
+- `auto.globorpctvcascavel` — GLOBO RPC TV CASCAVEL
+- `auto.globorpctvlondrina` — GLOBO RPC TV LONDRINA
+- `auto.globorpctvparanavai` — GLOBO RPC TV PARANAVAI
+- `auto.globorurals01e01` — Globo Rural S01E01
+- `auto.globorurals01e02` — Globo Rural S01E02
+- `auto.globorurals01e03` — Globo Rural S01E03
+- `auto.globorurals01e04` — Globo Rural S01E04
+- `auto.globorurals01e05` — Globo Rural S01E05
+- `auto.globorurals01e06` — Globo Rural S01E06
+- `auto.globorurals01e07` — Globo Rural S01E07
+- `auto.globorurals01e08` — Globo Rural S01E08
+- `auto.globorurals01e09` — Globo Rural S01E09
+- `auto.globorurals01e10` — Globo Rural S01E10
+- `auto.globosantacruzitabunabahia` — GLOBO SANTA CRUZ ITABUNA BAHIA
+- `auto.globotapajospa` — GLOBO TAPAJÓS PA
+- `auto.globotapajossantarem` — GLOBO TAPAJÓS SANTARÉM
+- `auto.globotemitapetininga` — GLOBO TEM ITAPETININGA
+- `auto.globotvguajaramirim` — GLOBO TV GUAJARÁ MIRIM
+- `auto.globotvitacotiara` — GLOBO TV ITACOTIARA
+- `auto.globotvjiparana` — GLOBO TV JI PARANA
+- `auto.globotvliberalaltamira` — GLOBO TV LIBERAL ALTAMIRA
+- `auto.globotvliberalparagominas` — GLOBO TV LIBERAL PARAGOMINAS
+- `auto.globotvliberalparauapebas` — GLOBO TV LIBERAL PARAUAPEBAS
+- `auto.globotvliberalredencao` — GLOBO TV LIBERAL REDENÇÃO
+- `auto.globotvmirantebalsas` — GLOBO TV MIRANTE BALSAS
+- `auto.globotvmorenacorumba` — GLOBO TV MORENA CORUMBÁ
+- `auto.globotvoeste` — GLOBO TV OESTE
+- `auto.globotvparintins` — GLOBO TV PARINTINS
+- `auto.globotvrbsbage` — GLOBO TV RBS BAGÉ
+- `auto.globotvredeamazonicaportovelho` — GLOBO TV REDE AMAZONICA PORTO VELHO
+- `auto.globotvtemsjdoriopreto` — GLOBO TV TEM S J DO RIO PRETO
+- `auto.globotvvanguardatte` — GLOBO TV VANGUARDA TTE
+- `auto.globotvvilhena` — GLOBO TV VILHENA
+- `auto.globouruguaiana` — GLOBO URUGUAIANA
+- `auto.globovilhena` — GLOBO VILHENA
+- `auto.goat3` — GOAT 3
+- `auto.godontgo2020leg` — GO DON'T GO (2020) LEG
+- `auto.godzillavskong` — GODZILLA VS KONG
+- `auto.gofestainesquecivel` — Go! Festa Inesquecível
+- `auto.golfusa` — GOLF USA
+- `auto.gorongosaoparaisorenasce` — Gorongosa O Paraíso Renasce
+- `auto.gospel` — GOSPEL
+- `auto.gospelmoviestelevision` — GOSPEL MOVIES TELEVISION
+- `auto.greatwhiteserialkillerfatalchristmas` — Great White Serial Killer Fatal Christmas
+- `auto.guardioesdagalaxia` — GUARDIOES DA GALAXIA
+- `auto.guardioesdagalaxiaespecialdefestas` — GUARDIOES DA GALAXIA ESPECIAL DE FESTAS
+- `auto.guardioesdagalaxiavol2` — GUARDIOES DA GALAXIA VOL 2
+- `auto.guerraalienigena` — GUERRA ALIENÍGENA
+- `auto.guerrasobaterra` — GUERRA SOB A TERRA
+- `auto.guiadopeloluar` — GUIADO PELO LUAR
+- `auto.gustavolimalivebutecoemcasa` — GUSTAVO LIMA LIVE BUTECO EM CASA
+- `auto.hair` — HAIR
+- `auto.halloclassic` — HALLO CLASSIC
+- `auto.hallodoc` — HALLO DOC
+- `auto.hallomovies` — HALLO MOVIES
+- `auto.hamilton2020leg` — HAMILTON (2020) LEG
+- `auto.hancock` — HANCOCK
+- `auto.harrypotterandacamarasecreta` — HARRY POTTER E A CÂMARA SECRETA
+- `auto.harrypotterandaordemdafenix` — HARRY POTTER E A ORDEM DA FÊNIX
+- `auto.harrypotterandapedrafilosofal` — HARRY POTTER E A PEDRA FILOSOFAL
+- `auto.harrypotterandasreliquiasdamorteparte1` — HARRY POTTER E AS RELÍQUIAS DA MORTE PARTE 1
+- `auto.harrypotterandasreliquiasdamorteparte2` — HARRY POTTER E AS RELÍQUIAS DA MORTE PARTE 2
+- `auto.harrypotterandocalicedefogo` — HARRY POTTER E O CÁLICE DE FOGO
+- `auto.harrypotterandoenigmadoprincipe` — HARRY POTTER E O ENIGMA DO PRÍNCIPE
+- `auto.harrypotterandoprisioneirodeazkaban` — HARRY POTTER E O PRISIONEIRO DE AZKABAN
+- `auto.hbomax01` — HBO MAX 01
+- `auto.hbomax02` — HBO MAX 02
+- `auto.hbomax03` — HBO MAX 03
+- `auto.hbomax04` — HBO MAX 04
+- `auto.hbomax05` — HBO MAX 05
+- `auto.hbomax06` — HBO MAX 06
+- `auto.hbomax07` — HBO MAX 07
+- `auto.hbomax08` — HBO MAX 08
+- `auto.hbomax09` — HBO MAX 09
+- `auto.hbomax10` — HBO MAX 10
+- `auto.hbomax11` — HBO MAX 11
+- `auto.hbomax12` — HBO MAX 12
+- `auto.hbomax13` — HBO MAX 13
+- `auto.hbomax14` — HBO MAX 14
+- `auto.hbomax15` — HBO MAX 15
+- `auto.hbomax16` — HBO MAX 16
+- `auto.hbomax17` — HBO MAX 17
+- `auto.hbomax18` — HBO MAX 18
+- `auto.hbomax19` — HBO MAX 19
+- `auto.hbomax20` — HBO MAX 20
+- `auto.hbomax21` — HBO MAX 21
+- `auto.hbomax22` — HBO MAX 22
+- `auto.hbomax23` — HBO MAX 23
+- `auto.hbomax24` — HBO MAX 24
+- `auto.hbomax25` — HBO MAX 25
+- `auto.hbomax26` — HBO MAX 26
+- `auto.hbomax28` — HBO MAX 28
+- `auto.hbomax29` — HBO MAX 29
+- `auto.hbomax30` — HBO MAX 30
+- `auto.hbomax31` — HBO MAX 31
+- `auto.hbomax32` — HBO MAX 32
+- `auto.hbomax33` — HBO MAX 33
+- `auto.hbomax34` — HBO MAX 34
+- `auto.hellboyiioexercitodourado` — HELLBOY II O EXÉRCITO DOURADO
+- `auto.heroidedoismundos` — HERÓI DE DOIS MUNDOS
+- `auto.heroisdeumaguerra` — HERÓIS DE UMA GUERRA
+- `auto.highlifeumanovavida` — HIGH LIFE UMA NOVA VIDA
+- `auto.highschoolmusicalomusicalespecialdefestas` — HIGH SCHOOL MUSICAL O MUSICAL ESPECIAL DE FESTAS
+- `auto.hilaryandjackie` — HILARY E JACKIE
+- `auto.hillamorpelojogo` — HILL AMOR PELO JOGO
+- `auto.hitdance` — Hit Dance
+- `auto.hitdancemusicas2000` — Hit Dance Músicas 2000
+- `auto.hitdancemusicas2000pt2` — Hit Dance Músicas 2000 (pt2)
+- `auto.homemaranha` — HOMEM ARANHA
+- `auto.homemaranha2` — HOMEM ARANHA 2
+- `auto.homemaranha3` — HOMEM ARANHA 3
+- `auto.homemaranhadevoltaaolar` — HOMEM ARANHA DE VOLTA AO LAR
+- `auto.homemaranhalongedecasa` — HOMEM ARANHA LONGE DE CASA
+- `auto.homemaranhasemvoltaparacasa` — HOMEM ARANHA SEM VOLTA PARA CASA
+- `auto.homemdedeus` — HOMEM DE DEUS
+- `auto.homemdefe` — HOMEM DE FÉ
+- `auto.homemdeferro` — HOMEM DE FERRO
+- `auto.homemdeferro2` — HOMEM DE FERRO 2
+- `auto.homemdeferro3` — HOMEM DE FERRO 3
+- `auto.homemformiga` — HOMEM FORMIGA
+- `auto.homemformigaandavespa` — HOMEM FORMIGA E A VESPA
+- `auto.honey2noritmodossonhos` — HONEY 2 NO RITMO DOS SONHOS
+- `auto.honey3noritmodoamor` — HONEY 3 NO RITMO DO AMOR
+- `auto.honey4nopulsardoritmo` — HONEY 4 NO PULSAR DO RITMO
+- `auto.honeygirlsgarotastalentosas` — HONEY GIRLS GAROTAS TALENTOSAS
+- `auto.honeynoritmodosseussonhos` — HONEY NO RITMO DOS SEUS SONHOS
+- `auto.hostis` — HOSTIS
+- `auto.hurricanelivrecomoovento` — HURRICANE – LIVRE COMO O VENTO
+- `auto.hurryuptomorrowalemdosholofotes` — HURRY UP TOMORROW ALEM DOS HOLOFOTES
+- `auto.idinvestigacaodiscoveryhd2` — ID INVESTIGACAO DISCOVERY HD2
+- `auto.igrejamundialimpd` — IGREJA MUNDIAL IMPD
+- `auto.indianajonesandaultimacruzada` — INDIANA JONES E A ÚLTIMA CRUZADA
+- `auto.indianajonesandoreinodacaveiradecristal` — INDIANA JONES E O REINO DA CAVEIRA DE CRISTAL
+- `auto.indianajonesandoscacadoresdaarcaperdida` — INDIANA JONES E OS CAÇADORES DA ARCA PERDIDA
+- `auto.indianajonesandotemplodaperdicao` — INDIANA JONES E O TEMPLO DA PERDIÇÃO
+- `auto.infernonofaroeste` — INFERNO NO FAROESTE
+- `auto.infinite2021leg` — INFINITE (2021) LEG
+- `auto.infinito` — INFINITO
+- `auto.iniciacao` — INICIACAO
+- `auto.iniciante` — Iniciante
+- `auto.inimigosdahplivequarentena` — INIMIGOS DA HP LIVE QUARENTENA
+- `auto.interestelar` — INTERESTELAR
+- `auto.intersect2020leg` — INTERSECT (2020) LEG
+- `auto.invasaobolchevique` — Invasao Bolchevique
+- `auto.investigacaoparalelaoassassinatodemariellefranco` — Investigacao Paralela O Assassinato de Marielle Franco
+- `auto.irmaosdehonra` — IRMÃOS DE HONRA
+- `auto.itraisportd` — IT RAI SPORT (D)
+- `auto.itskysportsf1` — IT SKY SPORTS F1
+- `auto.ivyandbean` — IVY E BEAN
+- `auto.ivyandbeanentramnadanca` — IVY E BEAN ENTRAM NA DANÇA
+- `auto.ivyandbeanofantasmadobanheiro` — IVY E BEAN O FANTASMA DO BANHEIRO
+- `auto.jackocacadordegigantes` — JACK O CAÇADOR DE GIGANTES
+- `auto.jaco` — JACÓ
+- `auto.jadesasylum2020leg` — JADE'S ASYLUM (2020) LEG
+- `auto.jadsandjadsonlivedosbrutos` — JADS E JADSON LIVE DOS BRUTOS
+- `auto.jeremias` — JEREMIAS
+- `auto.jesusamaiorhistoriadetodosostempos` — JESUS A MAIOR HISTÓRIA DE TODOS OS TEMPOS
+- `auto.jesusdenazareofilhodedeus2019leg` — JESUS DE NAZARÉ O FILHO DE DEUS (2019) LEG
+- `auto.jesusseguindoospassosdomessias` — JESUS SEGUINDO OS PASSOS DO MESSIAS
+- `auto.jillandjoyandosegredodoorfanato` — JILL E JOY E O SEGREDO DO ORFANATO
+- `auto.jiujitsu` — JIU JITSU
+- `auto.jorgeandmateuslivenagaragem` — JORGE E MATEUS LIVE NA GARAGEM
+- `auto.jose` — JOSÉ
+- `auto.josedoegito24h` — JOSE DO EGITO 24H
+- `auto.josedoegitoofilme` — JOSÉ DO EGITO O FILME
+- `auto.joseopaidejesus` — JOSÉ, O PAI DE JESUS
+- `auto.jovensbruxasnovairmandade` — JOVENS BRUXAS NOVA IRMANDADE
+- `auto.jumanjibemvindoaselva` — JUMANJI BEM VINDO A SELVA
+- `auto.jumanjiproximafase` — JUMANJI PROXIMA FASE
+- `auto.junge` — JUNG E
+- `auto.junglecruise` — JUNGLE CRUISE
+- `auto.juntosparasempre` — JUNTOS PARA SEMPRE
+- `auto.jurassicpark3` — JURASSIC PARK 3
+- `auto.jurassicparkoparquedosdinossauros` — JURASSIC PARK O PARQUE DOS DINOSSAUROS
+- `auto.jurassicworlddominio` — JURASSIC WORLD DOMÍNIO
+- `auto.jurassicworldomundodosdinossauros` — JURASSIC WORLD O MUNDO DOS DINOSSAUROS
+- `auto.jurassicworldreinoameacado` — JURASSIC WORLD REINO AMEAÇADO
+- `auto.kaamelottparte1` — KAAMELOTT PARTE 1
+- `auto.kallysmashupumaniversariomuitokally` — KALLY'S MASHUP! UM ANIVERSARIO MUITO KALLY!
+- `auto.kartnervoso` — Kart Nervoso
+- `auto.keniaosaog2025leg` — KENIA OS A OG (2025) LEG
+- `auto.kidsmais` — KIDS MAIS
+- `auto.kongailhadacaveira` — KONG A ILHA DA CAVEIRA
+- `auto.kronehit` — KRONE HIT
+- `auto.laminados47ronins` — LÂMINA DOS 47 RONINS
+- `auto.legodcaquamanafuriadeatlantida` — LEGO DC Aquaman – A Fúria de Atlântida
+- `auto.lembrancassombrias` — LEMBRANÇAS SOMBRIAS
+- `auto.lenita` — Lenita
+- `auto.letsdance` — LET'S DANCE
+- `auto.liaofilme` — LIA O FILME
+- `auto.lilolilocrocodilo` — LILO, LILO, CROCODILO
+- `auto.livealexandrepires` — LIVE ALEXANDRE PIRES
+- `auto.livedopoderoso` — LIVE DO PODEROSO
+- `auto.livefernandoandsorocaba` — LIVE FERNANDO E SOROCABA
+- `auto.livehenriqueandjuliano1904` — LIVE HENRIQUE E JULIANO 19 04
+- `auto.livejoaoboscoandvinicius` — LIVE JOAO BOSCO E VINICIUS
+- `auto.livemanowalter` — LIVE MANO WALTER
+- `auto.liveosmenotti` — LIVE OS MENOTTI
+- `auto.liverobertocarlos` — LIVE ROBERTO CARLOS
+- `auto.lobisomemnanoite` — LOBISOMEM NA NOITE
+- `auto.loboguerreiro2` — LOBO GUERREIRO 2
+- `auto.lovenature` — LOVE NATURE
+- `auto.luadejupiter` — LUA DE JÚPITER
+- `auto.lugardemulher` — Lugar de Mulher
+- `auto.lutapelafeahistoriadopadrestu` — LUTA PELA FÉ A HISTÓRIA DO PADRE STU
+- `auto.lx20482020leg` — LX 2048 (2020) LEG
+- `auto.maexandroides` — MÃE X ANDROIDES
+- `auto.magiainvertida` — MAGIA INVERTIDA
+- `auto.mahalia` — MAHALIA
+- `auto.maisforcaandflexibilidade` — Mais força e flexibilidade
+- `auto.malvadazefelipe` — Malvada Zé Felipe
+- `auto.mandachuvaofilme` — Manda Chuva O Filme
+- `auto.maquinadodesejo` — Maquina do Desejo
+- `auto.maquinasmortais` — MÁQUINAS MORTAIS
+- `auto.marcadospelaguerra` — MARCADOS PELA GUERRA
+- `auto.marcoandbeluttilive` — MARCO E BELUTTI LIVE
+- `auto.mariaandjoaoocontodasbruxas` — MARIA E JOÃO O CONTO DAS BRUXAS
+- `auto.mariamaedofilhodedeus` — MARIA MAE DO FILHO DE DEUS
+- `auto.mariliamendoncalivequarentena` — MARILIA MENDONCA LIVE QUARENTENA
+- `auto.marjorieprime` — MARJORIE PRIME
+- `auto.marujosdoamor` — MARUJOS DO AMOR
+- `auto.mashaandoursoofilme` — Masha e o Urso O Filme
+- `auto.mastershowtv` — MASTER SHOW TV
+- `auto.matildaomusical` — MATILDA O MUSICAL
+- `auto.maverick` — MAVERICK
+- `auto.max09` — MAX 09
+- `auto.max10` — MAX 10
+- `auto.maxwinslowandthehouseofsecrets` — MAX WINSLOW AND THE HOUSE OF SECRETS
+- `auto.mazarropiojecaandaeguamilagrosa` — MAZARROPI O JECA E A EGUA MILAGROSA
+- `auto.mazarropiportugalminhasaudade` — MAZARROPI PORTUGAL MINHA SAUDADE
+- `auto.mazzaropiabandadasvelhasvirgens` — MAZZAROPI A BANDA DAS VELHAS VIRGENS
+- `auto.mazzaropiacarrocinha` — MAZZAROPI A CARROCINHA
+- `auto.mazzaropiasaventurasdepedromalasartes` — MAZZAROPI AS AVENTURAS DE PEDRO MALASARTES
+- `auto.mazzaropibetaoroncaferro` — MAZZAROPI BETÃO RONCA FERRO
+- `auto.mazzaropicandinho` — MAZZAROPI CANDINHO
+- `auto.mazzaropicasinhapequenina` — MAZZAROPI CASINHA PEQUENINA
+- `auto.mazzaropichicofumaca` — MAZZAROPI CHICO FUMAÇA
+- `auto.mazzaropichoferdepraca` — MAZZAROPI CHOFER DE PRAÇA
+- `auto.mazzaropifuzileirodoamor` — MAZZAROPI FUZILEIRO DO AMOR
+- `auto.mazzaropijecaandseufilhopreto` — MAZZAROPI JECA E SEU FILHO PRETO
+- `auto.mazzaropijecacontraocapeta` — MAZZAROPI JECA CONTRA O CAPETA
+- `auto.mazzaropijecaoumfofoqueironoceu` — MAZZAROPI JECÃO UM FOFOQUEIRO NO CÉU
+- `auto.mazzaropimeujapaobrasileiro` — MAZZAROPI MEU JAPAO BRASILEIRO
+- `auto.mazzaropinadandoemdinheiro` — MAZZAROPI NADANDO EM DINHEIRO
+- `auto.mazzaropinoparaisodassolteironas` — MAZZAROPI NO PARAISO DAS SOLTEIRONAS
+- `auto.mazzaropiocineastadasplateias` — MAZZAROPI O CINEASTA DAS PLATÉIAS
+- `auto.mazzaropiocorintiano` — MAZZAROPI O CORINTIANO
+- `auto.mazzaropiogatodemadame` — MAZZAROPI O GATO DE MADAME
+- `auto.mazzaropiograndexerife` — MAZZAROPI O GRANDE XERIFE
+- `auto.mazzaropiojecaandafreira` — MAZZAROPI O JECA E A FREIRA
+- `auto.mazzaropiojecamacumbeiro` — MAZZAROPI O JECA MACUMBEIRO
+- `auto.mazzaropiolamparina` — MAZZAROPI O LAMPARINA
+- `auto.mazzaropionoivodagirafa` — MAZZAROPI O NOIVO DA GIRAFA
+- `auto.mazzaropiopuritanodaruaaugusta` — MAZZAROPI O PURITANO DA RUA AUGUSTA
+- `auto.mazzaropiovendedordelinguica` — MAZZAROPI O VENDEDOR DE LINGUICA
+- `auto.mazzaropitristezadojeca` — MAZZAROPI TRISTEZA DO JECA
+- `auto.mazzaropiumapistolaparadjeca` — MAZZAROPI UMA PISTOLA PARA DJECA
+- `auto.mazzaropiumcaipiraembariloche` — MAZZAROPI UM CAIPIRA EM BARILOCHE
+- `auto.mazzaropizedoperiquito` — MAZZAROPI ZÉ DO PERIQUITO
+- `auto.memoriasufocada` — Memoria Sufocada
+- `auto.mentiraincondicional` — MENTIRA INCONDICIONAL
+- `auto.mestresdoyinyangosonhodaeternidade2020leg` — MESTRES DO YIN YANG O SONHO DA ETERNIDADE (2020) LEG
+- `auto.meualbumdeamores` — MEU ÁLBUM DE AMORES
+- `auto.meuamigorobo` — MEU AMIGO ROBÔ
+- `auto.meumalvadofavorito` — Meu Malvado Favorito
+- `auto.meumalvadofavorito2` — Meu Malvado Favorito 2
+- `auto.meumalvadofavorito3` — Meu Malvado Favorito 3
+- `auto.meupapaiandnoel` — MEU PAPAI É NOEL
+- `auto.meusangueferveporvoce` — MEU SANGUE FERVE POR VOCÊ
+- `auto.midasman2024leg` — MIDAS MAN (2024) LEG
+- `auto.missaopijamas` — MISSÃO PIJAMAS
+- `auto.misteriodaspalavrascruzadasaquedafatal` — MISTÉRIO DAS PALAVRAS CRUZADAS A QUEDA FATAL
+- `auto.mls01` — MLS 01
+- `auto.mls02` — MLS 02
+- `auto.mls04` — MLS 04
+- `auto.mls05` — MLS 05
+- `auto.mls06` — MLS 06
+- `auto.mls07` — MLS 07
+- `auto.mls08` — MLS 08
+- `auto.mls09` — MLS 09
+- `auto.mls10` — MLS 10
+- `auto.mls11` — MLS 11
+- `auto.moglientredoismundos` — MOGLI ENTRE DOIS MUNDOS
+- `auto.mogliomeninolobo` — MOGLI O MENINO LOBO
+- `auto.mogulmowgli` — MOGUL MOWGLI
+- `auto.monsieuraznavour2024leg` — MONSIEUR AZNAVOUR (2024) LEG
+- `auto.moonfallameacalunar` — MOONFALL AMEAÇA LUNAR
+- `auto.moonwalker` — MOONWALKER
+- `auto.morbius` — MORBIUS
+- `auto.morcegonegro` — Morcego Negro
+- `auto.mortal` — MORTAL
+- `auto.mortemortemorte` — MORTE, MORTE, MORTE
+- `auto.mortenonilo` — MORTE NO NILO
+- `auto.mosul` — MOSUL
+- `auto.motoqueirofantasma` — MOTOQUEIRO FANTASMA
+- `auto.motoqueirofantasmaespiritodevinganca` — MOTOQUEIRO FANTASMA ESPIRITO DE VINGANCA
+- `auto.movimentodejesus` — MOVIMENTO DE JESUS
+- `auto.mrolympia2025` — MR OLYMPIA 2025
+- `auto.mtv00s` — MTV 00s
+- `auto.mudo` — MUDO
+- `auto.mulan` — MULAN
+- `auto.mundoemcaos` — MUNDO EM CAOS
+- `auto.musesimulationtheory2020leg` — MUSE SIMULATION THEORY (2020) LEG
+- `auto.music` — MUSIC
+- `auto.musicaamigosandfesta` — MÚSICA, AMIGOS E FESTA
+- `auto.mussumumfilmedocacildis` — Mussum Um Filme do Cacildis
+- `auto.mxfoxsports2mexico` — MX FOX SPORTS 2 MEXICO
+- `auto.mxfoxsports3mexico` — MX FOX SPORTS 3 MEXICO
+- `auto.mylittleponynovageracao` — My Little Pony Nova Geração
+- `auto.myson` — My Son
+- `auto.mytimemovienetworkbrazil` — MYTIME MOVIE NETWORK BRAZIL
+- `auto.nabatidadoamor` — NA BATIDA DO AMOR
+- `auto.nadaaperder` — NADA A PERDER
+- `auto.nadadenovonofront` — NADA DE NOVO NO FRONT
+- `auto.nadandopeloouro` — NADANDO PELO OURO
+- `auto.namiradoatirador` — NA MIRA DO ATIRADOR
+- `auto.nanaturezaselvagem` — NA NATUREZA SELVAGEM
+- `auto.naofecheosolhos` — NÃO FECHE OS OLHOS
+- `auto.naoolheparatras` — NÃO OLHE PARA TRÁS
+- `auto.narvik` — NARVIK
+- `auto.nascidaparacantar` — NASCIDA PARA CANTAR
+- `auto.naselva` — NA SELVA
+- `auto.natalcomosescolhidosnoitesanta` — NATAL COM OS ESCOLHIDOS NOITE SANTA
+- `auto.natalem8bits` — NATAL EM 8 BITS
+- `auto.natalemhollywood` — NATAL EM HOLLYWOOD
+- `auto.naturetime` — NATURE TIME
+- `auto.naviodaxuxa` — NAVIO DA XUXA
+- `auto.nbabrasil` — NBA BRASIL
+- `auto.nbaleaguepass07` — NBA LEAGUE PASS 07*
+- `auto.nbaleaguepass08` — NBA LEAGUE PASS 08*
+- `auto.nbaleaguepass09` — NBA LEAGUE PASS 09*
+- `auto.nbaleaguepass11ppv` — NBA LEAGUE PASS 11 (PPV)
+- `auto.nbaleaguepass12ppv` — NBA LEAGUE PASS 12 (PPV)
+- `auto.nbapass01` — NBA PASS 01
+- `auto.nbapass02` — NBA PASS 02
+- `auto.nbapass03` — NBA PASS 03
+- `auto.nbapass04` — NBA PASS 04
+- `auto.nbapass05` — NBA PASS 05
+- `auto.nbatv` — NBA TV
+- `auto.nbr` — NBR
+- `auto.neirud` — Neirud
+- `auto.nerveumjogosemregras` — NERVE UM JOGO SEM REGRAS
+- `auto.newbrasil` — NEW BRASIL
+- `auto.nfl` — NFL
+- `auto.nfl10` — NFL 10
+- `auto.nfl11` — NFL 11
+- `auto.nfl12` — NFL 12
+- `auto.nfl13` — NFL 13
+- `auto.nfl14` — NFL 14
+- `auto.nfl15` — NFL 15
+- `auto.nfl16` — NFL 16
+- `auto.nfl7` — NFL 7
+- `auto.nfl8` — NFL 8
+- `auto.nfl9` — NFL 9
+- `auto.nflfinalkansascitychiefsvsphiladelhpiaeagles` — NFL Final Kansas City Chiefs vs Philadelhpia Eagles
+- `auto.nflgamepass01` — NFL GAME PASS 01*
+- `auto.nflgamepass02` — NFL GAME PASS 02*
+- `auto.nflgamepass03` — NFL GAME PASS 03*
+- `auto.nflgamepass04` — NFL GAME PASS 04*
+- `auto.nflgamepass05` — NFL GAME PASS 05*
+- `auto.nflgamepass06` — NFL GAME PASS 06*
+- `auto.nflgamepass07` — NFL GAME PASS 07*
+- `auto.nflgamepass08` — NFL GAME PASS 08*
+- `auto.nflgamepass09` — NFL GAME PASS 09*
+- `auto.nflgamepass10` — NFL GAME PASS 10*
+- `auto.nflnetwork` — NFL NETWORK
+- `auto.nfltv` — NFL TV
+- `auto.nine` — NINE
+- `auto.noceudapatrianesseinstante` — No Ceu da Patria Nesse Instante
+- `auto.nocoracaodaescuridao` — NO CORAÇÃO DA ESCURIDÃO
+- `auto.noitariosdearrepiar` — NOITÁRIOS DE ARREPIAR
+- `auto.nolimitedoamanha` — NO LIMITE DO AMANHA
+- `auto.nolimites05e00` — No Limite S05E00
+- `auto.nolimites05e01` — No Limite S05E01
+- `auto.nolimites05e02` — No Limite S05E02
+- `auto.nolimites05e03` — No Limite S05E03
+- `auto.nolimites05e04` — No Limite S05E04
+- `auto.nolimites05e05` — No Limite S05E05
+- `auto.nolimites05e06` — No Limite S05E06
+- `auto.nolimites05e07` — No Limite S05E07
+- `auto.nolimites05e08` — No Limite S05E08
+- `auto.nolimites05e09` — No Limite S05E09
+- `auto.nolimites05e10` — No Limite S05E10
+- `auto.nolimites05e11` — No Limite S05E11
+- `auto.nolimites06e01` — No Limite S06E01
+- `auto.nolimites06e02` — No Limite S06E02
+- `auto.nolimites06e03` — No Limite S06E03
+- `auto.nolimites06e04` — No Limite S06E04
+- `auto.nolimites06e05` — No Limite S06E05
+- `auto.nolimites06e06` — No Limite S06E06
+- `auto.nolimites06e07` — No Limite S06E07
+- `auto.nolimites06e08` — No Limite S06E08
+- `auto.nolimites06e09` — No Limite S06E09
+- `auto.nolimites06e10` — No Limite S06E10
+- `auto.nolimites06e11` — No Limite S06E11
+- `auto.nolimites06e12` — No Limite S06E12
+- `auto.nolimites06e13` — No Limite S06E13
+- `auto.nolimites06e14` — No Limite S06E14
+- `auto.nolimites06e15` — No Limite S06E15
+- `auto.nolimites06e16` — No Limite S06E16
+- `auto.nolimites06e17` — No Limite S06E17
+- `auto.nolimites06e18` — No Limite S06E18
+- `auto.nolimites06e19` — No Limite S06E19
+- `auto.nolimites06e20` — No Limite S06E20
+- `auto.nolimites07e01` — No Limite S07E01
+- `auto.nolimites07e02` — No Limite S07E02
+- `auto.nolimites07e03` — No Limite S07E03
+- `auto.nolimites07e04` — No Limite S07E04
+- `auto.nolimites07e05` — No Limite S07E05
+- `auto.nolimites07e06` — No Limite S07E06
+- `auto.nolimites07e07` — No Limite S07E07
+- `auto.nolimites07e08` — No Limite S07E08
+- `auto.nolimites07e09` — No Limite S07E09
+- `auto.nolimites07e10` — No Limite S07E10
+- `auto.nomansland2021leg` — NO MAN'S LAND (2021) LEG
+- `auto.noritmodadanca` — NO RITMO DA DANÇA
+- `auto.noritmodafe` — NO RITMO DA FÉ
+- `auto.nossonatalnafazenda` — NOSSO NATAL NA FAZENDA
+- `auto.nsports01` — Nsports 01
+- `auto.nsports02` — Nsports 02
+- `auto.nsports03` — NSPORTS 03
+- `auto.nsports04` — NSPORTS 04
+- `auto.nsports5` — NSPORTS 5
+- `auto.nssports01` — NS SPORTS 01
+- `auto.nssports02` — NS SPORTS 02
+- `auto.oapocalipse` — O APOCALIPSE
+- `auto.oassassinodaminhafilha` — O Assassino da Minha Filha
+- `auto.oassassinodoriogreen` — O Assassino do Rio Green
+- `auto.obanqueirodaresistencia` — O BANQUEIRO DA RESISTÊNCIA
+- `auto.obarco` — O BARCO
+- `auto.obombardeio` — O BOMBARDEIO
+- `auto.obomgiganteamigo` — O BOM GIGANTE AMIGO
+- `auto.ocacadorderecompensas` — O CAÇADOR DE RECOMPENSAS
+- `auto.ocaldeiraomagico` — O Caldeirão Mágico
+- `auto.ocaminhoparaaeternidade` — O CAMINHO PARA A ETERNIDADE
+- `auto.ocaoandaraposa` — O Cão e a Raposa
+- `auto.ocaoandaraposa2` — O Cão e a Raposa 2
+- `auto.ocarpinteiroemseuspassosoquefariajesusparte2` — O CARPINTEIRO EM SEUS PASSOS O QUE FARIA JESUS? PARTE 2
+- `auto.ocavaleirododragao` — O Cavaleiro do Dragão
+- `auto.ocavaleirosolitario` — O CAVALEIRO SOLITÁRIO
+- `auto.ochamadodedeus` — O CHAMADO DE DEUS
+- `auto.ocoro` — O CORO
+- `auto.odespertardotigre` — O DESPERTAR DO TIGRE
+- `auto.odessa` — O'DESSA
+- `auto.odiadepoisdeamanha` — O DIA DEPOIS DE AMANHÃ
+- `auto.odiaemqueaterraparou` — O DIA EM QUE A TERRA PAROU
+- `auto.odilemadasredes` — O Dilema das Redes
+- `auto.odomdaserpente` — O DOM DA SERPENTE
+- `auto.odoutordafelicidade` — O DOUTOR DA FELICIDADE
+- `auto.oduelo` — O DUELO
+- `auto.oelevador` — O ELEVADOR
+- `auto.oenfermeirodanoite` — O ENFERMEIRO DA NOITE
+- `auto.oespacoentrenos` — O ESPAÇO ENTRE NÓS
+- `auto.oespetacularhomemaranha` — O ESPETACULAR HOMEM ARANHA
+- `auto.oespetacularhomemaranha2aameacadeelectro` — O ESPETACULAR HOMEM ARANHA 2 A AMEAÇA DE ELECTRO
+- `auto.oestesemlei` — OESTE SEM LEI
+- `auto.oexterminadordofuturo` — O EXTERMINADOR DO FUTURO
+- `auto.oexterminadordofuturo2ojulgamentofinal` — O EXTERMINADOR DO FUTURO 2 O JULGAMENTO FINAL
+- `auto.oexterminadordofuturo3arebeliaodasmaquinas` — O EXTERMINADOR DO FUTURO 3 A REBELIÃO DAS MÁQUINAS
+- `auto.oexterminadordofuturo4asalvacao` — O EXTERMINADOR DO FUTURO 4 A SALVAÇÃO
+- `auto.oexterminadordofuturodestinosombrio` — O EXTERMINADOR DO FUTURO DESTINO SOMBRIO
+- `auto.oexterminadordofuturogenesis` — O EXTERMINADOR DO FUTURO GÊNESIS
+- `auto.ofantasticohalloweendotubacao` — O Fantástico Halloween do Tubacão
+- `auto.ofilhodedeus` — O FILHO DE DEUS
+- `auto.ofilmedosespiritos` — O FILME DOS ESPÍRITOS
+- `auto.ofurioso` — O FURIOSO
+- `auto.ograndeivan` — O GRANDE IVAN
+- `auto.ogrinchmusical` — O GRINCH MUSICAL
+- `auto.oguardiaodosmundos` — O GUARDIÃO DOS MUNDOS
+- `auto.ohobbitabatalhadoscincoexercitos` — O HOBBIT A BATALHA DOS CINCO EXÉRCITOS
+- `auto.ohobbitadesolacaodesmaug` — O HOBBIT A DESOLAÇÃO DE SMAUG
+- `auto.ohobbitumajornadainesperada` — O HOBBIT UMA JORNADA INESPERADA
+- `auto.ohomemagua` — O HOMEM ÁGUA
+- `auto.ohomemdaagua2021leg` — O HOMEM DA ÁGUA (2021) LEG
+- `auto.oincrivelhulk` — O INCRÍVEL HULK
+- `auto.ojardimdafe` — O JARDIM DA FÉ
+- `auto.ojardimsecreto2020leg` — O JARDIM SECRETO (2020) LEG
+- `auto.olabirintodofauno` — O LABIRINTO DO FAUNO
+- `auto.olardascriancaspeculiares` — O LAR DAS CRIANÇAS PECULIARES
+- `auto.olegadodeosirisficcaocientificavolume1` — O LEGADO DE OSIRIS FICÇÃO CIENTÍFICA VOLUME 1
+- `auto.olegionario` — O LEGIONÁRIO
+- `auto.oliviarodrigogutsworldtour2024leg` — OLIVIA RODRIGO GUTS WORLD TOUR (2024) LEG
+- `auto.olivrodeclarence` — O LIVRO DE CLARENCE
+- `auto.oloboandoleao` — O LOBO E O LEÃO
+- `auto.omagicodeoz` — O MÁGICO DE OZ
+- `auto.omatador` — O MATADOR
+- `auto.omelhordaneve` — O MELHOR DA NEVE
+- `auto.omelhordomundo` — O MELHOR DO MUNDO
+- `auto.omeninodopijamalistrado` — O MENINO DO PIJAMA LISTRADO
+- `auto.omeninoquequeriaserrei` — O MENINO QUE QUERIA SER REI
+- `auto.omilagre` — O MILAGRE
+- `auto.omilagredelourdes` — O MILAGRE DE LOURDES
+- `auto.omilagreemcokeville` — O MILAGRE EM COKEVILLE
+- `auto.omisteriodacasaassombrada` — O MISTÉRIO DA CASA ASSOMBRADA
+- `auto.omisteriodesilverlake` — O MISTÉRIO DE SILVER LAKE
+- `auto.omisteriodorelogionaparede` — O MISTÉRIO DO RELÓGIO NA PAREDE
+- `auto.omundoperdidojurassicpark` — O MUNDO PERDIDO JURASSIC PARK
+- `auto.onatalmagico` — O NATAL MÁGICO
+- `auto.ondeosfracosnaotemvez` — ONDE OS FRACOS NAO TEM VEZ
+- `auto.onefootball4` — ONE FOOTBALL 4
+- `auto.oneshotcomedsheeran2025leg` — ONE SHOT COM ED SHEERAN (2025) LEG
+- `auto.ooutroladodoceu` — O OUTRO LADO DO CÉU
+- `auto.ooutroladodoceu2fogodafe` — O OUTRO LADO DO CÉU 2 FOGO DA FÉ
+- `auto.opapaquevenceuocomunismo` — O Papa que Venceu o Comunismo
+- `auto.operacaoresgatecavernanatailandia` — Operacao Resgate Caverna na Tailandia
+- `auto.opoco` — O POÇO
+- `auto.opoderdaoracao` — O PODER DA ORAÇÃO
+- `auto.opoderosochefaoopoderosochefao` — O PODEROSO CHEFÃOO PODEROSO CHEFÃO
+- `auto.opoderosochefaoparteii` — O PODEROSO CHEFÃO PARTE II
+- `auto.opoderosochefaoparteiii` — O PODEROSO CHEFÃO PARTE III
+- `auto.opoderosochefinho2negociosdafamilia` — O Poderoso Chefinho 2 Negócios da Família
+- `auto.oprimeirohomem` — O PRIMEIRO HOMEM
+- `auto.oprincipeesquecido` — O PRÍNCIPE ESQUECIDO
+- `auto.oprojetoadam` — O PROJETO ADAM
+- `auto.oprotegido` — O PROTEGIDO
+- `auto.oprotocolodeauschwitz` — O PROTOCOLO DE AUSCHWITZ
+- `auto.oprototipo` — O PROTÓTIPO
+- `auto.oquartosecreto` — O QUARTO SECRETO
+- `auto.oqueaconteceucomoreidosgolfinhos` — O Que Aconteceu com o Rei dos Golfinhos?
+- `auto.oquebranozesandosquatroreinos` — O QUEBRA NOZES E OS QUATRO REINOS
+- `auto.oregresso` — O REGRESSO
+- `auto.oreileao` — O REI LEÃO
+- `auto.oreileaonohollywoodbowl2025leg` — O REI LEAO NO HOLLYWOOD BOWL (2025) LEG
+- `auto.oreimacacoalendacomeca` — O REI MACACO A LENDA COMEÇA
+- `auto.oresgate` — O Resgate
+- `auto.oresgatederuby` — O RESGATE DE RUBY
+- `auto.oresgatedosoldadoryan` — O RESGATE DO SOLDADO RYAN
+- `auto.oretornodejohnhenry` — O RETORNO DE JOHN HENRY
+- `auto.orfeudocarnaval` — ORFEU DO CARNAVAL
+- `auto.os6ridiculos` — OS 6 RIDÍCULOS
+- `auto.os800` — OS 800
+- `auto.osaeronautas` — OS AERONAUTAS
+- `auto.oscantores` — OS CANTORES
+- `auto.osdonosdaverdade` — Os Donos da Verdade
+- `auto.osenhordosaneisasduastorres` — O SENHOR DOS ANÉIS AS DUAS TORRES
+- `auto.osenhordosaneisasociedadedoanel` — O SENHOR DOS ANÉIS A SOCIEDADE DO ANEL
+- `auto.osenhordosaneisoretornodorei` — O SENHOR DOS ANÉIS O RETORNO DO REI
+- `auto.osesquecidos` — OS ESQUECIDOS
+- `auto.osimperdoaveis` — OS IMPERDOÁVEIS
+- `auto.osindomaveis` — OS INDOMÁVEIS
+- `auto.osinfratores` — OS INFRATORES
+- `auto.osirmaossisters` — OS IRMAOS SISTERS
+- `auto.osmonstros` — OS MONSTROS
+- `auto.osnovosmutantes` — OS NOVOS MUTANTES
+- `auto.osoitosodiados` — OS OITOS ODIADOS
+- `auto.osoldadoquenaoexistiu` — O SOLDADO QUE NAO EXISTIU
+- `auto.osomdaalma` — O SOM DA ALMA
+- `auto.osomdafe` — O SOM DA FÉ
+- `auto.osomdosilencio` — O SOM DO SILÊNCIO
+- `auto.osossosdasaudade` — Os Ossos da Saudade
+- `auto.ospiratasembuscadotesouroperdido` — OS PIRATAS EM BUSCA DO TESOURO PERDIDO
+- `auto.ostenisencantados` — OS TÊNIS ENCANTADOS
+- `auto.osursinhosdeyellowstone` — Os Ursinhos de Yellowstone
+- `auto.osvingadorestheavengers` — OS VINGADORES THE AVENGERS
+- `auto.oultimodesejodesardar` — O ÚLTIMO DESEJO DE SARDAR
+- `auto.oultimodragao` — O ÚLTIMO DRAGÃO
+- `auto.oultimoduelo` — O ÚLTIMO DUELO
+- `auto.oultimotrempronatal` — O ÚLTIMO TREM PRO NATAL
+- `auto.ouroandcobica` — OURO E COBIÇA
+- `auto.ovice` — O VICE
+- `auto.paiemdobro` — PAI EM DOBRO
+- `auto.paixaoperigosa` — PAIXÃO PERIGOSA
+- `auto.palauumhomemdefe` — PALAU UM HOMEM DE FÉ
+- `auto.panteranegra` — PANTERA NEGRA
+- `auto.panteranegrawakandaparasempre` — PANTERA NEGRA WAKANDA PARA SEMPRE
+- `auto.papafranciscoconquistandocoracoes` — PAPA FRANCISCO CONQUISTANDO CORAÇÕES
+- `auto.paramountplus5` — PARAMOUNT PLUS 5
+- `auto.paramountplus6` — PARAMOUNT PLUS 6
+- `auto.paramountplus7` — PARAMOUNT PLUS 7
+- `auto.paramountpluspltf01` — PARAMOUNT PLUS PLTF 01
+- `auto.paramountpluspltf02` — PARAMOUNT PLUS PLTF 02
+- `auto.paramountpluspltf03` — PARAMOUNT PLUS PLTF 03
+- `auto.pararelaxarandtranquilizar` — Para relaxar e tranquilizar
+- `auto.passageiroacidental` — PASSAGEIRO ACIDENTAL
+- `auto.paternidade` — PATERNIDADE
+- `auto.pauloapostolodecristo` — PAULO, APÓSTOLO DE CRISTO
+- `auto.paulodetarso` — PAULO DE TARSO
+- `auto.pedrocoelho2ofugitivo` — PEDRO COELHO 2 O FUGITIVO
+- `auto.pegueabala` — PEGUE A BALA
+- `auto.pendragonacoragemdeumguerreiro` — PENDRAGON A CORAGEM DE UM GUERREIRO
+- `auto.pequenasempresasandgrandesnegocioss01e01` — Pequenas Empresas & Grandes Negocios S01E01
+- `auto.pequenasempresasandgrandesnegocioss01e02` — Pequenas Empresas & Grandes Negocios S01E02
+- `auto.pequenasempresasandgrandesnegocioss01e03` — Pequenas Empresas & Grandes Negocios S01E03
+- `auto.pequenasempresasandgrandesnegocioss01e04` — Pequenas Empresas & Grandes Negocios S01E04
+- `auto.pequenasempresasandgrandesnegocioss01e05` — Pequenas Empresas & Grandes Negocios S01E05
+- `auto.pequenasempresasandgrandesnegocioss01e06` — Pequenas Empresas & Grandes Negocios S01E06
+- `auto.pequenasempresasandgrandesnegocioss01e07` — Pequenas Empresas & Grandes Negocios S01E07
+- `auto.pequenasempresasandgrandesnegocioss01e08` — Pequenas Empresas & Grandes Negocios S01E08
+- `auto.pequenasempresasandgrandesnegocioss01e09` — Pequenas Empresas & Grandes Negocios S01E09
+- `auto.pequenosgrandesherois` — PEQUENOS GRANDES HEROIS
+- `auto.perderbarriga` — Perder barriga
+- `auto.perdidopracachorro` — Perdido pra Cachorro
+- `auto.perdidopracachorro2` — Perdido pra Cachorro 2
+- `auto.perdidopracachorro3` — Perdido pra Cachorro 3
+- `auto.pericleslive` — PERICLES LIVE
+- `auto.perigoiminente` — PERIGO IMINENTE
+- `auto.pernaandbumbum` — Perna e Bumbum
+- `auto.pesospesados` — PESOS PESADOS
+- `auto.picapauofilme` — Pica Pau O Filme
+- `auto.pilatesnacama` — Pilates na cama
+- `auto.pilotosdeguerra` — PILOTOS DE GUERRA
+- `auto.piratasdocaribeamaldicaodoperolanegra` — PIRATAS DO CARIBE A MALDIÇÃO DO PÉROLA NEGRA
+- `auto.piratasdocaribeavingancadesalazar` — PIRATAS DO CARIBE A VINGANÇA DE SALAZAR
+- `auto.piratasdocaribenavegandoemaguasmisteriosas` — PIRATAS DO CARIBE NAVEGANDO EM ÁGUAS MISTERIOSAS
+- `auto.piratasdocaribenofimdomundo` — PIRATAS DO CARIBE NO FIM DO MUNDO
+- `auto.piratasdocaribeobaudamorte` — PIRATAS DO CARIBE O BAÚ DA MORTE
+- `auto.plus18playboy` — [ PLUS 18] Playboy
+- `auto.postodecombate` — POSTO DE COMBATE
+- `auto.prateadosavidaemtemposdemadureza` — Prateados A Vida em Tempos de Madureza
+- `auto.presasnoparaiso` — PRESAS NO PARAÍSO
+- `auto.primeirachegada` — PRIMEIRA CHEGADA
+- `auto.primevideo1x` — PRIME VIDEO 1X
+- `auto.primevideoamazon01` — Prime Video Amazon 01
+- `auto.primevideoamazon02` — Prime Video Amazon 02
+- `auto.primevideoamazon03` — Prime Video Amazon 03
+- `auto.primevideoamazon04` — Prime Video Amazon 04
+- `auto.primevideoamazon05` — Prime Video Amazon 05
+- `auto.primevideoamazon1` — PRIME VIDEO AMAZON 1
+- `auto.primevideoamazon2` — PRIME VIDEO AMAZON 2
+- `auto.primevideoamazon3` — PRIME VIDEO AMAZON 3
+- `auto.primevideoamazon4` — PRIME VIDEO AMAZON 4
+- `auto.procurada` — PROCURADA
+- `auto.procurandofigaro` — PROCURANDO FÍGARO
+- `auto.procurasegonker` — PROCURA SE GONKER
+- `auto.profissaoreporters01e01` — Profissao Reporter S01E01
+- `auto.profissaoreporters01e02` — Profissao Reporter S01E02
+- `auto.profissaoreporters01e03` — Profissao Reporter S01E03
+- `auto.profissaoreporters01e04` — Profissao Reporter S01E04
+- `auto.profissaoreporters01e05` — Profissao Reporter S01E05
+- `auto.profissaoreporters01e06` — Profissao Reporter S01E06
+- `auto.profissaoreporters01e08` — Profissao Reporter S01E08
+- `auto.proximaparadanatal` — PRÓXIMA PARADA NATAL
+- `auto.pt24kitchen` — PT 24 KITCHEN
+- `auto.ptabolatv` — PT A BOLA TV
+- `auto.ptamc` — PT AMC
+- `auto.ptaxn` — PT AXN
+- `auto.ptaxnmovies` — PT AXN MOVIES
+- `auto.ptaxnwhite` — PT AXN WHITE
+- `auto.ptbtv1` — PT BTV 1
+- `auto.ptcacaandpesca` — PT CACA E PESCA
+- `auto.ptcacavision` — PT CACAVISION
+- `auto.ptcanal11` — PT CANAL 11
+- `auto.ptcanalpanda` — PT CANAL PANDA
+- `auto.ptcmtv` — PT CMTV
+- `auto.ptcnn` — PT CNN
+- `auto.ptcrimeplusinvestigation` — PT CRIME PLUS INVESTIGATION
+- `auto.ptdisney` — PT DISNEY
+- `auto.ptelevensport1` — PT ELEVEN SPORT 1
+- `auto.ptelevensport2` — PT ELEVEN SPORT 2
+- `auto.ptelevensport3` — PT ELEVEN SPORT 3
+- `auto.ptelevensport5` — PT ELEVEN SPORT 5
+- `auto.ptelevensports1` — PT ELEVEN SPORTS 1
+- `auto.ptelevensports1d` — PT ELEVEN SPORTS 1 (D)
+- `auto.ptelevensports2` — PT ELEVEN SPORTS 2
+- `auto.ptelevensports2d` — PT ELEVEN SPORTS 2 (D)
+- `auto.ptelevensports3` — PT ELEVEN SPORTS 3
+- `auto.ptelevensports3d` — PT ELEVEN SPORTS 3 (D)
+- `auto.ptelevensports4d` — PT ELEVEN SPORTS 4 (D)
+- `auto.ptelevensports5` — PT ELEVEN SPORTS 5
+- `auto.ptelevensports5d` — PT ELEVEN SPORTS 5 (D)
+- `auto.pteuronews` — PT EURONEWS
+- `auto.pteurosport1` — PT EUROSPORT 1
+- `auto.pteurosport2` — PT EUROSPORT 2
+- `auto.ptfoxcomedy` — PT FOX COMEDY
+- `auto.ptfoxcrime` — PT FOX CRIME
+- `auto.ptfoxlife` — PT FOX LIFE
+- `auto.ptfoxmovies` — PT FOX MOVIES
+- `auto.ptglobo` — PT GLOBO
+- `auto.ptglobonow` — PT GLOBO NOW
+- `auto.pthistoria` — PT HISTORIA
+- `auto.pthollywood` — PT HOLLYWOOD
+- `auto.ptidinvestigationdiscovery` — PT ID INVESTIGATION DISCOVERY
+- `auto.ptmotorvision` — PT MOTORVISION
+- `auto.ptmtvportugal` — PT MTV PORTUGAL
+- `auto.ptnickjr` — PT NICK JR
+- `auto.ptnosstudios` — PT NOS STUDIOS
+- `auto.ptodisseia` — PT ODISSEIA
+- `auto.ptpfc` — PT PFC
+- `auto.ptportocanal` — PT PORTO CANAL
+- `auto.ptrtp1` — PT RTP 1
+- `auto.ptrtp2` — PT RTP 2
+- `auto.ptrtp3` — PT RTP 3
+- `auto.ptrtpacores` — PT RTP ACORES
+- `auto.ptrtpafrica` — PT RTP AFRICA
+- `auto.ptrtpmadeira` — PT RTP MADEIRA
+- `auto.ptrtpmemoria` — PT RTP MEMORIA
+- `auto.ptsic` — PT SIC
+- `auto.ptsiccaras` — PT SIC CARAS
+- `auto.ptsicmulher` — PT SIC MULHER
+- `auto.ptsicnoticias` — PT SIC NOTICIAS
+- `auto.ptsicradical` — PT SIC RADICAL
+- `auto.ptsporttvnba` — PT SPORT TV NBA
+- `auto.ptsyfy` — PT SYFY
+- `auto.pttlc` — PT TLC
+- `auto.pttorostv` — PT TOROS TV
+- `auto.pttravel` — PT TRAVEL
+- `auto.pttvcineaction` — PT TV CINE ACTION
+- `auto.pttvcineedition` — PT TV CINE EDITION
+- `auto.pttvcineemotion` — PT TV CINE EMOTION
+- `auto.pttvcinetop` — PT TV CINE TOP
+- `auto.pttvi` — PT TVI
+- `auto.pttvi24` — PT TVI 24
+- `auto.pttvificcao` — PT TVI FICCAO
+- `auto.pttvireality` — PT TVI REALITY
+- `auto.pttvirealitycam1` — PT TVI REALITY CAM 1
+- `auto.pttvirealitycam2` — PT TVI REALITY CAM 2
+- `auto.pttvirealitycam3` — PT TVI REALITY CAM 3
+- `auto.pttvirealitycam4` — PT TVI REALITY CAM 4
+- `auto.pttvrecord` — PT TV RECORD
+- `auto.ptzapviva` — PT ZAP VIVA
+- `auto.pumpingiron` — Pumping Iron
+- `auto.quandotudopareceperdido` — QUANDO TUDO PARECE PERDIDO
+- `auto.queenrockmontreal2007leg` — QUEEN ROCK MONTREAL (2007) LEG
+- `auto.queimatotaldegordatreinohit` — Queima total de gorda Treino HIT
+- `auto.queimemuitagorduratreinohit` — Queime muita gordura Treino HIT
+- `auto.querosergrande` — QUERO SER GRANDE
+- `auto.radio96fmsomplusconteudo` — Rádio 96 FM Som PLUS conteúdo!
+- `auto.radio98fmatodahoraemtodolugar` — Rádio 98 FM A toda hora, em todo lugar!
+- `auto.radioassuncaocearense620am` — Rádio Assunção Cearense 620 AM
+- `auto.radiobandeirantes909fm863fmfechadacomvocefechadacomaverdade` — Rádio Bandeirantes 90 9 FM 86 3 FM Fechada com você, fechada com a verdade!
+- `auto.radiobandnewssp969fmemumsegundotudopodemudar` — Rádio BandNews SP 96 9 FM Em um segundo tudo pode mudar!
+- `auto.radiocaxias935fm` — Rádio Caxias 93 5 FM
+- `auto.radiocbnsaopaulo905fmaradioquetocanoticia` — Rádio CBN São Paulo 90 5 FM A rádio que toca notícia
+- `auto.radiocidade860amaradioqueescutavoce` — Rádio Cidade 860 AM A rádio que escuta você!
+- `auto.radiocidadedasaguas1013fmaradiodosmelhoresouvintes` — Rádio Cidade das Águas 101 3 FM A rádio dos melhores ouvintes
+- `auto.radiocultura965fmradiodojeitoquevocegosta` — Rádio Cultura 96 5 FM Rádio do jeito que você gosta!
+- `auto.radioculturadosinhamuns1055fmavozdaregiao` — Rádio Cultura dos Inhamuns 105 5 FM A Voz da Região
+- `auto.radiodifusora1070amamaispotentedaparaiba` — Rádio Difusora 1070 AM A Mais Potente da Paraíba
+- `auto.radiogaucha937fmafontedainformacao` — Rádio Gaúcha 93 7 FM A Fonte Da Informação
+- `auto.radiogrenal959fmaunicacomfutebol24horas` — Rádio Grenal 95 9 FM A única com futebol 24 horas!
+- `auto.radioitatiaia610am957fmaradiodeminas` — Rádio Itatiaia 610 AM 95 7 FM A Rádio de Minas
+- `auto.radiojornalderecife903fmpernambucofalandoparaomundo` — Rádio Jornal de Recife 90 3 FM Pernambuco falando para o mundo!
+- `auto.radiojovempannewsarededainformacao` — Rádio Jovem Pan News A rede da informação
+- `auto.radiosociedade740am1025fmaradiodabahia` — Rádio Sociedade 740 AM 102 5 FM A rádio da Bahia!
+- `auto.radiouniversidade1160amradiouniversidadenoarnovaspossibilidades` — Rádio Universidade 1160 AM Rádio Universidade, no ar, novas possibilidades!
+- `auto.rastrodemaldade` — RASTRO DE MALDADE
+- `auto.rastrosdeodio` — RASTROS DE ODIO
+- `auto.receitasfast` — RECEITAS FAST
+- `auto.recordbauru` — RECORD BAURU
+- `auto.recordcorreiopb` — RECORD CORREIO PB
+- `auto.recordes` — RECORD ES
+- `auto.recordflorianopolisscndtv` — RECORD FLORIANÓPOLIS SC NDTV
+- `auto.recordjuara` — RECORD JUARA
+- `auto.recordjuina` — RECORD JUINA
+- `auto.recordmt` — RECORD MT
+- `auto.recordnewsu4k` — RECORD NEWS U4K
+- `auto.recordpa` — RECORD PA
+- `auto.recordpajucaraal` — RECORD PAJUÇARA AL
+- `auto.recordpr` — RECORD PR
+- `auto.recordremansoma` — RECORD REMANSO MA
+- `auto.recordrictvmaringa` — RECORD RICTV MARINGA
+- `auto.recordrn` — RECORD RN
+- `auto.recordsantacatarina` — RECORD SANTA CATARINA
+- `auto.recordsc` — RECORD SC
+- `auto.recordsergipe` — RECORD SERGIPE
+- `auto.recordsicro` — RECORD SIC RO
+- `auto.recordthplus` — RECORD TH PLUS
+- `auto.recordto` — RECORD TO
+- `auto.recordtropical` — RECORD TROPICAL
+- `auto.recordtvbahia` — RECORDTV BAHIA
+- `auto.recordtvcorreiojoaopessoa` — RECORD TV CORREIO JOAO PESSOA
+- `auto.recordtvcuritiba` — RECORDTV CURITIBA
+- `auto.recordtvflorianopolis` — RECORDTV FLORIANOPOLIS
+- `auto.recordtvndtvflorianopolis` — RECORDTV NDTV FLORIANOPOLIS
+- `auto.recordtvrecife` — RECORDTV RECIFE
+- `auto.recordtvricmaringa` — RECORDTV RIC MARINGA
+- `auto.recordtvrntvtropical` — RECORDTV RN TV TROPICAL
+- `auto.recordtvsantacatarina` — RECORDTV SANTA CATARINA
+- `auto.recordtvsicrondonia` — RecordTV SIC Rondonia
+- `auto.recordtvvitoria` — RECORDTV VITORIA
+- `auto.recordvitoriaes` — RECORD VITORIA ES
+- `auto.redbadainvasaodosfrancos` — REDBAD A INVASÃO DOS FRANCOS
+- `auto.redbulltv` — REDBULL TV
+- `auto.redeamazonicacacoal` — REDE AMAZONICA CACOAL
+- `auto.redeamazonicacruzeirodosul` — REDE AMAZONICA CRUZEIRO DO SUL
+- `auto.redeamazonicamanacapuru` — REDE AMAZONICA MANACAPURU
+- `auto.redeamazonicarorainopolis` — REDE AMAZONICA RORAINOPOLIS
+- `auto.redegeniises` — REDE GENIISES
+- `auto.redegloborbstv` — REDE GLOBO RBS TV
+- `auto.redegloborbstvbage` — REDE GLOBO RBS TV BAGE
+- `auto.redemaisfamilia` — REDE MAIS FAMILIA
+- `auto.redeminas` — REDE MINAS
+- `auto.reflexosdafe` — REFLEXOS DA FÉ
+- `auto.refugio` — REFÚGIO
+- `auto.refugio2021leg` — REFÚGIO (2021) LEG
+- `auto.reggaeresistencia` — Reggae Resistência
+- `auto.reidoringueahistoriadejembelcher` — REI DO RINGUE A HISTÓRIA DE JEM BELCHER
+- `auto.reismagosvspapainoel` — REIS MAGOS VS PAPAI NOEL
+- `auto.relatosdeguerra` — RELATOS DE GUERRA
+- `auto.resgatenooeste` — RESGATE NO OESTE
+- `auto.resistencia` — RESISTÊNCIA
+- `auto.retornodalenda` — RETORNO DA LENDA
+- `auto.retromusic` — RETRO MUSIC
+- `auto.rockbrtv` — ROCK BR TV
+- `auto.rocketman` — ROCKETMAN
+- `auto.rocktv` — ROCK TV
+- `auto.roguewarfare3amortedeumanacao` — ROGUE WARFARE 3 A MORTE DE UMA NAÇÃO
+- `auto.rotinamatinal` — Rotina matinal
+- `auto.rotinaparamelhorarapostura` — Rotina para melhorar a postura
+- `auto.rs21` — RS21
+- `auto.rubikonpontosemretorno` — RUBIKON PONTO SEM RETORNO
+- `auto.runtimeacao` — RUNTIME ACAO
+- `auto.runtimebrasil` — RUNTIME BRASIL
+- `auto.runtimecomedia` — RUNTIME COMEDIA
+- `auto.runtimecrime` — RUNTIME CRIME
+- `auto.runtimefamilia` — RUNTIME FAMILIA
+- `auto.runtimefilmes` — RUNTIME FILMES
+- `auto.runtimeromance` — RUNTIME ROMANCE
+- `auto.safety` — SAFETY
+- `auto.salomao` — SALOMÃO
+- `auto.salsaofilmequente` — SALSA, O FILME QUENTE
+- `auto.salvopelagraca` — SALVO PELA GRAÇA
+- `auto.santoantoniodepadua` — SANTO ANTÔNIO DE PÁDUA
+- `auto.santuariodefatima` — SANTUÁRIO DE FÁTIMA
+- `auto.sbtallamandaro` — SBT ALLAMANDA RO
+- `auto.sbtaltamira` — SBT ALTAMIRA
+- `auto.sbtba` — SBT BA
+- `auto.sbtbahia` — SBT BAHIA
+- `auto.sbtcastanhaltvparaense` — SBT CASTANHAL TV PARAENSE
+- `auto.sbtcuiaba` — SBT CUIABA
+- `auto.sbtcuiabamt` — SBT CUIABA MT
+- `auto.sbtdifusora` — SBT DIFUSORA
+- `auto.sbtdifusorasaoluizdomaranhao` — SBT DIFUSORA SAO LUIZ DO MARANHAO
+- `auto.sbtfozdoiguacu` — SBT FOZ DO IGUACU
+- `auto.sbtgoiana` — SBT GOIANA
+- `auto.sbtgoiania` — SBT GOIANIA
+- `auto.sbthdb` — SBT HDB
+- `auto.sbtjangadeiro` — SBT JANGADEIRO
+- `auto.sbtkids` — SBT KIDS
+- `auto.sbtlondrina` — SBT LONDRINA
+- `auto.sbtnaipi` — SBT NAIPI
+- `auto.sbtnovelas` — SBT NOVELAS
+- `auto.sbtpa` — SBT PA
+- `auto.sbtpaguajara` — SBT PA GUAJARÁ
+- `auto.sbtpaguajarao` — SBT PA GUAJARAO
+- `auto.sbtparana` — SBT PARANA
+- `auto.sbtplusnovelas` — SBT PLUS NOVELAS
+- `auto.sbtplustvzyn` — SBT PLUS TV ZYN
+- `auto.sbtpontagrossa` — SBT PONTA GROSSA
+- `auto.sbtraiz` — SBT RAIZ
+- `auto.sbtredemassapr` — SBT Rede Massa PR
+- `auto.sbtsaoluiz` — SBT SAO LUIZ
+- `auto.sbtsaoluizma` — SBT SAO LUIZ MA
+- `auto.sbtsdb` — SBT SDB
+- `auto.sbtsim` — SBT SIM
+- `auto.sbtspfhdb` — SBT SP FHDB
+- `auto.sbttambauparaiba` — SBT TAMBAU PARAIBA
+- `auto.sbtthplusvale` — SBT TH PLUS VALE
+- `auto.sbtto` — SBT TO
+- `auto.sbttribunaes` — SBT TRIBUNAES
+- `auto.sbttvjangadeiroce` — SBT TV JANGADEIRO CE
+- `auto.sbttvjornalpe` — SBT TV JORNAL PE
+- `auto.sbttvtambaupb` — SBT TV Tambaú (PB)
+- `auto.sbttvzyn` — SBT TV ZYN
+- `auto.sbtvitoriosa` — SBT VITORIOSA
+- `auto.scarlettacurapelafe` — SCARLETT A CURA PELA FÉ
+- `auto.sedentarios` — Sedentários
+- `auto.segundooevangelho` — SEGUNDO O EVANGELHO
+- `auto.selena` — SELENA
+- `auto.semcontrole` — SEM CONTROLE
+- `auto.semfiltroflamengo` — Sem Filtro Flamengo
+- `auto.setehomensandumdestino` — SETE HOMENS E UM DESTINO
+- `auto.shadowinthecloud2021leg` — SHADOW IN THE CLOUD (2021) LEG
+- `auto.shangchiandalendadosdezaneis` — SHANG CHI E A LENDA DOS DEZ ANÉIS
+- `auto.showdomilhaopicpays01e01` — Show do Milhao PicPay S01E01
+- `auto.showdomilhaopicpays01e02` — Show do Milhao PicPay S01E02
+- `auto.showdomilhaopicpays01e03` — Show do Milhao PicPay S01E03
+- `auto.simonalninguemsabeoduroquedei` — Simonal Ninguém Sabe o Duro Que Dei
+- `auto.sinais` — SINAIS
+- `auto.sinaldefe` — SINAL DE FÉ
+- `auto.sincronico` — SINCRÔNICO
+- `auto.sincronico2020leg` — SINCRÓNICO (2020) LEG
+- `auto.skylines3` — SKYLINES 3
+- `auto.sniperamericano` — SNIPER AMERICANO
+- `auto.sobaluzdafama` — SOB A LUZ DA FAMA
+- `auto.sobaluzdafamaacampamentodedanca` — SOB A LUZ DA FAMA ACAMPAMENTO DE DANÇA
+- `auto.sobaluzdafamaopoderdapaixao` — SOB A LUZ DA FAMA O PODER DA PAIXÃO
+- `auto.sociedadesecretadossegundosfilhosreais` — SOCIEDADE SECRETA DOS SEGUNDOS FILHOS REAIS
+- `auto.solangealmeidalive` — SOLANGE ALMEIDA LIVE
+- `auto.sombralunar` — SOMBRA LUNAR
+- `auto.somdaesperancaahistoriadepossumtrot` — SOM DA ESPERANÇA A HISTÓRIA DE POSSUM TROT
+- `auto.songsungblueumsonhoadois` — SONG SUNG BLUE UM SONHO A DOIS
+- `auto.sonhosrebeldes` — SONHOS REBELDES
+- `auto.spin` — SPIN
+- `auto.spinaltap2oultimoato` — SPINAL TAP 2 O ULTIMO ATO
+- `auto.spiritoindomavel` — Spirit O Indomável
+- `auto.sportv5` — SPORTV 5
+- `auto.sportv6` — SPORTV 6
+- `auto.sportvfhd60fps` — SPORTV FHD60FPS
+- `auto.sportynet05` — SPORTYNET 05
+- `auto.sportynet06` — SPORTYNET 06
+- `auto.sportynet07` — SPORTYNET 07
+- `auto.sportynet08` — SPORTYNET 08
+- `auto.sportynet09` — SPORTYNET 09
+- `auto.stardust` — STARDUST
+- `auto.stevejobs` — STEVE JOBS
+- `auto.straightouttacomptonahistoriadonwa` — STRAIGHT OUTTA COMPTON A HISTORIA DO N W A
+- `auto.superradiotupi965fmaradiodorio` — Super Rádio Tupi 96 5 FM A rádio do Rio!
+- `auto.surdo` — SURDO
+- `auto.technoboys` — TECHNOBOYS
+- `auto.telemundoboston` — TELEMUNDO BOSTON
+- `auto.telemundomiami` — TELEMUNDO MIAMI
+- `auto.telemundonewyork` — TELEMUNDO NEW YORK
+- `auto.temalienigenasnomeuquarto` — TEM ALIENÍGENAS NO MEU QUARTO
+- `auto.tempo2021leg` — TEMPO (2021) LEG
+- `auto.terapiadomedo` — TERAPIA DO MEDO
+- `auto.terradosbravos` — TERRA DOS BRAVOS
+- `auto.terradossonhos` — TERRA DOS SONHOS
+- `auto.terrasperigosas` — TERRAS PERIGOSAS
+- `auto.terraviolenta` — TERRA VIOLENTA
+- `auto.territoriohostil` — TERRITÓRIO HOSTIL
+- `auto.thebeachboysumahistoriadesucesso` — THE BEACH BOYS UMA HISTÓRIA DE SUCESSO
+- `auto.thebirthofhteixeira` — The Birth of H Teixeira
+- `auto.theboxnoritmodocoracao` — THE BOX NO RITMO DO CORAÇÃO
+- `auto.thecellar2022leg` — THE CELLAR (2022) LEG
+- `auto.themortuarycollection2020leg` — THE MORTUARY COLLECTION (2020) LEG
+- `auto.thepond2021leg` — THE POND (2021) LEG
+- `auto.thevoicebrasils08e01` — The Voice Brasil S08E01
+- `auto.thevoicebrasils08e02` — The Voice Brasil S08E02
+- `auto.thevoicebrasils08e03` — The Voice Brasil S08E03
+- `auto.thevoicebrasils08e04` — The Voice Brasil S08E04
+- `auto.thevoicebrasils08e05` — The Voice Brasil S08E05
+- `auto.thevoicebrasils08e06` — The Voice Brasil S08E06
+- `auto.thevoicebrasils08e07` — The Voice Brasil S08E07
+- `auto.thevoicebrasils08e08` — The Voice Brasil S08E08
+- `auto.thevoicebrasils08e09` — The Voice Brasil S08E09
+- `auto.thevoicebrasils08e10` — The Voice Brasil S08E10
+- `auto.thevoicebrasils08e11` — The Voice Brasil S08E11
+- `auto.thevoicebrasils08e12` — The Voice Brasil S08E12
+- `auto.thevoicebrasils08e13` — The Voice Brasil S08E13
+- `auto.thevoicebrasils08e14` — The Voice Brasil S08E14
+- `auto.thevoicebrasils08e15` — The Voice Brasil S08E15
+- `auto.thevoicebrasils08e16` — The Voice Brasil S08E16
+- `auto.thevoicebrasils08e17` — The Voice Brasil S08E17
+- `auto.thevoicebrasils08e18` — The Voice Brasil S08E18
+- `auto.thevoicebrasils08e19` — The Voice Brasil S08E19
+- `auto.thevoicebrasils08e20` — The Voice Brasil S08E20
+- `auto.thevoicebrasils09e01` — The Voice Brasil S09E01
+- `auto.thevoicebrasils09e02` — The Voice Brasil S09E02
+- `auto.thevoicebrasils09e03` — The Voice Brasil S09E03
+- `auto.thevoicebrasils09e04` — The Voice Brasil S09E04
+- `auto.thevoicebrasils09e05` — The Voice Brasil S09E05
+- `auto.thevoicebrasils09e06` — The Voice Brasil S09E06
+- `auto.thevoicebrasils09e07` — The Voice Brasil S09E07
+- `auto.thevoicebrasils09e08` — The Voice Brasil S09E08
+- `auto.thevoicebrasils09e09` — The Voice Brasil S09E09
+- `auto.thevoicebrasils09e10` — The Voice Brasil S09E10
+- `auto.thevoicebrasils09e11` — The Voice Brasil S09E11
+- `auto.thevoicebrasils09e12` — The Voice Brasil S09E12
+- `auto.thevoicebrasils09e13` — The Voice Brasil S09E13
+- `auto.thevoicebrasils09e14` — The Voice Brasil S09E14
+- `auto.thevoicebrasils09e15` — The Voice Brasil S09E15
+- `auto.thevoicebrasils09e16` — The Voice Brasil S09E16
+- `auto.thevoicebrasils09e17` — The Voice Brasil S09E17
+- `auto.thevoicebrasils09e18` — The Voice Brasil S09E18
+- `auto.thevoicebrasils09e19` — The Voice Brasil S09E19
+- `auto.thevoicebrasils09e20` — The Voice Brasil S09E20
+- `auto.thevoicebrasils10e01` — The Voice Brasil S10E01
+- `auto.thevoicebrasils10e02` — The Voice Brasil S10E02
+- `auto.thevoicebrasils10e03` — The Voice Brasil S10E03
+- `auto.thevoicebrasils10e04` — The Voice Brasil S10E04
+- `auto.thevoicebrasils10e05` — The Voice Brasil S10E05
+- `auto.thevoicebrasils10e06` — The Voice Brasil S10E06
+- `auto.thevoicebrasils10e08` — The Voice Brasil S10E08
+- `auto.thevoicebrasils10e09` — The Voice Brasil S10E09
+- `auto.thevoicebrasils10e10` — The Voice Brasil S10E10
+- `auto.thevoicebrasils10e11` — The Voice Brasil S10E11
+- `auto.thevoicebrasils10e12` — The Voice Brasil S10E12
+- `auto.thevoicebrasils10e13` — The Voice Brasil S10E13
+- `auto.thevoicebrasils10e14` — The Voice Brasil S10E14
+- `auto.thevoicebrasils10e15` — The Voice Brasil S10E15
+- `auto.thevoicebrasils10e16` — The Voice Brasil S10E16
+- `auto.thevoicebrasils10e17` — The Voice Brasil S10E17
+- `auto.thevoicebrasils10e18` — The Voice Brasil S10E18
+- `auto.thevoicebrasils11e01` — The Voice Brasil S11E01
+- `auto.thevoicebrasils11e02` — The Voice Brasil S11E02
+- `auto.thevoicebrasils11e03` — The Voice Brasil S11E03
+- `auto.thevoicebrasils11e04` — The Voice Brasil S11E04
+- `auto.thevoicebrasils11e05` — The Voice Brasil S11E05
+- `auto.thevoicebrasils11e06` — The Voice Brasil S11E06
+- `auto.thevoicebrasils11e07` — The Voice Brasil S11E07
+- `auto.thevoicebrasils11e08` — The Voice Brasil S11E08
+- `auto.thevoicebrasils11e09` — The Voice Brasil S11E09
+- `auto.thevoicebrasils11e10` — The Voice Brasil S11E10
+- `auto.thevoicebrasils11e11` — The Voice Brasil S11E11
+- `auto.thevoicebrasils11e12` — The Voice Brasil S11E12
+- `auto.thevoicebrasils11e13` — The Voice Brasil S11E13
+- `auto.thevoicebrasils11e14` — The Voice Brasil S11E14
+- `auto.thevoicebrasils12e01` — The Voice Brasil S12E01
+- `auto.thevoicebrasils12e02` — The Voice Brasil S12E02
+- `auto.thevoicebrasils12e03` — The Voice Brasil S12E03
+- `auto.thevoicebrasils12e04` — The Voice Brasil S12E04
+- `auto.thevoicebrasils12e05` — The Voice Brasil S12E05
+- `auto.thevoicebrasils12e06` — The Voice Brasil S12E06
+- `auto.thevoicebrasils12e07` — The Voice Brasil S12E07
+- `auto.thevoicebrasils12e08` — The Voice Brasil S12E08
+- `auto.thevoicebrasils12e09` — The Voice Brasil S12E09
+- `auto.thevoicebrasils12e10` — The Voice Brasil S12E10
+- `auto.thevoicebrasils12e11` — The Voice Brasil S12E11
+- `auto.thevoicebrasils13e01` — The Voice Brasil S13E01
+- `auto.thevoicebrasils13e02` — The Voice Brasil S13E02
+- `auto.thevoicebrasils13e03` — The Voice Brasil S13E03
+- `auto.thevoicebrasils13e04` — The Voice Brasil S13E04
+- `auto.thevoicebrasils13e05` — The Voice Brasil S13E05
+- `auto.thevoicebrasils13e06` — The Voice Brasil S13E06
+- `auto.thevoicebrasils13e07` — The Voice Brasil S13E07
+- `auto.thevoicebrasils13e08` — The Voice Brasil S13E08
+- `auto.thevoicebrasils13e09` — The Voice Brasil S13E09
+- `auto.thevoicebrasils13e10` — The Voice Brasil S13E10
+- `auto.thevoicebrasils13e11` — The Voice Brasil S13E11
+- `auto.thevoicebrasils13e12` — The Voice Brasil S13E12
+- `auto.thevoicekidss04e01` — The Voice Kids S04E01
+- `auto.thevoicekidss04e02` — The Voice Kids S04E02
+- `auto.thevoicekidss04e03` — The Voice Kids S04E03
+- `auto.thevoicekidss04e04` — The Voice Kids S04E04
+- `auto.thevoicekidss04e05` — The Voice Kids S04E05
+- `auto.thevoicekidss04e06` — The Voice Kids S04E06
+- `auto.thevoicekidss04e07` — The Voice Kids S04E07
+- `auto.thevoicekidss04e08` — The Voice Kids S04E08
+- `auto.thevoicekidss04e09` — The Voice Kids S04E09
+- `auto.thevoicekidss04e10` — The Voice Kids S04E10
+- `auto.thevoicekidss04e11` — The Voice Kids S04E11
+- `auto.thevoicekidss04e12` — The Voice Kids S04E12
+- `auto.thevoicekidss04e13` — The Voice Kids S04E13
+- `auto.thevoicekidss04e14` — The Voice Kids S04E14
+- `auto.thevoicekidss05e01` — The Voice Kids S05E01
+- `auto.thevoicekidss05e02` — The Voice Kids S05E02
+- `auto.thevoicekidss05e03` — The Voice Kids S05E03
+- `auto.thevoicekidss05e04` — The Voice Kids S05E04
+- `auto.thevoicekidss05e05` — The Voice Kids S05E05
+- `auto.thevoicekidss05e06` — The Voice Kids S05E06
+- `auto.thevoicekidss05e07` — The Voice Kids S05E07
+- `auto.thevoicekidss05e08` — The Voice Kids S05E08
+- `auto.thevoicekidss05e09` — The Voice Kids S05E09
+- `auto.thevoicekidss05e10` — The Voice Kids S05E10
+- `auto.thevoicekidss05e11` — The Voice Kids S05E11
+- `auto.thevoicekidss05e12` — The Voice Kids S05E12
+- `auto.thevoicekidss05e13` — The Voice Kids S05E13
+- `auto.thevoicekidss05e14` — The Voice Kids S05E14
+- `auto.thevoicekidss05e15` — The Voice Kids S05E15
+- `auto.thevoicekidss05e16` — The Voice Kids S05E16
+- `auto.thevoicekidss06e01` — The Voice Kids S06E01
+- `auto.thevoicekidss06e02` — The Voice Kids S06E02
+- `auto.thevoicekidss06e03` — The Voice Kids S06E03
+- `auto.thevoicekidss06e04` — The Voice Kids S06E04
+- `auto.thevoicekidss06e05` — The Voice Kids S06E05
+- `auto.thevoicekidss06e06` — The Voice Kids S06E06
+- `auto.thevoicekidss06e07` — The Voice Kids S06E07
+- `auto.thevoicekidss06e08` — The Voice Kids S06E08
+- `auto.thevoicekidss06e09` — The Voice Kids S06E09
+- `auto.thevoicekidss06e10` — The Voice Kids S06E10
+- `auto.thevoicekidss06e11` — The Voice Kids S06E11
+- `auto.thevoicekidss06e12` — The Voice Kids S06E12
+- `auto.thevoicekidss06e13` — The Voice Kids S06E13
+- `auto.thevoicekidss06e14` — The Voice Kids S06E14
+- `auto.thevoicekidss06e15` — The Voice Kids S06E15
+- `auto.thevoicekidss06e16` — The Voice Kids S06E16
+- `auto.thevoicekidss06e17` — The Voice Kids S06E17
+- `auto.thevoicekidss07e01` — The Voice Kids S07E01
+- `auto.thevoicekidss07e02` — The Voice Kids S07E02
+- `auto.thevoicekidss07e03` — The Voice Kids S07E03
+- `auto.thevoicekidss07e04` — The Voice Kids S07E04
+- `auto.thevoicekidss07e05` — The Voice Kids S07E05
+- `auto.thevoicekidss07e06` — The Voice Kids S07E06
+- `auto.thevoicekidss07e07` — The Voice Kids S07E07
+- `auto.thevoicekidss07e08` — The Voice Kids S07E08
+- `auto.thevoicekidss07e09` — The Voice Kids S07E09
+- `auto.thevoicekidss07e10` — The Voice Kids S07E10
+- `auto.thevoicekidss07e11` — The Voice Kids S07E11
+- `auto.thevoicekidss07e12` — The Voice Kids S07E12
+- `auto.thevoicekidss08e01` — The Voice Kids S08E01
+- `auto.thevoicekidss08e02` — The Voice Kids S08E02
+- `auto.thevoicekidss08e03` — The Voice Kids S08E03
+- `auto.thevoicekidss08e04` — The Voice Kids S08E04
+- `auto.thevoicekidss08e05` — The Voice Kids S08E05
+- `auto.thevoicekidss08e06` — The Voice Kids S08E06
+- `auto.thevoicekidss08e07` — The Voice Kids S08E07
+- `auto.thevoicekidss08e08` — The Voice Kids S08E08
+- `auto.thevoicekidss08e09` — The Voice Kids S08E09
+- `auto.thevoicekidss08e10` — The Voice Kids S08E10
+- `auto.thevoicekidss08e11` — The Voice Kids S08E11
+- `auto.thevoicekidss08e12` — The Voice Kids S08E12
+- `auto.thevoicekidss08e13` — The Voice Kids S08E13
+- `auto.thevoicekidss08e14` — The Voice Kids S08E14
+- `auto.thevoicemaiss01e01` — The Voice Mais S01E01
+- `auto.thevoicemaiss01e02` — The Voice Mais S01E02
+- `auto.thevoicemaiss01e03` — The Voice Mais S01E03
+- `auto.thevoicemaiss01e04` — The Voice Mais S01E04
+- `auto.thevoicemaiss01e05` — The Voice Mais S01E05
+- `auto.thevoicemaiss01e06` — The Voice Mais S01E06
+- `auto.thevoicemaiss01e07` — The Voice Mais S01E07
+- `auto.thevoicemaiss01e08` — The Voice Mais S01E08
+- `auto.thevoicemaiss01e09` — The Voice Mais S01E09
+- `auto.thevoicemaiss01e10` — The Voice Mais S01E10
+- `auto.thevoicemaiss01e11` — The Voice Mais S01E11
+- `auto.thevoicemaiss01e12` — The Voice Mais S01E12
+- `auto.thevoicemaiss02e01` — The Voice Mais S02E01
+- `auto.thevoicemaiss02e02` — The Voice Mais S02E02
+- `auto.thevoicemaiss02e03` — The Voice Mais S02E03
+- `auto.thevoicemaiss02e04` — The Voice Mais S02E04
+- `auto.thevoicemaiss02e05` — The Voice Mais S02E05
+- `auto.thevoicemaiss02e06` — The Voice Mais S02E06
+- `auto.thevoicemaiss02e07` — The Voice Mais S02E07
+- `auto.thevoicemaiss02e08` — The Voice Mais S02E08
+- `auto.thevoicemaiss02e09` — The Voice Mais S02E09
+- `auto.thevoicemaiss02e10` — The Voice Mais S02E10
+- `auto.thor` — THOR
+- `auto.thoramorandtrovao` — THOR AMOR E TROVÃO
+- `auto.thoromundosombrio` — THOR O MUNDO SOMBRIO
+- `auto.thorragnarok` — THOR RAGNAROK
+- `auto.timecopoguardiaodotempo` — TIMECOP O GUARDIAO DO TEMPO
+- `auto.tina` — TINA
+- `auto.titanaand` — TITAN A E
+- `auto.tocaotrompete` — Toca o Trompete
+- `auto.tomaggastral` — Toma (GG Astral)
+- `auto.touroindomavel` — TOURO INDOMÁVEL
+- `auto.treinoparasecarbraco` — Treino para secar Braço
+- `auto.treshomensemconflito` — TRÊS HOMENS EM CONFLITO
+- `auto.trialaccount` — TRIAL ACCOUNT
+- `auto.trincarabdomen` — Trincar abdômen
+- `auto.triunfantesemdeus` — TRIUNFANTES EM DEUS
+- `auto.tudnmx` — TUDN MX
+- `auto.turmadamonicalicoes` — TURMA DA MÔNICA LIÇÕES
+- `auto.tvassembleia` — TV ASSEMBLEIA
+- `auto.tvculturabelem` — TV CULTURA BELEM
+- `auto.tvfronteira` — TV FRONTEIRA
+- `auto.tvgazetafhdb` — TV GAZETA FHDB
+- `auto.tvgazetasdb` — TV GAZETA SDB
+- `auto.tvgranderiopetrolina` — TV GRANDE RIO PETROLINA
+- `auto.tvimaculada` — TV IMACULADA
+- `auto.tvitnetsports1` — TV ITNET SPORTS 1
+- `auto.tvitnetsports2` — TV ITNET SPORTS 2
+- `auto.tvliberalaltamira` — TV LIBERAL ALTAMIRA
+- `auto.tvliberalaltamria` — TV LIBERAL ALTAMRIA
+- `auto.tvliberalredencao` — TV LIBERAL REDENCAO
+- `auto.tvliberalrendencao` — TV LIBERAL RENDENCAO
+- `auto.tvmana` — TV MANÁ BR
+- `auto.tvmax1` — TV MAX 1
+- `auto.tvmax2` — TV MAX 2
+- `auto.tvmax3` — TV MAX 3
+- `auto.tvmax4` — TV MAX 4
+- `auto.tvmundial` — TV MUNDIAL
+- `auto.tvmundomaior` — TV MUNDO MAIOR
+- `auto.tvouronegro` — TV OURO NEGRO
+- `auto.tvriopreto` — TV RIO PRETO
+- `auto.tycsportsusa` — TYC SPORTS USA
+- `auto.ufc311makhachevvsmoicanocardcompleto` — UFC 311 Makhachev vs Moicano [Card Completo]
+- `auto.ufc312duplessisvsstrickland2cardcompleto` — UFC 312 Du Plessis vs Strickland 2 [Card Completo]
+- `auto.ufc313pereiravsankalaevcardcompleto` — UFC 313 Pereira vs Ankalaev [Card Completo]
+- `auto.ufc317topuriavsoliveira` — UFC 317 Topuria vs Oliveira
+- `auto.ufc318hollowayvspoirier3` — UFC 318 Holloway vs Poirier 3
+- `auto.ufc319duplessisvschimaev` — UFC 319 du Plessis vs Chimaev
+- `auto.ufc320ankalaevvspereira2` — UFC 320 Ankalaev vs Pereira 2
+- `auto.ufc321aspinallvsgane` — UFC 321 Aspinall vs Gane
+- `auto.ufc322dellamaddalenavsmakhachev` — UFC 322 Della Maddalena vs Makhachev
+- `auto.ufc324adamfugittvstymiller2026cardpreliminar` — UFC 324 Adam Fugitt vs Ty Miller (2026) [Card Preliminar]
+- `auto.ufc324alexperezvscharlesjohnson2026cardpreliminar` — UFC 324 Alex Perez vs Charles Johnson (2026) [Card Preliminar]
+- `auto.ufc324arnoldallenvsjeansilva2026cardprincipal` — UFC 324 Arnold Allen vs Jean Silva (2026) [Card Principal]
+- `auto.ufc324atebaabegagautiervsandreypulyaev2026cardpreliminar` — UFC 324 Ateba Abega Gautier vs Andrey Pulyaev (2026) [Card Preliminar]
+- `auto.ufc324joshhokitvsdenzelfreeman2026cardpreliminar` — UFC 324 Josh Hokit vs Denzel Freeman (2026) [Card Preliminar]
+- `auto.ufc324justingaethjevspaddypimblett2026cardprincipal` — UFC 324 Justin Gaethje vs Paddy Pimblett (2026) [Card Principal]
+- `auto.ufc324nataliasilvavsrosenamajunas2026cardprincipal` — UFC 324 Natalia Silva vs Rose Namajunas (2026) [Card Principal]
+- `auto.ufc324nikitakrylovvsmodestasbukauskas2026cardpreliminar` — UFC 324 Nikita Krylov vs Modestas Bukauskas (2026) [Card Preliminar]
+- `auto.ufc324seanomalleyvssongyadong2026cardprincipal` — UFC 324 Sean OMalley vs Song Yadong (2026) [Card Principal]
+- `auto.ufc324umarnurmagomedovvsdeivesonfigueiredo2026cardpreliminar` — UFC 324 Umar Nurmagomedov vs Deiveson Figueiredo (2026) [Card Preliminar]
+- `auto.ufc324waldocortesacostavsderricklewis2026cardprincipal` — UFC 324 Waldo Cortes Acosta vs Derrick Lewis (2026) [Card Principal]
+- `auto.ufc325volkanovskivslopes2` — UFC 325 Volkanovski vs Lopes 2
+- `auto.ufc326hollowayvsoliveira2` — UFC 326 Holloway vs Oliveira 2
+- `auto.ufc327prochazkavsulberg` — UFC 327 Prochazka vs Ulberg
+- `auto.ufc329mcgregorvsholloway2` — UFC 329 McGregor vs Holloway 2
+- `auto.ufc330makhachevvsmachadogarry` — UFC 330 Makhachev vs Machado Garry
+- `auto.ufcfightnight248yanvsfigueiredocardpreliminar` — UFC Fight Night 248 Yan vs Figueiredo [Card Preliminar]
+- `auto.ufcfightnight248yanvsfigueiredocardprincipal` — UFC Fight Night 248 Yan vs Figueiredo [Card Principal]
+- `auto.ufcfightnight249dernvsribas2cardcompleto` — UFC Fight Night 249 Dern vs Ribas 2 [Card Completo]
+- `auto.ufcfightnight250adesanyavsimavovcardcompleto` — UFC Fight Night 250 Adesanya vs Imavov [Card Completo]
+- `auto.ufcfightnight251cannoniervsrodriguescardpreliminar` — UFC Fight Night 251 Cannonier vs Rodrigues [Card Preliminar]
+- `auto.ufcfightnight251cannoniervsrodriguescardprincipal` — UFC Fight Night 251 Cannonier vs Rodrigues [Card Principal]
+- `auto.ufcfightnight252cejudovssongcardcompleto` — UFC Fight Night 252 Cejudo vs Song [Card Completo]
+- `auto.ufcfightnight253kapevsalmabayevcardcompleto` — UFC Fight Night 253 Kape vs Almabayev [Card Completo]
+- `auto.ufcfightnight254vettorivsdolidze2cardcompleto` — UFC Fight Night 254 Vettori vs Dolidze 2 [Card Completo]
+- `auto.ufcfightnight255edwardsvsbradycardcompleto` — UFC Fight Night 255 Edwards vs Brady [Card Completo]
+- `auto.ufcfightnight256burnsvsmorales` — UFC Fight Night 256 Burns vs Morales
+- `auto.ufcfightnight257walkervszhang` — UFC Fight Night 257 Walker vs Zhang
+- `auto.ufcfightnight259lopesvssilva` — UFC Fight Night 259 Lopes vs Silva
+- `auto.ufcfightnight260ulbergvsreyes` — UFC Fight Night 260 Ulberg vs Reyes
+- `auto.ufcfightnight261oliveiravsgamrot` — UFC Fight Night 261 Oliveira vs Gamrot
+- `auto.ufcfightnight262deriddervsallen` — UFC Fight Night 262 de Ridder vs Allen
+- `auto.ufcfightnight263garciavsonama` — UFC Fight Night 263 Garcia vs Onama
+- `auto.ufcfightnight264bonfimvsbrown` — UFC Fight Night 264 Bonfim vs Brown
+- `auto.ufcfightnight265tsarukyanvshooker` — UFC Fight Night 265 Tsarukyan vs Hooker
+- `auto.ufcfightnight266bautistavsoliveira` — UFC Fight Night 266 Bautista vs Oliveira
+- `auto.ufcfightnight267stricklandvshernandez` — UFC Fight Night 267 Strickland vs Hernandez
+- `auto.ufcfightnight268morenovskavanagh` — UFC Fight Night 268 Moreno vs Kavanagh
+- `auto.ufcfightnight270evloevvsmurphy` — UFC Fight Night 270 Evloev vs Murphy
+- `auto.ufcfightnight271adesanyavspyfer` — UFC Fight Night 271 Adesanya vs Pyfer
+- `auto.ufcfightnight272moicanovsduncan` — UFC Fight Night 272 Moicano vs Duncan
+- `auto.ufcfightnight275dellamaddalenavsprates` — UFC Fight Night 275 Della Maddalena vs Prates
+- `auto.ufcfightnight276allenvscosta` — UFC Fight Night 276 Allen vs Costa
+- `auto.ufcfightnight279kapevshoriguchi` — UFC Fight Night 279 Kape vs Horiguchi
+- `auto.ufcfightnight281duplessisvsusman` — UFC Fight Night 281 du Plessis vs Usman
+- `auto.ufcfightnight282ankalaevvsguskov` — UFC Fight Night 282 Ankalaev vs Guskov
+- `auto.ufcfightnight283medicvsrodriguez` — UFC Fight Night 283 Medic vs Rodriguez
+- `auto.ufcfightnight284gamrotvssalkilld` — UFC Fight Night 284 Gamrot vs Salkilld
+- `auto.ufcfightnight285hernandezvsrodrigues` — UFC Fight Night 285 Hernandez vs Rodrigues
+- `auto.ufcfightpass1` — UFC FIGHT PASS 1
+- `auto.ufcfightpass3` — UFC FIGHT PASS 3
+- `auto.ufcfightpass4` — UFC FIGHT PASS 4
+- `auto.ufcfightpass5` — UFC FIGHT PASS 5
+- `auto.ufcfightpassinter1` — UFC FIGHT PASS INTER 1
+- `auto.ufcfightpassinter2` — UFC FIGHT PASS INTER 2
+- `auto.ufcfightpassinter3` — UFC FIGHT PASS INTER 3
+- `auto.ufcfreedom250topuriavsgaethje` — UFC Freedom 250 Topuria vs Gaethje
+- `auto.ufconespn63covingtonvsbuckleycardpreliminar` — UFC on ESPN 63 Covington vs Buckley [Card Preliminar]
+- `auto.ufconespn63covingtonvsbuckleycardprincipal` — UFC on ESPN 63 Covington vs Buckley [Card Principal]
+- `auto.ufconespn64morenovsercegcardcompleto` — UFC on ESPN 64 Moreno vs Erceg [Card Completo]
+- `auto.ufconespn65emmettvsmurphycardprincipal` — UFC on ESPN 65 Emmett vs Murphy [Card Principal]
+- `auto.ufconespn66machadogarryvsprates` — UFC on ESPN 66 Machado Garry vs Prates
+- `auto.ufconespn67sandhagenvsfigueiredo` — UFC on ESPN 67 Sandhagen vs Figueiredo
+- `auto.ufconespn69usmanvsbuckley` — UFC on ESPN 69 Usman vs Buckley
+- `auto.ufconespn70lewisvsteixeira` — UFC on ESPN 70 Lewis vs Teixeira
+- `auto.ufconespn71tairavspark` — UFC on ESPN 71 Taira vs Park
+- `auto.ufconespn72dolidzevshernandez` — UFC on ESPN 72 Dolidze vs Hernandez
+- `auto.ufconespn73royvalvskape` — UFC on ESPN 73 Royval vs Kape
+- `auto.ukbbcone` — UK BBC ONE
+- `auto.ukbtsport11p` — UK BT SPORT 1 1 (P)
+- `auto.ukbtsport31p` — UK BT SPORT 3 1 (P)
+- `auto.ukeurosport2` — UK EUROSPORT 2
+- `auto.ukitv` — UK ITV
+- `auto.ukskysportscricket` — UK SKY SPORTS CRICKET
+- `auto.ukskysportsf1` — UK SKYSPORTS F1
+- `auto.ukskysportsnews` — UK SKY SPORTS NEWS
+- `auto.ukskysportsracing` — UK SKY SPORTS RACING
+- `auto.ultimosdiasnodeserto` — ÚLTIMOS DIAS NO DESERTO
+- `auto.umacancaoparaela` — UMA CANÇÃO PARA ELA
+- `auto.umahistoriadenatalnatalina` — UMA HISTÓRIA DE NATAL NATALINA
+- `auto.umainvencaodenatal` — UMA INVENÇÃO DE NATAL
+- `auto.umajanelaparaoceu` — UMA JANELA PARA O CÉU
+- `auto.umajanelaparaoceu2` — UMA JANELA PARA O CÉU 2
+- `auto.umajornadadefe` — UMA JORNADA DE FÉ
+- `auto.umajornadamagica` — UMA JORNADA MÁGICA
+- `auto.umalicaodeesperanca` — UMA LIÇÃO DE ESPERANÇA
+- `auto.umamorcomsabordenatal` — UM AMOR COM SABOR DE NATAL
+- `auto.umamordetesouro` — UM AMOR DE TESOURO
+- `auto.umanotaparaoamor` — UMA NOTA PARA O AMOR
+- `auto.umasereiaemparis` — UMA SEREIA EM PARIS
+- `auto.umasereiraempariscamleg` — UMA SEREIRA EM PARIS CAM LEG
+- `auto.umaultimaviagem` — Uma Ultima Viagem
+- `auto.umaviagemincrivelomisteriodoovo` — UMA VIAGEM INCRÍVEL O MISTÉRIO DO OVO
+- `auto.umavidadeesperanca` — UMA VIDA DE ESPERANCA
+- `auto.umcasodedetetive` — UM CASO DE DETETIVE
+- `auto.umcontosobreotempo` — UM CONTO SOBRE O TEMPO
+- `auto.umhomemcomum` — UM HOMEM COMUM
+- `auto.umlarverdadeiro` — UM LAR VERDADEIRO
+- `auto.ummeninochamadonatal` — UM MENINO CHAMADO NATAL
+- `auto.ummilhaodemaneirasdepegarnapistola` — UM MILHÃO DE MANEIRAS DE PEGAR NA PISTOLA
+- `auto.umnatalmagico` — UM NATAL MAGICO
+- `auto.umnatalmagico2` — UM NATAL MÁGICO 2
+- `auto.umretratodeteresa` — Um Retrato de Teresa
+- `auto.umromancecristao` — UM ROMANCE CRISTÃO
+- `auto.umveraopararecordar` — UM VERÃO PARA RECORDAR
+- `auto.underwrapsumamumianohalloween2` — UNDER WRAPS UMA MÚMIA NO HALLOWEEN 2
+- `auto.uniquetv` — UNIQUE TV
+- `auto.univisionmiami` — UNIVISION MIAMI
+- `auto.univisionnewyork` — UNIVISION NEW YORK
+- `auto.upgradeatualizacao` — UPGRADE ATUALIZAÇÃO
+- `auto.upsidedownmagicleg` — UPSIDE DOWN MAGIC LEG
+- `auto.usfoxsoccerplusy` — US FOX SOCCER PLUS (Y)
+- `auto.usfoxsports1y` — US FOX SPORTS 1 (Y)
+- `auto.usfoxsports2` — US FOX SPORTS 2
+- `auto.usgolf` — US GOLF
+- `auto.usmlbbostonredsox` — US MLB BOSTON RED SOX
+- `auto.usmlbnetwork` — US MLB NETWORK
+- `auto.usnbaleaguepass7f` — US NBA LEAGUE PASS 7 (F)
+- `auto.usnbaleaguepass8f` — US NBA LEAGUE PASS 8 (F)
+- `auto.usnbatvy` — US NBA TV (Y)
+- `auto.usnbcsnboston` — US NBCSN BOSTON
+- `auto.usnesn` — US NESN
+- `auto.usnflnetwork` — US NFL NETWORK
+- `auto.ussportsnetnewyorky` — US SPORTSNET NEW YORK (Y)
+- `auto.ustastemade` — US TASTEMADE
+- `auto.ustennisy` — US TENNIS (Y)
+- `auto.utopiamuda` — Utopia Muda
+- `auto.uyraaretomadadafloresta` — Uyra A Retomada da Floresta
+- `auto.valhallaalendadethor` — VALHALLA A LENDA DE THOR
+- `auto.vampsamortenaoexisteparaoamor` — VAMPS A MORTE NÃO EXISTE PARA O AMOR
+- `auto.vejacomoelescorrem` — VEJA COMO ELES CORREM
+- `auto.venom` — VENOM
+- `auto.venomtempodecarnificina` — VENOM TEMPO DE CARNIFICINA
+- `auto.verdadeandhonra` — VERDADE E HONRA
+- `auto.vermelhosol2020leg` — VERMELHO SOL (2020) LEG
+- `auto.viagem2ailhamisteriosa` — VIAGEM 2 A ILHA MISTERIOSA
+- `auto.viagemaocentrodaterraofilme` — VIAGEM AO CENTRO DA TERRA O FILME
+- `auto.viajantesinstintoanddesejo` — VIAJANTES INSTINTO E DESEJO
+- `auto.victoriaandmisterio` — VICTORIA E MISTÉRIO
+- `auto.vingadoreseradeultron` — VINGADORES ERA DE ULTRON
+- `auto.vingadoresguerrainfinita` — VINGADORES GUERRA INFINITA
+- `auto.vingadoresultimato` — VINGADORES ULTIMATO
+- `auto.vingancaandcastigo` — VINGANÇA & CASTIGO
+- `auto.virgemmaria` — VIRGEM MARIA
+- `auto.viuvanegra` — VIÚVA NEGRA
+- `auto.vocejafoiabahia` — Você Já Foi à Bahia
+- `auto.voceradicalamnesia` — Voce Radical Amnesia
+- `auto.volitionleg` — VOLITION LEG
+- `auto.voltandoparacasanoescuro2021leg` — VOLTANDO PARA CASA NO ESCURO (2021) LEG
+- `auto.voxluxoprecodafama` — VOX LUX O PRECO DA FAMA
+- `auto.voyeur` — Voyeur
+- `auto.vozesandvultos` — VOZES E VULTOS
+- `auto.vrt` — VRT
+- `auto.warning` — WARNING
+- `auto.watcher2022leg` — WATCHER (2022) LEG
+- `auto.wolfcreekviagemaoinferno` — WOLF CREEK VIAGEM AO INFERNO
+- `auto.wukongcontraairadosdeuses` — WU KONG CONTRA A IRA DOS DEUSES
+- `auto.xxxaxymaxtv` — XXX â€¢ XY MAX TV
+- `auto.xxxgangbang` — XXX GANGBANG
+- `auto.yogaparaquemnuncapraticou` — Yoga para quem nunca praticou
+- `auto.zappingsports` — ZAPPING SPORTS
+- `auto.zappingsports1` — ZAPPING SPORTS 1
+- `auto.zappingsports3` — ZAPPING SPORTS 3
+- `auto.zecolmeiaofilme` — Ze Colmeia O Filme
+- `auto.zenetoandcristianolive` — ZE NETO E CRISTIANO LIVE
+- `auto.zombiands` — Z O M B I E S
+- `auto.zombiands2` — Z O M B I E S 2
+- `auto.zombiands3` — Z O M B I E S 3
+- `auto.zona414` — ZONA 414
+- `auto.zonadecombate` — ZONA DE COMBATE
+- `auto.zonafria` — ZONA FRIA
+
+## Correspondências aproximadas
+
+- **Discovery** → `DiscoveryChannel.br` em IPTV-EPG BR (aproximação 0.900: DISCOVERY ~ BRDISCOVERY)
+- **DISCOVERY ID** → `DiscoveryKids.br` em IPTV-EPG BR (aproximação 0.917: DISCOVERYID ~ DISCOVERYKIDS)
+- **Music Box Brazil** → `MusicBoxBrasil.br` em IPTV-EPG BR (aproximação 0.929: MUSICBOXBRAZIL ~ MUSICBOXBRASIL)
+- **GLOBO RBS PORTO ALEGRE** → `4015` em Genius (aproximação 0.973: GLOBORBSPORTOALEGRE ~ GLOBORBSPORTOALGRE)
+- **RecordTV Manaus** → `4056` em Genius (aproximação 0.923: RECORDTVMANAUS ~ RECORDMANAUS)
+- **GLOBO BAHIA** → `4021` em Genius (aproximação 0.909: GLOBOBAHIA ~ GLOBOTVBAHIA)
+- **RPC TV PARANAVAI** → `RPC Paranavaí HD.br` em Open-EPG Brazil 4 (aproximação 0.923: RPCTVPARANAVAI ~ RPCPARANAVAI)
+- **BAND MINAS** → `Band Minas BH HD.br` em Open-EPG Brazil 4 (aproximação 0.900: BANDMINAS ~ BANDMINASBH)
+- **GB TV VERDES MARES** → `TV Verdes Mares HD.br` em Open-EPG Brazil 4 (aproximação 0.929: GBTVVERDESMARES ~ TVVERDESMARES)
+- **RECORD GOIAS** → `RecordTVGoiás.br` em IPTV-EPG BR (aproximação 0.917: RECORDGOIAS ~ RECORDTVGOIAS)
+- **GB TV SERGIPE** → `TV Sergipe HD.br` em Open-EPG Brazil 4 (aproximação 0.900: GBTVSERGIPE ~ TVSERGIPE)
+- **Prime Box Brasil** → `Prime Box Brazil HD.br` em Open-EPG Brazil 4 (aproximação 0.929: PRIMEBOXBRASIL ~ PRIMEBOXBRAZIL)
+- **RecordTV Paulista** → `Record Paulista HD.br` em Open-EPG Brazil 4 (aproximação 0.933: RECORDTVPAULISTA ~ RECORDPAULISTA)
+- **SBT BRASILIA** → `SBTBrasil.br` em IPTV-EPG BR (aproximação 0.900: SBTBRASILIA ~ SBTBRASIL)
+- **TVE Bahia** → `TV Bahia HD.br` em Open-EPG Brazil 4 (aproximação 0.933: TVEBAHIA ~ TVBAHIA)
+- **WOHOO** → `WooHoo.br` em IPTV-EPG BR (aproximação 0.909: WOHOO ~ WOOHOO)
+- **CNN INTERNACIONAL** → `CNN.International.br` em EPGShare BR2 (aproximação 0.938: CNNINTERNACIONAL ~ CNNINTERNATIONAL)
+- **GB TV CABO BRANCO** → `TVCaboBranco.br` em IPTV-EPG BR (aproximação 0.929: GBTVCABOBRANCO ~ BRTVCABOBRANCO)
+- **GB TV GAZETA ALAGOAS** → `TVGazetaAlagoas.br` em IPTV-EPG BR (aproximação 0.941: GBTVGAZETAALAGOAS ~ BRTVGAZETAALAGOAS)
+- **GLOBO EPCAMPINAS** → `4006` em Genius (aproximação 0.938: GLOBOEPCAMPINAS ~ GLOBOEPTVCAMPINAS)
+- **GLOBO TEM SOROCABA** → `4027` em Genius (aproximação 0.941: GLOBOTEMSOROCABA ~ GLOBOTVTEMSOROCABA)
+- **GLOBO TRIBUNA SANTOS** → `4029` em Genius (aproximação 0.947: GLOBOTRIBUNASANTOS ~ GLOBOTVTRIBUNASANTOS)
+- **JOVEN PAN NEWS** → `JovemPanNews.br` em IPTV-EPG BR (aproximação 0.917: JOVENPANNEWS ~ JOVEMPANNEWS)
+- **GLOBO RECIFE** → `TV Globo Recife HD.br` em Open-EPG Brazil 4 (aproximação 0.917: GLOBORECIFE ~ TVGLOBORECIFE)
+- **Globo RPC Cascavel** → `TV Globo RPC Cascavel.br` em Open-EPG Brazil 4 (aproximação 0.941: GLOBORPCCASCAVEL ~ TVGLOBORPCCASCAVEL)
+- **ID INVESTIGACAO DISCOVERY** → `InvestigacaoDiscovery.br` em Genius (aproximação 0.955: IDINVESTIGACAODISCOVERY ~ INVESTIGACAODISCOVERY)
+- **TRAVEL BOX BRASIL** → `TravelBoxBrazil.br` em IPTV-EPG BR (aproximação 0.933: TRAVELBOXBRASIL ~ TRAVELBOXBRAZIL)
+- **Discovery Theather** → `Discovery.HD.Theater.br` em EPGShare BR2 (aproximação 0.970: DISCOVERYTHEATHER ~ DISCOVERYTHEATER)
+- **Globo RBS TV Porto Alegre** → `4015` em Genius (aproximação 0.923: GLOBORBSTVPORTOALEGRE ~ GLOBORBSPORTOALGRE)
+- **Globo TV Anhanguera** → `GloboAnhanguera.br` em IPTV-EPG BR (aproximação 0.938: GLOBOTVANHANGUERA ~ GLOBOANHANGUERA)
+- **GLOBO TV ANHANGUERA GOIANIA** → `GloboBrasil.br` em Genius (aproximação 0.957: GLOBOTVANHANGUERAGOIANIA ~ GLOBOANHANGUERAGOIANIA)
+- **Globo TV Gazeta Vitoria** → `4024` em Genius (aproximação 0.950: GLOBOTVGAZETAVITORIA ~ GLOBOTVGAZETEVITORIA)
+- **RECORD INTERIOR SP** → `Record Interior HD.br` em Open-EPG Brazil 4 (aproximação 0.933: RECORDINTERIORSP ~ RECORDINTERIOR)
+- **REDE BRASIL TV** → `Rede Brasil HD.br` em Open-EPG Brazil 4 (aproximação 0.909: REDEBRASILTV ~ REDEBRASIL)
+- **REDE GLOBO TV TEM SOROCABA** → `4027` em Genius (aproximação 0.900: REDEGLOBOTVTEMSOROCABA ~ GLOBOTVTEMSOROCABA)
+- **SBT INTERIOR SP** → `SBT Interior HD.br` em Open-EPG Brazil 4 (aproximação 0.917: SBTINTERIORSP ~ SBTINTERIOR)
+- **Telecine Action [LEG]** → `Telecine Action HD.br` em Open-EPG Brazil 4 (aproximação 0.903: TELECINEACTIONLEG ~ TELECINEACTION)
+- **Telecine Pipoca [LEG]** → `Telecine Pipoca HD.br` em Open-EPG Brazil 4 (aproximação 0.903: TELECINEPIPOCALEG ~ TELECINEPIPOCA)
+- **Telecine Premium [LEG]** → `TelecinePremium.br` em IPTV-EPG BR (aproximação 0.909: TELECINEPREMIUMLEG ~ TELECINEPREMIUM)
+- **TV GLOOBINHO** → `Gloobinho HD.br` em Open-EPG Brazil 4 (aproximação 0.900: TVGLOOBINHO ~ GLOOBINHO)
+- **BAND BRASILIA** → `BandBrasil.br` em IPTV-EPG BR (aproximação 0.909: BANDBRASILIA ~ BANDBRASIL)
+- **CANÃ‡ÃƒO NOVA** → `4071` em Genius (aproximação 0.900: CANAAONOVA ~ CANCAONOVA)
+- **GLOBO NEWS DF** → `Globo News HD.br` em Open-EPG Brazil 4 (aproximação 0.900: GLOBONEWSDF ~ GLOBONEWS)
+- **GLOBO TV VANGUARDA S J CAMPOS** → `4030` em Genius (aproximação 0.941: GLOBOTVVANGUARDASJCAMPOS ~ GLOBOTVVANGUARDASJDOSCAMPOS)
+- **PREMIERE CLUB** → `4094` em Genius (aproximação 0.923: PREMIERECLUB ~ PREMIERECLUBES)
+- **RECORD PARANA** → `4059` em Genius (aproximação 0.909: RECORDPARANA ~ RECORDPARA)
+- **RECORD RIO PRETO** → `Record TV Rio Preto HD.br` em Open-EPG Brazil 4 (aproximação 0.933: RECORDRIOPRETO ~ RECORDTVRIOPRETO)
+- **RECORD TV MINAS** → `Record TV Minas BH.br` em Open-EPG Brazil 4 (aproximação 0.929: RECORDTVMINAS ~ RECORDTVMINASBH)
+- **REDE SÃ‰CULO 21** → `Rede Século 21.br` em Open-EPG Brazil 4 (aproximação 0.917: REDESACULO21 ~ REDESECULO21)
+- **TVE BRASIL>>>** → `TVBrasil.br` em IPTV-EPG BR (aproximação 0.941: TVEBRASIL ~ TVBRASIL)
+- **TV GAZETA ES SUL** → `TV Gazeta Sul HD.br` em Open-EPG Brazil 4 (aproximação 0.917: TVGAZETAESSUL ~ TVGAZETASUL)
+- **TV GAZETA SUL ES** → `TV Gazeta Sul HD.br` em Open-EPG Brazil 4 (aproximação 0.917: TVGAZETASULES ~ TVGAZETASUL)
+- **TV TEM ITAPETINIGA** → `TV TEM Itapetininga HD.br` em Open-EPG Brazil 4 (aproximação 0.970: TVTEMITAPETINIGA ~ TVTEMITAPETININGA)
+- **ZOOMO** → `ZooMoo.br` em IPTV-EPG BR (aproximação 0.909: ZOOMO ~ ZOOMOO)
+- **BOA VONTADE** → `São.Paulo/SP..Boa.Vontade.TV.br` em EPGShare BR1 (aproximação 0.909: BOAVONTADE ~ BOAVONTADETV)
+- **DISCOVERY SCIENCE US** → `DiscoveryScience.br` em IPTV-EPG BR (aproximação 0.941: DISCOVERYSCIENCEUS ~ DISCOVERYSCIENCE)
+- **HITORY** → `São.Paulo/SP..History.Hd.br` em EPGShare BR1 (aproximação 0.923: HITORY ~ HISTORY)
+- **NICKLODEON BR** → `Nickelodeon.br` em EPGShare BR2 (aproximação 0.952: NICKLODEON ~ NICKELODEON)
+- **PREMIERE 2 BR*** → `4095` em Genius (aproximação 0.900: PREMIERE2BR ~ PREMIERE2)
+- **PREMIERE CLUBES BR*** → `4094` em Genius (aproximação 0.933: PREMIERECLUBESBR ~ PREMIERECLUBES)
+- **PT CARTOON NETWORK** → `CartoonNetwork.br` em IPTV-EPG BR (aproximação 0.933: PTCARTOONNETWORK ~ CARTOONNETWORK)
+- **PT DISCOVERY** → `Discovery HD.br` em Open-EPG Brazil 4 (aproximação 0.900: PTDISCOVERY ~ DISCOVERY)
+- **PT DISNEY JUNIOR** → `DisneyJunior.br` em IPTV-EPG BR (aproximação 0.923: PTDISNEYJUNIOR ~ DISNEYJUNIOR)
+- **PT NAT GEO WILD** → `NatGeoWild.br` em IPTV-EPG BR (aproximação 0.909: PTNATGEOWILD ~ NATGEOWILD)
+- **PT NATIONAL GEOGRAPHIC** → `NationalGeographic.br` em IPTV-EPG BR (aproximação 0.947: PTNATIONALGEOGRAPHIC ~ NATIONALGEOGRAPHIC)
+- **PT NICKELODEON** → `Nickelodeon.br` em EPGShare BR2 (aproximação 0.917: PTNICKELODEON ~ NICKELODEON)
+- **RECORDTV BRASILIA** → `4052` em Genius (aproximação 0.933: RECORDTVBRASILIA ~ RECORDBRASILIA)
+- **RECORDTV CAMPINAS** → `4053` em Genius (aproximação 0.933: RECORDTVCAMPINAS ~ RECORDCAMPINAS)
+- **TV A CRÃTICA** → `TVACritica.br` em IPTV-EPG BR (aproximação 0.900: TVACRATICA ~ TVACRITICA)
+- **TV Cancao Nova** → `4071` em Genius (aproximação 0.909: TVCANCAONOVA ~ CANCAONOVA)
+- **UNIVERSAL PREMIER** → `Universal Premiere.br` em Open-EPG Brazil 4 (aproximação 0.970: UNIVERSALPREMIER ~ UNIVERSALPREMIERE)
