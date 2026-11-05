@@ -386,7 +386,8 @@ def main():
 
 if __name__ == '__main__':
     main()
- limpos frequentes, mas limita tamanho do JSON.
+ # Inclui nomes limpos frequentes, mas limita o tamanho do JSON.
+
         aliases.update(a for a, _ in slot['names'].most_common(20) if a)
         ids = []
         for tid, count in slot['ids'].most_common():
