@@ -173,7 +173,6 @@ def purge_vod_from_learned(learned: dict, manual_keys: set[str]) -> int:
         groups = rec.get('groups', []) or []
         groups_str = " ".join(groups).upper()
 
-        # Condições para ser expurgado
         if YEAR_SUFFIX_RE.search(name):
             keys_to_remove.append(key)
         elif any(VOD_GENRES_RE.search(g) for g in groups) and not any(exc in groups_str for exc in LIVE_EXCEPTIONS):
@@ -383,49 +382,6 @@ def main():
     args.learned.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + '\n', 'utf-8')
     print(f'\nDicionário consolidado: {len(output_channels)} canais reais mantidos | {payload["stats"]["trusted_ids"]} IDs mapeados.')
 
-
-if __name__ == '__main__':
-    main()
- # Inclui nomes limpos frequentes, mas limita o tamanho do JSON.
-
-        aliases.update(a for a, _ in slot['names'].most_common(20) if a)
-        ids = []
-        for tid, count in slot['ids'].most_common():
-            owners = id_owners.get(tid, {})
-            if len(owners) == 1:
-                ids.append({'id': tid, 'observations': count, 'trusted': True})
-        output_channels[key] = {
-            'name': preferred,
-            'aliases': sorted(aliases, key=lambda s: (len(s), s.lower()))[:80],
-            'tvg_names': [a for a, _ in slot['tvg_names'].most_common(30)],
-            'tvg_ids': ids[:80],
-            'groups': [g for g, _ in slot['groups'].most_common(20)],
-            'observations': slot['observations'],
-            'blank_id_observations': slot['blank_id_observations'],
-            'source_count': len(slot['playlists']),
-            'source_fingerprints': sorted(slot['playlists']),
-        }
-
-    all_fingerprints = sorted({fp for rec in output_channels.values() for fp in rec.get('source_fingerprints', [])})
-    payload = {
-        'version': 1,
-        'description': 'Banco aprendido de M3Us; sem URLs de stream. IDs ambíguos não são promovidos.',
-        'channels': dict(sorted(output_channels.items())),
-        'ambiguous_ids': ambiguous,
-        'stats': {
-            'channels': len(output_channels),
-            'trusted_ids': sum(len(v.get('tvg_ids', [])) for v in output_channels.values()),
-            'ambiguous_ids': len(ambiguous),
-            'source_count': len(all_fingerprints),
-            'source_fingerprints': all_fingerprints,
-            'files_in_this_import': file_stats,
-        },
-    }
-    out = args.import_out or args.learned
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + '\n', 'utf-8')
-    print(f'Dicionário aprendido: {len(output_channels)} canais; IDs confiáveis: {payload["stats"]["trusted_ids"]}; ambíguos: {len(ambiguous)}')
-    print(f'Saída: {out}')
 
 if __name__ == '__main__':
     main()
