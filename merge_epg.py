@@ -35,7 +35,7 @@ FUZZY_MARGIN = float(os.environ.get("FUZZY_MARGIN", "0.035"))
 AGREEMENT_THRESHOLD = float(os.environ.get("AGREEMENT_THRESHOLD", "0.55"))
 MIN_COMPARABLE_PROGRAMMES = int(os.environ.get("MIN_COMPARABLE_PROGRAMMES", "3"))
 TVG_ID_NAME_THRESHOLD = float(os.environ.get("TVG_ID_NAME_THRESHOLD", "0.72"))
-DOWNLOAD_WORKERS = max(1, min(4, int(os.environ.get("DOWNLOAD_WORKERS", "3"))))
+DOWNLOAD_WORKERS = max(1, min(5, int(os.environ.get("DOWNLOAD_WORKERS", "4"))))
 GZIP_LEVEL = max(1, min(9, int(os.environ.get("GZIP_LEVEL", "6"))))
 OUTPUT_PAST_HOURS = max(0, int(os.environ.get("OUTPUT_PAST_HOURS", "12")))
 WRITE_PLAIN_XML = os.environ.get("WRITE_PLAIN_XML", "0").strip().lower() in {"1", "true", "yes"}
@@ -52,6 +52,26 @@ LEGACY_INTERNAL_IDS: dict[str, tuple[str, ...]] = {
     "auto.sportv1": ("auto.sportv",),
 }
 
+# ==============================================================================
+# FONTES DE EPG
+# Para adicionar uma nova fonte, basta colocar o Nome e a URL abaixo.
+# O sistema gera automaticamente o peso (1.0), as prioridades (ordem da lista)
+# e as chaves para uso interno.
+# ==============================================================================
+EPG_SOURCES = {
+    "Genius": os.environ.get("PRIMARY_EPG_URL", "https://github.com/ferteque/Curated-M3U-Repository/raw/refs/heads/main/epg13.xml.gz"),
+    "Open-EPG Brazil 4": "https://www.open-epg.com/files/brazil4.xml",
+    "EPGShare BR1": "https://epgshare01.online/epgshare01/epg_ripper_BR1.xml.gz",
+    "IPTV-EPG BR": "https://iptv-epg.org/files/epg-br.xml",
+    "EPGShare BR2": "https://epgshare01.online/epgshare01/epg_ripper_BR2.xml.gz",
+    "Open-EPG Brazil": "https://www.open-epg.com/files/brazil.xml",
+    "EPG pw BR": "https://epg.pw/xmltv/epg_BR.xml",
+    "Claro LimaAlef": "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/claro.xml",
+    "Globo LimaAlef": "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/globo.xml",
+    "VivoPlay LimaAlef": "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/vivoplay.xml",
+    "XSports LimaAlef": "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/xsports.xml",
+}
+
 @dataclass(frozen=True)
 class SourceSpec:
     key: str
@@ -63,13 +83,20 @@ class SourceSpec:
     default_offset: str = "+0000"
     timeshift_hours: float = 0.0
 
-SOURCE_SPECS = [
-    SourceSpec("primary", "Genius", os.environ.get("PRIMARY_EPG_URL", "https://github.com/ferteque/Curated-M3U-Repository/raw/refs/heads/main/epg13.xml.gz"), 1, "genius", 1.0),
-    SourceSpec("secondary", "Open-EPG Brazil 4", os.environ.get("SECONDARY_EPG_URL", "https://www.open-epg.com/files/brazil4.xml"), 2, "open-epg", 1.0),
-    SourceSpec("tertiary", "EPGShare BR1", os.environ.get("TERTIARY_EPG_URL", "https://epgshare01.online/epgshare01/epg_ripper_BR1.xml.gz"), 3, "epgshare", 0.5),
-    SourceSpec("quaternary", "IPTV-EPG BR", os.environ.get("QUATERNARY_EPG_URL", "https://iptv-epg.org/files/epg-br.xml"), 4, "iptv-epg", 1.0),
-    SourceSpec("quinary", "EPGShare BR2", os.environ.get("QUINARY_EPG_URL", "https://epgshare01.online/epgshare01/epg_ripper_BR2.xml.gz"), 5, "epgshare", 0.5),
-]
+# Constrói as especificações programaticamente
+SOURCE_SPECS = []
+for idx, (lbl, link) in enumerate(EPG_SOURCES.items(), start=1):
+    safe_key = re.sub(r'[^a-z0-9]', '', lbl.lower()) or f"src{idx}"
+    SOURCE_SPECS.append(SourceSpec(
+        key=safe_key,
+        label=lbl,
+        url=link,
+        priority=idx,
+        family=safe_key,  # Família isolada (o desempate real ocorre na avaliação de grade)
+        vote_weight=1.0,
+        default_offset="+0000",
+        timeshift_hours=0.0
+    ))
 
 @dataclass(frozen=True)
 class ProgrammeRow:
