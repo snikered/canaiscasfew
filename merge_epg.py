@@ -22,7 +22,7 @@ from difflib import SequenceMatcher
 from functools import lru_cache
 from pathlib import Path
 from statistics import mean
-from typing import Iterable
+from typing import Iterable, Any
 from xml.sax.saxutils import quoteattr
 
 from epg_utils import digit_signature, normalize_name, normalize_source_id
@@ -35,7 +35,7 @@ FUZZY_MARGIN = float(os.environ.get("FUZZY_MARGIN", "0.035"))
 AGREEMENT_THRESHOLD = float(os.environ.get("AGREEMENT_THRESHOLD", "0.55"))
 MIN_COMPARABLE_PROGRAMMES = int(os.environ.get("MIN_COMPARABLE_PROGRAMMES", "3"))
 TVG_ID_NAME_THRESHOLD = float(os.environ.get("TVG_ID_NAME_THRESHOLD", "0.72"))
-DOWNLOAD_WORKERS = max(1, min(4, int(os.environ.get("DOWNLOAD_WORKERS", "3")))) # Controla RAM
+DOWNLOAD_WORKERS = max(1, min(4, int(os.environ.get("DOWNLOAD_WORKERS", "3"))))
 GZIP_LEVEL = max(1, min(9, int(os.environ.get("GZIP_LEVEL", "6"))))
 OUTPUT_PAST_HOURS = max(0, int(os.environ.get("OUTPUT_PAST_HOURS", "12")))
 WRITE_PLAIN_XML = os.environ.get("WRITE_PLAIN_XML", "0").strip().lower() in {"1", "true", "yes"}
@@ -63,15 +63,12 @@ class SourceSpec:
     default_offset: str = "+0000"
     timeshift_hours: float = 0.0
 
-# Adicione quantas fontes quiser aqui. O script escala automaticamente.
 SOURCE_SPECS = [
     SourceSpec("primary", "Genius", os.environ.get("PRIMARY_EPG_URL", "https://github.com/ferteque/Curated-M3U-Repository/raw/refs/heads/main/epg13.xml.gz"), 1, "genius", 1.0),
     SourceSpec("secondary", "Open-EPG Brazil 4", os.environ.get("SECONDARY_EPG_URL", "https://www.open-epg.com/files/brazil4.xml"), 2, "open-epg", 1.0),
     SourceSpec("tertiary", "EPGShare BR1", os.environ.get("TERTIARY_EPG_URL", "https://epgshare01.online/epgshare01/epg_ripper_BR1.xml.gz"), 3, "epgshare", 0.5),
     SourceSpec("quaternary", "IPTV-EPG BR", os.environ.get("QUATERNARY_EPG_URL", "https://iptv-epg.org/files/epg-br.xml"), 4, "iptv-epg", 1.0),
     SourceSpec("quinary", "EPGShare BR2", os.environ.get("QUINARY_EPG_URL", "https://epgshare01.online/epgshare01/epg_ripper_BR2.xml.gz"), 5, "epgshare", 0.5),
-    # Exemplo para adicionar novas fontes futuras:
-    # SourceSpec("fonte6", "Nome Fonte 6", "https://url-da-fonte.xml.gz", 6, "familia_x", 1.0),
 ]
 
 @dataclass(frozen=True)
@@ -128,14 +125,16 @@ def format_xmltv_datetime(dt: datetime) -> str:
 
 @lru_cache(maxsize=500000)
 def parse_xmltv_datetime(value: str, default_offset: str = "+0000") -> datetime | None:
-    if not value: return None
+    if not value:
+        return None
     value = value.strip()
     match = re.match(r"^(\d{14}|\d{12})(?:\s*([+-]\d{4}))?(?:\s+.*)?$", value)
     if match:
         digits, offset = match.groups()
         try:
             second = int(digits[12:14]) if len(digits) == 14 else 0
-            if not offset: offset = default_offset or "+0000"
+            if not offset:
+                offset = default_offset or "+0000"
             sign = 1 if offset[0] == "+" else -1
             delta = timedelta(hours=int(offset[1:3]), minutes=int(offset[3:5]))
             tz = timezone(sign * delta)
@@ -144,22 +143,25 @@ def parse_xmltv_datetime(value: str, default_offset: str = "+0000") -> datetime 
                 int(digits[8:10]), int(digits[10:12]), second, tzinfo=tz
             )
             return dt.astimezone(timezone.utc)
-        except (ValueError, IndexError): pass
+        except (ValueError, IndexError):
+            pass
 
     for fmt in ("%Y%m%d%H%M%S %z", "%Y%m%d%H%M %z"):
-        try: return datetime.strptime(value, fmt).astimezone(timezone.utc)
-        except ValueError: pass
+        try:
+            return datetime.strptime(value, fmt).astimezone(timezone.utc)
+        except ValueError:
+            pass
     for fmt in ("%Y%m%d%H%M%S", "%Y%m%d%H%M"):
         try:
             sign = 1 if default_offset[0] == "+" else -1
             delta = timedelta(hours=int(default_offset[1:3]), minutes=int(default_offset[3:5]))
             tz = timezone(sign * delta)
             return datetime.strptime(value, fmt).replace(tzinfo=tz).astimezone(timezone.utc)
-        except (ValueError, IndexError): pass
+        except (ValueError, IndexError):
+            pass
     return None
 
 def download_to_temp_file(url: str, attempts: int = 3) -> Path:
-    """Baixa o feed diretamente para disco evitando estouro de RAM no GitHub Actions."""
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".tmp")
     tmp_path = Path(tmp.name)
     tmp.close()
@@ -174,8 +176,10 @@ def download_to_temp_file(url: str, attempts: int = 3) -> Path:
             return tmp_path
         except Exception as exc:
             last_error = exc
-            if attempt < attempts: time.sleep(attempt * 3)
-    if tmp_path.exists(): tmp_path.unlink()
+            if attempt < attempts:
+                time.sleep(attempt * 3)
+    if tmp_path.exists():
+        tmp_path.unlink()
     raise RuntimeError(f"Falha ao baixar {url}: {last_error}")
 
 def read_source_from_file(spec: SourceSpec, tmp_path: Path) -> EpgSource:
@@ -199,7 +203,8 @@ def read_source_from_file(spec: SourceSpec, tmp_path: Path) -> EpgSource:
         tag = local_tag(child)
         if tag == "channel":
             channel_id = child.attrib.get("id", "").strip()
-            if not channel_id: continue
+            if not channel_id:
+                continue
             channels[channel_id] = child
             display_names = [
                 (node.text or "").strip() for node in child
@@ -210,7 +215,8 @@ def read_source_from_file(spec: SourceSpec, tmp_path: Path) -> EpgSource:
             norm_candidates: list[str] = []
             for candidate in [*display_names, channel_id, normalize_source_id(channel_id)]:
                 normalized = normalize_name(candidate)
-                if not normalized or normalized in norm_candidates: continue
+                if not normalized or normalized in norm_candidates:
+                    continue
                 norm_candidates.append(normalized)
                 exact_index[normalized].add(channel_id)
                 fuzzy_index[digit_signature(normalized)][normalized].add(channel_id)
@@ -222,19 +228,20 @@ def read_source_from_file(spec: SourceSpec, tmp_path: Path) -> EpgSource:
 
         elif tag == "programme":
             channel_id = child.attrib.get("channel", "").strip()
-            if not channel_id: continue
+            if not channel_id:
+                continue
             programs[channel_id].append(child)
 
             start = parse_xmltv_datetime(child.attrib.get("start", ""), spec.default_offset)
             stop = parse_xmltv_datetime(child.attrib.get("stop", ""), spec.default_offset)
-            if start is None: continue
+            if start is None:
+                continue
             title = programme_title(child)
             rows[channel_id].append(ProgrammeRow(
                 start=start, stop=stop or start, title=title,
                 normalized_title=normalize_programme_title(title), element=child,
             ))
 
-    # Anti-overlap inicial da fonte
     for channel_id, channel_rows in rows.items():
         channel_rows.sort(key=lambda item: item.start)
         fixed_rows: list[ProgrammeRow] = []
@@ -242,6 +249,231 @@ def read_source_from_file(spec: SourceSpec, tmp_path: Path) -> EpgSource:
             stop = row.stop
             if stop <= row.start:
                 next_start = channel_rows[idx + 1].start if idx + 1 < len(channel_rows) else None
+                stop = next_start if (next_start and next_start > row.start) else row.start + timedelta(hours=2)
+            fixed_rows.append(ProgrammeRow(
+                start=row.start, stop=stop, title=row.title,
+                normalized_title=row.normalized_title, element=row.element,
+            ))
+        rows[channel_id] = fixed_rows
+
+    root.clear()
+    return EpgSource(
+        spec=spec, channels=channels, names=names, normalized_names=normalized_names,
+        programs=dict(programs), rows=dict(rows), exact_index=dict(exact_index),
+        fuzzy_index={sig: dict(items) for sig, items in fuzzy_index.items()},
+        normalized_id_index=dict(normalized_id_index),
+    )
+
+def read_optional_source(spec: SourceSpec) -> tuple[EpgSource | None, str | None]:
+    tmp_path = None
+    try:
+        tmp_path = download_to_temp_file(spec.url)
+        src = read_source_from_file(spec, tmp_path)
+        return src, None
+    except Exception as exc:
+        return None, str(exc)
+    finally:
+        if tmp_path and tmp_path.exists():
+            try:
+                tmp_path.unlink()
+            except Exception:
+                pass
+
+def aliases_for(entry: dict[str, object]) -> list[str]:
+    values: list[str] = [str(entry.get("name", ""))]
+    values.extend(str(x) for x in entry.get("aliases", []) or [])
+    output, seen = [], set()
+    for value in values:
+        normalized = normalize_name(value)
+        if normalized and normalized not in seen:
+            output.append(normalized)
+            seen.add(normalized)
+    return output
+
+def old_id_hints_for(entry: dict[str, object]) -> list[str]:
+    output, seen = [], set()
+    for value in entry.get("old_tvg_ids", []) or []:
+        raw = str(value).strip()
+        if raw and raw not in seen:
+            output.append(raw)
+            seen.add(raw)
+    return output
+
+def choose_exact(source: EpgSource, aliases: Iterable[str]) -> tuple[str | None, str]:
+    for alias in aliases:
+        candidates = source.exact_index.get(alias, set())
+        if candidates:
+            selected = max(candidates, key=lambda cid: len(source.programs.get(cid, [])))
+            return selected, f"nome exato: {alias}"
+    return None, ""
+
+def _sequence_ratio_upper_bound(left: str, right: str, left_counter: Counter[str] | None = None) -> float:
+    if not left or not right:
+        return 0.0
+    length_bound = (2.0 * min(len(left), len(right))) / (len(left) + len(right))
+    if length_bound < (FUZZY_THRESHOLD - FUZZY_MARGIN):
+        return length_bound
+    lc = left_counter or Counter(left)
+    rc = Counter(right)
+    common = sum(min(count, rc.get(ch, 0)) for ch, count in lc.items())
+    return min(length_bound, (2.0 * common) / (len(left) + len(right)))
+
+def best_fuzzy(source: EpgSource, aliases: list[str]) -> tuple[str | None, float, float, str]:
+    if not aliases:
+        return None, 0.0, 0.0, ""
+    relevant_floor = FUZZY_THRESHOLD - FUZZY_MARGIN
+    best_by_channel: dict[str, tuple[float, str, str]] = {}
+    for alias in aliases:
+        if len(alias) < 4:
+            continue
+        alias_counter = Counter(alias)
+        bucket = source.fuzzy_index.get(digit_signature(alias), {})
+        for normalized_candidate, channel_ids in bucket.items():
+            if _sequence_ratio_upper_bound(alias, normalized_candidate, alias_counter) < relevant_floor:
+                continue
+            ratio = SequenceMatcher(None, alias, normalized_candidate).ratio()
+            if ratio < relevant_floor:
+                continue
+            for channel_id in channel_ids:
+                old = best_by_channel.get(channel_id)
+                if old is None or ratio > old[0]:
+                    best_by_channel[channel_id] = (ratio, alias, normalized_candidate)
+    if not best_by_channel:
+        return None, 0.0, 0.0, ""
+    scored = sorted(((score, cid, a, cand) for cid, (score, a, cand) in best_by_channel.items()), reverse=True)
+    best = scored[0]
+    second_score = scored[1][0] if len(scored) > 1 else 0.0
+    return best[1], best[0], second_score, f"aproximação {best[0]:.3f}: {best[2]} ~ {best[3]}"
+
+def _name_compatibility(source: EpgSource, channel_id: str, aliases: list[str]) -> float:
+    candidates = source.normalized_names.get(channel_id, [])
+    best = 0.0
+    for alias in aliases:
+        alias_sig = digit_signature(alias)
+        for candidate_norm in candidates:
+            if alias_sig != digit_signature(candidate_norm):
+                continue
+            if alias == candidate_norm:
+                return 1.0
+            best = max(best, SequenceMatcher(None, alias, candidate_norm).ratio())
+    return best
+
+def match_by_safe_tvg_id_hint(source: EpgSource, aliases: list[str], old_ids: list[str]) -> ChannelMatch | None:
+    if not old_ids or not aliases:
+        return None
+    candidate_ids: set[str] = set()
+    for value in old_ids:
+        raw = value.strip()
+        if raw in source.channels:
+            candidate_ids.add(raw)
+        normalized = normalize_source_id(raw)
+        if normalized:
+            candidate_ids.update(source.normalized_id_index.get(normalized, set()))
+    candidates = []
+    for channel_id in candidate_ids:
+        compatibility = _name_compatibility(source, channel_id, aliases)
+        if compatibility >= TVG_ID_NAME_THRESHOLD:
+            candidates.append((compatibility, channel_id))
+    if not candidates:
+        return None
+    candidates.sort(reverse=True)
+    score, channel_id = candidates[0]
+    return ChannelMatch(source, channel_id, f"tvg-id antigo confirmado ({score:.3f})", score)
+
+def find_match(source: EpgSource, aliases: list[str], old_ids: list[str] | None = None) -> ChannelMatch | None:
+    exact_id, reason = choose_exact(source, aliases)
+    if exact_id:
+        return ChannelMatch(source, exact_id, reason, 1.0)
+    fuzzy_id, best_score, second_score, fuzzy_reason = best_fuzzy(source, aliases)
+    if fuzzy_id and best_score >= FUZZY_THRESHOLD and (best_score - second_score) >= FUZZY_MARGIN:
+        return ChannelMatch(source, fuzzy_id, fuzzy_reason, best_score)
+    return match_by_safe_tvg_id_hint(source, aliases, old_ids or [])
+
+def manual_override(overrides: dict[str, object], target_id: str) -> tuple[str | None, str | None]:
+    item = (overrides.get("by_target_id", {}) or {}).get(target_id)
+    if not isinstance(item, dict):
+        return None, None
+    source = str(item.get("source", "")).lower().strip()
+    channel_id = str(item.get("channel_id", "")).strip()
+    valid = {spec.key for spec in SOURCE_SPECS}
+    return (source, channel_id) if source in valid and channel_id else (None, None)
+
+def add_display_name_first(channel: ET.Element, name: str) -> None:
+    normalized_existing = {normalize_name(node.text or "") for node in channel if local_tag(node) == "display-name"}
+    if normalize_name(name) in normalized_existing:
+        return
+    display = ET.Element("display-name")
+    display.text = name
+    channel.insert(0, display)
+
+def programme_title(programme: ET.Element | None) -> str:
+    if programme is None:
+        return ""
+    for child in programme:
+        if local_tag(child) == "title" and (child.text or "").strip():
+            return (child.text or "").strip()
+    return ""
+
+@lru_cache(maxsize=200000)
+def normalize_programme_title(value: str) -> str:
+    value = unicodedata.normalize("NFKD", value or "")
+    value = "".join(ch for ch in value if not unicodedata.combining(ch)).upper()
+    value = re.sub(r"\b(?:HD|FHD|AO VIVO|LIVE|ESTREIA|INEDITO|INÉDITO)\b", " ", value)
+    value = re.sub(r"\bT\d+\s*E\d+\b", " ", value)
+    value = re.sub(r"\bS\d+\s*E\d+\b", " ", value)
+    value = re.sub(r"[^A-Z0-9]+", " ", value)
+    return re.sub(r"\s+", " ", value).strip()
+
+def programme_rows(source: EpgSource, channel_id: str) -> list[ProgrammeRow]:
+    return source.rows.get(channel_id, [])
+
+def now_next_for(source: EpgSource, channel_id: str, now: datetime) -> tuple[dict | None, dict | None]:
+    current, next_item = None, None
+    for row in programme_rows(source, channel_id):
+        if row.start <= now < row.stop:
+            current = {"start": row.start, "stop": row.stop, "title": row.title}
+        elif row.start > now and next_item is None:
+            next_item = {"start": row.start, "stop": row.stop, "title": row.title}
+            if current is not None:
+                break
+    return current, next_item
+
+_AGREEMENT_CACHE: dict[tuple[str, str, str, str], dict[str, object]] = {}
+_HEALTH_CACHE: dict[tuple[str, str], dict[str, object]] = {}
+
+def _calc_agreement(a_rows: list[ProgrammeRow], b_rows: list[ProgrammeRow], offset: timedelta) -> dict[str, object]:
+    similarities = []
+    b_floor = 0
+    tolerance = timedelta(minutes=20)
+    for a_row in a_rows:
+        a_start, a_stop = a_row.start + offset, a_row.stop + offset
+        while b_floor < len(b_rows) and b_rows[b_floor].stop < a_start - tolerance:
+            b_floor += 1
+
+        best = None
+        idx = b_floor
+        while idx < len(b_rows):
+            b_row = b_rows[idx]
+            if b_row.start > a_stop + tolerance:
+                break
+            overlap = max(0.0, (min(a_stop, b_row.stop) - max(a_start, b_row.start)).total_seconds())
+            shorter = max(1.0, min((a_stop - a_start).total_seconds(), (b_row.stop - b_row.start).total_seconds()))
+            overlap_ratio = overlap / shorter
+            start_delta = abs((b_row.start - a_start).total_seconds())
+            if overlap_ratio >= 0.35 or start_delta <= 20 * 60:
+                time_score = max(overlap_ratio, max(0.0, 1.0 - start_delta / (20 * 60)))
+                title_score = 0.0
+                if a_row.normalized_title and b_row.normalized_title:
+                    title_score = 1.0 if a_row.normalized_title == b_row.normalized_title else SequenceMatcher(None, a_row.normalized_title, b_row.normalized_title).ratio()
+                cand = (time_score, title_score)
+                if best is None or cand > best:
+                    best = cand
+            idx += 1
+        if best is not None:
+            similarities.append(best[1])
+
+    if not similarities:
+        return {"comparable": 0, "agreement": None, "avert if idx + 1 < len(channel_rows) else None
                 stop = next_start if (next_start and next_start > row.start) else row.start + timedelta(hours=2)
             fixed_rows.append(ProgrammeRow(
                 start=row.start, stop=stop, title=row.title,
