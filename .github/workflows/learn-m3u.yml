@@ -65,11 +65,14 @@ jobs:
               print(f'Lista remota {i} baixada para aprendizado ({path.name}).')
           PY
 
-          # Arquivos sanitizados criados pelo preparar_importacao.html.
+                    # Arquivos sanitizados criados pelo preparar_importacao.html (na raiz ou em learning/)
           shopt -s nullglob
-          for f in learning/*.safe.m3u; do
-            cp "$f" "/tmp/learn/$(basename "$f")"
+          for f in learning/*.safe.m3u *.safe.m3u; do
+            if [ -f "$f" ]; then
+              cp "$f" "/tmp/learn/$(basename "$f")"
+            fi
           done
+
 
           FILES=(/tmp/learn/*.m3u)
           if [ ${#FILES[@]} -eq 0 ]; then
