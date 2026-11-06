@@ -1,16 +1,9 @@
 #!/usr/bin/env python3
-"""Compila dicionário manual + aprendizado persistente no catálogo consumido pelo merge_epg.py.
-Otimizado para evitar bloqueio por excesso de aliases (Fuzzy Overload).
-"""
-from __future__ import annotations
-
 import argparse
 import json
 from collections import Counter, defaultdict
 from pathlib import Path
-
 from epg_utils import normalize_name, stable_channel_id
-
 
 def alias_index(manual_channels: dict[str, dict]) -> dict[str, str]:
     owners: dict[str, set[str]] = defaultdict(set)
@@ -20,24 +13,19 @@ def alias_index(manual_channels: dict[str, dict]) -> dict[str, str]:
             if norm: owners[norm].add(key)
     return {a: next(iter(keys)) for a, keys in owners.items() if len(keys) == 1}
 
-
-def deduplicate_aliases(raw_aliases: list[str], max_items: int = 15) -> list[str]:
-    """Remove aliases que, após normalizados, são essencialmente o mesmo nome."""
-    unique_norms = set()
+def keep_raw_aliases(raw_aliases: list[str], max_items: int = 40) -> list[str]:
+    """Preserva os nomes literais originais da M3U para que a TV os encontre."""
+    seen = set()
     cleaned = []
-    
-    # Ordena pelos mais curtos primeiro (costumam ser mais limpos)
     for alias in sorted(raw_aliases, key=len):
         if not alias: continue
-        norm = normalize_name(alias)
-        if norm and norm not in unique_norms:
-            unique_norms.add(norm)
-            cleaned.append(alias)
+        lower_alias = str(alias).strip().lower()
+        if lower_alias not in seen:
+            seen.add(lower_alias)
+            cleaned.append(str(alias).strip())
             if len(cleaned) >= max_items:
                 break
-                
     return cleaned
-
 
 def main() -> None:
     ap = argparse.ArgumentParser()
@@ -58,7 +46,6 @@ def main() -> None:
         'blank': 0, 'observations': 0, 'fingerprints': set(), 'learned_keys': set(),
     })
 
-    # Regras manuais entram sempre
     for key, rec in manual_channels.items():
         b = buckets[key]
         b['names'][str(rec.get('name') or key)] += 10_000
@@ -72,8 +59,8 @@ def main() -> None:
         name = str(rec.get('name') or learned_key)
         b['names'][name] += max(1, int(rec.get('observations', 1) or 1))
         
-        # Puxa apenas uma fração do histórico para evitar acumulação de lixo
-        b['aliases'].update(list(rec.get('aliases', []))[:15]) 
+        # Extrai até 40 aliases literais para suportar FHD, H265, etc.
+        b['aliases'].update(list(rec.get('aliases', []))[:40]) 
         
         for item in rec.get('tvg_ids', []) or []:
             if isinstance(item, dict):
@@ -118,9 +105,7 @@ def main() -> None:
         raw_aliases.add(preferred)
         raw_aliases.update(str(x) for x in manual_rec.get('aliases', []) or [] if x)
         
-        # AQUI OCORRE A MÁGICA DE OTIMIZAÇÃO: Filtramos para um máximo de 15 aliases hiper-úteis
-        clean_aliases = deduplicate_aliases(list(raw_aliases), max_items=15)
-        
+        clean_aliases = keep_raw_aliases(list(raw_aliases), max_items=40)
         trusted_ids = [tid for tid, _ in b['ids'].most_common() if len(id_owners.get(tid, {key})) == 1 and tid not in unresolved_ambiguous]
         blank_aliases = clean_aliases if b['blank'] else []
         
@@ -130,10 +115,10 @@ def main() -> None:
             'name': preferred,
             'aliases': clean_aliases,
             'original_names': clean_aliases,
-            'old_tvg_ids': trusted_ids[:20],  # Limite máximo de 20 IDs antigos
+            'old_tvg_ids': trusted_ids[:20],
             'blank_tvg_id_names': blank_aliases,
             'blank_tvg_id_tvg_names': [],
-            'groups': [g for g, _ in b['groups'].most_common(5)], # Máximo 5 grupos
+            'groups': [g for g, _ in b['groups'].most_common(5)],
             'source_playlists': sorted(b['fingerprints']),
             'playlist_entries': b['observations'],
             'blank_tvg_id_entries': b['blank'],
@@ -141,7 +126,7 @@ def main() -> None:
         })
 
     payload = {
-        'description': 'Catálogo compilado. Otimizado para baixa sobrecarga de Fuzzy Matching.',
+        'description': 'Catálogo compilado. Otimizado com nomes literais para compatibilidade Plug & Play.',
         'identity_basis': 'channel_name_dictionary',
         'channel_count': len(entries),
         'trusted_compatibility_ids': sum(len(x['old_tvg_ids']) for x in entries),
@@ -151,7 +136,7 @@ def main() -> None:
     
     args.catalog.parent.mkdir(parents=True, exist_ok=True)
     args.catalog.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + '\n', 'utf-8')
-    print(f"Catálogo compilado: {len(entries)} canais; {payload['trusted_compatibility_ids']} IDs confiáveis; {len(unresolved_ambiguous)} ambíguos ignorados")
+    print(f"Catálogo compilado: {len(entries)} canais; {payload['trusted_compatibility_ids']} IDs confiáveis")
 
 if __name__ == '__main__':
     main()
