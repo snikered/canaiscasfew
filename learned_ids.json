@@ -13925,8 +13925,8 @@
     "CANALDOBOI": {
       "name": "CANAL DO BOI",
       "aliases": [
-        "Canal do Boi",
-        "CANAL DO BOI"
+        "CANAL DO BOI",
+        "Canal do Boi"
       ],
       "tvg_names": [
         "CANAL DO BOI",
@@ -15307,8 +15307,8 @@
     "CONMEBOLTV1": {
       "name": "Conmebol TV 1",
       "aliases": [
-        "CONMEBOL TV 1",
-        "Conmebol TV 1"
+        "Conmebol TV 1",
+        "CONMEBOL TV 1"
       ],
       "tvg_names": [
         "Conmebol TV 1",
@@ -19752,8 +19752,8 @@
     "HBOPLUS": {
       "name": "HBO Plus",
       "aliases": [
-        "HBO Plus",
-        "HBO PLUS"
+        "HBO PLUS",
+        "HBO Plus"
       ],
       "tvg_names": [
         "HBO Plus",
@@ -19833,8 +19833,8 @@
     "HBOXTREME": {
       "name": "HBO Xtreme",
       "aliases": [
-        "HBO XTREME",
-        "HBO Xtreme"
+        "HBO Xtreme",
+        "HBO XTREME"
       ],
       "tvg_names": [
         "HBO Xtreme",
@@ -24630,8 +24630,8 @@
     "TELECINEPIPOCA": {
       "name": "Telecine Pipoca",
       "aliases": [
-        "Telecine Pipoca",
-        "TELECINE PIPOCA"
+        "TELECINE PIPOCA",
+        "Telecine Pipoca"
       ],
       "tvg_names": [
         "Telecine Pipoca",
@@ -32771,14 +32771,6 @@
     "source_fingerprints": [
       "48e33f9603c77df0d9525afba5b079e67f2728171dbcead1e7a1d374e6315eae"
     ],
-    "files_in_this_import": [
-      {
-        "file": "playlist-canais.safe.m3u",
-        "sha256": "48e33f9603c77df0d9525afba5b079e67f2728171dbcead1e7a1d374e6315eae",
-        "entries": 2211,
-        "candidates": 2211,
-        "blank_id_candidates": 1642
-      }
-    ]
+    "files_in_this_import": []
   }
 }

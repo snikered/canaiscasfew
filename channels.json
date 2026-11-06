@@ -87,14 +87,14 @@
       "canonical_key": "FISHTV",
       "name": "FISH TV",
       "aliases": [
-        "FISH TV"
+        "Fish TV"
       ],
       "original_names": [
-        "FISH TV"
+        "Fish TV"
       ],
       "old_tvg_ids": [],
       "blank_tvg_id_names": [
-        "FISH TV"
+        "Fish TV"
       ],
       "blank_tvg_id_tvg_names": [],
       "groups": [
@@ -191,14 +191,14 @@
       "canonical_key": "FOODNETWORK",
       "name": "FOOD NETWORK",
       "aliases": [
-        "Food Network"
+        "FOOD NETWORK"
       ],
       "original_names": [
-        "Food Network"
+        "FOOD NETWORK"
       ],
       "old_tvg_ids": [],
       "blank_tvg_id_names": [
-        "Food Network"
+        "FOOD NETWORK"
       ],
       "blank_tvg_id_tvg_names": [],
       "groups": [
@@ -417,10 +417,10 @@
       "canonical_key": "GLOBOBRASILIA",
       "name": "Globo Brasilia",
       "aliases": [
-        "Globo Brasilia"
+        "GLOBO BRASILIA"
       ],
       "original_names": [
-        "Globo Brasilia"
+        "GLOBO BRASILIA"
       ],
       "old_tvg_ids": [],
       "blank_tvg_id_names": [],
@@ -465,10 +465,10 @@
       "canonical_key": "HBOXTREME",
       "name": "HBO Xtreme",
       "aliases": [
-        "HBO Xtreme"
+        "HBO XTREME"
       ],
       "original_names": [
-        "HBO Xtreme"
+        "HBO XTREME"
       ],
       "old_tvg_ids": [
         "hboxtreme.br"
@@ -594,10 +594,10 @@
       "canonical_key": "TELECINEPIPOCA",
       "name": "Telecine Pipoca",
       "aliases": [
-        "TELECINE PIPOCA"
+        "Telecine Pipoca"
       ],
       "original_names": [
-        "TELECINE PIPOCA"
+        "Telecine Pipoca"
       ],
       "old_tvg_ids": [
         "telecinepipoca.br"
@@ -694,16 +694,16 @@
       "canonical_key": "TVCULTURA",
       "name": "TV CULTURA",
       "aliases": [
-        "TV CULTURA"
+        "TV Cultura"
       ],
       "original_names": [
-        "TV CULTURA"
+        "TV Cultura"
       ],
       "old_tvg_ids": [
         "cultura.br"
       ],
       "blank_tvg_id_names": [
-        "TV CULTURA"
+        "TV Cultura"
       ],
       "blank_tvg_id_tvg_names": [],
       "groups": [
@@ -721,12 +721,12 @@
       "canonical_key": "AANDE",
       "name": "A&E",
       "aliases": [
-        "A E",
-        "A&E"
+        "A&E",
+        "A E"
       ],
       "original_names": [
-        "A E",
-        "A&E"
+        "A&E",
+        "A E"
       ],
       "old_tvg_ids": [
         "aande.br"
@@ -871,14 +871,14 @@
       "canonical_key": "CANALDOBOI",
       "name": "CANAL DO BOI",
       "aliases": [
-        "Canal do Boi"
+        "CANAL DO BOI"
       ],
       "original_names": [
-        "Canal do Boi"
+        "CANAL DO BOI"
       ],
       "old_tvg_ids": [],
       "blank_tvg_id_names": [
-        "Canal do Boi"
+        "CANAL DO BOI"
       ],
       "blank_tvg_id_tvg_names": [],
       "groups": [
@@ -1390,10 +1390,10 @@
       "canonical_key": "HBOMUNDI",
       "name": "HBO Mundi",
       "aliases": [
-        "HBO MUNDI"
+        "HBO Mundi"
       ],
       "original_names": [
-        "HBO MUNDI"
+        "HBO Mundi"
       ],
       "old_tvg_ids": [
         "hbomundi.br"
@@ -1767,10 +1767,10 @@
       "canonical_key": "RECORDNEWS",
       "name": "Record News",
       "aliases": [
-        "Record News"
+        "RECORD NEWS"
       ],
       "original_names": [
-        "Record News"
+        "RECORD NEWS"
       ],
       "old_tvg_ids": [
         "recordnews.br"
@@ -2067,10 +2067,10 @@
       "canonical_key": "TVRATIMBUM",
       "name": "TV Rá Tim Bum!",
       "aliases": [
-        "TV Ra Tim Bum"
+        "TV Rá Tim Bum"
       ],
       "original_names": [
-        "TV Ra Tim Bum"
+        "TV Rá Tim Bum"
       ],
       "old_tvg_ids": [
         "ratimbum.br"
@@ -2420,14 +2420,14 @@
       "canonical_key": "CONMEBOLTV1",
       "name": "Conmebol TV 1",
       "aliases": [
-        "CONMEBOL TV 1"
+        "Conmebol TV 1"
       ],
       "original_names": [
-        "CONMEBOL TV 1"
+        "Conmebol TV 1"
       ],
       "old_tvg_ids": [],
       "blank_tvg_id_names": [
-        "CONMEBOL TV 1"
+        "Conmebol TV 1"
       ],
       "blank_tvg_id_tvg_names": [],
       "groups": [
@@ -2913,10 +2913,10 @@
       "canonical_key": "GLOBOTVTEMSOROCABA",
       "name": "GLOBO TV TEM SOROCABA",
       "aliases": [
-        "GLOBO TV TEM SOROCABA"
+        "Globo TV TEM Sorocaba"
       ],
       "original_names": [
-        "GLOBO TV TEM SOROCABA"
+        "Globo TV TEM Sorocaba"
       ],
       "old_tvg_ids": [],
       "blank_tvg_id_names": [],
@@ -3626,14 +3626,14 @@
       "canonical_key": "CONMEBOLTV3",
       "name": "Conmebol TV 3",
       "aliases": [
-        "CONMEBOL TV 3"
+        "Conmebol TV 3"
       ],
       "original_names": [
-        "CONMEBOL TV 3"
+        "Conmebol TV 3"
       ],
       "old_tvg_ids": [],
       "blank_tvg_id_names": [
-        "CONMEBOL TV 3"
+        "Conmebol TV 3"
       ],
       "blank_tvg_id_tvg_names": [],
       "groups": [
