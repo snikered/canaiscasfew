@@ -1,5 +1,5 @@
 {
-  "description": "Catálogo compilado. Otimizado para baixa sobrecarga de Fuzzy Matching.",
+  "description": "Catálogo compilado. Otimizado com nomes literais para compatibilidade Plug & Play.",
   "identity_basis": "channel_name_dictionary",
   "channel_count": 1686,
   "trusted_compatibility_ids": 94,
@@ -10,16 +10,22 @@
       "canonical_key": "DISCOVERYHOMEANDHEALTH",
       "name": "Discovery Home & Health",
       "aliases": [
-        "Discovery H&H"
+        "DISCOVERY H&H",
+        "Discovery Home & Health",
+        "Discovery Home and Health"
       ],
       "original_names": [
-        "Discovery H&H"
+        "DISCOVERY H&H",
+        "Discovery Home & Health",
+        "Discovery Home and Health"
       ],
       "old_tvg_ids": [
         "discoveryhomehealth.br"
       ],
       "blank_tvg_id_names": [
-        "Discovery H&H"
+        "DISCOVERY H&H",
+        "Discovery Home & Health",
+        "Discovery Home and Health"
       ],
       "blank_tvg_id_tvg_names": [],
       "groups": [
@@ -241,10 +247,12 @@
       "canonical_key": "BANDSPORTS",
       "name": "BandSports",
       "aliases": [
-        "BandSports"
+        "BandSports",
+        "BAND SPORTS"
       ],
       "original_names": [
-        "BandSports"
+        "BandSports",
+        "BAND SPORTS"
       ],
       "old_tvg_ids": [],
       "blank_tvg_id_names": [],
@@ -264,16 +272,19 @@
       "canonical_key": "CANCAONOVA",
       "name": "CANCAO NOVA",
       "aliases": [
-        "CANÇÃO NOVA"
+        "CANÇÃO NOVA",
+        "CANCAO NOVA"
       ],
       "original_names": [
-        "CANÇÃO NOVA"
+        "CANÇÃO NOVA",
+        "CANCAO NOVA"
       ],
       "old_tvg_ids": [
         "CANCAON"
       ],
       "blank_tvg_id_names": [
-        "CANÇÃO NOVA"
+        "CANÇÃO NOVA",
+        "CANCAO NOVA"
       ],
       "blank_tvg_id_tvg_names": [],
       "groups": [
@@ -417,10 +428,10 @@
       "canonical_key": "GLOBOBRASILIA",
       "name": "Globo Brasilia",
       "aliases": [
-        "GLOBO BRASILIA"
+        "Globo Brasilia"
       ],
       "original_names": [
-        "GLOBO BRASILIA"
+        "Globo Brasilia"
       ],
       "old_tvg_ids": [],
       "blank_tvg_id_names": [],
@@ -465,10 +476,10 @@
       "canonical_key": "HBOXTREME",
       "name": "HBO Xtreme",
       "aliases": [
-        "HBO XTREME"
+        "HBO Xtreme"
       ],
       "original_names": [
-        "HBO XTREME"
+        "HBO Xtreme"
       ],
       "old_tvg_ids": [
         "hboxtreme.br"
@@ -515,16 +526,22 @@
       "canonical_key": "REDETV",
       "name": "REDE TV",
       "aliases": [
-        "REDETV"
+        "REDETV",
+        "REDE TV",
+        "REDE TV ( )"
       ],
       "original_names": [
-        "REDETV"
+        "REDETV",
+        "REDE TV",
+        "REDE TV ( )"
       ],
       "old_tvg_ids": [
         "redetv.br"
       ],
       "blank_tvg_id_names": [
-        "REDETV"
+        "REDETV",
+        "REDE TV",
+        "REDE TV ( )"
       ],
       "blank_tvg_id_tvg_names": [],
       "groups": [
@@ -567,16 +584,22 @@
       "canonical_key": "SPORTV1",
       "name": "SporTV 1",
       "aliases": [
-        "SporTV"
+        "SporTV",
+        "SporTV 1",
+        "Sportv.br"
       ],
       "original_names": [
-        "SporTV"
+        "SporTV",
+        "SporTV 1",
+        "Sportv.br"
       ],
       "old_tvg_ids": [
         "sportv.br"
       ],
       "blank_tvg_id_names": [
-        "SporTV"
+        "SporTV",
+        "SporTV 1",
+        "Sportv.br"
       ],
       "blank_tvg_id_tvg_names": [],
       "groups": [
@@ -594,10 +617,10 @@
       "canonical_key": "TELECINEPIPOCA",
       "name": "Telecine Pipoca",
       "aliases": [
-        "Telecine Pipoca"
+        "TELECINE PIPOCA"
       ],
       "original_names": [
-        "Telecine Pipoca"
+        "TELECINE PIPOCA"
       ],
       "old_tvg_ids": [
         "telecinepipoca.br"
@@ -669,9 +692,11 @@
       "canonical_key": "TNTSERIES",
       "name": "TNT Séries",
       "aliases": [
+        "TNT Series",
         "TNT Séries"
       ],
       "original_names": [
+        "TNT Series",
         "TNT Séries"
       ],
       "old_tvg_ids": [
@@ -694,16 +719,16 @@
       "canonical_key": "TVCULTURA",
       "name": "TV CULTURA",
       "aliases": [
-        "TV Cultura"
+        "TV CULTURA"
       ],
       "original_names": [
-        "TV Cultura"
+        "TV CULTURA"
       ],
       "old_tvg_ids": [
         "cultura.br"
       ],
       "blank_tvg_id_names": [
-        "TV Cultura"
+        "TV CULTURA"
       ],
       "blank_tvg_id_tvg_names": [],
       "groups": [
@@ -721,12 +746,16 @@
       "canonical_key": "AANDE",
       "name": "A&E",
       "aliases": [
+        "A E",
         "A&E",
-        "A E"
+        "A and E",
+        "A&amp;E.br"
       ],
       "original_names": [
+        "A E",
         "A&E",
-        "A E"
+        "A and E",
+        "A&amp;E.br"
       ],
       "old_tvg_ids": [
         "aande.br"
@@ -871,14 +900,14 @@
       "canonical_key": "CANALDOBOI",
       "name": "CANAL DO BOI",
       "aliases": [
-        "CANAL DO BOI"
+        "Canal do Boi"
       ],
       "original_names": [
-        "CANAL DO BOI"
+        "Canal do Boi"
       ],
       "old_tvg_ids": [],
       "blank_tvg_id_names": [
-        "CANAL DO BOI"
+        "Canal do Boi"
       ],
       "blank_tvg_id_tvg_names": [],
       "groups": [
@@ -1244,10 +1273,16 @@
       "canonical_key": "FILMANDARTS",
       "name": "Film & Arts",
       "aliases": [
-        "FILM&ARTS"
+        "FILM&ARTS",
+        "Film & Arts",
+        "Film And Arts",
+        "Film And Arts.br"
       ],
       "original_names": [
-        "FILM&ARTS"
+        "FILM&ARTS",
+        "Film & Arts",
+        "Film And Arts",
+        "Film And Arts.br"
       ],
       "old_tvg_ids": [
         "FABB"
@@ -1390,10 +1425,10 @@
       "canonical_key": "HBOMUNDI",
       "name": "HBO Mundi",
       "aliases": [
-        "HBO Mundi"
+        "HBO MUNDI"
       ],
       "original_names": [
-        "HBO Mundi"
+        "HBO MUNDI"
       ],
       "old_tvg_ids": [
         "hbomundi.br"
@@ -1415,10 +1450,14 @@
       "canonical_key": "HBOPLUS",
       "name": "HBO Plus",
       "aliases": [
-        "HBO+"
+        "HBO+",
+        "HBO +",
+        "HBO Plus"
       ],
       "original_names": [
-        "HBO+"
+        "HBO+",
+        "HBO +",
+        "HBO Plus"
       ],
       "old_tvg_ids": [
         "hboplusbrasil.br"
@@ -1440,10 +1479,10 @@
       "canonical_key": "HBOPOP",
       "name": "HBO Pop",
       "aliases": [
-        "HBO Pop"
+        "HBO POP"
       ],
       "original_names": [
-        "HBO Pop"
+        "HBO POP"
       ],
       "old_tvg_ids": [
         "hbopop.br"
@@ -1465,10 +1504,10 @@
       "canonical_key": "HBOSIGNATURE",
       "name": "HBO Signature",
       "aliases": [
-        "HBO Signature"
+        "HBO SIGNATURE"
       ],
       "original_names": [
-        "HBO Signature"
+        "HBO SIGNATURE"
       ],
       "old_tvg_ids": [
         "hbosignature.br"
@@ -1491,11 +1530,15 @@
       "name": "History",
       "aliases": [
         "History",
-        "The History"
+        "The History",
+        "History Channel",
+        "The History Channel"
       ],
       "original_names": [
         "History",
-        "The History"
+        "The History",
+        "History Channel",
+        "The History Channel"
       ],
       "old_tvg_ids": [
         "historychannel.br"
@@ -1517,10 +1560,14 @@
       "canonical_key": "HISTORY2",
       "name": "History 2",
       "aliases": [
-        "H2"
+        "H2",
+        "History2",
+        "History 2"
       ],
       "original_names": [
-        "H2"
+        "H2",
+        "History2",
+        "History 2"
       ],
       "old_tvg_ids": [
         "history2.br"
@@ -1667,14 +1714,17 @@
       "canonical_key": "MXADN40",
       "name": "MX ADN 40",
       "aliases": [
-        "MX Adn40"
+        "MX Adn40",
+        "MX ADN 40"
       ],
       "original_names": [
-        "MX Adn40"
+        "MX Adn40",
+        "MX ADN 40"
       ],
       "old_tvg_ids": [],
       "blank_tvg_id_names": [
-        "MX Adn40"
+        "MX Adn40",
+        "MX ADN 40"
       ],
       "blank_tvg_id_tvg_names": [],
       "groups": [
@@ -1767,10 +1817,10 @@
       "canonical_key": "RECORDNEWS",
       "name": "Record News",
       "aliases": [
-        "RECORD NEWS"
+        "Record News"
       ],
       "original_names": [
-        "RECORD NEWS"
+        "Record News"
       ],
       "old_tvg_ids": [
         "recordnews.br"
@@ -1817,10 +1867,16 @@
       "canonical_key": "SONY",
       "name": "Sony",
       "aliases": [
-        "Sony"
+        "Sony",
+        "Canal Sony",
+        "Sony Channel",
+        "CanalSony.br"
       ],
       "original_names": [
-        "Sony"
+        "Sony",
+        "Canal Sony",
+        "Sony Channel",
+        "CanalSony.br"
       ],
       "old_tvg_ids": [
         "sony.br"
@@ -2067,10 +2123,14 @@
       "canonical_key": "TVRATIMBUM",
       "name": "TV Rá Tim Bum!",
       "aliases": [
-        "TV Rá Tim Bum"
+        "TV Ra Tim Bum",
+        "TV Rá Tim Bum",
+        "TV Rá Tim Bum!"
       ],
       "original_names": [
-        "TV Rá Tim Bum"
+        "TV Ra Tim Bum",
+        "TV Rá Tim Bum",
+        "TV Rá Tim Bum!"
       ],
       "old_tvg_ids": [
         "ratimbum.br"
@@ -2144,10 +2204,12 @@
       "canonical_key": "USANETWORK",
       "name": "USA Network",
       "aliases": [
-        "USA"
+        "USA",
+        "USA Network"
       ],
       "original_names": [
-        "USA"
+        "USA",
+        "USA Network"
       ],
       "old_tvg_ids": [
         "syfy.br"
@@ -2420,14 +2482,14 @@
       "canonical_key": "CONMEBOLTV1",
       "name": "Conmebol TV 1",
       "aliases": [
-        "Conmebol TV 1"
+        "CONMEBOL TV 1"
       ],
       "original_names": [
-        "Conmebol TV 1"
+        "CONMEBOL TV 1"
       ],
       "old_tvg_ids": [],
       "blank_tvg_id_names": [
-        "Conmebol TV 1"
+        "CONMEBOL TV 1"
       ],
       "blank_tvg_id_tvg_names": [],
       "groups": [
@@ -2913,10 +2975,10 @@
       "canonical_key": "GLOBOTVTEMSOROCABA",
       "name": "GLOBO TV TEM SOROCABA",
       "aliases": [
-        "Globo TV TEM Sorocaba"
+        "GLOBO TV TEM SOROCABA"
       ],
       "original_names": [
-        "Globo TV TEM Sorocaba"
+        "GLOBO TV TEM SOROCABA"
       ],
       "old_tvg_ids": [],
       "blank_tvg_id_names": [],
@@ -3036,14 +3098,17 @@
       "canonical_key": "MXAZTECAUNO",
       "name": "MX Azteca UNO",
       "aliases": [
-        "MX Azteca UNO"
+        "MX Azteca UNO",
+        "MX Azteca UNO @"
       ],
       "original_names": [
-        "MX Azteca UNO"
+        "MX Azteca UNO",
+        "MX Azteca UNO @"
       ],
       "old_tvg_ids": [],
       "blank_tvg_id_names": [
-        "MX Azteca UNO"
+        "MX Azteca UNO",
+        "MX Azteca UNO @"
       ],
       "blank_tvg_id_tvg_names": [],
       "groups": [
@@ -3626,14 +3691,14 @@
       "canonical_key": "CONMEBOLTV3",
       "name": "Conmebol TV 3",
       "aliases": [
-        "Conmebol TV 3"
+        "CONMEBOL TV 3"
       ],
       "original_names": [
-        "Conmebol TV 3"
+        "CONMEBOL TV 3"
       ],
       "old_tvg_ids": [],
       "blank_tvg_id_names": [
-        "Conmebol TV 3"
+        "CONMEBOL TV 3"
       ],
       "blank_tvg_id_tvg_names": [],
       "groups": [
@@ -3651,14 +3716,14 @@
       "canonical_key": "CONMEBOLTV4",
       "name": "Conmebol TV 4",
       "aliases": [
-        "CONMEBOL TV 4"
+        "Conmebol TV 4"
       ],
       "original_names": [
-        "CONMEBOL TV 4"
+        "Conmebol TV 4"
       ],
       "old_tvg_ids": [],
       "blank_tvg_id_names": [
-        "CONMEBOL TV 4"
+        "Conmebol TV 4"
       ],
       "blank_tvg_id_tvg_names": [],
       "groups": [
@@ -3776,14 +3841,17 @@
       "canonical_key": "COTELECARIBE",
       "name": "CO Telecaribe",
       "aliases": [
-        "CO Telecaribe"
+        "CO Telecaribe",
+        "CO TELE Caribe"
       ],
       "original_names": [
-        "CO Telecaribe"
+        "CO Telecaribe",
+        "CO TELE Caribe"
       ],
       "old_tvg_ids": [],
       "blank_tvg_id_names": [
-        "CO Telecaribe"
+        "CO Telecaribe",
+        "CO TELE Caribe"
       ],
       "blank_tvg_id_tvg_names": [],
       "groups": [
@@ -5432,14 +5500,17 @@
       "canonical_key": "MXAZTECA7",
       "name": "MX Azteca 7",
       "aliases": [
-        "MX Azteca 7"
+        "MX Azteca 7",
+        "MX Azteca 7 @"
       ],
       "original_names": [
-        "MX Azteca 7"
+        "MX Azteca 7",
+        "MX Azteca 7 @"
       ],
       "old_tvg_ids": [],
       "blank_tvg_id_names": [
-        "MX Azteca 7"
+        "MX Azteca 7",
+        "MX Azteca 7 @"
       ],
       "blank_tvg_id_tvg_names": [],
       "groups": [
@@ -6212,14 +6283,17 @@
       "canonical_key": "USHALLMARKMOVIESANDMYSTERIES",
       "name": "US Hallmark Movies & Mysteries",
       "aliases": [
-        "US Hallmark Movies & Mysteries"
+        "US Hallmark Movies & Mysteries",
+        "US Hallmark Movies AND Mysteries"
       ],
       "original_names": [
-        "US Hallmark Movies & Mysteries"
+        "US Hallmark Movies & Mysteries",
+        "US Hallmark Movies AND Mysteries"
       ],
       "old_tvg_ids": [],
       "blank_tvg_id_names": [
-        "US Hallmark Movies & Mysteries"
+        "US Hallmark Movies & Mysteries",
+        "US Hallmark Movies AND Mysteries"
       ],
       "blank_tvg_id_tvg_names": [],
       "groups": [
@@ -6362,14 +6436,17 @@
       "canonical_key": "USTEENNICK",
       "name": "US TEEN NICK",
       "aliases": [
-        "US Teennick"
+        "US Teennick",
+        "US TEEN NICK"
       ],
       "original_names": [
-        "US Teennick"
+        "US Teennick",
+        "US TEEN NICK"
       ],
       "old_tvg_ids": [],
       "blank_tvg_id_names": [
-        "US Teennick"
+        "US Teennick",
+        "US TEEN NICK"
       ],
       "blank_tvg_id_tvg_names": [],
       "groups": [
@@ -41826,10 +41903,12 @@
       "canonical_key": "ADULTSWIM",
       "name": "Adult Swim",
       "aliases": [
-        "AdultSwim"
+        "AdultSwim",
+        "Adult Swim"
       ],
       "original_names": [
-        "AdultSwim"
+        "AdultSwim",
+        "Adult Swim"
       ],
       "old_tvg_ids": [],
       "blank_tvg_id_names": [],
@@ -41845,10 +41924,14 @@
       "canonical_key": "AGROPLUS",
       "name": "Agro+",
       "aliases": [
-        "Agro+"
+        "Agro+",
+        "Agro Plus",
+        "AgroPlus.br"
       ],
       "original_names": [
-        "Agro+"
+        "Agro+",
+        "Agro Plus",
+        "AgroPlus.br"
       ],
       "old_tvg_ids": [],
       "blank_tvg_id_names": [],
@@ -41864,10 +41947,12 @@
       "canonical_key": "PARAMOUNT",
       "name": "Paramount Channel",
       "aliases": [
-        "Paramount"
+        "Paramount",
+        "Paramount Channel"
       ],
       "original_names": [
-        "Paramount"
+        "Paramount",
+        "Paramount Channel"
       ],
       "old_tvg_ids": [],
       "blank_tvg_id_names": [],
@@ -41883,10 +41968,14 @@
       "canonical_key": "SABORANDARTE",
       "name": "Sabor & Arte",
       "aliases": [
-        "Sabor & Arte"
+        "Sabor & Arte",
+        "Sabor And Arte",
+        "Sabor And Arte.br"
       ],
       "original_names": [
-        "Sabor & Arte"
+        "Sabor & Arte",
+        "Sabor And Arte",
+        "Sabor And Arte.br"
       ],
       "old_tvg_ids": [],
       "blank_tvg_id_names": [],
