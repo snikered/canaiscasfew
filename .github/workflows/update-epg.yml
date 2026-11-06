@@ -19,10 +19,9 @@ jobs:
     timeout-minutes: 45
     env:
       PYTHONUNBUFFERED: "1"
-      DOWNLOAD_WORKERS: "5"
+      DOWNLOAD_WORKERS: "4"
       GZIP_LEVEL: "6"
       OUTPUT_PAST_HOURS: "12"
-      WRITE_PLAIN_XML: "0"
 
     steps:
       - name: Baixar o repositório
@@ -32,15 +31,30 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: "3.12"
+          
+      - name: Instalar dependências de Extração
+        run: pip install requests beautifulsoup4
+
+      - name: Rodar Extratores (Em Paralelo)
+        run: |
+          set -e
+          python tvplus.py &
+          python tvmap.py &
+          python mitv.py &
+          python meuguia.py &
+          python guiadetv.py &
+          python urbantv.py &
+          wait
+          echo "Todos os extratores locais foram finalizados."
 
       - name: Compilar dicionário persistente
         shell: bash
         run: |
           set -euo pipefail
-          python compile_dictionary.py --catalog /tmp/channels-universal.json
-          echo "CHANNELS_FILE=/tmp/channels-universal.json" >> "$GITHUB_ENV"
+          python compile_dictionary.py --catalog channels.json
+          echo "CHANNELS_FILE=channels.json" >> "$GITHUB_ENV"
 
-      - name: Gerar EPG otimizado por nome e consenso de 5 fontes
+      - name: Gerar EPG Costurado e Consolidado
         run: python merge_epg.py
 
       - name: Publicar somente EPG e relatórios na branch epg
@@ -60,7 +74,7 @@ jobs:
           git checkout --orphan publicacao-epg
           git rm -rf .
           cp /tmp/epg-publicado/* .
-          printf '# Saída automática do EPG Universal\n\nDicionário persistente + identificação por nome + consenso de 5 fontes.\n' > README.md
+          printf '# EPG Universal com Scrapers Locais + APIs Abertas\n\nGeração unificada por consenso de 16 fontes.\n' > README.md
           git add epg.xml.gz report.md report.json validation.md validation.json README.md
-          git commit -m "Atualiza EPG universal automático"
+          git commit -m "Atualiza EPG multi-fonte consolidado"
           git push --force origin HEAD:epg
