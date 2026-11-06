@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""EPG universal multi-fonte escalável com Segment Subtraction (Gap-Filling + Trimming perfeito).
+"""EPG universal multi-fonte escalável com Segment Subtraction (Gap-Filling + Trimming perfeito)
+e Mapeamento Multi-ID (Plug & Play) para proteger nomes de canais SD, HD, FHD e 4K contra falsos conflitos.
 """
 from __future__ import annotations
 
@@ -142,7 +143,7 @@ def download_to_temp_file(url: str, attempts: int = 3) -> Path:
     last_error = None
     for attempt in range(1, attempts + 1):
         try:
-            req = urllib.request.Request(url, headers={"User-Agent": "EPG-Universal/3.0", "Accept": "*/*"})
+            req = urllib.request.Request(url, headers={"User-Agent": "EPG-Universal/4.0", "Accept": "*/*"})
             with urllib.request.urlopen(req, timeout=120) as resp, tmp_path.open("wb") as out:
                 while chunk := resp.read(1024 * 512): out.write(chunk)
             return tmp_path
@@ -520,17 +521,24 @@ def make_validation(entry: dict[str, object], chosen: CandidateEvaluation, all_e
         "cross_sources": chosen.comparisons, "candidates": candidates,
     }
 
-# A MAGIA DA COMPATIBILIDADE: Tudo o que está no compile_dictionary vira tvg-id!
+# ==============================================================================
+# ALGORITMO MULTI-ID (O SEGREDO DO PLUG & PLAY)
+# Exporta o EPG para TODOS os nomes e IDs encontrados, forçando o salvamento
+# mesmo quando outro canal "lixo" tentar roubar o mesmo ID.
+# ==============================================================================
 def _compatibility_candidates(entry: dict[str, object]) -> list[str]:
     values = []
     target_id = str(entry.get("id", "")).strip()
     values.append(target_id)
-    values.extend(LEGACY_INTERNAL_IDS.get(target_id, ()))
+    
+    for key in ["name", "aliases", "original_names", "blank_tvg_id_names", "blank_tvg_id_tvg_names", "tvg_names"]:
+        if key in entry:
+            data = entry[key]
+            if isinstance(data, list): values.extend(str(x).strip() for x in data if x)
+            elif isinstance(data, str): values.append(data.strip())
+            
     values.extend(str(x).strip() for x in entry.get("old_tvg_ids", []) or [])
-    values.append(str(entry.get("name", "")).strip())
-    values.extend(str(x).strip() for x in entry.get("aliases", []) or [])
-    values.extend(str(x).strip() for x in entry.get("original_names", []) or [])
-    values.extend(str(x).strip() for x in entry.get("blank_tvg_id_names", []) or [])
+    values.extend(LEGACY_INTERNAL_IDS.get(target_id, ()))
     return [v for v in dict.fromkeys(values) if v and len(v) <= 220]
 
 def build_compatibility_ids(entries: list[dict[str, object]]) -> tuple[dict[str, list[str]], dict[str, list[str]]]:
@@ -538,19 +546,31 @@ def build_compatibility_ids(entries: list[dict[str, object]]) -> tuple[dict[str,
     for entry in entries:
         target_id = str(entry.get("id", ""))
         for candidate in _compatibility_candidates(entry): owners[candidate].add(target_id)
+        
     by_target, ambiguous = {}, {}
     for entry in entries:
         target_id = str(entry.get("id", ""))
+        target_norm = normalize_name(target_id.split('.')[-1] if '.' in target_id else target_id)
+        
         ids, bad = [target_id], []
         for candidate in _compatibility_candidates(entry):
             if candidate == target_id: continue
-            if len(owners.get(candidate, set())) == 1: ids.append(candidate)
-            else: bad.append(candidate)
+            
+            # PROTEÇÃO BRUTA: Se o nome normalizado da variante (ex: CARTOONITO HD) for igual à raiz do canal (CARTOONITO),
+            # nós IGNORAMOS qualquer falso conflito e FORÇAMOS a criação desse ID no XML.
+            cand_norm = normalize_name(candidate)
+            if len(owners.get(candidate, set())) == 1 or cand_norm == target_norm:
+                ids.append(candidate)
+            else:
+                bad.append(candidate)
+                
         by_target[target_id] = list(dict.fromkeys(ids))
         if bad: ambiguous[target_id] = sorted(set(bad))
     return by_target, ambiguous
 
-# ALGORITMO DE SUBTRAÇÃO PARA COSTURA PERFEITA SEM BURACOS (Trimming)
+# ==============================================================================
+# ALGORITMO DE COSTURA PERFEITA (SUBTRAÇÃO DE SEGMENTOS E TRIMMING)
+# ==============================================================================
 def stitch_multi_source_schedule(
     all_evaluations: list[CandidateEvaluation], target_channel_id: str, cutoff: datetime, overrides: dict[str, object]
 ) -> list[ET.Element]:
@@ -604,21 +624,17 @@ def stitch_multi_source_schedule(
         for cand in cleaned_source_progs:
             c_start, c_stop = cand["start"], cand["stop"]
             
-            # Subtrai as interseções com a merged_timeline
             valid_segments = [(c_start, c_stop)]
             for ex in merged_timeline:
                 new_segments = []
                 for seg_start, seg_stop in valid_segments:
-                    # Se não há sobreposição, mantém o segmento
                     if seg_stop <= ex["start"] or seg_start >= ex["stop"]:
                         new_segments.append((seg_start, seg_stop))
                     else:
-                        # Há sobreposição, quebra o segmento nas partes que sobram
                         if seg_start < ex["start"]: new_segments.append((seg_start, ex["start"]))
                         if seg_stop > ex["stop"]: new_segments.append((ex["stop"], seg_stop))
                 valid_segments = new_segments
 
-            # Adiciona os pedaços que sobraram e que têm pelo menos 3 minutos
             for seg_start, seg_stop in valid_segments:
                 if (seg_stop - seg_start).total_seconds() >= 180:
                     new_cand = copy.deepcopy(cand)
@@ -668,7 +684,7 @@ def write_epg_stream(
                 gz.write(data)
                 if plain is not None: plain.write(data)
 
-            generator = "EPG Universal Otimizado (Segment Subtraction Trimming)"
+            generator = "EPG Universal Otimizado (Multi-ID Plug&Play e Trimming)"
             source_name = "Consolidado Inteligente de Múltiplas Fontes"
             emit((f"<?xml version='1.0' encoding='utf-8'?>\n<tv generator-info-name={quoteattr(generator)} source-info-name={quoteattr(source_name)}>\n").encode("utf-8"))
 
@@ -676,7 +692,16 @@ def write_epg_stream(
                 target_id = str(entry.get("id", ""))
                 ids_for_channel = compatibility_ids.get(target_id, [target_id])
                 compatibility_alias_count += max(0, len(ids_for_channel) - 1)
-                display_aliases = list(dict.fromkeys([str(entry.get("name", "")), *(str(x) for x in entry.get("aliases", []) or []), *(str(x) for x in entry.get("original_names", []) or [])]))
+                
+                # Coleta todos os nomes possiveis que estavam no dicionário
+                display_aliases = []
+                for key_ in ["name", "aliases", "original_names"]:
+                    if key_ in entry:
+                        val = entry[key_]
+                        if isinstance(val, list): display_aliases.extend(str(x).strip() for x in val)
+                        elif isinstance(val, str): display_aliases.append(val.strip())
+                display_aliases = list(dict.fromkeys(display_aliases))
+                
                 for output_id in ids_for_channel:
                     channel = copy.deepcopy(chosen.match.source.channels[chosen.match.channel_id])
                     channel.attrib["id"] = output_id
@@ -701,7 +726,7 @@ def write_epg_stream(
     return programme_count, compatibility_alias_count
 
 def main() -> None:
-    print("Iniciando geração de EPG Multi-Fonte (Segment Subtraction + Raw Aliases)...")
+    print("Iniciando geração de EPG (Com Força Bruta de Multi-IDs)...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -808,10 +833,10 @@ def main() -> None:
     (OUTPUT_DIR / "validation.json").write_text(json.dumps({"generated_at": now.isoformat(), "active_sources": [s.label for s in active_sources], "summary": counts, "channels": validations}, ensure_ascii=False, indent=2) + "\n", "utf-8")
 
     report_md = [
-        "# Relatório do EPG Universal — Múltiplas Fontes (Subtração Dinâmica)", "",
+        "# Relatório do EPG Universal — Força Bruta Multi-IDs e Trimming", "",
         f"- Canais no catálogo: **{counts['playlist_channels']}**",
         f"- Canais com grade encontrada: **{counts['matched']}**",
-        f"- Total de programas gravados (grade costurada): **{counts['programmes']}**",
+        f"- Total de programas gravados (grade costurada e clonada): **{counts['programmes']}**",
         "", "## Fonte base utilizada por canal", ""
     ]
     for source in active_sources: report_md.append(f"- **{source.label}:** {source_counts[source.label]} canal(is)")
@@ -819,16 +844,6 @@ def main() -> None:
     for label, seconds in timings.items(): report_md.append(f"- **{label.replace('_', ' ').title()}:** {seconds:.2f} s")
     report_md.append(f"- **Tempo Total:** {time.perf_counter() - run_start:.2f} s")
     (OUTPUT_DIR / "report.md").write_text("\n".join(report_md) + "\n", "utf-8")
-
-    validation_md = [
-        "# Validação e Consenso de Grade", "",
-        f"Fontes ativas ({len(active_sources)}): **{', '.join(s.label for s in active_sources)}**", "",
-        "## Agora / Próximo", ""
-    ]
-    for item in sorted(validations, key=lambda x: str(x["name"])):
-        current, nxt = item.get("now") or {}, item.get("next") or {}
-        validation_md.append(f"- **{item['name']}** ({item['source']}): Agora **{current.get('title', '—')}** → Próximo **{nxt.get('title', '—')}** · confiança **{item['confidence']}%**")
-    (OUTPUT_DIR / "validation.md").write_text("\n".join(validation_md) + "\n", "utf-8")
     print(f"Sucesso! EPG gerado com {programme_count} programas unificados de {len(active_sources)} fontes.")
 
 if __name__ == "__main__":
