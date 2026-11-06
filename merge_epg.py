@@ -53,28 +53,29 @@ LEGACY_INTERNAL_IDS: dict[str, tuple[str, ...]] = {
 }
 
 # ==============================================================================
-# FONTES DE EPG
-# O desempate será puramente baseado na saúde (falta de buracos) da grade.
+# FONTES DE EPG (Nome, URL, Família, Peso)
+# Genius volta a ter peso duplo para garantir horários corretos (UTC real).
+# Fontes do mesmo autor partilham a mesma família para evitar "conluio".
 # ==============================================================================
-EPG_SOURCES = {
-    "Genius": os.environ.get("PRIMARY_EPG_URL", "https://github.com/ferteque/Curated-M3U-Repository/raw/refs/heads/main/epg13.xml.gz"),
-    "Open-EPG BR 4": "https://www.open-epg.com/files/brazil4.xml",
-    "Open-EPG BR": "https://www.open-epg.com/files/brazil.xml",
-    "EPG pw BR": "https://epg.pw/xmltv/epg_BR.xml",
-    "Claro": "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/claro.xml",
-    "Globo": "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/globo.xml",
-    "VivoPlay": "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/vivoplay.xml",
-    "XSports": "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/xsports.xml",
-    "EPGShare BR1": "https://epgshare01.online/epgshare01/epg_ripper_BR1.xml.gz",
-    "IPTV-EPG BR": "https://iptv-epg.org/files/epg-br.xml",
-    "EPGShare BR2": "https://epgshare01.online/epgshare01/epg_ripper_BR2.xml.gz",
-    "TV Map": "epg_tvmap.xml",
-    "MiTV": "epg_mitv.xml",
-    "TV Plus": "epg_tvplus.xml",
-    "Meu Guia": "epg_meuguia.xml",
-    "GuiaDeTV": "epg_guiadetv.xml",
-    "UrbanTV": "epg_urbantv.xml",
-}
+EPG_SOURCES_CONFIG = [
+    ("Genius", os.environ.get("PRIMARY_EPG_URL", "https://github.com/ferteque/Curated-M3U-Repository/raw/refs/heads/main/epg13.xml.gz"), "genius", 2.0),
+    ("Open-EPG BR 4", "https://www.open-epg.com/files/brazil4.xml", "openepg", 1.0),
+    ("Open-EPG BR", "https://www.open-epg.com/files/brazil.xml", "openepg", 1.0),
+    ("EPG pw BR", "https://epg.pw/xmltv/epg_BR.xml", "epgpw", 1.0),
+    ("Claro", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/claro.xml", "git_extra", 1.0),
+    ("Globo", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/globo.xml", "git_extra", 1.0),
+    ("VivoPlay", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/vivoplay.xml", "git_extra", 1.0),
+    ("XSports", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/xsports.xml", "git_extra", 1.0),
+    ("EPGShare BR1", "https://epgshare01.online/epgshare01/epg_ripper_BR1.xml.gz", "epgshare", 1.0),
+    ("IPTV-EPG BR", "https://iptv-epg.org/files/epg-br.xml", "iptvepg", 1.0),
+    ("EPGShare BR2", "https://epgshare01.online/epgshare01/epg_ripper_BR2.xml.gz", "epgshare", 1.0),
+    ("TV Map", "epg_tvmap.xml", "scrapers", 1.0),
+    ("MiTV", "epg_mitv.xml", "scrapers", 1.0),
+    ("TV Plus", "epg_tvplus.xml", "scrapers", 1.0),
+    ("Meu Guia", "epg_meuguia.xml", "scrapers", 1.0),
+    ("GuiaDeTV", "epg_guiadetv.xml", "scrapers", 1.0),
+    ("UrbanTV", "epg_urbantv.xml", "scrapers", 1.0),
+]
 
 @dataclass(frozen=True)
 class SourceSpec:
@@ -88,15 +89,15 @@ class SourceSpec:
     timeshift_hours: float = 0.0
 
 SOURCE_SPECS = []
-for idx, (lbl, link) in enumerate(EPG_SOURCES.items(), start=1):
+for idx, (lbl, link, family, weight) in enumerate(EPG_SOURCES_CONFIG, start=1):
     safe_key = re.sub(r'[^a-z0-9]', '', lbl.lower()) or f"src{idx}"
     SOURCE_SPECS.append(SourceSpec(
         key=safe_key,
         label=lbl,
         url=link,
         priority=idx,
-        family=safe_key,
-        vote_weight=1.0,
+        family=family,
+        vote_weight=weight,
         default_offset="+0000",
         timeshift_hours=0.0
     ))
@@ -704,7 +705,10 @@ def stitch_multi_source_schedule(
     if not all_evaluations:
         return []
 
-    # 1. CRIAR O BANCO DE SINOPSES (Enriquecimento Cruzado)
+    # ==============================================================================
+    # 1. CRIAR O BANCO DE SINOPSES (Enriquecimento Cruzado Automático)
+    # Puxa a sinopse mais rica (longa) de TODAS as fontes para usar na grade final
+    # ==============================================================================
     best_descriptions: dict[str, str] = {}
     for ev in all_evaluations:
         for prog_row in ev.match.source.rows.get(ev.match.channel_id, []):
@@ -717,13 +721,15 @@ def stitch_multi_source_schedule(
 
     merged_timeline: list[dict[str, Any]] = []
 
+    # ==============================================================================
     # 2. COSTURA DA GRADE (Gap-Filling)
+    # Usa a fonte prioritária e completa os buracos com as fontes secundárias
+    # ==============================================================================
     for ev in all_evaluations:
         src = ev.match.source
         cid = ev.match.channel_id
         raw_elements = src.programs.get(cid, [])
-        if not raw_elements:
-            continue
+        if not raw_elements: continue
 
         ch_shift = float(overrides.get("channel_timeshifts", {}).get(target_channel_id, 0.0))
         src_shift = float(overrides.get("source_timeshifts", {}).get(src.spec.key, 0.0))
@@ -733,13 +739,10 @@ def stitch_multi_source_schedule(
         for el in raw_elements:
             start_dt = parse_xmltv_datetime(el.attrib.get("start", ""), src.spec.default_offset)
             stop_dt = parse_xmltv_datetime(el.attrib.get("stop", ""), src.spec.default_offset)
-            if not start_dt:
-                continue
+            if not start_dt: continue
             start_dt += total_shift
-            if stop_dt:
-                stop_dt += total_shift
+            if stop_dt: stop_dt += total_shift
             parsed.append({"start": start_dt, "stop": stop_dt, "el": el})
-
         parsed.sort(key=lambda x: x["start"])
 
         cleaned_source_progs = []
@@ -747,10 +750,8 @@ def stitch_multi_source_schedule(
             s_dt, sp_dt = prog["start"], prog["stop"]
             if sp_dt is None or sp_dt <= s_dt:
                 sp_dt = parsed[i + 1]["start"] if i + 1 < len(parsed) else s_dt + timedelta(hours=2)
-            if i + 1 < len(parsed) and sp_dt > parsed[i + 1]["start"]:
-                sp_dt = parsed[i + 1]["start"]
-            if sp_dt < cutoff:
-                continue
+            if i + 1 < len(parsed) and sp_dt > parsed[i + 1]["start"]: sp_dt = parsed[i + 1]["start"]
+            if sp_dt < cutoff: continue
             cleaned_source_progs.append({"start": s_dt, "stop": sp_dt, "el": prog["el"]})
 
         if not merged_timeline:
@@ -764,37 +765,34 @@ def stitch_multi_source_schedule(
                 if not (c_stop <= existing["start"] or c_start >= existing["stop"]):
                     has_collision = True
                     break
-            if not has_collision:
-                merged_timeline.append(cand)
-
+            if not has_collision: merged_timeline.append(cand)
+            
     merged_timeline.sort(key=lambda x: x["start"])
 
+    # ==============================================================================
     # 3. MONTAGEM FINAL COM INJEÇÃO DAS SINOPSES RICAS
+    # ==============================================================================
     final_elements = []
     for i, prog in enumerate(merged_timeline):
         s_dt, sp_dt = prog["start"], prog["stop"]
-        if i + 1 < len(merged_timeline):
-            next_start = merged_timeline[i + 1]["start"]
-            if sp_dt > next_start:
-                sp_dt = next_start
-
+        if i + 1 < len(merged_timeline) and sp_dt > merged_timeline[i + 1]["start"]:
+            sp_dt = merged_timeline[i + 1]["start"]
+            
         el = copy.deepcopy(prog["el"])
         el.attrib["start"] = format_xmltv_datetime(s_dt)
         el.attrib["stop"] = format_xmltv_datetime(sp_dt)
         
+        # INJEÇÃO: Procura a melhor sinopse para este programa
         title_node = el.find("title")
         if title_node is not None and title_node.text:
             norm_title = normalize_programme_title(title_node.text)
             best_desc = best_descriptions.get(norm_title)
-            
             if best_desc:
                 desc_node = el.find("desc")
-                if desc_node is None:
-                    desc_node = ET.SubElement(el, "desc")
+                if desc_node is None: desc_node = ET.SubElement(el, "desc")
                 desc_node.text = best_desc
 
         final_elements.append(el)
-
     return final_elements
 
 def write_epg_stream(
@@ -815,8 +813,8 @@ def write_epg_stream(
                 gz.write(data)
                 if plain is not None: plain.write(data)
 
-            generator = "EPG universal multi-fonte escalavel com juncao total"
-            source_name = "Consenso Inteligente + Costura de Lacunas (Gap-Filling)"
+            generator = "EPG Universal Otimizado (Gap-Filling + Cross-Enrichment)"
+            source_name = "Consolidado Inteligente de 16 Fontes (Anti-overlap & UTC)"
             emit((f"<?xml version='1.0' encoding='utf-8'?>\n<tv generator-info-name={quoteattr(generator)} source-info-name={quoteattr(source_name)}>\n").encode("utf-8"))
 
             for entry, chosen, _evaluations, _forced in selected:
@@ -848,7 +846,7 @@ def write_epg_stream(
     return programme_count, compatibility_alias_count
 
 def main() -> None:
-    print("Iniciando geração de EPG Multi-Fonte com Junção Total e Enriquecimento de Sinopses...")
+    print("Iniciando geração de EPG Multi-Fonte com Junção Total e Sinopses Cruzadas...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
