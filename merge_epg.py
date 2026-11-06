@@ -702,13 +702,9 @@ def stitch_multi_source_schedule(
     cutoff: datetime,
     overrides: dict[str, object],
 ) -> list[ET.Element]:
-    if not all_evaluations:
-        return []
+    if not all_evaluations: return []
 
-    # ==============================================================================
-    # 1. CRIAR O BANCO DE SINOPSES (Enriquecimento Cruzado Automático)
-    # Puxa a sinopse mais rica (longa) de TODAS as fontes para usar na grade final
-    # ==============================================================================
+    # 1. CRIAR O BANCO DE SINOPSES (Enriquecimento Cruzado)
     best_descriptions: dict[str, str] = {}
     for ev in all_evaluations:
         for prog_row in ev.match.source.rows.get(ev.match.channel_id, []):
@@ -721,10 +717,7 @@ def stitch_multi_source_schedule(
 
     merged_timeline: list[dict[str, Any]] = []
 
-    # ==============================================================================
     # 2. COSTURA DA GRADE (Gap-Filling)
-    # Usa a fonte prioritária e completa os buracos com as fontes secundárias
-    # ==============================================================================
     for ev in all_evaluations:
         src = ev.match.source
         cid = ev.match.channel_id
@@ -769,9 +762,7 @@ def stitch_multi_source_schedule(
             
     merged_timeline.sort(key=lambda x: x["start"])
 
-    # ==============================================================================
-    # 3. MONTAGEM FINAL COM INJEÇÃO DAS SINOPSES RICAS
-    # ==============================================================================
+    # 3. MONTAGEM FINAL COM INJEÇÃO DAS SINOPSES RICAS E PREVENÇÃO ESTREITA
     final_elements = []
     for i, prog in enumerate(merged_timeline):
         s_dt, sp_dt = prog["start"], prog["stop"]
@@ -782,7 +773,7 @@ def stitch_multi_source_schedule(
         el.attrib["start"] = format_xmltv_datetime(s_dt)
         el.attrib["stop"] = format_xmltv_datetime(sp_dt)
         
-        # INJEÇÃO: Procura a melhor sinopse para este programa
+        # Injeção da Sinopse
         title_node = el.find("title")
         if title_node is not None and title_node.text:
             norm_title = normalize_programme_title(title_node.text)
@@ -814,7 +805,7 @@ def write_epg_stream(
                 if plain is not None: plain.write(data)
 
             generator = "EPG Universal Otimizado (Gap-Filling + Cross-Enrichment)"
-            source_name = "Consolidado Inteligente de 16 Fontes (Anti-overlap & UTC)"
+            source_name = "Consolidado Inteligente de Múltiplas Fontes (Anti-overlap & UTC)"
             emit((f"<?xml version='1.0' encoding='utf-8'?>\n<tv generator-info-name={quoteattr(generator)} source-info-name={quoteattr(source_name)}>\n").encode("utf-8"))
 
             for entry, chosen, _evaluations, _forced in selected:
