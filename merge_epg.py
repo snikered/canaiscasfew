@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """EPG universal multi-fonte escalável com costura automática de lacunas (Gap-Filling),
-normalização estrita em UTC, consenso inteligente e anti-sobreposição.
+normalização estrita em UTC, consenso inteligente, anti-sobreposição e enriquecimento de sinopses.
 """
 from __future__ import annotations
 
@@ -54,7 +54,6 @@ LEGACY_INTERNAL_IDS: dict[str, tuple[str, ...]] = {
 
 # ==============================================================================
 # FONTES DE EPG
-# Genius já não é favorecido. Todas as fontes têm peso igual (1.0).
 # O desempate será puramente baseado na saúde (falta de buracos) da grade.
 # ==============================================================================
 EPG_SOURCES = {
@@ -697,15 +696,34 @@ def build_compatibility_ids(entries: list[dict[str, object]]) -> tuple[dict[str,
     return by_target, ambiguous
 
 def stitch_multi_source_schedule(
-    all_evaluations: list[CandidateEvaluation], target_channel_id: str, cutoff: datetime, overrides: dict[str, object],
+    all_evaluations: list[CandidateEvaluation],
+    target_channel_id: str,
+    cutoff: datetime,
+    overrides: dict[str, object],
 ) -> list[ET.Element]:
-    if not all_evaluations: return []
+    if not all_evaluations:
+        return []
+
+    # 1. CRIAR O BANCO DE SINOPSES (Enriquecimento Cruzado)
+    best_descriptions: dict[str, str] = {}
+    for ev in all_evaluations:
+        for prog_row in ev.match.source.rows.get(ev.match.channel_id, []):
+            desc_node = prog_row.element.find("desc")
+            if desc_node is not None and desc_node.text:
+                desc_text = desc_node.text.strip()
+                norm_title = prog_row.normalized_title
+                if len(desc_text) > len(best_descriptions.get(norm_title, "")):
+                    best_descriptions[norm_title] = desc_text
+
     merged_timeline: list[dict[str, Any]] = []
 
+    # 2. COSTURA DA GRADE (Gap-Filling)
     for ev in all_evaluations:
         src = ev.match.source
-        raw_elements = src.programs.get(ev.match.channel_id, [])
-        if not raw_elements: continue
+        cid = ev.match.channel_id
+        raw_elements = src.programs.get(cid, [])
+        if not raw_elements:
+            continue
 
         ch_shift = float(overrides.get("channel_timeshifts", {}).get(target_channel_id, 0.0))
         src_shift = float(overrides.get("source_timeshifts", {}).get(src.spec.key, 0.0))
@@ -715,10 +733,13 @@ def stitch_multi_source_schedule(
         for el in raw_elements:
             start_dt = parse_xmltv_datetime(el.attrib.get("start", ""), src.spec.default_offset)
             stop_dt = parse_xmltv_datetime(el.attrib.get("stop", ""), src.spec.default_offset)
-            if not start_dt: continue
+            if not start_dt:
+                continue
             start_dt += total_shift
-            if stop_dt: stop_dt += total_shift
+            if stop_dt:
+                stop_dt += total_shift
             parsed.append({"start": start_dt, "stop": stop_dt, "el": el})
+
         parsed.sort(key=lambda x: x["start"])
 
         cleaned_source_progs = []
@@ -726,8 +747,10 @@ def stitch_multi_source_schedule(
             s_dt, sp_dt = prog["start"], prog["stop"]
             if sp_dt is None or sp_dt <= s_dt:
                 sp_dt = parsed[i + 1]["start"] if i + 1 < len(parsed) else s_dt + timedelta(hours=2)
-            if i + 1 < len(parsed) and sp_dt > parsed[i + 1]["start"]: sp_dt = parsed[i + 1]["start"]
-            if sp_dt < cutoff: continue
+            if i + 1 < len(parsed) and sp_dt > parsed[i + 1]["start"]:
+                sp_dt = parsed[i + 1]["start"]
+            if sp_dt < cutoff:
+                continue
             cleaned_source_progs.append({"start": s_dt, "stop": sp_dt, "el": prog["el"]})
 
         if not merged_timeline:
@@ -741,18 +764,37 @@ def stitch_multi_source_schedule(
                 if not (c_stop <= existing["start"] or c_start >= existing["stop"]):
                     has_collision = True
                     break
-            if not has_collision: merged_timeline.append(cand)
+            if not has_collision:
+                merged_timeline.append(cand)
+
     merged_timeline.sort(key=lambda x: x["start"])
 
+    # 3. MONTAGEM FINAL COM INJEÇÃO DAS SINOPSES RICAS
     final_elements = []
     for i, prog in enumerate(merged_timeline):
         s_dt, sp_dt = prog["start"], prog["stop"]
-        if i + 1 < len(merged_timeline) and sp_dt > merged_timeline[i + 1]["start"]:
-            sp_dt = merged_timeline[i + 1]["start"]
+        if i + 1 < len(merged_timeline):
+            next_start = merged_timeline[i + 1]["start"]
+            if sp_dt > next_start:
+                sp_dt = next_start
+
         el = copy.deepcopy(prog["el"])
         el.attrib["start"] = format_xmltv_datetime(s_dt)
         el.attrib["stop"] = format_xmltv_datetime(sp_dt)
+        
+        title_node = el.find("title")
+        if title_node is not None and title_node.text:
+            norm_title = normalize_programme_title(title_node.text)
+            best_desc = best_descriptions.get(norm_title)
+            
+            if best_desc:
+                desc_node = el.find("desc")
+                if desc_node is None:
+                    desc_node = ET.SubElement(el, "desc")
+                desc_node.text = best_desc
+
         final_elements.append(el)
+
     return final_elements
 
 def write_epg_stream(
@@ -806,7 +848,7 @@ def write_epg_stream(
     return programme_count, compatibility_alias_count
 
 def main() -> None:
-    print("Iniciando geração de EPG Multi-Fonte com Junção Total...")
+    print("Iniciando geração de EPG Multi-Fonte com Junção Total e Enriquecimento de Sinopses...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
