@@ -53,11 +53,22 @@ LEGACY_INTERNAL_IDS: dict[str, tuple[str, ...]] = {
 }
 
 # ==============================================================================
-# FONTES DE EPG (Nome, URL, Família, Peso)
-# Genius volta a ter peso duplo para garantir horários corretos (UTC real).
+# FONTES DE EPG: CAMADAS DE CONFIANÇA (TIERS)
+# O motor de consenso respeitará a precisão temporal das fontes de maior peso.
 # ==============================================================================
 EPG_SOURCES_CONFIG = [
-    ("Genius", os.environ.get("PRIMARY_EPG_URL", "https://github.com/ferteque/Curated-M3U-Repository/raw/refs/heads/main/epg13.xml.gz"), "genius", 2.0),
+    # TIER 1: Âncoras Absolutas de Horário (Extrema precisão local)
+    ("Meu Guia", "epg_meuguia.xml", "meuguia", 3.0),
+    ("GuiaDeTV", "epg_guiadetv.xml", "guiadetv", 3.0),
+    
+    # TIER 2: Fontes Secundárias Confiáveis (Excelentes para sinopses e filmes)
+    ("TV Plus", "epg_tvplus.xml", "tvplus", 1.5),
+    ("MiTV", "epg_mitv.xml", "mitv", 1.5),
+    ("TV Map", "epg_tvmap.xml", "tvmap", 1.5),
+    ("UrbanTV", "epg_urbantv.xml", "urbantv", 1.5),
+    ("Genius", os.environ.get("PRIMARY_EPG_URL", "https://github.com/ferteque/Curated-M3U-Repository/raw/refs/heads/main/epg13.xml.gz"), "genius", 1.5),
+
+    # TIER 3: Agregadores Públicos (Tapa-buracos com fuso horário instável)
     ("Open-EPG BR 4", "https://www.open-epg.com/files/brazil4.xml", "openepg", 1.0),
     ("Open-EPG BR", "https://www.open-epg.com/files/brazil.xml", "openepg", 1.0),
     ("EPG pw BR", "https://epg.pw/xmltv/epg_BR.xml", "epgpw", 1.0),
@@ -68,12 +79,6 @@ EPG_SOURCES_CONFIG = [
     ("EPGShare BR1", "https://epgshare01.online/epgshare01/epg_ripper_BR1.xml.gz", "epgshare", 1.0),
     ("IPTV-EPG BR", "https://iptv-epg.org/files/epg-br.xml", "iptvepg", 1.0),
     ("EPGShare BR2", "https://epgshare01.online/epgshare01/epg_ripper_BR2.xml.gz", "epgshare", 1.0),
-    ("TV Map", "epg_tvmap.xml", "scrapers", 1.0),
-    ("MiTV", "epg_mitv.xml", "scrapers", 1.0),
-    ("TV Plus", "epg_tvplus.xml", "scrapers", 1.0),
-    ("Meu Guia", "epg_meuguia.xml", "scrapers", 1.0),
-    ("GuiaDeTV", "epg_guiadetv.xml", "scrapers", 1.0),
-    ("UrbanTV", "epg_urbantv.xml", "scrapers", 1.0),
 ]
 
 @dataclass(frozen=True)
