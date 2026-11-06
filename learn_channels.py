@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import html
 import json
 import re
 from collections import Counter, defaultdict
@@ -224,13 +225,19 @@ def main():
                 display = safe_display(basis)
                 slot['names'][display] += 1
                 
-                # NOVO: Salva OBRIGATORIAMENTE o nome original exato da M3U como alias!
-                if original_name: slot['aliases'][original_name] += 1
+                if original_name:
+                    slot['aliases'][original_name] += 1
+                    unesc_orig = html.unescape(original_name).strip()
+                    if unesc_orig: slot['aliases'][unesc_orig] += 1
                 if display: slot['aliases'][display] += 1
 
                 if tvg_name:
                     slot['tvg_names'][tvg_name] += 1
                     slot['aliases'][tvg_name] += 1
+                    unesc_tvg = html.unescape(tvg_name).strip()
+                    if unesc_tvg:
+                        slot['tvg_names'][unesc_tvg] += 1
+                        slot['aliases'][unesc_tvg] += 1
 
                 if group: slot['groups'][group] += 1
                 slot['playlists'].add(fp)
@@ -252,9 +259,9 @@ def main():
         preferred = manual_rec.get('name')
         if not preferred: preferred = slot['names'].most_common(1)[0][0] if slot['names'] else key
 
-        # MODO PLUG & PLAY: Mantém todos os nomes originais até 40 itens
         raw_aliases = set(manual_rec.get('aliases', []) or [])
-        raw_aliases.update(a for a, _ in slot['aliases'].most_common(40) if a)
+        raw_aliases.update(a for a, _ in slot['aliases'].most_common(80) if a)
+        raw_aliases.update(a for a, _ in slot['tvg_names'].most_common(80) if a)
         
         seen_lower = set()
         final_aliases = []
@@ -266,12 +273,15 @@ def main():
         ids = []
         for tid, count in slot['ids'].most_common():
             owners = id_owners.get(tid, {})
-            if len(owners) == 1: ids.append({'id': tid, 'observations': count, 'trusted': True})
+            tid_norm = normalize_name(tid.split('.')[0])
+            # Permite se tiver 1 único dono OU se o ID tiver literalmente o nome do canal (ex: globonews.br -> GLOBONEWS)
+            if len(owners) == 1 or tid_norm == key:
+                ids.append({'id': tid, 'observations': count, 'trusted': True})
 
         output_channels[key] = {
             'name': preferred,
-            'aliases': final_aliases[:40],
-            'tvg_names': [a for a, _ in slot['tvg_names'].most_common(15)],
+            'aliases': final_aliases[:80],
+            'tvg_names': [a for a, _ in slot['tvg_names'].most_common(40)],
             'tvg_ids': ids[:40],
             'groups': [g for g, _ in slot['groups'].most_common(10)],
             'observations': slot['observations'],
