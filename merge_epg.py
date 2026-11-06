@@ -57,18 +57,13 @@ LEGACY_INTERNAL_IDS: dict[str, tuple[str, ...]] = {
 # O motor de consenso respeitará a precisão temporal das fontes de maior peso.
 # ==============================================================================
 EPG_SOURCES_CONFIG = [
-    # TIER 1: Âncoras Absolutas de Horário (Extrema precisão local)
     ("Meu Guia", "epg_meuguia.xml", "meuguia", 3.0),
     ("GuiaDeTV", "epg_guiadetv.xml", "guiadetv", 3.0),
-    
-    # TIER 2: Fontes Secundárias Confiáveis (Excelentes para sinopses e filmes)
     ("TV Plus", "epg_tvplus.xml", "tvplus", 1.5),
     ("MiTV", "epg_mitv.xml", "mitv", 1.5),
     ("TV Map", "epg_tvmap.xml", "tvmap", 1.5),
     ("UrbanTV", "epg_urbantv.xml", "urbantv", 1.5),
     ("Genius", os.environ.get("PRIMARY_EPG_URL", "https://github.com/ferteque/Curated-M3U-Repository/raw/refs/heads/main/epg13.xml.gz"), "genius", 1.5),
-
-    # TIER 3: Agregadores Públicos (Tapa-buracos com fuso horário instável)
     ("Open-EPG BR 4", "https://www.open-epg.com/files/brazil4.xml", "openepg", 1.0),
     ("Open-EPG BR", "https://www.open-epg.com/files/brazil.xml", "openepg", 1.0),
     ("EPG pw BR", "https://epg.pw/xmltv/epg_BR.xml", "epgpw", 1.0),
@@ -664,15 +659,26 @@ def make_validation(entry: dict[str, object], chosen: CandidateEvaluation, all_e
         "cross_sources": chosen.comparisons, "candidates": candidates,
     }
 
+# ==============================================================================
+# PULO DO GATO: UNIVERSAL MATCH
+# Esta função transforma todos os nomes e aliases em tvg-id oficiais dentro do XML.
+# Assim, as TVs reconhecem os canais nativamente sem necessidade de preparação prévia.
+# ==============================================================================
 def _compatibility_candidates(entry: dict[str, object]) -> list[str]:
     values = []
     target_id = str(entry.get("id", "")).strip()
+    values.append(target_id)
     values.extend(LEGACY_INTERNAL_IDS.get(target_id, ()))
+    
+    # Adiciona os IDs antigos que ele aprendeu das M3U
     values.extend(str(x).strip() for x in entry.get("old_tvg_ids", []) or [])
+    
+    # Transforma TODO e qualquer nome que o canal tiver no seu XML final!
+    values.append(str(entry.get("name", "")).strip())
+    values.extend(str(x).strip() for x in entry.get("aliases", []) or [])
+    values.extend(str(x).strip() for x in entry.get("original_names", []) or [])
     values.extend(str(x).strip() for x in entry.get("blank_tvg_id_names", []) or [])
-    values.extend(str(x).strip() for x in entry.get("blank_tvg_id_tvg_names", []) or [])
-    if int(entry.get("blank_tvg_id_entries", 0) or 0) > 0:
-        values.append(str(entry.get("name", "")).strip())
+    
     return [v for v in dict.fromkeys(values) if v and len(v) <= 220]
 
 def build_compatibility_ids(entries: list[dict[str, object]]) -> tuple[dict[str, list[str]], dict[str, list[str]]]:
@@ -700,9 +706,6 @@ def stitch_multi_source_schedule(
 ) -> list[ET.Element]:
     if not all_evaluations: return []
 
-    # ==============================================================================
-    # 1. CRIAR O BANCO DE SINOPSES (Enriquecimento Cruzado)
-    # ==============================================================================
     best_descriptions: dict[str, str] = {}
     for ev in all_evaluations:
         for prog_row in ev.match.source.rows.get(ev.match.channel_id, []):
@@ -715,9 +718,6 @@ def stitch_multi_source_schedule(
 
     merged_timeline: list[dict[str, Any]] = []
 
-    # ==============================================================================
-    # 2. COSTURA DA GRADE COM TRIMMING AVANÇADO (Para evitar "Buracos da Meia-Noite")
-    # ==============================================================================
     for ev in all_evaluations:
         src = ev.match.source
         cid = ev.match.channel_id
@@ -751,32 +751,22 @@ def stitch_multi_source_schedule(
             merged_timeline = cleaned_source_progs
             continue
 
-        # Inserção Dinâmica: Em vez de descartar os programas secundários que colidem, 
-        # nós 'aparamos' as bordas deles para encaixarem nos buracos vazios.
         for cand in cleaned_source_progs:
             c_start, c_stop = cand["start"], cand["stop"]
             
             discard = False
             for ex in merged_timeline:
-                # Verifica se há alguma sobreposição
                 if c_start < ex["stop"] and c_stop > ex["start"]:
-                    # Se o programa já existente engolir completamente o novo, descartamos
                     if c_start >= ex["start"] and c_stop <= ex["stop"]:
                         discard = True
                         break
-                    
-                    # Corta (Trim) o início do programa secundário se a principal ainda estiver a dar
                     if c_start >= ex["start"] and c_start < ex["stop"]:
                         c_start = ex["stop"]
-                    # Corta o fim do secundário se a principal for começar
                     elif c_stop > ex["start"] and c_stop <= ex["stop"]:
                         c_stop = ex["start"]
                     else:
-                        # Se o programa secundário for um mega-evento que engole o programa existente, 
-                        # empurramos o início dele para o fim do existente para não dividir o bloco a meio.
                         c_start = ex["stop"]
 
-            # Só adicionamos o programa secundário se sobrar pelo menos 3 minutos de filme após os cortes
             if not discard and (c_stop - c_start).total_seconds() >= 180:
                 cand["start"] = c_start
                 cand["stop"] = c_stop
@@ -784,9 +774,6 @@ def stitch_multi_source_schedule(
                 
     merged_timeline.sort(key=lambda x: x["start"])
 
-    # ==============================================================================
-    # 3. LIMPEZA FINAL E INJEÇÃO DE SINOPSES
-    # ==============================================================================
     final_elements = []
     for i, prog in enumerate(merged_timeline):
         s_dt, sp_dt = prog["start"], prog["stop"]
@@ -797,7 +784,6 @@ def stitch_multi_source_schedule(
         el.attrib["start"] = format_xmltv_datetime(s_dt)
         el.attrib["stop"] = format_xmltv_datetime(sp_dt)
         
-        # Injeta a sinopse longa
         title_node = el.find("title")
         if title_node is not None and title_node.text:
             norm_title = normalize_programme_title(title_node.text)
@@ -828,8 +814,8 @@ def write_epg_stream(
                 gz.write(data)
                 if plain is not None: plain.write(data)
 
-            generator = "EPG Universal Otimizado (Gap-Filling + Trimming)"
-            source_name = "Consolidado Inteligente de 17 Fontes (Anti-overlap & UTC)"
+            generator = "EPG Universal Otimizado (Universal Match + Trimming)"
+            source_name = "Consolidado Inteligente de Múltiplas Fontes"
             emit((f"<?xml version='1.0' encoding='utf-8'?>\n<tv generator-info-name={quoteattr(generator)} source-info-name={quoteattr(source_name)}>\n").encode("utf-8"))
 
             for entry, chosen, _evaluations, _forced in selected:
@@ -861,7 +847,7 @@ def write_epg_stream(
     return programme_count, compatibility_alias_count
 
 def main() -> None:
-    print("Iniciando geração de EPG Multi-Fonte com Corte de Lacunas (Trimming)...")
+    print("Iniciando geração de EPG Multi-Fonte com Universal Match...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -968,7 +954,7 @@ def main() -> None:
     (OUTPUT_DIR / "validation.json").write_text(json.dumps({"generated_at": now.isoformat(), "active_sources": [s.label for s in active_sources], "summary": counts, "channels": validations}, ensure_ascii=False, indent=2) + "\n", "utf-8")
 
     report_md = [
-        "# Relatório do EPG Universal — Múltiplas Fontes com Junção Total (Gap-Filling)", "",
+        "# Relatório do EPG Universal — Múltiplas Fontes com Junção Total", "",
         f"- Canais no catálogo: **{counts['playlist_channels']}**",
         f"- Canais com grade encontrada: **{counts['matched']}**",
         f"- Total de programas gravados (grade costurada): **{counts['programmes']}**",
@@ -993,4 +979,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
