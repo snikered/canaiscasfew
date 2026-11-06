@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""EPG universal multi-fonte escalável com costura automática de lacunas (Gap-Filling),
+"""EPG universal multi-fonte escalável com costura automática de lacunas (Gap-Filling + Trimming),
 normalização estrita em UTC, consenso inteligente, anti-sobreposição e enriquecimento de sinopses.
 """
 from __future__ import annotations
@@ -55,7 +55,6 @@ LEGACY_INTERNAL_IDS: dict[str, tuple[str, ...]] = {
 # ==============================================================================
 # FONTES DE EPG (Nome, URL, Família, Peso)
 # Genius volta a ter peso duplo para garantir horários corretos (UTC real).
-# Fontes do mesmo autor partilham a mesma família para evitar "conluio".
 # ==============================================================================
 EPG_SOURCES_CONFIG = [
     ("Genius", os.environ.get("PRIMARY_EPG_URL", "https://github.com/ferteque/Curated-M3U-Repository/raw/refs/heads/main/epg13.xml.gz"), "genius", 2.0),
@@ -92,14 +91,8 @@ SOURCE_SPECS = []
 for idx, (lbl, link, family, weight) in enumerate(EPG_SOURCES_CONFIG, start=1):
     safe_key = re.sub(r'[^a-z0-9]', '', lbl.lower()) or f"src{idx}"
     SOURCE_SPECS.append(SourceSpec(
-        key=safe_key,
-        label=lbl,
-        url=link,
-        priority=idx,
-        family=family,
-        vote_weight=weight,
-        default_offset="+0000",
-        timeshift_hours=0.0
+        key=safe_key, label=lbl, url=link, priority=idx,
+        family=family, vote_weight=weight, default_offset="+0000", timeshift_hours=0.0
     ))
 
 @dataclass(frozen=True)
@@ -190,10 +183,8 @@ def parse_xmltv_datetime(value: str, default_offset: str = "+0000") -> datetime 
 def download_to_temp_file(url: str, attempts: int = 3) -> Path:
     local_path = Path(url)
     if not url.startswith("http"):
-        if local_path.exists():
-            return local_path
-        else:
-            raise RuntimeError(f"Arquivo local não encontrado: {url}")
+        if local_path.exists(): return local_path
+        else: raise RuntimeError(f"Arquivo local não encontrado: {url}")
 
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".tmp")
     tmp_path = Path(tmp.name)
@@ -704,7 +695,9 @@ def stitch_multi_source_schedule(
 ) -> list[ET.Element]:
     if not all_evaluations: return []
 
+    # ==============================================================================
     # 1. CRIAR O BANCO DE SINOPSES (Enriquecimento Cruzado)
+    # ==============================================================================
     best_descriptions: dict[str, str] = {}
     for ev in all_evaluations:
         for prog_row in ev.match.source.rows.get(ev.match.channel_id, []):
@@ -717,7 +710,9 @@ def stitch_multi_source_schedule(
 
     merged_timeline: list[dict[str, Any]] = []
 
-    # 2. COSTURA DA GRADE (Gap-Filling)
+    # ==============================================================================
+    # 2. COSTURA DA GRADE COM TRIMMING AVANÇADO (Para evitar "Buracos da Meia-Noite")
+    # ==============================================================================
     for ev in all_evaluations:
         src = ev.match.source
         cid = ev.match.channel_id
@@ -751,18 +746,42 @@ def stitch_multi_source_schedule(
             merged_timeline = cleaned_source_progs
             continue
 
+        # Inserção Dinâmica: Em vez de descartar os programas secundários que colidem, 
+        # nós 'aparamos' as bordas deles para encaixarem nos buracos vazios.
         for cand in cleaned_source_progs:
             c_start, c_stop = cand["start"], cand["stop"]
-            has_collision = False
-            for existing in merged_timeline:
-                if not (c_stop <= existing["start"] or c_start >= existing["stop"]):
-                    has_collision = True
-                    break
-            if not has_collision: merged_timeline.append(cand)
             
+            discard = False
+            for ex in merged_timeline:
+                # Verifica se há alguma sobreposição
+                if c_start < ex["stop"] and c_stop > ex["start"]:
+                    # Se o programa já existente engolir completamente o novo, descartamos
+                    if c_start >= ex["start"] and c_stop <= ex["stop"]:
+                        discard = True
+                        break
+                    
+                    # Corta (Trim) o início do programa secundário se a principal ainda estiver a dar
+                    if c_start >= ex["start"] and c_start < ex["stop"]:
+                        c_start = ex["stop"]
+                    # Corta o fim do secundário se a principal for começar
+                    elif c_stop > ex["start"] and c_stop <= ex["stop"]:
+                        c_stop = ex["start"]
+                    else:
+                        # Se o programa secundário for um mega-evento que engole o programa existente, 
+                        # empurramos o início dele para o fim do existente para não dividir o bloco a meio.
+                        c_start = ex["stop"]
+
+            # Só adicionamos o programa secundário se sobrar pelo menos 3 minutos de filme após os cortes
+            if not discard and (c_stop - c_start).total_seconds() >= 180:
+                cand["start"] = c_start
+                cand["stop"] = c_stop
+                merged_timeline.append(cand)
+                
     merged_timeline.sort(key=lambda x: x["start"])
 
-    # 3. MONTAGEM FINAL COM INJEÇÃO DAS SINOPSES RICAS E PREVENÇÃO ESTREITA
+    # ==============================================================================
+    # 3. LIMPEZA FINAL E INJEÇÃO DE SINOPSES
+    # ==============================================================================
     final_elements = []
     for i, prog in enumerate(merged_timeline):
         s_dt, sp_dt = prog["start"], prog["stop"]
@@ -773,7 +792,7 @@ def stitch_multi_source_schedule(
         el.attrib["start"] = format_xmltv_datetime(s_dt)
         el.attrib["stop"] = format_xmltv_datetime(sp_dt)
         
-        # Injeção da Sinopse
+        # Injeta a sinopse longa
         title_node = el.find("title")
         if title_node is not None and title_node.text:
             norm_title = normalize_programme_title(title_node.text)
@@ -804,8 +823,8 @@ def write_epg_stream(
                 gz.write(data)
                 if plain is not None: plain.write(data)
 
-            generator = "EPG Universal Otimizado (Gap-Filling + Cross-Enrichment)"
-            source_name = "Consolidado Inteligente de Múltiplas Fontes (Anti-overlap & UTC)"
+            generator = "EPG Universal Otimizado (Gap-Filling + Trimming)"
+            source_name = "Consolidado Inteligente de 17 Fontes (Anti-overlap & UTC)"
             emit((f"<?xml version='1.0' encoding='utf-8'?>\n<tv generator-info-name={quoteattr(generator)} source-info-name={quoteattr(source_name)}>\n").encode("utf-8"))
 
             for entry, chosen, _evaluations, _forced in selected:
@@ -837,7 +856,7 @@ def write_epg_stream(
     return programme_count, compatibility_alias_count
 
 def main() -> None:
-    print("Iniciando geração de EPG Multi-Fonte com Junção Total e Sinopses Cruzadas...")
+    print("Iniciando geração de EPG Multi-Fonte com Corte de Lacunas (Trimming)...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -969,3 +988,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
