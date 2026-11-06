@@ -20,7 +20,6 @@ QUALITY_TOKENS = {
     "VIP", "BACKUP", "BKP", "ALT", "TESTE", "TEST", "RAW", "LEG",
 }
 
-# Estados do Brasil (para evitar que o fuzzy misture Globo SP com Globo RJ)
 REGIONAL_TOKENS = {
     "SP", "RJ", "MG", "RS", "PR", "SC", "BA", "PE", "CE", "PA", 
     "AM", "MA", "GO", "DF", "ES", "MT", "MS", "PB", "RN", "AL", 
@@ -59,7 +58,6 @@ def strip_quality_markers(value: str) -> str:
             continue
         skip_next_hd = False
         
-        # Só ignora o token se for puramente qualidade. Mantém as siglas regionais!
         if clean in QUALITY_TOKENS or re.fullmatch(r"\d{2,3}FPS", clean):
             continue
             
@@ -91,7 +89,7 @@ def normalize_name(value: str) -> str:
 
     value = re.sub(r"[^A-Z0-9]+", "", value)
 
-alias_map = {
+    alias_map = {
         "CANALSONY": "SONY",
         "SONYCHANNEL": "SONY",
         "SPORTV": "SPORTV1",
@@ -105,6 +103,9 @@ alias_map = {
         "AGROPLUS": "AGROPLUS",
         "UNIVERSALSTUDIO": "STUDIOUNIVERSAL",
         "BOOMERANG": "CARTOONITO",
+        "CANALWOOHOO": "WOOHOO",
+        "TRAVELBOXBRAZIL": "TRAVELBOX",
+        "TRAVELBOXBRASIL": "TRAVELBOX",
     }
     return alias_map.get(value, value)
 
@@ -132,11 +133,10 @@ def similarity(left: str, right: str) -> float:
     if a == b:
         return 1.0
         
-    # Punição severa se as siglas de estado não baterem (Evita Globo SP assumir Globo RJ)
     a_tokens, b_tokens = set(re.findall(r'[A-Z]+', a)), set(re.findall(r'[A-Z]+', b))
     a_regs, b_regs = a_tokens.intersection(REGIONAL_TOKENS), b_tokens.intersection(REGIONAL_TOKENS)
     if a_regs and b_regs and a_regs != b_regs:
-        return 0.0 # Se um é SP e outro é RJ, zera a similaridade!
+        return 0.0
 
     ratio = SequenceMatcher(None, a, b).ratio()
     if min(len(a), len(b)) >= 5 and (a in b or b in a):
