@@ -91,11 +91,20 @@ def normalize_name(value: str) -> str:
 
     value = re.sub(r"[^A-Z0-9]+", "", value)
 
-    alias_map = {
-        "CANALSONY": "SONY", "SONYCHANNEL": "SONY", "SPORTV": "SPORTV1",
-        "H2": "HISTORY2", "HISTORYII": "HISTORY2", "USA": "USANETWORK",
-        "PARAMOUNTCHANNEL": "PARAMOUNT", "DISCOVERYHANDH": "DISCOVERYHOMEANDHEALTH",
-        "DISCOVERYHOMEHEALTH": "DISCOVERYHOMEANDHEALTH", "HBOPLUS": "HBOPLUS", "AGROPLUS": "AGROPLUS",
+alias_map = {
+        "CANALSONY": "SONY",
+        "SONYCHANNEL": "SONY",
+        "SPORTV": "SPORTV1",
+        "H2": "HISTORY2",
+        "HISTORYII": "HISTORY2",
+        "USA": "USANETWORK",
+        "PARAMOUNTCHANNEL": "PARAMOUNT",
+        "DISCOVERYHANDH": "DISCOVERYHOMEANDHEALTH",
+        "DISCOVERYHOMEHEALTH": "DISCOVERYHOMEANDHEALTH",
+        "HBOPLUS": "HBOPLUS",
+        "AGROPLUS": "AGROPLUS",
+        "UNIVERSALSTUDIO": "STUDIOUNIVERSAL",
+        "BOOMERANG": "CARTOONITO",
     }
     return alias_map.get(value, value)
 
