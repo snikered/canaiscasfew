@@ -88,12 +88,11 @@ def main() -> None:
     unresolved_ambiguous: dict[str, list[str]] = {}
     for tid, owners in (learned.get('ambiguous_ids', {}) or {}).items():
         canonical_owners = {idx.get(normalize_name(str(owner)), str(owner)) for owner in owners}
-        tid_norm = normalize_name(str(tid).split('.')[0])
         if len(canonical_owners) == 1:
             buckets[next(iter(canonical_owners))]['ids'][str(tid)] += 1
-        elif tid_norm in canonical_owners:
-            buckets[tid_norm]['ids'][str(tid)] += 100
         else:
+            # Mesmo que o prefixo do ID coincida com um canal (ex.: sbt.br),
+            # não o trate como confiável se o aprendizado mostrou vários donos.
             unresolved_ambiguous[str(tid)] = sorted(canonical_owners)
 
     id_owners: dict[str, set[str]] = defaultdict(set)
@@ -102,9 +101,7 @@ def main() -> None:
         
     for tid, owners in id_owners.items():
         if len(owners) > 1:
-            tid_norm = normalize_name(str(tid).split('.')[0])
-            if tid_norm not in owners:
-                unresolved_ambiguous[tid] = sorted(owners)
+            unresolved_ambiguous[tid] = sorted(owners)
 
     used_ids: set[str] = set()
     entries = []
@@ -125,8 +122,7 @@ def main() -> None:
         
         trusted_ids = []
         for tid, _ in b['ids'].most_common():
-            tid_norm = normalize_name(str(tid).split('.')[0])
-            if (len(id_owners.get(tid, {key})) == 1 and tid not in unresolved_ambiguous) or tid_norm == normalize_name(key):
+            if len(id_owners.get(tid, {key})) == 1 and tid not in unresolved_ambiguous:
                 trusted_ids.append(tid)
                 
         entries.append({

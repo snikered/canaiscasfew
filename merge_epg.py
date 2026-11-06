@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""EPG universal multi-fonte escalável com Segment Subtraction (Gap-Filling + Trimming perfeito)
-e Mapeamento Multi-ID (Plug & Play) para proteger nomes de canais SD, HD, FHD e 4K contra falsos conflitos.
+"""EPG universal multi-fonte escalável com Segment Subtraction (Gap-Filling + Trimming perfeito).
 """
 from __future__ import annotations
 
@@ -143,7 +142,7 @@ def download_to_temp_file(url: str, attempts: int = 3) -> Path:
     last_error = None
     for attempt in range(1, attempts + 1):
         try:
-            req = urllib.request.Request(url, headers={"User-Agent": "EPG-Universal/4.0", "Accept": "*/*"})
+            req = urllib.request.Request(url, headers={"User-Agent": "EPG-Universal/3.0", "Accept": "*/*"})
             with urllib.request.urlopen(req, timeout=120) as resp, tmp_path.open("wb") as out:
                 while chunk := resp.read(1024 * 512): out.write(chunk)
             return tmp_path
@@ -195,6 +194,29 @@ def read_source_from_file(spec: SourceSpec, tmp_path: Path) -> EpgSource:
             title = programme_title(child)
             rows[channel_id].append(ProgrammeRow(start=start, stop=stop or start, title=title, normalized_title=normalize_programme_title(title), element=child))
 
+    # Algumas fontes XMLTV publicam <programme> sem declarar o <channel>
+    # correspondente. Não descarte essas grades: sintetize o canal pelo ID e
+    # indexe o ID normalizado para permitir o reconhecimento por nome/ID.
+    for channel_id in programs:
+        if channel_id in channels:
+            continue
+        channel = ET.Element("channel", {"id": channel_id})
+        fallback_name = normalize_source_id(channel_id) or channel_id
+        ET.SubElement(channel, "display-name").text = fallback_name
+        channels[channel_id] = channel
+        names[channel_id] = [fallback_name]
+        norm_candidates = []
+        for candidate in (fallback_name, channel_id, normalize_source_id(channel_id)):
+            normalized = normalize_name(candidate)
+            if normalized and normalized not in norm_candidates:
+                norm_candidates.append(normalized)
+                exact_index[normalized].add(channel_id)
+                fuzzy_index[digit_signature(normalized)][normalized].add(channel_id)
+        normalized_names[channel_id] = norm_candidates
+        normalized_id = normalize_source_id(channel_id)
+        if normalized_id:
+            normalized_id_index[normalized_id].add(channel_id)
+
     for channel_id, channel_rows in rows.items():
         channel_rows.sort(key=lambda item: item.start)
         fixed_rows: list[ProgrammeRow] = []
@@ -241,10 +263,24 @@ def old_id_hints_for(entry: dict[str, object]) -> list[str]:
     return output
 
 def choose_exact(source: EpgSource, aliases: Iterable[str]) -> tuple[str | None, str]:
+    """Escolhe uma correspondência exata que realmente tenha grade utilizável.
+
+    O código antigo priorizava a quantidade de elementos <programme> brutos.
+    Entradas com horários inválidos podiam vencer e deixar o canal sem EPG,
+    mesmo quando outra fonte/candidato tinha horários válidos.
+    """
+    candidates: dict[str, str] = {}
     for alias in aliases:
-        candidates = source.exact_index.get(alias, set())
-        if candidates: return max(candidates, key=lambda cid: len(source.programs.get(cid, []))), f"nome exato: {alias}"
-    return None, ""
+        for channel_id in source.exact_index.get(alias, set()):
+            candidates.setdefault(channel_id, alias)
+    scheduled = [cid for cid in candidates if source.rows.get(cid)]
+    if not scheduled:
+        return None, "nome exato encontrado, mas sem programação com horário válido"
+    channel_id = max(
+        scheduled,
+        key=lambda cid: (len(source.rows.get(cid, [])), len(source.programs.get(cid, []))),
+    )
+    return channel_id, f"nome exato: {candidates[channel_id]}"
 
 def _sequence_ratio_upper_bound(left: str, right: str, left_counter: Counter[str] | None = None) -> float:
     if not left or not right: return 0.0
@@ -256,6 +292,7 @@ def _sequence_ratio_upper_bound(left: str, right: str, left_counter: Counter[str
     return min(length_bound, (2.0 * common) / (len(left) + len(right)))
 
 def best_fuzzy(source: EpgSource, aliases: list[str]) -> tuple[str | None, float, float, str]:
+    """Correspondência aproximada conservadora, considerando só grades válidas."""
     if not aliases: return None, 0.0, 0.0, ""
     relevant_floor = FUZZY_THRESHOLD - FUZZY_MARGIN
     best_by_channel: dict[str, tuple[float, str, str]] = {}
@@ -268,6 +305,10 @@ def best_fuzzy(source: EpgSource, aliases: list[str]) -> tuple[str | None, float
             ratio = SequenceMatcher(None, alias, normalized_candidate).ratio()
             if ratio < relevant_floor: continue
             for channel_id in channel_ids:
+                # Não permitir que um nome aproximado sem grade válida bloqueie
+                # outro candidato ou apareça como correspondência bem-sucedida.
+                if not source.rows.get(channel_id):
+                    continue
                 old = best_by_channel.get(channel_id)
                 if old is None or ratio > old[0]: best_by_channel[channel_id] = (ratio, alias, normalized_candidate)
     if not best_by_channel: return None, 0.0, 0.0, ""
@@ -297,12 +338,16 @@ def match_by_safe_tvg_id_hint(source: EpgSource, aliases: list[str], old_ids: li
         if normalized: candidate_ids.update(source.normalized_id_index.get(normalized, set()))
     candidates = []
     for channel_id in candidate_ids:
+        if not source.rows.get(channel_id):
+            continue
         compatibility = _name_compatibility(source, channel_id, aliases)
         if compatibility >= TVG_ID_NAME_THRESHOLD: candidates.append((compatibility, channel_id))
     if not candidates: return None
     candidates.sort(reverse=True)
     score, channel_id = candidates[0]
-    return ChannelMatch(source, channel_id, f"tvg-id antigo confirmado ({score:.3f})", score)
+    if len(candidates) > 1 and score - candidates[1][0] < FUZZY_MARGIN:
+        return None
+    return ChannelMatch(source, channel_id, f"tvg-id antigo confirmado pelo nome ({score:.3f})", score)
 
 def find_match(source: EpgSource, aliases: list[str], old_ids: list[str] | None = None) -> ChannelMatch | None:
     exact_id, reason = choose_exact(source, aliases)
@@ -311,6 +356,38 @@ def find_match(source: EpgSource, aliases: list[str], old_ids: list[str] | None 
     if fuzzy_id and best_score >= FUZZY_THRESHOLD and (best_score - second_score) >= FUZZY_MARGIN:
         return ChannelMatch(source, fuzzy_id, fuzzy_reason, best_score)
     return match_by_safe_tvg_id_hint(source, aliases, old_ids or [])
+
+def suggest_source_matches(source: EpgSource, aliases: list[str], limit: int = 5) -> list[dict[str, object]]:
+    """Diagnóstico: mostra nomes parecidos mesmo quando a grade não é utilizável."""
+    found: dict[str, tuple[float, str]] = {}
+    for alias in aliases:
+        for cid in source.exact_index.get(alias, set()):
+            found[cid] = (1.0, alias)
+        if len(alias) < 4:
+            continue
+        bucket = source.fuzzy_index.get(digit_signature(alias), {})
+        for candidate, channel_ids in bucket.items():
+            score = SequenceMatcher(None, alias, candidate).ratio()
+            if score < 0.60:
+                continue
+            for cid in channel_ids:
+                old = found.get(cid)
+                if old is None or score > old[0]:
+                    found[cid] = (score, f"{alias} ~ {candidate}")
+    ranked = sorted(found.items(), key=lambda item: (item[1][0], len(source.rows.get(item[0], []))), reverse=True)
+    return [
+        {
+            "source": source.spec.label,
+            "source_key": source.spec.key,
+            "channel_id": cid,
+            "source_names": source.names.get(cid, []),
+            "match_score": round(score, 4),
+            "reason": reason,
+            "valid_programmes": len(source.rows.get(cid, [])),
+            "raw_programmes": len(source.programs.get(cid, [])),
+        }
+        for cid, (score, reason) in ranked[:limit]
+    ]
 
 def manual_override(overrides: dict[str, object], target_id: str) -> tuple[str | None, str | None]:
     item = (overrides.get("by_target_id", {}) or {}).get(target_id)
@@ -521,24 +598,17 @@ def make_validation(entry: dict[str, object], chosen: CandidateEvaluation, all_e
         "cross_sources": chosen.comparisons, "candidates": candidates,
     }
 
-# ==============================================================================
-# ALGORITMO MULTI-ID (O SEGREDO DO PLUG & PLAY)
-# Exporta o EPG para TODOS os nomes e IDs encontrados, forçando o salvamento
-# mesmo quando outro canal "lixo" tentar roubar o mesmo ID.
-# ==============================================================================
+# A MAGIA DA COMPATIBILIDADE: Tudo o que está no compile_dictionary vira tvg-id!
 def _compatibility_candidates(entry: dict[str, object]) -> list[str]:
     values = []
     target_id = str(entry.get("id", "")).strip()
     values.append(target_id)
-    
-    for key in ["name", "aliases", "original_names", "blank_tvg_id_names", "blank_tvg_id_tvg_names", "tvg_names"]:
-        if key in entry:
-            data = entry[key]
-            if isinstance(data, list): values.extend(str(x).strip() for x in data if x)
-            elif isinstance(data, str): values.append(data.strip())
-            
-    values.extend(str(x).strip() for x in entry.get("old_tvg_ids", []) or [])
     values.extend(LEGACY_INTERNAL_IDS.get(target_id, ()))
+    values.extend(str(x).strip() for x in entry.get("old_tvg_ids", []) or [])
+    values.append(str(entry.get("name", "")).strip())
+    values.extend(str(x).strip() for x in entry.get("aliases", []) or [])
+    values.extend(str(x).strip() for x in entry.get("original_names", []) or [])
+    values.extend(str(x).strip() for x in entry.get("blank_tvg_id_names", []) or [])
     return [v for v in dict.fromkeys(values) if v and len(v) <= 220]
 
 def build_compatibility_ids(entries: list[dict[str, object]]) -> tuple[dict[str, list[str]], dict[str, list[str]]]:
@@ -546,31 +616,19 @@ def build_compatibility_ids(entries: list[dict[str, object]]) -> tuple[dict[str,
     for entry in entries:
         target_id = str(entry.get("id", ""))
         for candidate in _compatibility_candidates(entry): owners[candidate].add(target_id)
-        
     by_target, ambiguous = {}, {}
     for entry in entries:
         target_id = str(entry.get("id", ""))
-        target_norm = normalize_name(target_id.split('.')[-1] if '.' in target_id else target_id)
-        
         ids, bad = [target_id], []
         for candidate in _compatibility_candidates(entry):
             if candidate == target_id: continue
-            
-            # PROTEÇÃO BRUTA: Se o nome normalizado da variante (ex: CARTOONITO HD) for igual à raiz do canal (CARTOONITO),
-            # nós IGNORAMOS qualquer falso conflito e FORÇAMOS a criação desse ID no XML.
-            cand_norm = normalize_name(candidate)
-            if len(owners.get(candidate, set())) == 1 or cand_norm == target_norm:
-                ids.append(candidate)
-            else:
-                bad.append(candidate)
-                
+            if len(owners.get(candidate, set())) == 1: ids.append(candidate)
+            else: bad.append(candidate)
         by_target[target_id] = list(dict.fromkeys(ids))
         if bad: ambiguous[target_id] = sorted(set(bad))
     return by_target, ambiguous
 
-# ==============================================================================
-# ALGORITMO DE COSTURA PERFEITA (SUBTRAÇÃO DE SEGMENTOS E TRIMMING)
-# ==============================================================================
+# ALGORITMO DE SUBTRAÇÃO PARA COSTURA PERFEITA SEM BURACOS (Trimming)
 def stitch_multi_source_schedule(
     all_evaluations: list[CandidateEvaluation], target_channel_id: str, cutoff: datetime, overrides: dict[str, object]
 ) -> list[ET.Element]:
@@ -624,17 +682,21 @@ def stitch_multi_source_schedule(
         for cand in cleaned_source_progs:
             c_start, c_stop = cand["start"], cand["stop"]
             
+            # Subtrai as interseções com a merged_timeline
             valid_segments = [(c_start, c_stop)]
             for ex in merged_timeline:
                 new_segments = []
                 for seg_start, seg_stop in valid_segments:
+                    # Se não há sobreposição, mantém o segmento
                     if seg_stop <= ex["start"] or seg_start >= ex["stop"]:
                         new_segments.append((seg_start, seg_stop))
                     else:
+                        # Há sobreposição, quebra o segmento nas partes que sobram
                         if seg_start < ex["start"]: new_segments.append((seg_start, ex["start"]))
                         if seg_stop > ex["stop"]: new_segments.append((ex["stop"], seg_stop))
                 valid_segments = new_segments
 
+            # Adiciona os pedaços que sobraram e que têm pelo menos 3 minutos
             for seg_start, seg_stop in valid_segments:
                 if (seg_stop - seg_start).total_seconds() >= 180:
                     new_cand = copy.deepcopy(cand)
@@ -684,7 +746,7 @@ def write_epg_stream(
                 gz.write(data)
                 if plain is not None: plain.write(data)
 
-            generator = "EPG Universal Otimizado (Multi-ID Plug&Play e Trimming)"
+            generator = "EPG Universal Otimizado (Segment Subtraction Trimming)"
             source_name = "Consolidado Inteligente de Múltiplas Fontes"
             emit((f"<?xml version='1.0' encoding='utf-8'?>\n<tv generator-info-name={quoteattr(generator)} source-info-name={quoteattr(source_name)}>\n").encode("utf-8"))
 
@@ -692,16 +754,7 @@ def write_epg_stream(
                 target_id = str(entry.get("id", ""))
                 ids_for_channel = compatibility_ids.get(target_id, [target_id])
                 compatibility_alias_count += max(0, len(ids_for_channel) - 1)
-                
-                # Coleta todos os nomes possiveis que estavam no dicionário
-                display_aliases = []
-                for key_ in ["name", "aliases", "original_names"]:
-                    if key_ in entry:
-                        val = entry[key_]
-                        if isinstance(val, list): display_aliases.extend(str(x).strip() for x in val)
-                        elif isinstance(val, str): display_aliases.append(val.strip())
-                display_aliases = list(dict.fromkeys(display_aliases))
-                
+                display_aliases = list(dict.fromkeys([str(entry.get("name", "")), *(str(x) for x in entry.get("aliases", []) or []), *(str(x) for x in entry.get("original_names", []) or [])]))
                 for output_id in ids_for_channel:
                     channel = copy.deepcopy(chosen.match.source.channels[chosen.match.channel_id])
                     channel.attrib["id"] = output_id
@@ -726,7 +779,7 @@ def write_epg_stream(
     return programme_count, compatibility_alias_count
 
 def main() -> None:
-    print("Iniciando geração de EPG (Com Força Bruta de Multi-IDs)...")
+    print("Iniciando geração de EPG Multi-Fonte (Segment Subtraction + Raw Aliases)...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -798,7 +851,23 @@ def main() -> None:
             forced = True
 
         if not matches:
-            report_rows.append({"target_id": target_id, "name": visible_name, "status": "missing", "source": None, "source_key": None, "source_channel_id": None, "method": "sem correspondência nas fontes ativas", "confidence": 0})
+            diagnostics = []
+            for source in active_sources:
+                diagnostics.extend(suggest_source_matches(source, aliases, limit=3))
+            diagnostics.sort(key=lambda item: (item["match_score"], item["valid_programmes"]), reverse=True)
+            exact_without_schedule = any(
+                item["match_score"] == 1.0 and item["raw_programmes"] > 0 and item["valid_programmes"] == 0
+                for item in diagnostics
+            )
+            reason = (
+                "nome encontrado em uma ou mais fontes, mas sem programas com horários válidos"
+                if exact_without_schedule else "nenhuma correspondência segura com grade válida"
+            )
+            report_rows.append({
+                "target_id": target_id, "name": visible_name, "status": "missing",
+                "source": None, "source_key": None, "source_channel_id": None,
+                "method": reason, "confidence": 0, "source_suggestions": diagnostics[:8],
+            })
             continue
 
         chosen, evaluations = evaluate_candidates(matches, now, max_active_vote_weight)
@@ -810,7 +879,24 @@ def main() -> None:
         first_match = min(evaluations, key=lambda ev: ev.match.source.spec.priority) if evaluations else chosen
         changed = first_match.match.source is not chosen.match.source
         
-        report_rows.append({"target_id": target_id, "name": visible_name, "status": "matched", "source": chosen.match.source.label, "source_key": chosen.match.source.spec.key, "source_channel_id": chosen.match.channel_id, "method": chosen.match.method, "confidence": chosen.confidence, "changed_from_first_available": changed, "matched_sources_count": len(evaluations)})
+        report_rows.append({
+            "target_id": target_id, "name": visible_name, "status": "matched",
+            "source": chosen.match.source.label, "source_key": chosen.match.source.spec.key,
+            "source_channel_id": chosen.match.channel_id, "method": chosen.match.method,
+            "confidence": chosen.confidence, "changed_from_first_available": changed,
+            "matched_sources_count": len(evaluations),
+            "valid_programmes_in_selected_source": len(chosen.match.source.rows.get(chosen.match.channel_id, [])),
+            "raw_programmes_in_selected_source": len(chosen.match.source.programs.get(chosen.match.channel_id, [])),
+            "now": serialize_now_next(chosen.health.get("current")),
+            "next": serialize_now_next(chosen.health.get("next")),
+            "source_candidates": [
+                {"source": ev.match.source.label, "channel_id": ev.match.channel_id,
+                 "valid_programmes": len(ev.match.source.rows.get(ev.match.channel_id, [])),
+                 "raw_programmes": len(ev.match.source.programs.get(ev.match.channel_id, [])),
+                 "match_method": ev.match.method, "match_score": round(ev.match.match_score, 4)}
+                for ev in sorted(evaluations, key=lambda item: item.match.source.spec.priority)
+            ],
+        })
         validations.append(make_validation(entry, chosen, evaluations, now))
 
     timings["matching_consenso_validacao"] = round(time.perf_counter() - stage_start, 3)
@@ -824,6 +910,8 @@ def main() -> None:
         "playlist_channels": len(entries),
         "matched": sum(1 for row in report_rows if row["status"] == "matched"),
         "missing": sum(1 for row in report_rows if row["status"] == "missing"),
+        "missing_with_source_candidates": sum(1 for row in report_rows if row["status"] == "missing" and row.get("source_suggestions")),
+        "matched_channels_with_valid_programmes": sum(1 for row in report_rows if row["status"] == "matched" and row.get("valid_programmes_in_selected_source", 0) > 0),
         "programmes": programme_count,
         "compatibility_ids_and_name_aliases": compatibility_alias_count,
         "timing_seconds": timings, "selected_by_source": source_counts,
@@ -833,17 +921,41 @@ def main() -> None:
     (OUTPUT_DIR / "validation.json").write_text(json.dumps({"generated_at": now.isoformat(), "active_sources": [s.label for s in active_sources], "summary": counts, "channels": validations}, ensure_ascii=False, indent=2) + "\n", "utf-8")
 
     report_md = [
-        "# Relatório do EPG Universal — Força Bruta Multi-IDs e Trimming", "",
+        "# Relatório do EPG Universal — Múltiplas Fontes (Subtração Dinâmica)", "",
         f"- Canais no catálogo: **{counts['playlist_channels']}**",
         f"- Canais com grade encontrada: **{counts['matched']}**",
-        f"- Total de programas gravados (grade costurada e clonada): **{counts['programmes']}**",
+        f"- Total de programas gravados (grade costurada): **{counts['programmes']}**",
         "", "## Fonte base utilizada por canal", ""
     ]
     for source in active_sources: report_md.append(f"- **{source.label}:** {source_counts[source.label]} canal(is)")
+    report_md.extend(["", "## Canais sem correspondência segura", ""])
+    missing_rows = [row for row in report_rows if row["status"] == "missing"]
+    if not missing_rows:
+        report_md.append("Nenhum canal ficou sem correspondência segura.")
+    else:
+        for row in sorted(missing_rows, key=lambda item: str(item.get("name", ""))):
+            report_md.append(f"- **{row.get('name', 'Canal sem nome')}** — {row.get('method', 'sem correspondência')}")
+            for suggestion in row.get("source_suggestions", [])[:2]:
+                names = ", ".join(suggestion.get("source_names", [])[:3]) or suggestion.get("channel_id", "")
+                report_md.append(
+                    f"  - {suggestion.get('source')}: {names} "
+                    f"(similaridade {suggestion.get('match_score')}, "
+                    f"{suggestion.get('valid_programmes')} programas válidos)"
+                )
     report_md.extend(["", "## Desempenho", ""])
     for label, seconds in timings.items(): report_md.append(f"- **{label.replace('_', ' ').title()}:** {seconds:.2f} s")
     report_md.append(f"- **Tempo Total:** {time.perf_counter() - run_start:.2f} s")
     (OUTPUT_DIR / "report.md").write_text("\n".join(report_md) + "\n", "utf-8")
+
+    validation_md = [
+        "# Validação e Consenso de Grade", "",
+        f"Fontes ativas ({len(active_sources)}): **{', '.join(s.label for s in active_sources)}**", "",
+        "## Agora / Próximo", ""
+    ]
+    for item in sorted(validations, key=lambda x: str(x["name"])):
+        current, nxt = item.get("now") or {}, item.get("next") or {}
+        validation_md.append(f"- **{item['name']}** ({item['source']}): Agora **{current.get('title', '—')}** → Próximo **{nxt.get('title', '—')}** · confiança **{item['confidence']}%**")
+    (OUTPUT_DIR / "validation.md").write_text("\n".join(validation_md) + "\n", "utf-8")
     print(f"Sucesso! EPG gerado com {programme_count} programas unificados de {len(active_sources)} fontes.")
 
 if __name__ == "__main__":

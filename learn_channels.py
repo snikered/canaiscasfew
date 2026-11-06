@@ -165,10 +165,13 @@ def main():
     known_fingerprints = set()
 
     for tid, owners in existing_ambiguous.items():
-        for key in owners: id_owners[str(tid)][str(key)] += 1
+        for key in owners:
+            canonical_key = manual_alias_index.get(normalize_name(str(key)), str(key))
+            id_owners[str(tid)][canonical_key] += 1
 
     for key, rec in existing.items():
-        slot = channels[key]
+        canonical_key = manual_alias_index.get(normalize_name(str(key)), str(key))
+        slot = channels[canonical_key]
         slot['names'].update({rec.get('name', key): int(rec.get('observations', 1) or 1)})
         slot['aliases'].update({a: 1 for a in rec.get('aliases', []) or []})
         slot['tvg_names'].update({a: 1 for a in rec.get('tvg_names', []) or []})
@@ -180,7 +183,7 @@ def main():
                 tid = str(item).strip(); count = 1
             if tid:
                 slot['ids'][tid] += count
-                id_owners[tid][key] += count
+                id_owners[tid][canonical_key] += count
         slot['groups'].update({g: 1 for g in rec.get('groups', []) or []})
         slot['playlists'].update(rec.get('source_fingerprints', []) or [])
         known_fingerprints.update(rec.get('source_fingerprints', []) or [])
@@ -273,9 +276,9 @@ def main():
         ids = []
         for tid, count in slot['ids'].most_common():
             owners = id_owners.get(tid, {})
-            tid_norm = normalize_name(tid.split('.')[0])
-            # Permite se tiver 1 único dono OU se o ID tiver literalmente o nome do canal (ex: globonews.br -> GLOBONEWS)
-            if len(owners) == 1 or tid_norm == key:
+            # Um ID observado em mais de um canal é ambíguo, ainda que seu
+            # prefixo coincida com o nome de um dos proprietários.
+            if len(owners) == 1 and tid not in ambiguous:
                 ids.append({'id': tid, 'observations': count, 'trusted': True})
 
         output_channels[key] = {
