@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
+"""Compila dicionário manual + aprendizado persistente no catálogo consumido pelo merge_epg.py.
+Otimizado com nomes literais para compatibilidade Plug & Play em qualquer player IPTV.
+"""
+from __future__ import annotations
+
 import argparse
 import json
 from collections import Counter, defaultdict
 from pathlib import Path
+
 from epg_utils import normalize_name, stable_channel_id
 
 def alias_index(manual_channels: dict[str, dict]) -> dict[str, str]:
@@ -13,8 +19,8 @@ def alias_index(manual_channels: dict[str, dict]) -> dict[str, str]:
             if norm: owners[norm].add(key)
     return {a: next(iter(keys)) for a, keys in owners.items() if len(keys) == 1}
 
-def keep_raw_aliases(raw_aliases: list[str], max_items: int = 40) -> list[str]:
-    """Preserva os nomes literais originais da M3U para que a TV os encontre."""
+def keep_raw_aliases(raw_aliases: list[str], max_items: int = 80) -> list[str]:
+    """Preserva os nomes literais originais da M3U (SD, HD, FHD, 4K, H265) para que a TV os encontre."""
     seen = set()
     cleaned = []
     for alias in sorted(raw_aliases, key=len):
@@ -42,7 +48,7 @@ def main() -> None:
     idx = alias_index(manual_channels)
 
     buckets = defaultdict(lambda: {
-        'names': Counter(), 'aliases': set(), 'ids': Counter(), 'groups': Counter(),
+        'names': Counter(), 'aliases': set(), 'tvg_names': set(), 'ids': Counter(), 'groups': Counter(),
         'blank': 0, 'observations': 0, 'fingerprints': set(), 'learned_keys': set(),
     })
 
@@ -59,8 +65,9 @@ def main() -> None:
         name = str(rec.get('name') or learned_key)
         b['names'][name] += max(1, int(rec.get('observations', 1) or 1))
         
-        # Extrai até 40 aliases literais para suportar FHD, H265, etc.
-        b['aliases'].update(list(rec.get('aliases', []))[:40]) 
+        b['aliases'].update(list(rec.get('aliases', []))[:80])
+        b['aliases'].update(list(rec.get('tvg_names', []))[:80])
+        b['tvg_names'].update(list(rec.get('tvg_names', []))[:80])
         
         for item in rec.get('tvg_ids', []) or []:
             if isinstance(item, dict):
@@ -81,15 +88,23 @@ def main() -> None:
     unresolved_ambiguous: dict[str, list[str]] = {}
     for tid, owners in (learned.get('ambiguous_ids', {}) or {}).items():
         canonical_owners = {idx.get(normalize_name(str(owner)), str(owner)) for owner in owners}
-        if len(canonical_owners) == 1: buckets[next(iter(canonical_owners))]['ids'][str(tid)] += 1
-        else: unresolved_ambiguous[str(tid)] = sorted(canonical_owners)
+        tid_norm = normalize_name(str(tid).split('.')[0])
+        if len(canonical_owners) == 1:
+            buckets[next(iter(canonical_owners))]['ids'][str(tid)] += 1
+        elif tid_norm in canonical_owners:
+            buckets[tid_norm]['ids'][str(tid)] += 100
+        else:
+            unresolved_ambiguous[str(tid)] = sorted(canonical_owners)
 
     id_owners: dict[str, set[str]] = defaultdict(set)
     for key, b in buckets.items():
         for tid in b['ids']: id_owners[tid].add(key)
         
     for tid, owners in id_owners.items():
-        if len(owners) > 1: unresolved_ambiguous[tid] = sorted(owners)
+        if len(owners) > 1:
+            tid_norm = normalize_name(str(tid).split('.')[0])
+            if tid_norm not in owners:
+                unresolved_ambiguous[tid] = sorted(owners)
 
     used_ids: set[str] = set()
     entries = []
@@ -105,19 +120,24 @@ def main() -> None:
         raw_aliases.add(preferred)
         raw_aliases.update(str(x) for x in manual_rec.get('aliases', []) or [] if x)
         
-        clean_aliases = keep_raw_aliases(list(raw_aliases), max_items=40)
-        trusted_ids = [tid for tid, _ in b['ids'].most_common() if len(id_owners.get(tid, {key})) == 1 and tid not in unresolved_ambiguous]
-        blank_aliases = clean_aliases if b['blank'] else []
+        clean_aliases = keep_raw_aliases(list(raw_aliases), max_items=80)
+        clean_tvg_names = keep_raw_aliases(list(b['tvg_names']), max_items=80)
         
+        trusted_ids = []
+        for tid, _ in b['ids'].most_common():
+            tid_norm = normalize_name(str(tid).split('.')[0])
+            if (len(id_owners.get(tid, {key})) == 1 and tid not in unresolved_ambiguous) or tid_norm == normalize_name(key):
+                trusted_ids.append(tid)
+                
         entries.append({
             'id': target_id,
             'canonical_key': key,
             'name': preferred,
             'aliases': clean_aliases,
             'original_names': clean_aliases,
-            'old_tvg_ids': trusted_ids[:20],
-            'blank_tvg_id_names': blank_aliases,
-            'blank_tvg_id_tvg_names': [],
+            'old_tvg_ids': trusted_ids[:40],
+            'blank_tvg_id_names': clean_aliases,
+            'blank_tvg_id_tvg_names': clean_tvg_names,
             'groups': [g for g, _ in b['groups'].most_common(5)],
             'source_playlists': sorted(b['fingerprints']),
             'playlist_entries': b['observations'],
