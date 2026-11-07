@@ -842,6 +842,14 @@ def main() -> None:
     for label, seconds in timings.items(): report_md.append(f"- **{label.replace('_', ' ').title()}:** {seconds:.2f} s")
     report_md.append(f"- **Tempo Total:** {time.perf_counter() - run_start:.2f} s")
     (OUTPUT_DIR / "report.md").write_text("\n".join(report_md) + "\n", "utf-8")
+    
+    # Gerar o validation.md para evitar falha no GitHub Actions
+    val_md = ["# Validação e Consenso de Grade\n"]
+    for v in validations:
+        now_title = v['now']['title'] if v.get('now') else 'Sem programação'
+        val_md.append(f"- **{v['name']}** ({v['source']}): Agora **{now_title}** - Confiança **{v['confidence']}%**")
+    (OUTPUT_DIR / "validation.md").write_text("\n".join(val_md) + "\n", "utf-8")
+
     print(f"Sucesso! EPG gerado com {programme_count} programas unificados de {len(active_sources)} fontes.")
 
 if __name__ == "__main__":
