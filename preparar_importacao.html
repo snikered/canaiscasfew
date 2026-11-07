@@ -1,28 +1,419 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Preparar M3U para aprendizado do EPG</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preparar M3U — EPG Universal</title>
 <style>
-body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;max-width:850px;margin:40px auto;padding:0 18px;line-height:1.45}button,input{font:inherit}button{padding:10px 16px;margin:8px 8px 8px 0}.box{border:1px solid #bbb;border-radius:12px;padding:18px;margin:18px 0}pre{white-space:pre-wrap;word-break:break-word}.ok{font-weight:700}
+  :root {
+    --bg: #0f1115;
+    --card: #181b20;
+    --border: #2b303a;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --text: #f3f4f6;
+    --text-dim: #9ca3af;
+    --success: #10b981;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 32px 16px;
+    display: flex;
+    justify-content: center;
+  }
+  .container {
+    width: 100%;
+    max-width: 760px;
+  }
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  p.desc {
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+  .file-drop {
+    border: 2px dashed var(--border);
+    border-radius: 10px;
+    padding: 32px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    margin-bottom: 18px;
+  }
+  .file-drop:hover {
+    border-color: var(--accent);
+    background: rgba(37, 99, 235, 0.05);
+  }
+  input[type="file"] { display: none; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.2s;
+  }
+  .btn:hover:not(:disabled) { background: var(--accent-hover); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .progress-box {
+    margin-top: 20px;
+    background: #111317;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.88rem;
+    color: var(--text-dim);
+    line-height: 1.6;
+    word-break: break-all;
+    min-height: 60px;
+  }
+  .bar-container {
+    height: 8px;
+    background: #232730;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 12px;
+  }
+  .bar-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--accent);
+    transition: width 0.1s linear;
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .stat-item {
+    background: #1e2229;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  .stat-label { font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; }
+  .stat-val { font-size: 1.2rem; font-weight: 700; color: #fff; margin-top: 4px; }
+  .success-text { color: var(--success); font-weight: 600; }
 </style>
-</head><body>
-<h1>Preparar lista para o dicionário EPG</h1>
-<p>Este arquivo lê a M3U <strong>somente no seu aparelho</strong> e gera uma versão <code>.safe.m3u</code> sem URLs de stream, usuário, senha ou token. O arquivo seguro pode ser enviado à pasta <code>learning/</code> do GitHub.</p>
-<div class="box">
-<input id="file" type="file" accept=".m3u,.m3u8,text/plain"><br>
-<button id="go">Gerar arquivo seguro</button>
-<pre id="status">Escolha uma M3U.</pre>
+</head>
+<body>
+
+<div class="container">
+  <h1>Preparador M3U Ultra-Rápido</h1>
+  <p class="desc">
+    Higieniza listas gigantescas em <strong>passagem única</strong> direto no navegador. Descarta catálogos de filmes, séries, canais 24h e elimina links de stream/senhas, gerando um <code>.safe.m3u</code> leve pronto para o GitHub.
+  </p>
+
+  <div class="card">
+    <div class="file-drop" id="dropZone" onclick="document.getElementById('fileInput').click()">
+      <p id="fileNameDisplay" style="font-weight: 600;">Clique ou arraste a lista .m3u aqui</p>
+      <span style="font-size: 0.85rem; color: var(--text-dim); display: block; margin-top: 6px;">
+        Suporta arquivos de até 500 MB sem travar
+      </span>
+    </div>
+    <input id="fileInput" type="file" accept=".m3u,.m3u8,text/plain">
+
+    <button id="startBtn" class="btn" disabled>Processar e Gerar Arquivo Seguro</button>
+
+    <div class="bar-container" id="barBox" style="display: none;">
+      <div class="bar-fill" id="barFill"></div>
+    </div>
+
+    <div class="progress-box" id="statusBox">Aguardando seleção do arquivo...</div>
+
+    <div class="stats-grid" id="statsBox" style="display: none;">
+      <div class="stat-item">
+        <div class="stat-label">Total Analisado</div>
+        <div class="stat-val" id="statTotal">0</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Canais Lineares</div>
+        <div class="stat-val" id="statKept">0</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">VOD / Descartados</div>
+        <div class="stat-val" id="statDiscarded">0</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Tempo Gasto</div>
+        <div class="stat-val" id="statTime">0s</div>
+      </div>
+    </div>
+  </div>
 </div>
+
 <script>
-const SUP=/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g;
-const vod=/\b(FILMES?|MOVIES?|S[ÉE]RIES?|NOVELAS?|DORAMAS?|NETFLIX|AMAZON\s*PRIME|PRIME\s*VIDEO|GLOBOPLAY|DISNEY\s*(PLUS|\+)|APPLE(\s*TV)?\s*(PLUS|\+)|HBO\s*MAX|PARAMOUNT\s*(PLUS|\+)|DISCOVERY\s*(PLUS|\+)|CURSOS?|ANIMES?|TEMPORADA|EPIS[ÓO]DIO)\b/i;
-const live=/\b(CANAIS?|ABERTOS?|GLOBOS?|RECORD(TV)?|SBT|BAND|VARIEDADES?|ESPORTES?|SPORTS?|SPORTV|ESPN|PREMIERE|PPV|NOT[ÍI]CIAS?|INFANTIS?|DOCUMENT[ÁA]RIOS?|TELECINE|RELIGIOSOS?|M[ÚU]SICA|MUSIC)\b/i;
-const pseudo=/\b(24\s*H(ORAS?|RS)?|CINE\s+(FILMES|S[ÉE]RIES|DESENHOS|NOVELAS)|JOGOS?\s+DO\s+DIA)\b/i;
-function attrs(line){const o={};for(const m of line.matchAll(/([\w-]+)="([^"]*)"/g))o[m[1]]=m[2];return o}
-function esc(s){return String(s||'').replaceAll('&','&amp;').replaceAll('"','&quot;')}
-async function eachLine(file, fn){const rd=file.stream().getReader(), dec=new TextDecoder();let buf='';while(true){const {value,done}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});let i;while((i=buf.indexOf('\n'))>=0){let line=buf.slice(0,i).replace(/\r$/,'');buf=buf.slice(i+1);fn(line)}}buf+=dec.decode();if(buf)fn(buf.replace(/\r$/,''))}
-function candidate(name,group,id,count){const g=(group||'').replace(SUP,'').trim();const G=g.toUpperCase();const explicit=/(CANAIS|ABERTOS|GLOBOS|PPV|PAY.?PER.?VIEW|ESPORTES|SPORTV|ESPN|PREMIERE|RECORDTV)/i.test(g);let isVod=vod.test(g)||((/PARAMOUNT\+|DISCOVERY\+|SBT\+|STAR\+|APPLE\+/i.test(g))&&!/PPV|CANAIS/i.test(g))||/^LEGENDADOS?$/i.test(g);if(count>600&&!explicit)return false;if(pseudo.test(g)&&!/GLOBOSAT FILMES|FILMES E S[ÉE]RIES|CANAIS LEGENDADOS/i.test(g))return false;if(isVod&&!/CANAIS|PPV/i.test(g))return false;if(live.test(g)||/GLOBOSAT FILMES|FILMES E S[ÉE]RIES|CANAIS LEGENDADOS/i.test(g))return true;if(id&&!isVod)return true;return false}
-document.getElementById('go').onclick=async()=>{const f=document.getElementById('file').files[0],st=document.getElementById('status');if(!f){st.textContent='Escolha uma M3U primeiro.';return}st.textContent='1/2: analisando grupos…';const gc=new Map();let total=0;await eachLine(f,l=>{if(!l.startsWith('#EXTINF'))return;total++;const a=attrs(l),g=(a['group-title']||'');gc.set(g,(gc.get(g)||0)+1)});st.textContent='2/2: removendo streams e VOD…';const out=['#EXTM3U'];let kept=0;await eachLine(f,l=>{if(!l.startsWith('#EXTINF'))return;const a=attrs(l);const name=displayName(l,a['tvg-name']||'').trim();const g=a['group-title']||'',id=a['tvg-id']||'',tn=a['tvg-name']||name;if(!candidate(name,g,id,gc.get(g)||0))return;out.push(`#EXTINF:-1 tvg-id="${esc(id)}" tvg-name="${esc(tn)}" group-title="${esc(g)}",${name}`);kept++});const blob=new Blob([out.join('\n')+'\n'],{type:'audio/x-mpegurl'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=f.name.replace(/\.m3u8?$/i,'')+'-canais.safe.m3u';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);st.innerHTML=`<span class="ok">Pronto.</span> ${total.toLocaleString('pt-BR')} entradas lidas; ${kept.toLocaleString('pt-BR')} candidatas a EPG mantidas. Nenhuma URL de stream foi exportada.`}
+// Expressões regulares otimizadas em cache
+const SUP_RE = /[⁰¹²³⁴⁵⁶⁷⁸⁹]/g;
+const VOD_RE = /\b(FILMES?|MOVIES?|S[ÉE]RIES?|NOVELAS?|DORAMAS?|NETFLIX|AMAZON\s*PRIME|PRIME\s*VIDEO|GLOBOPLAY|DISNEY\s*(?:PLUS|\+)|APPLE(?:\s*TV)?\s*(?:PLUS|\+)|HBO\s*MAX|MAX|PARAMOUNT\s*(?:PLUS|\+)|DISCOVERY\s*(?:PLUS|\+)|SBT\s*\+|STAR\s*\+|CURSOS?|ANIMES?|TEMPORADA|EPIS[ÓO]DIO)\b/i;
+const LIVE_RE = /\b(CANAIS?|ABERTOS?|GLOBOS?|RECORD(?:TV)?|SBT|BAND|VARIEDADES?|ESPORTES?|SPORTS?|SPORTV|ESPN|PREMIERE|PPV|NOT[ÍI]CIAS?|INFANTIS?|DOCUMENT[ÁA]RIOS?|HBO|TELECINE|MAX|WARNER|DISCOVERY|PARAMOUNT|RELIGIOSOS?|M[ÚU]SICA|MUSIC|LEGENDADOS?|TV)\b/i;
+const PSEUDO_RE = /\b(24\s*H(?:ORAS?|RS)?|CINE\s+(?:FILMES|S[ÉE]RIES|DESENHOS|NOVELAS)|JOGOS?\s+DO\s+DIA)\b/i;
+const EXPLICIT_LIVE = /(CANAIS|ABERTOS|GLOBOS|PPV|PAY.?PER.?VIEW|ESPORTES|SPORTV|ESPN|PREMIERE|RECORDTV)/i;
+const LIVE_EXCEPTIONS = /(GLOBOSAT FILMES|FILMES E S[ÉE]RIES|FILMES E SERIES|CANAIS LEGENDADOS)/i;
+
+const fileInput = document.getElementById('fileInput');
+const dropZone = document.getElementById('dropZone');
+const fileNameDisplay = document.getElementById('fileNameDisplay');
+const startBtn = document.getElementById('startBtn');
+const statusBox = document.getElementById('statusBox');
+const barBox = document.getElementById('barBox');
+const barFill = document.getElementById('barFill');
+const statsBox = document.getElementById('statsBox');
+
+let selectedFile = null;
+
+// Drag and drop
+dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.style.borderColor = 'var(--accent)'; });
+dropZone.addEventListener('dragleave', () => { dropZone.style.borderColor = 'var(--border)'; });
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropZone.style.borderColor = 'var(--border)';
+  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', () => {
+  if (fileInput.files.length) handleFile(fileInput.files[0]);
+});
+
+function handleFile(f) {
+  selectedFile = f;
+  fileNameDisplay.textContent = `${f.name} (${(f.size / (1024 * 1024)).toFixed(1)} MB)`;
+  statusBox.textContent = "Arquivo pronto para análise. Clique no botão abaixo.";
+  startBtn.disabled = false;
+  barBox.style.display = 'none';
+  statsBox.style.display = 'none';
+}
+
+function esc(s) {
+  return String(s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+}
+
+// Analisa nome do canal após a vírgula fora de aspas
+function extractNameAndAttributes(line) {
+  let inQuote = false;
+  let commaIdx = -1;
+  const len = line.length;
+  for (let i = 0; i < len; i++) {
+    const c = line.charCodeAt(i);
+    if (c === 34) { // '"'
+      inQuote = !inQuote;
+    } else if (c === 44 && !inQuote) { // ','
+      commaIdx = i;
+      break;
+    }
+  }
+  const attrPart = commaIdx >= 0 ? line.slice(0, commaIdx) : line;
+  const rawName = commaIdx >= 0 ? line.slice(commaIdx + 1).trim() : '';
+
+  let tvgId = '', tvgName = '', groupTitle = '';
+  const mId = /tvg-id="([^"]*)"/i.exec(attrPart);
+  if (mId) tvgId = mId[1].trim();
+
+  const mName = /tvg-name="([^"]*)"/i.exec(attrPart);
+  if (mName) tvgName = mName[1].trim();
+
+  const mGrp = /group-title="([^"]*)"/i.exec(attrPart);
+  if (mGrp) groupTitle = mGrp[1].trim();
+
+  const finalName = rawName || tvgName || 'Sem Nome';
+  return { tvgId, tvgName, groupTitle, name: finalName };
+}
+
+// Cache de decisão de grupos para evitar regex redundante
+const groupCache = new Map();
+function inspectGroup(group) {
+  let res = groupCache.get(group);
+  if (res) return res;
+
+  const gClean = (group || '').replace(SUP_RE, '').trim();
+  const isExplicit = EXPLICIT_LIVE.test(gClean);
+  const isVod = VOD_RE.test(gClean) || (/PARAMOUNT\+|DISCOVERY\+|SBT\+|STAR\+|APPLE\+/i.test(gClean) && !/PPV|CANAIS/i.test(gClean)) || /^LEGENDADOS?$/i.test(gClean);
+  const isPseudo = PSEUDO_RE.test(gClean);
+  const isLiveExc = LIVE_EXCEPTIONS.test(gClean);
+  const isLive = LIVE_RE.test(gClean);
+
+  let discardNow = false;
+  if (isPseudo && !isLiveExc) discardNow = true;
+  else if (isVod && !/CANAIS|PPV/i.test(gClean)) discardNow = true;
+
+  res = { discardNow, isExplicit, isVod, isLive, isLiveExc };
+  groupCache.set(group, res);
+  return res;
+}
+
+startBtn.onclick = async () => {
+  if (!selectedFile) return;
+
+  startBtn.disabled = true;
+  barBox.style.display = 'block';
+  statsBox.style.display = 'none';
+
+  const startTime = performance.now();
+  const fileSize = selectedFile.size;
+  const stream = selectedFile.stream ? selectedFile.stream() : null;
+  const reader = stream.getReader();
+  const decoder = new TextDecoder('utf-8');
+
+  let buffer = '';
+  let totalLines = 0;
+  let totalExtinf = 0;
+  let bytesRead = 0;
+
+  const groupCounts = new Map();
+  const candidates = [];
+
+  statusBox.textContent = "Processando lista em streaming (passagem única)...";
+
+  let lastUiUpdate = performance.now();
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    bytesRead += value.length;
+    buffer += decoder.decode(value, { stream: true });
+
+    let pos = 0;
+    let nextNl = -1;
+
+    // Varredura de quebra de linha sem fatiamento destrutivo
+    while ((nextNl = buffer.indexOf('\n', pos)) !== -1) {
+      let line = buffer.slice(pos, nextNl);
+      pos = nextNl + 1;
+      if (line.charCodeAt(line.length - 1) === 13) {
+        line = line.slice(0, -1);
+      }
+      totalLines++;
+
+      // Filtra de imediato URLs de stream
+      if (line.charCodeAt(0) !== 35 || !line.startsWith('#EXTINF')) {
+        continue;
+      }
+
+      totalExtinf++;
+      const item = extractNameAndAttributes(line);
+      const grp = item.groupTitle;
+
+      groupCounts.set(grp, (groupCounts.get(grp) || 0) + 1);
+
+      const check = inspectGroup(grp);
+      if (check.discardNow) {
+        continue;
+      }
+
+      candidates.push({
+        id: item.tvgId,
+        tn: item.tvgName,
+        group: grp,
+        name: item.name,
+        check: check
+      });
+    }
+
+    buffer = buffer.slice(pos);
+
+    // Atualiza barra de progresso a cada ~120ms para manter a tela fluida
+    const now = performance.now();
+    if (now - lastUiUpdate > 120) {
+      lastUiUpdate = now;
+      const pct = Math.min(100, Math.round((bytesRead / fileSize) * 100));
+      barFill.style.width = pct + '%';
+      statusBox.textContent = `Lendo: ${pct}% · ${totalExtinf.toLocaleString('pt-BR')} itens catalogados · ${candidates.length.toLocaleString('pt-BR')} canais potenciais...`;
+      await new Promise(r => setTimeout(r, 0));
+    }
+  }
+
+  // Linha residual no fim do buffer
+  if (buffer.length > 0) {
+    let line = buffer;
+    if (line.charCodeAt(line.length - 1) === 13) line = line.slice(0, -1);
+    if (line.startsWith('#EXTINF')) {
+      totalExtinf++;
+      const item = extractNameAndAttributes(line);
+      groupCounts.set(item.groupTitle, (groupCounts.get(item.groupTitle) || 0) + 1);
+      const check = inspectGroup(item.groupTitle);
+      if (!check.discardNow) {
+        candidates.push({ id: item.tvgId, tn: item.tvgName, group: item.groupTitle, name: item.name, check });
+      }
+    }
+  }
+
+  statusBox.textContent = "Filtrando canais legítimos e montando arquivo sanitizado...";
+  barFill.style.width = '100%';
+  await new Promise(r => setTimeout(r, 10));
+
+  // Segunda etapa instantânea: filtra apenas o array de candidatos em memória
+  const safeLines = ["#EXTM3U"];
+  let kept = 0;
+
+  for (let i = 0; i < candidates.length; i++) {
+    const c = candidates[i];
+    const count = groupCounts.get(c.group) || 0;
+    const chk = c.check;
+
+    if (count > 600 && !chk.isExplicit) {
+      continue;
+    }
+
+    let isCandidate = false;
+    if (chk.isLive || chk.isLiveExc) {
+      isCandidate = true;
+    } else if (c.id && !chk.isVod) {
+      isCandidate = true;
+    }
+
+    if (isCandidate) {
+      const tn = c.tn || c.name;
+      safeLines.push(`#EXTINF:-1 tvg-id="${esc(c.id)}" tvg-name="${esc(tn)}" group-title="${esc(c.group)}",${c.name}`);
+      kept++;
+    }
+  }
+
+  const durationSec = ((performance.now() - startTime) / 1000).toFixed(1);
+
+  // Download do arquivo sanitizado
+  const blob = new Blob([safeLines.join('\n') + '\n'], { type: 'audio/x-mpegurl' });
+  const downloadUrl = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = downloadUrl;
+  a.download = selectedFile.name.replace(/\.m3u8?$/i, '') + '-canais.safe.m3u';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(downloadUrl), 5000);
+
+  // Exibe estatísticas
+  statusBox.innerHTML = `<span class="success-text">✓ Concluído com sucesso!</span> Download iniciado automaticamente.`;
+  statsBox.style.display = 'grid';
+  document.getElementById('statTotal').textContent = totalExtinf.toLocaleString('pt-BR');
+  document.getElementById('statKept').textContent = kept.toLocaleString('pt-BR');
+  document.getElementById('statDiscarded').textContent = (totalExtinf - kept).toLocaleString('pt-BR');
+  document.getElementById('statTime').textContent = `${durationSec}s`;
+
+  startBtn.disabled = false;
+};
 </script>
-</body></html>
+
+</body>
+</html>
