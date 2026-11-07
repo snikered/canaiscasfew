@@ -22,8 +22,8 @@ from difflib import SequenceMatcher
 from functools import lru_cache
 from pathlib import Path
 from statistics import mean
-from typing import Iterable, Any
 from xml.sax.saxutils import quoteattr
+from typing import Iterable, Any
 
 from epg_utils import digit_signature, normalize_name as original_normalize_name, normalize_source_id
 
@@ -32,16 +32,12 @@ OVERRIDES_PATH = Path(os.environ.get("OVERRIDES_FILE", "overrides.json"))
 OUTPUT_DIR = Path(os.environ.get("OUTPUT_DIR", "output"))
 ESPELHO_PATH = Path("espelho.json")
 
-# ==============================================================================
-# SEGURANÇA: Lê os links diretamente do Cofre do GitHub Actions (Secrets)
-# ==============================================================================
 M3U_URLS = []
 for i in range(1, 6):
     url = os.environ.get(f"M3U_URL_{i}")
     if url and url.startswith("http"):
         M3U_URLS.append(url.strip())
 
-# GATILHOS DE MATCH OTIMIZADOS
 FUZZY_THRESHOLD = float(os.environ.get("FUZZY_THRESHOLD", "0.84"))
 FUZZY_MARGIN = float(os.environ.get("FUZZY_MARGIN", "0.035"))
 AGREEMENT_THRESHOLD = float(os.environ.get("AGREEMENT_THRESHOLD", "0.55"))
@@ -105,9 +101,6 @@ class CandidateEvaluation:
     support_families: int; weighted_ratio: float; avg_support_agreement: float; health_score: float
     health: dict[str, object]; confidence: int; comparisons: list[dict[str, object]]
 
-# ==============================================================================
-# CAMADA DE PRÉ-NORMALIZAÇÃO UNIVERSAL - BASEADA 100% EM NOME
-# ==============================================================================
 def normalizar_canal(nome: str) -> str:
     if not nome: return ""
     original_nome = nome
@@ -295,7 +288,7 @@ def best_fuzzy(source: EpgSource, aliases: list[str]) -> tuple[str | None, float
     relevant_floor = FUZZY_THRESHOLD - FUZZY_MARGIN
     best_by_channel: dict[str, tuple[float, str, str]] = {}
     for alias in aliases:
-        if len(alias) < 2: continue # Reduzido para 2 caracteres para permitir E!, H2, etc.
+        if len(alias) < 2: continue 
         alias_counter = Counter(alias)
         bucket = source.fuzzy_index.get(digit_signature(alias), {})
         for normalized_candidate, channel_ids in bucket.items():
@@ -312,11 +305,9 @@ def best_fuzzy(source: EpgSource, aliases: list[str]) -> tuple[str | None, float
     return best[1], best[0], second_score, f"aproximação {best[0]:.3f}: {best[2]} ~ {best[3]}"
 
 def find_match(source: EpgSource, aliases: list[str]) -> ChannelMatch | None:
-    # Match Exato Pelo Nome Limpo
     exact_id, reason = choose_exact(source, aliases)
     if exact_id: return ChannelMatch(source, exact_id, reason, 1.0)
     
-    # Match Aproximado
     fuzzy_id, best_score, second_score, fuzzy_reason = best_fuzzy(source, aliases)
     if fuzzy_id and best_score >= FUZZY_THRESHOLD and (best_score - second_score) >= FUZZY_MARGIN:
         return ChannelMatch(source, fuzzy_id, fuzzy_reason, best_score)
@@ -539,9 +530,17 @@ def build_strict_compatibility_ids(entries: list[dict[str, object]]) -> dict[str
     for entry in entries:
         target_id = str(entry.get("id", ""))
         ids_to_export = [target_id]
+        
         for alias in get_clean_aliases(entry):
             if alias not in ids_to_export:
                 ids_to_export.append(alias)
+                
+        # Garante que o ID do provedor esteja no XML para o player linkar
+        for t_id in entry.get("tvg_ids_to_export", []):
+            clean_t_id = str(t_id).strip()
+            if clean_t_id and clean_t_id not in ids_to_export:
+                ids_to_export.append(clean_t_id)
+                
         by_target[target_id] = ids_to_export
     return by_target
 
@@ -658,7 +657,7 @@ def write_epg_stream(
                 gz.write(data)
                 if plain is not None: plain.write(data)
 
-            generator = "EPG Universal Otimizado (Baseado em Nome)"
+            generator = "EPG Universal Otimizado (Isolamento de ID de Provedor)"
             source_name = "Consolidado Inteligente de Múltiplas Fontes"
             emit((f"<?xml version='1.0' encoding='utf-8'?>\n<tv generator-info-name={quoteattr(generator)} source-info-name={quoteattr(source_name)}>\n").encode("utf-8"))
 
@@ -701,7 +700,7 @@ def write_epg_stream(
     return programme_count, compatibility_alias_count
 
 def main() -> None:
-    print("Iniciando geração de EPG (Zero Dictionary - Match 100% Baseado no Nome)...")
+    print("Iniciando geração de EPG (Agrupamento Estrito por Nome)...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -720,6 +719,7 @@ def main() -> None:
                     "id": ch["id"],
                     "name": ch["name"],
                     "aliases": set(ch["aliases"]),
+                    "tvg_ids_to_export": set(ch.get("tvg_ids_to_export", [])),
                     "group": ch.get("group", "")
                 }
             print(f"Espelho recuperado com {len(unique_entries)} canais de backup.")
@@ -737,11 +737,11 @@ def main() -> None:
                 
     m3u_files = list(set(m3u_files))
     
-    # 3. Lista Negra de VODs
-    VOD_BLACKLIST = {"FILME", "SERIE", "SÉRIE", "VOD", "LANCAMENTO", "LANÇAMENTO", "CINEMA", "SERIADO", "PLAYBACK", "ANIME", "MOVIE", "XXX", "ADULTO"}
+    # Lista Negra de VODs e Falsos Canais expandida
+    VOD_BLACKLIST = {"FILME", "SERIE", "SÉRIE", "VOD", "LANCAMENTO", "LANÇAMENTO", "CINEMA", "SERIADO", "PLAYBACK", "ANIME", "MOVIE", "XXX", "ADULTO", "24H", "24HS", "EVENTO"}
     
     if m3u_files:
-        print(f"Processando arquivo(s) M3U com Leitura Leve (Ignorando VODs e TVIDs)...")
+        print(f"Processando arquivo(s) M3U com Leitura Leve (Desacoplando TVID)...")
         for m3u_path in m3u_files:
             with m3u_path.open("r", encoding="utf-8", errors="ignore") as f:
                 for line in f:
@@ -761,20 +761,23 @@ def main() -> None:
                         if any(blacklisted in group_upper for blacklisted in VOD_BLACKLIST):
                             continue
                             
-                        target_id = tvg_id or tvg_name or name
+                        # SOLUÇÃO: Agrupa APENAS pelo nome. Ignora tvg_id do provedor para criar a chave!
+                        target_id = tvg_name or name
                         if not target_id: continue
                         
                         if target_id not in unique_entries:
                             unique_entries[target_id] = {
                                 "id": target_id,
-                                "name": name or tvg_name or target_id,
+                                "name": name or tvg_name,
                                 "aliases": set(),
+                                "tvg_ids_to_export": set(),
                                 "group": group
                             }
                         
-                        # EXCLUSIVO: Adiciona apenas os nomes para o match, ignora o TVID do provedor
                         if tvg_name: unique_entries[target_id]["aliases"].add(tvg_name)
                         if name: unique_entries[target_id]["aliases"].add(name)
+                        # Guarda o tvg-id podre apenas para exportar no XML para o player conectar
+                        if tvg_id: unique_entries[target_id]["tvg_ids_to_export"].add(tvg_id)
         
         for m3u_path in m3u_files:
             if str(m3u_path).endswith('.tmp'):
@@ -786,6 +789,7 @@ def main() -> None:
 
     for v in unique_entries.values():
         v["aliases"] = list(v["aliases"])
+        v["tvg_ids_to_export"] = list(v["tvg_ids_to_export"])
         entries.append(v)
         
     espelho_to_save = {"updated_at": datetime.now(timezone.utc).isoformat(), "channels": entries}
@@ -877,7 +881,7 @@ def main() -> None:
     (OUTPUT_DIR / "validation.json").write_text(json.dumps({"generated_at": now.isoformat(), "active_sources": [s.label for s in active_sources], "summary": counts, "channels": validations}, ensure_ascii=False, indent=2) + "\n", "utf-8")
 
     report_md = [
-        "# Relatório do EPG Universal — Baseado Puramente no Nome", "",
+        "# Relatório do EPG Universal — Isolamento de ID", "",
         f"- Canais lidos nas listas M3U (Após corte de VOD): **{counts['playlist_channels']}**",
         f"- Canais com grade encontrada: **{counts['matched']}**",
         f"- Total de programas gravados: **{counts['programmes']}**",
