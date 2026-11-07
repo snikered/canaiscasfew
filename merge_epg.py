@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """EPG universal adaptável (Zero-Dictionary, Multi-URL Segura)
 com Interceptador Xtream Codes, Filtro VOD por URL e
-Força Bruta Baseada EXCLUSIVAMENTE em Nomes (Ignorando tvg-id).
+Árbitro de Colisões de IDs (Garante XMLTV 100% Único e Compatível).
 """
 from __future__ import annotations
 
@@ -528,7 +528,7 @@ def make_validation(entry: dict[str, object], chosen: CandidateEvaluation, all_e
     }
 
 def get_clean_aliases(entry: dict[str, object]) -> list[str]:
-    """Retorna uma lista de nomes limpos e expandidos do canal para atuar como IDs no XML."""
+    """Retorna nomes limpos e variações para servirem de Fallback."""
     values = []
     if entry.get("tvg_names"):
         values.extend(str(x).strip() for x in entry.get("tvg_names", []) if x)
@@ -560,20 +560,78 @@ def get_clean_aliases(entry: dict[str, object]) -> list[str]:
             
     return [v for v in expanded if v and len(v) <= 220]
 
-def build_name_based_ids(entries: list[dict[str, object]]) -> dict[str, list[str]]:
-    """Gera dicionário de exportação ignorando COMPLETAMENTE o tvg-id."""
-    by_target = {}
+def resolve_export_ids(entries: list[dict[str, object]]) -> dict[str, list[str]]:
+    """O Árbitro de Colisões: Resolve quem ganha cada ID, garantindo XMLTV 100% Único"""
+    requested_ids = defaultdict(list)
+    
     for entry in entries:
         target_id = str(entry.get("id", ""))
-        ids_to_export = []
+        wants = []
         
-        for alias in get_clean_aliases(entry):
-            if alias not in ids_to_export:
-                ids_to_export.append(alias)
+        # 1. Pede o ID oficial do Xtream Codes
+        for t_id in entry.get("tvg_ids_to_export", []):
+            t_id_str = str(t_id).strip()
+            if t_id_str and t_id_str not in wants:
+                wants.append(t_id_str)
                 
-        by_target[target_id] = ids_to_export
-        
-    return by_target
+        # 2. Pede o Nome Exato
+        exact_name = str(entry.get("name", "")).strip()
+        if exact_name and exact_name not in wants:
+            wants.append(exact_name)
+            
+        # 3. Pede as variações sem brackets e tags
+        for alias in get_clean_aliases(entry):
+            if alias not in wants:
+                wants.append(alias)
+                
+        for w in wants:
+            requested_ids[w].append(entry)
+            
+    assigned_to_target = defaultdict(list)
+    used_ids = set()
+    
+    # Processa os pedidos e julga os confrontos
+    for req_id, claimants in requested_ids.items():
+        if len(claimants) == 1:
+            winner = claimants[0]
+        else:
+            # Colisão de IDs! (O provedor repetiu o mesmo ID para HD, SD, FHD)
+            # Ganha quem tiver o nome exato mais parecido com a string do ID
+            best_score = -1.0
+            winner = None
+            id_clean = re.sub(r'[^a-z0-9]', '', req_id.lower())
+            
+            for c in claimants:
+                name_clean = re.sub(r'[^a-z0-9]', '', normalize_name(c["name"]).lower())
+                ratio = SequenceMatcher(None, id_clean, name_clean).ratio()
+                if id_clean == name_clean: ratio += 1.0 # Bônus de correspondência exata
+                
+                # Desempate: Se o canal original tem o mesmo tamanho, é mais forte
+                if len(req_id) == len(c["name"]): ratio += 0.1
+                
+                if ratio > best_score:
+                    best_score = ratio
+                    winner = c
+                    
+        if winner:
+            target = winner["id"]
+            if req_id not in used_ids:
+                assigned_to_target[target].append(req_id)
+                used_ids.add(req_id)
+                
+    # Fallback de segurança: Garante que NENHUM canal ficará sem ID no XML
+    for entry in entries:
+        target = entry["id"]
+        if not assigned_to_target.get(target):
+            fallback = target
+            counter = 1
+            while fallback in used_ids:
+                fallback = f"{target}_{counter}"
+                counter += 1
+            assigned_to_target[target].append(fallback)
+            used_ids.add(fallback)
+            
+    return assigned_to_target
 
 def stitch_multi_source_schedule(
     all_evaluations: list[CandidateEvaluation], target_channel_id: str, cutoff: datetime, overrides: dict[str, object]
@@ -688,7 +746,7 @@ def write_epg_stream(
                 gz.write(data)
                 if plain is not None: plain.write(data)
 
-            generator = "EPG Universal Otimizado (Name-Based Match)"
+            generator = "EPG Universal Otimizado (Árbitro de Colisões XTream)"
             source_name = "Consolidado Inteligente de Múltiplas Fontes"
             emit((f"<?xml version='1.0' encoding='utf-8'?>\n<tv generator-info-name={quoteattr(generator)} source-info-name={quoteattr(source_name)}>\n").encode("utf-8"))
 
@@ -731,7 +789,7 @@ def write_epg_stream(
     return programme_count, compatibility_alias_count
 
 def main() -> None:
-    print("Iniciando geração de EPG (Ignorando TVG-ID dos Provedores, Apenas Nomes)...")
+    print("Iniciando geração de EPG (Com Árbitro de Colisões Xtream Codes)...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -749,6 +807,7 @@ def main() -> None:
                     "id": ch["id"],
                     "name": ch["name"],
                     "aliases": set(ch["aliases"]),
+                    "tvg_ids_to_export": set(ch.get("tvg_ids_to_export", [])),
                     "group": ch.get("group", "")
                 }
             print(f"Espelho recuperado com {len(unique_entries)} canais de backup.")
@@ -782,6 +841,7 @@ def main() -> None:
                         print(f"  -> Sucesso! {len(data)} canais ao vivo obtidos. VODs ignorados nativamente na fonte.")
                         for ch in data:
                             name = str(ch.get("name", "")).strip()
+                            epg_id = str(ch.get("epg_channel_id", "")).strip()
                             if not name: continue
                             
                             name_upper = name.upper()
@@ -797,9 +857,12 @@ def main() -> None:
                                     "id": target_id,
                                     "name": name,
                                     "aliases": set(),
+                                    "tvg_ids_to_export": set(),
                                     "group": str(ch.get("category_id", ""))
                                 }
                             unique_entries[target_id]["aliases"].add(name)
+                            if epg_id:
+                                unique_entries[target_id]["tvg_ids_to_export"].add(epg_id)
                         success_json = True
             except Exception as e:
                 print(f"  -> Falha ao usar API JSON ({e}). Tentando M3U tradicional...")
@@ -826,10 +889,12 @@ def main() -> None:
                                 current_extinf = None
                                 continue
 
+                            tvg_id_match = re.search(r'tvg-id="(.*?)"', current_extinf, re.IGNORECASE)
                             tvg_name_match = re.search(r'tvg-name="(.*?)"', current_extinf, re.IGNORECASE)
                             group_match = re.search(r'group-title="(.*?)"', current_extinf, re.IGNORECASE)
                             name_match = re.search(r',(.*?)$', current_extinf)
                             
+                            tvg_id = tvg_id_match.group(1).strip() if tvg_id_match else ""
                             tvg_name = tvg_name_match.group(1).strip() if tvg_name_match else ""
                             group = group_match.group(1).strip() if group_match else ""
                             name = name_match.group(1).strip() if name_match else ""
@@ -855,11 +920,13 @@ def main() -> None:
                                     "id": target_id,
                                     "name": name or tvg_name,
                                     "aliases": set(),
+                                    "tvg_ids_to_export": set(),
                                     "group": group
                                 }
                             
                             if tvg_name: unique_entries[target_id]["aliases"].add(tvg_name)
                             if name: unique_entries[target_id]["aliases"].add(name)
+                            if tvg_id: unique_entries[target_id]["tvg_ids_to_export"].add(tvg_id)
                 try: tmp_m3u.unlink()
                 except Exception: pass
             except Exception as e:
@@ -867,6 +934,7 @@ def main() -> None:
 
     for v in unique_entries.values():
         v["aliases"] = list(v["aliases"])
+        v["tvg_ids_to_export"] = list(v.get("tvg_ids_to_export", []))
         entries.append(v)
         
     if not entries:
@@ -878,7 +946,7 @@ def main() -> None:
     try: overrides = json.loads(OVERRIDES_PATH.read_text("utf-8")) if OVERRIDES_PATH.exists() else {}
     except Exception: overrides = {}
 
-    compatibility_ids = build_name_based_ids(entries)
+    compatibility_ids = resolve_export_ids(entries)
     timings["catalogo"] = round(time.perf_counter() - stage_start, 3)
 
     stage_start = time.perf_counter()
@@ -961,7 +1029,7 @@ def main() -> None:
     (OUTPUT_DIR / "validation.json").write_text(json.dumps({"generated_at": now.isoformat(), "active_sources": [s.label for s in active_sources], "summary": counts, "channels": validations}, ensure_ascii=False, indent=2) + "\n", "utf-8")
 
     report_md = [
-        "# Relatório do EPG Universal — Filtro Baseado em Nome Ativo", "",
+        "# Relatório do EPG Universal — Resolutor de Colisão Ativo", "",
         f"- Canais lidos nas listas M3U (Após VOD Inteligente): **{counts['playlist_channels']}**",
         f"- Canais com grade encontrada: **{counts['matched']}**",
         f"- Total de programas gravados: **{counts['programmes']}**",
