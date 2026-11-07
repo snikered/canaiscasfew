@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """EPG universal adaptável que lê múltiplas M3U (Zero-Dictionary, Multi-URL Segura)
-com Bloqueio Anti-VOD, Injeção 1:1 Estrita e Espelho de Segurança (Failover).
+com Bloqueio Anti-VOD, Injeção 1:1 Estrita, Match 100% Baseado em Nome e Espelho de Segurança.
 """
 from __future__ import annotations
 
@@ -46,20 +46,11 @@ FUZZY_THRESHOLD = float(os.environ.get("FUZZY_THRESHOLD", "0.84"))
 FUZZY_MARGIN = float(os.environ.get("FUZZY_MARGIN", "0.035"))
 AGREEMENT_THRESHOLD = float(os.environ.get("AGREEMENT_THRESHOLD", "0.55"))
 MIN_COMPARABLE_PROGRAMMES = int(os.environ.get("MIN_COMPARABLE_PROGRAMMES", "3"))
-TVG_ID_NAME_THRESHOLD = float(os.environ.get("TVG_ID_NAME_THRESHOLD", "0.70"))
 
 DOWNLOAD_WORKERS = max(1, min(4, int(os.environ.get("DOWNLOAD_WORKERS", "3"))))
 GZIP_LEVEL = max(1, min(9, int(os.environ.get("GZIP_LEVEL", "6"))))
 OUTPUT_PAST_HOURS = max(0, int(os.environ.get("OUTPUT_PAST_HOURS", "12")))
 WRITE_PLAIN_XML = os.environ.get("WRITE_PLAIN_XML", "0").strip().lower() in {"1", "true", "yes"}
-
-LEGACY_INTERNAL_IDS: dict[str, tuple[str, ...]] = {
-    "auto.history2": ("auto.h2",), "auto.aande": ("auto.aee",),
-    "auto.filmandarts": ("auto.filmearts",), "auto.paramount": ("auto.paramountchannel",),
-    "auto.warner": ("auto.warnerchannel",), "auto.saborandarte": ("auto.saborearte",),
-    "auto.discovery": ("auto.discoverychannel",), "auto.discoveryhomeandhealth": ("auto.discoveryheh",),
-    "auto.sportv1": ("auto.sportv",),
-}
 
 EPG_SOURCES_CONFIG = [
     ("Meu Guia", "epg_meuguia.xml", "meuguia", 3.0),
@@ -115,12 +106,13 @@ class CandidateEvaluation:
     health: dict[str, object]; confidence: int; comparisons: list[dict[str, object]]
 
 # ==============================================================================
-# CAMADA DE PRÉ-NORMALIZAÇÃO UNIVERSAL
+# CAMADA DE PRÉ-NORMALIZAÇÃO UNIVERSAL - BASEADA 100% EM NOME
 # ==============================================================================
 def normalizar_canal(nome: str) -> str:
     if not nome: return ""
     original_nome = nome
     nome = re.sub(r'\[.*?\]|\(.*?\)|\|.*?\|', ' ', nome)
+    nome = re.sub(r'[\¹\²\³\⁴]', ' ', nome) 
     nome = re.sub(r'\bJOVEM PAN\b(?! NEWS)', 'JOVEM PAN NEWS', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bFOX SPORTS\b', 'ESPN 4', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bBOOMERANG\b', 'CARTOONITO', nome, flags=re.IGNORECASE)
@@ -130,7 +122,8 @@ def normalizar_canal(nome: str) -> str:
     nome = re.sub(r'\bFOX LIFE\b', 'STAR LIFE', nome, flags=re.IGNORECASE)
     nome = re.sub(r'^GB\b', 'GLOBO', nome, flags=re.IGNORECASE)
     nome = re.sub(r'^RECORDTV\b', 'RECORD', nome, flags=re.IGNORECASE)
-    tags = r'\b(SD|HD|FHD|UHD|4K|8K|H264|H265|HEVC|LEG|LEGENDADO|DUB|DUBLADO|HQ|VIP|VOD|24H|24/7|1080P|720P|60FPS)\b[\*\²\³]*'
+    
+    tags = r'\b(SD|HD|FHD|UHD|4K|8K|H264|H265|HEVC|HDR\+?|LEG|LEGENDADO|DUB|DUBLADO|HQ|VIP|VOD|24H[S]?|24/7|1080P|720P|60FPS|PPV|EVENTOS?)\b[\*\²\³\¹\⁴\+]*'
     nome = re.sub(tags, '', nome, flags=re.IGNORECASE)
     nome = re.sub(r'[*=_\-]', ' ', nome)
     nome_limpo = ' '.join(nome.split()).strip().upper()
@@ -187,14 +180,13 @@ def download_to_temp_file(url: str, attempts: int = 4) -> Path:
     last_error = None
     for attempt in range(1, attempts + 1):
         try:
-            # User agent robusto para evitar bloqueios de provedores
             req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)", "Accept": "*/*"})
             with urllib.request.urlopen(req, timeout=120) as resp, tmp_path.open("wb") as out:
                 while chunk := resp.read(1024 * 512): out.write(chunk)
             return tmp_path
         except Exception as exc:
             last_error = exc
-            if attempt < attempts: time.sleep(attempt * 4) # Espera 4s, 8s, 12s...
+            if attempt < attempts: time.sleep(attempt * 4) 
     if tmp_path.exists(): tmp_path.unlink()
     raise RuntimeError(f"Falha ao baixar {url}: {last_error}")
 
@@ -283,15 +275,6 @@ def aliases_for(entry: dict[str, object]) -> list[str]:
             seen.add(norm_fallback)
     return output
 
-def old_id_hints_for(entry: dict[str, object]) -> list[str]:
-    output, seen = [], set()
-    for value in entry.get("old_tvg_ids", []) or []:
-        raw = str(value).strip()
-        if raw and raw not in seen:
-            output.append(raw)
-            seen.add(raw)
-    return output
-
 def choose_exact(source: EpgSource, aliases: Iterable[str]) -> tuple[str | None, str]:
     for alias in aliases:
         candidates = source.exact_index.get(alias, set())
@@ -312,7 +295,7 @@ def best_fuzzy(source: EpgSource, aliases: list[str]) -> tuple[str | None, float
     relevant_floor = FUZZY_THRESHOLD - FUZZY_MARGIN
     best_by_channel: dict[str, tuple[float, str, str]] = {}
     for alias in aliases:
-        if len(alias) < 4: continue
+        if len(alias) < 2: continue # Reduzido para 2 caracteres para permitir E!, H2, etc.
         alias_counter = Counter(alias)
         bucket = source.fuzzy_index.get(digit_signature(alias), {})
         for normalized_candidate, channel_ids in bucket.items():
@@ -328,41 +311,17 @@ def best_fuzzy(source: EpgSource, aliases: list[str]) -> tuple[str | None, float
     second_score = scored[1][0] if len(scored) > 1 else 0.0
     return best[1], best[0], second_score, f"aproximação {best[0]:.3f}: {best[2]} ~ {best[3]}"
 
-def _name_compatibility(source: EpgSource, channel_id: str, aliases: list[str]) -> float:
-    candidates = source.normalized_names.get(channel_id, [])
-    best = 0.0
-    for alias in aliases:
-        alias_sig = digit_signature(alias)
-        for candidate_norm in candidates:
-            if alias_sig != digit_signature(candidate_norm): continue
-            if alias == candidate_norm: return 1.0
-            best = max(best, SequenceMatcher(None, alias, candidate_norm).ratio())
-    return best
-
-def match_by_safe_tvg_id_hint(source: EpgSource, aliases: list[str], old_ids: list[str]) -> ChannelMatch | None:
-    if not old_ids or not aliases: return None
-    candidate_ids: set[str] = set()
-    for value in old_ids:
-        raw = value.strip()
-        if raw in source.channels: candidate_ids.add(raw)
-        normalized = normalize_source_id(raw)
-        if normalized: candidate_ids.update(source.normalized_id_index.get(normalized, set()))
-    candidates = []
-    for channel_id in candidate_ids:
-        compatibility = _name_compatibility(source, channel_id, aliases)
-        if compatibility >= TVG_ID_NAME_THRESHOLD: candidates.append((compatibility, channel_id))
-    if not candidates: return None
-    candidates.sort(reverse=True)
-    score, channel_id = candidates[0]
-    return ChannelMatch(source, channel_id, f"tvg-id antigo confirmado pelo nome ({score:.3f})", score)
-
-def find_match(source: EpgSource, aliases: list[str], old_ids: list[str] | None = None) -> ChannelMatch | None:
+def find_match(source: EpgSource, aliases: list[str]) -> ChannelMatch | None:
+    # Match Exato Pelo Nome Limpo
     exact_id, reason = choose_exact(source, aliases)
     if exact_id: return ChannelMatch(source, exact_id, reason, 1.0)
+    
+    # Match Aproximado
     fuzzy_id, best_score, second_score, fuzzy_reason = best_fuzzy(source, aliases)
     if fuzzy_id and best_score >= FUZZY_THRESHOLD and (best_score - second_score) >= FUZZY_MARGIN:
         return ChannelMatch(source, fuzzy_id, fuzzy_reason, best_score)
-    return match_by_safe_tvg_id_hint(source, aliases, old_ids or [])
+        
+    return None
 
 def manual_override(overrides: dict[str, object], target_id: str) -> tuple[str | None, str | None]:
     item = (overrides.get("by_target_id", {}) or {}).get(target_id)
@@ -699,7 +658,7 @@ def write_epg_stream(
                 gz.write(data)
                 if plain is not None: plain.write(data)
 
-            generator = "EPG Universal Otimizado (Cache Auto-Reparável)"
+            generator = "EPG Universal Otimizado (Baseado em Nome)"
             source_name = "Consolidado Inteligente de Múltiplas Fontes"
             emit((f"<?xml version='1.0' encoding='utf-8'?>\n<tv generator-info-name={quoteattr(generator)} source-info-name={quoteattr(source_name)}>\n").encode("utf-8"))
 
@@ -742,7 +701,7 @@ def write_epg_stream(
     return programme_count, compatibility_alias_count
 
 def main() -> None:
-    print("Iniciando geração de EPG (Leitura Segura com Espelho Inteligente)...")
+    print("Iniciando geração de EPG (Zero Dictionary - Match 100% Baseado no Nome)...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -752,7 +711,6 @@ def main() -> None:
     m3u_files = []
     unique_entries = {}
     
-    # 1. Carrega o Espelho de Segurança (Failover) da Nuvem
     if ESPELHO_PATH.exists():
         try:
             print("Lendo Espelho de Segurança...")
@@ -768,7 +726,6 @@ def main() -> None:
         except Exception as e:
             print(f"Aviso: Não foi possível carregar o espelho: {e}")
     
-    # 2. Faz o download automático das listas remotas de forma segura
     for idx, url in enumerate(M3U_URLS):
         if url.strip().startswith("http"):
             print(f"Baixando lista secreta M3U {idx+1}...")
@@ -780,11 +737,11 @@ def main() -> None:
                 
     m3u_files = list(set(m3u_files))
     
-    # 3. Lista Negra de VODs: Ignora Filmes e Séries para não estourar a memória (RAM)
-    VOD_BLACKLIST = {"FILME", "SERIE", "SÉRIE", "VOD", "LANCAMENTO", "LANÇAMENTO", "CINEMA", "SERIADO", "PLAYBACK", "ANIME", "MOVIE", "XXX"}
+    # 3. Lista Negra de VODs
+    VOD_BLACKLIST = {"FILME", "SERIE", "SÉRIE", "VOD", "LANCAMENTO", "LANÇAMENTO", "CINEMA", "SERIADO", "PLAYBACK", "ANIME", "MOVIE", "XXX", "ADULTO"}
     
     if m3u_files:
-        print(f"Processando arquivo(s) M3U com Leitura Leve (Ignorando VODs)...")
+        print(f"Processando arquivo(s) M3U com Leitura Leve (Ignorando VODs e TVIDs)...")
         for m3u_path in m3u_files:
             with m3u_path.open("r", encoding="utf-8", errors="ignore") as f:
                 for line in f:
@@ -814,9 +771,10 @@ def main() -> None:
                                 "aliases": set(),
                                 "group": group
                             }
+                        
+                        # EXCLUSIVO: Adiciona apenas os nomes para o match, ignora o TVID do provedor
                         if tvg_name: unique_entries[target_id]["aliases"].add(tvg_name)
                         if name: unique_entries[target_id]["aliases"].add(name)
-                        if tvg_id: unique_entries[target_id]["aliases"].add(tvg_id)
         
         for m3u_path in m3u_files:
             if str(m3u_path).endswith('.tmp'):
@@ -826,12 +784,10 @@ def main() -> None:
         if not unique_entries:
             print("Nenhuma lista e nenhum espelho disponíveis. Verifique seus links no GitHub Secrets.")
 
-    # 4. Transforma o dicionário atualizado em lista
     for v in unique_entries.values():
         v["aliases"] = list(v["aliases"])
         entries.append(v)
         
-    # 5. Salva o Espelho atualizado para o GitHub Actions fazer o backup na nuvem
     espelho_to_save = {"updated_at": datetime.now(timezone.utc).isoformat(), "channels": entries}
     (OUTPUT_DIR / "espelho.json").write_text(json.dumps(espelho_to_save, ensure_ascii=False, indent=2), "utf-8")
 
@@ -875,8 +831,7 @@ def main() -> None:
         target_id = str(entry.get("id", ""))
         visible_name = str(entry.get("name", ""))
         aliases = aliases_for(entry)
-        old_id_hints = old_id_hints_for(entry)
-        matches = [m for source in active_sources if (m := find_match(source, aliases, old_id_hints)) is not None]
+        matches = [m for source in active_sources if (m := find_match(source, aliases)) is not None]
 
         override_source_key, override_id = manual_override(overrides, target_id)
         forced = False
@@ -922,7 +877,7 @@ def main() -> None:
     (OUTPUT_DIR / "validation.json").write_text(json.dumps({"generated_at": now.isoformat(), "active_sources": [s.label for s in active_sources], "summary": counts, "channels": validations}, ensure_ascii=False, indent=2) + "\n", "utf-8")
 
     report_md = [
-        "# Relatório do EPG Universal — Automação Segura com Espelho", "",
+        "# Relatório do EPG Universal — Baseado Puramente no Nome", "",
         f"- Canais lidos nas listas M3U (Após corte de VOD): **{counts['playlist_channels']}**",
         f"- Canais com grade encontrada: **{counts['matched']}**",
         f"- Total de programas gravados: **{counts['programmes']}**",
