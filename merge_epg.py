@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """EPG universal adaptável que lê múltiplas M3U (Zero-Dictionary, Multi-URL Segura)
-com Bloqueio Anti-VOD (Economia de RAM) e Injeção 1:1 Estrita.
+com Bloqueio Anti-VOD, Injeção 1:1 Estrita e Espelho de Segurança (Failover).
 """
 from __future__ import annotations
 
@@ -30,6 +30,7 @@ from epg_utils import digit_signature, normalize_name as original_normalize_name
 CATALOG_PATH = Path(os.environ.get("CHANNELS_FILE", "channels.json"))
 OVERRIDES_PATH = Path(os.environ.get("OVERRIDES_FILE", "overrides.json"))
 OUTPUT_DIR = Path(os.environ.get("OUTPUT_DIR", "output"))
+ESPELHO_PATH = Path("espelho.json")
 
 # ==============================================================================
 # SEGURANÇA: Lê os links diretamente do Cofre do GitHub Actions (Secrets)
@@ -179,20 +180,21 @@ def parse_xmltv_datetime(value: str, default_offset: str = "+0000") -> datetime 
         except (ValueError, IndexError): pass
     return None
 
-def download_to_temp_file(url: str, attempts: int = 3) -> Path:
+def download_to_temp_file(url: str, attempts: int = 4) -> Path:
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".tmp")
     tmp_path = Path(tmp.name)
     tmp.close()
     last_error = None
     for attempt in range(1, attempts + 1):
         try:
-            req = urllib.request.Request(url, headers={"User-Agent": "EPG-Universal/4.0", "Accept": "*/*"})
+            # User agent robusto para evitar bloqueios de provedores
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)", "Accept": "*/*"})
             with urllib.request.urlopen(req, timeout=120) as resp, tmp_path.open("wb") as out:
                 while chunk := resp.read(1024 * 512): out.write(chunk)
             return tmp_path
         except Exception as exc:
             last_error = exc
-            if attempt < attempts: time.sleep(attempt * 3)
+            if attempt < attempts: time.sleep(attempt * 4) # Espera 4s, 8s, 12s...
     if tmp_path.exists(): tmp_path.unlink()
     raise RuntimeError(f"Falha ao baixar {url}: {last_error}")
 
@@ -697,7 +699,7 @@ def write_epg_stream(
                 gz.write(data)
                 if plain is not None: plain.write(data)
 
-            generator = "EPG Universal Otimizado (Multi-URL Segura)"
+            generator = "EPG Universal Otimizado (Cache Auto-Reparável)"
             source_name = "Consolidado Inteligente de Múltiplas Fontes"
             emit((f"<?xml version='1.0' encoding='utf-8'?>\n<tv generator-info-name={quoteattr(generator)} source-info-name={quoteattr(source_name)}>\n").encode("utf-8"))
 
@@ -740,17 +742,33 @@ def write_epg_stream(
     return programme_count, compatibility_alias_count
 
 def main() -> None:
-    print("Iniciando geração de EPG (Leitura Segura em Nuvem - Zero Dictionary)...")
+    print("Iniciando geração de EPG (Leitura Segura com Espelho Inteligente)...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-
     stage_start = time.perf_counter()
     
     entries = []
     m3u_files = []
+    unique_entries = {}
     
-    # 1. Faz o download automático das listas remotas de forma segura
+    # 1. Carrega o Espelho de Segurança (Failover) da Nuvem
+    if ESPELHO_PATH.exists():
+        try:
+            print("Lendo Espelho de Segurança...")
+            espelho_data = json.loads(ESPELHO_PATH.read_text("utf-8"))
+            for ch in espelho_data.get("channels", []):
+                unique_entries[ch["id"]] = {
+                    "id": ch["id"],
+                    "name": ch["name"],
+                    "aliases": set(ch["aliases"]),
+                    "group": ch.get("group", "")
+                }
+            print(f"Espelho recuperado com {len(unique_entries)} canais de backup.")
+        except Exception as e:
+            print(f"Aviso: Não foi possível carregar o espelho: {e}")
+    
+    # 2. Faz o download automático das listas remotas de forma segura
     for idx, url in enumerate(M3U_URLS):
         if url.strip().startswith("http"):
             print(f"Baixando lista secreta M3U {idx+1}...")
@@ -758,18 +776,16 @@ def main() -> None:
                 tmp_m3u = download_to_temp_file(url.strip())
                 m3u_files.append(tmp_m3u)
             except Exception as e:
-                print(f"⚠ Erro ao baixar lista remota: {e}")
+                print(f"⚠ Erro ao baixar lista remota: {e}. O Espelho será acionado.")
                 
     m3u_files = list(set(m3u_files))
-    unique_entries = {}
     
-    # 2. Lista Negra de VODs: Ignora Filmes e Séries para não estourar a memória (RAM)
+    # 3. Lista Negra de VODs: Ignora Filmes e Séries para não estourar a memória (RAM)
     VOD_BLACKLIST = {"FILME", "SERIE", "SÉRIE", "VOD", "LANCAMENTO", "LANÇAMENTO", "CINEMA", "SERIADO", "PLAYBACK", "ANIME", "MOVIE", "XXX"}
     
     if m3u_files:
-        print(f"Processando {len(m3u_files)} arquivo(s) M3U com Leitura Leve (Ignorando VODs)...")
+        print(f"Processando arquivo(s) M3U com Leitura Leve (Ignorando VODs)...")
         for m3u_path in m3u_files:
-            # Usando leitura linha a linha (streaming) para não carregar 200MB na memória
             with m3u_path.open("r", encoding="utf-8", errors="ignore") as f:
                 for line in f:
                     line = line.strip()
@@ -784,7 +800,6 @@ def main() -> None:
                         group = group_match.group(1).strip() if group_match else ""
                         name = name_match.group(1).strip() if name_match else ""
                         
-                        # Filtro Anti-VOD: Se a categoria for de filme ou série, ignora a linha imediatamente
                         group_upper = group.upper()
                         if any(blacklisted in group_upper for blacklisted in VOD_BLACKLIST):
                             continue
@@ -803,17 +818,22 @@ def main() -> None:
                         if name: unique_entries[target_id]["aliases"].add(name)
                         if tvg_id: unique_entries[target_id]["aliases"].add(tvg_id)
         
-        for v in unique_entries.values():
-            v["aliases"] = list(v["aliases"])
-            entries.append(v)
-            
-        # Apaga os arquivos temporários após o uso
         for m3u_path in m3u_files:
             if str(m3u_path).endswith('.tmp'):
                 try: m3u_path.unlink()
                 except Exception: pass
     else:
-        print("Nenhuma lista encontrada nos Secrets do GitHub. Verifique suas configurações.")
+        if not unique_entries:
+            print("Nenhuma lista e nenhum espelho disponíveis. Verifique seus links no GitHub Secrets.")
+
+    # 4. Transforma o dicionário atualizado em lista
+    for v in unique_entries.values():
+        v["aliases"] = list(v["aliases"])
+        entries.append(v)
+        
+    # 5. Salva o Espelho atualizado para o GitHub Actions fazer o backup na nuvem
+    espelho_to_save = {"updated_at": datetime.now(timezone.utc).isoformat(), "channels": entries}
+    (OUTPUT_DIR / "espelho.json").write_text(json.dumps(espelho_to_save, ensure_ascii=False, indent=2), "utf-8")
 
     try: overrides = json.loads(OVERRIDES_PATH.read_text("utf-8")) if OVERRIDES_PATH.exists() else {}
     except Exception: overrides = {}
@@ -902,7 +922,7 @@ def main() -> None:
     (OUTPUT_DIR / "validation.json").write_text(json.dumps({"generated_at": now.isoformat(), "active_sources": [s.label for s in active_sources], "summary": counts, "channels": validations}, ensure_ascii=False, indent=2) + "\n", "utf-8")
 
     report_md = [
-        "# Relatório do EPG Universal — Automação Total (Via URL Segura)", "",
+        "# Relatório do EPG Universal — Automação Segura com Espelho", "",
         f"- Canais lidos nas listas M3U (Após corte de VOD): **{counts['playlist_channels']}**",
         f"- Canais com grade encontrada: **{counts['matched']}**",
         f"- Total de programas gravados: **{counts['programmes']}**",
