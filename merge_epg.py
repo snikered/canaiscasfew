@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """EPG universal adaptável (Zero-Dictionary, Multi-URL Segura)
 com Interceptador Xtream Codes, Filtro VOD por URL e
-Força Bruta Baseada EXCLUSIVAMENTE em Nomes (Ignorando tvg-id).
+Árbitro de Colisões Universal (Garante 100% de pureza no XML).
 """
 from __future__ import annotations
 
@@ -528,7 +528,6 @@ def make_validation(entry: dict[str, object], chosen: CandidateEvaluation, all_e
     }
 
 def get_clean_aliases(entry: dict[str, object]) -> list[str]:
-    """Retorna uma lista de nomes limpos e expandidos do canal para atuar como IDs no XML."""
     values = []
     if entry.get("tvg_names"):
         values.extend(str(x).strip() for x in entry.get("tvg_names", []) if x)
@@ -560,20 +559,55 @@ def get_clean_aliases(entry: dict[str, object]) -> list[str]:
             
     return [v for v in expanded if v and len(v) <= 220]
 
-def build_name_based_ids(entries: list[dict[str, object]]) -> dict[str, list[str]]:
-    """Gera dicionário de exportação ignorando COMPLETAMENTE o tvg-id."""
-    by_target = {}
+def build_unique_export_ids(entries: list[dict[str, object]]) -> dict[str, list[str]]:
+    """Garante que NENHUM ID se repita no XML, prevenindo corrupção e falhas no player."""
+    claims = defaultdict(list)
+
     for entry in entries:
-        target_id = str(entry.get("id", ""))
-        ids_to_export = []
+        possible_ids = set()
         
+        # 1. Recupera o TVG-ID (extremamente importante para o player!)
+        for tvid in entry.get("tvg_ids_to_export", []):
+            if tvid: possible_ids.add(tvid)
+
+        # 2. Expansão de Nomes Limpos (Garantia Absoluta de Fallback)
         for alias in get_clean_aliases(entry):
-            if alias not in ids_to_export:
-                ids_to_export.append(alias)
-                
-        by_target[target_id] = ids_to_export
-        
-    return by_target
+            if alias: possible_ids.add(alias)
+
+        for pid in possible_ids:
+            claims[pid].append(entry)
+
+    assigned = defaultdict(list)
+    
+    for pid, claimants in claims.items():
+        if len(claimants) == 1:
+            assigned[claimants[0]["id"]].append(pid)
+        else:
+            # ARENA DE COLISÃO: Mais de um canal quer o mesmo ID no XML!
+            # Quem tiver a melhor similaridade de string vence o direito de usar.
+            best_claimant = None
+            best_score = -1.0
+            pid_clean = re.sub(r'\.(br|mx|ar|cl|co|pe|us|uk|pt)$', '', pid.lower())
+            pid_clean = re.sub(r'^(auto\.|yt\.)', '', pid_clean)
+            pid_clean = re.sub(r'[^a-z0-9]', '', pid_clean)
+
+            for c in claimants:
+                name_clean = re.sub(r'[^a-z0-9]', '', normalize_name(c["name"]).lower())
+                ratio = SequenceMatcher(None, pid_clean, name_clean).ratio()
+
+                if pid.lower() == c["name"].lower() or pid.lower() == c["id"].lower():
+                    ratio += 2.0  # Vitória esmagadora se for o nome exato
+                elif pid_clean in name_clean or name_clean in pid_clean:
+                    ratio += 0.5  # Bônus de contenção (ex: "amc" em "amcfhd")
+
+                if ratio > best_score:
+                    best_score = ratio
+                    best_claimant = c
+
+            if best_claimant:
+                assigned[best_claimant["id"]].append(pid)
+
+    return assigned
 
 def stitch_multi_source_schedule(
     all_evaluations: list[CandidateEvaluation], target_channel_id: str, cutoff: datetime, overrides: dict[str, object]
@@ -688,13 +722,15 @@ def write_epg_stream(
                 gz.write(data)
                 if plain is not None: plain.write(data)
 
-            generator = "EPG Universal Otimizado (Name-Based Match)"
+            generator = "EPG Universal Otimizado (Árbitro de Colisões Ativo)"
             source_name = "Consolidado Inteligente de Múltiplas Fontes"
             emit((f"<?xml version='1.0' encoding='utf-8'?>\n<tv generator-info-name={quoteattr(generator)} source-info-name={quoteattr(source_name)}>\n").encode("utf-8"))
 
             for entry, chosen, _evaluations, _forced in selected:
                 target_id = str(entry.get("id", ""))
-                ids_for_channel = compatibility_ids.get(target_id, [target_id])
+                ids_for_channel = compatibility_ids.get(target_id, [])
+                if not ids_for_channel: continue # Se não tem IDs limpos, pula
+                
                 compatibility_alias_count += max(0, len(ids_for_channel) - 1)
                 
                 for output_id in ids_for_channel:
@@ -714,7 +750,9 @@ def write_epg_stream(
 
             for entry, chosen, all_evaluations, _forced in selected:
                 target_id = str(entry.get("id", ""))
-                ids_for_channel = compatibility_ids.get(target_id, [target_id])
+                ids_for_channel = compatibility_ids.get(target_id, [])
+                if not ids_for_channel: continue
+                
                 stitched_programmes = stitch_multi_source_schedule(all_evaluations, target_id, cutoff, overrides)
                 
                 for original in stitched_programmes:
@@ -731,7 +769,7 @@ def write_epg_stream(
     return programme_count, compatibility_alias_count
 
 def main() -> None:
-    print("Iniciando geração de EPG (Ignorando TVG-ID dos Provedores, Apenas Nomes)...")
+    print("Iniciando geração de EPG (Com Árbitro de Corrupção XML)...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -749,6 +787,7 @@ def main() -> None:
                     "id": ch["id"],
                     "name": ch["name"],
                     "aliases": set(ch["aliases"]),
+                    "tvg_ids_to_export": set(ch.get("tvg_ids_to_export", [])),
                     "group": ch.get("group", "")
                 }
             print(f"Espelho recuperado com {len(unique_entries)} canais de backup.")
@@ -782,6 +821,7 @@ def main() -> None:
                         print(f"  -> Sucesso! {len(data)} canais ao vivo obtidos. VODs ignorados nativamente na fonte.")
                         for ch in data:
                             name = str(ch.get("name", "")).strip()
+                            epg_id = str(ch.get("epg_channel_id", "")).strip()
                             if not name: continue
                             
                             name_upper = name.upper()
@@ -797,9 +837,12 @@ def main() -> None:
                                     "id": target_id,
                                     "name": name,
                                     "aliases": set(),
+                                    "tvg_ids_to_export": set(),
                                     "group": str(ch.get("category_id", ""))
                                 }
                             unique_entries[target_id]["aliases"].add(name)
+                            if epg_id:
+                                unique_entries[target_id]["tvg_ids_to_export"].add(epg_id)
                         success_json = True
             except Exception as e:
                 print(f"  -> Falha ao usar API JSON ({e}). Tentando M3U tradicional...")
@@ -826,10 +869,12 @@ def main() -> None:
                                 current_extinf = None
                                 continue
 
+                            tvg_id_match = re.search(r'tvg-id="(.*?)"', current_extinf, re.IGNORECASE)
                             tvg_name_match = re.search(r'tvg-name="(.*?)"', current_extinf, re.IGNORECASE)
                             group_match = re.search(r'group-title="(.*?)"', current_extinf, re.IGNORECASE)
                             name_match = re.search(r',(.*?)$', current_extinf)
                             
+                            tvg_id = tvg_id_match.group(1).strip() if tvg_id_match else ""
                             tvg_name = tvg_name_match.group(1).strip() if tvg_name_match else ""
                             group = group_match.group(1).strip() if group_match else ""
                             name = name_match.group(1).strip() if name_match else ""
@@ -855,11 +900,13 @@ def main() -> None:
                                     "id": target_id,
                                     "name": name or tvg_name,
                                     "aliases": set(),
+                                    "tvg_ids_to_export": set(),
                                     "group": group
                                 }
                             
                             if tvg_name: unique_entries[target_id]["aliases"].add(tvg_name)
                             if name: unique_entries[target_id]["aliases"].add(name)
+                            if tvg_id: unique_entries[target_id]["tvg_ids_to_export"].add(tvg_id)
                 try: tmp_m3u.unlink()
                 except Exception: pass
             except Exception as e:
@@ -867,6 +914,7 @@ def main() -> None:
 
     for v in unique_entries.values():
         v["aliases"] = list(v["aliases"])
+        v["tvg_ids_to_export"] = list(v["tvg_ids_to_export"])
         entries.append(v)
         
     if not entries:
@@ -878,7 +926,7 @@ def main() -> None:
     try: overrides = json.loads(OVERRIDES_PATH.read_text("utf-8")) if OVERRIDES_PATH.exists() else {}
     except Exception: overrides = {}
 
-    compatibility_ids = build_name_based_ids(entries)
+    compatibility_ids = build_unique_export_ids(entries)
     timings["catalogo"] = round(time.perf_counter() - stage_start, 3)
 
     stage_start = time.perf_counter()
@@ -943,43 +991,4 @@ def main() -> None:
 
     timings["matching_consenso_validacao"] = round(time.perf_counter() - stage_start, 3)
 
-    stage_start = time.perf_counter()
-    programme_count, compatibility_alias_count = write_epg_stream(selected, compatibility_ids, now, overrides)
-    timings["serializacao_e_gzip"] = round(time.perf_counter() - stage_start, 3)
-
-    source_counts = {source.label: sum(1 for row in report_rows if row.get("source") == source.label) for source in active_sources}
-    counts = {
-        "playlist_channels": len(entries),
-        "matched": sum(1 for row in report_rows if row["status"] == "matched"),
-        "missing": sum(1 for row in report_rows if row["status"] == "missing"),
-        "programmes": programme_count,
-        "compatibility_ids_and_name_aliases": compatibility_alias_count,
-        "timing_seconds": timings, "selected_by_source": source_counts,
-    }
-
-    (OUTPUT_DIR / "report.json").write_text(json.dumps({"summary": counts, "source_errors": source_errors, "channels": report_rows}, ensure_ascii=False, indent=2) + "\n", "utf-8")
-    (OUTPUT_DIR / "validation.json").write_text(json.dumps({"generated_at": now.isoformat(), "active_sources": [s.label for s in active_sources], "summary": counts, "channels": validations}, ensure_ascii=False, indent=2) + "\n", "utf-8")
-
-    report_md = [
-        "# Relatório do EPG Universal — Filtro Baseado em Nome Ativo", "",
-        f"- Canais lidos nas listas M3U (Após VOD Inteligente): **{counts['playlist_channels']}**",
-        f"- Canais com grade encontrada: **{counts['matched']}**",
-        f"- Total de programas gravados: **{counts['programmes']}**",
-        "", "## Fonte base utilizada por canal", ""
-    ]
-    for source in active_sources: report_md.append(f"- **{source.label}:** {source_counts[source.label]} canal(is)")
-    report_md.extend(["", "## Desempenho", ""])
-    for label, seconds in timings.items(): report_md.append(f"- **{label.replace('_', ' ').title()}:** {seconds:.2f} s")
-    report_md.append(f"- **Tempo Total:** {time.perf_counter() - run_start:.2f} s")
-    (OUTPUT_DIR / "report.md").write_text("\n".join(report_md) + "\n", "utf-8")
-    
-    val_md = ["# Validação e Consenso de Grade\n"]
-    for v in validations:
-        now_title = v['now']['title'] if v.get('now') else 'Sem programação'
-        val_md.append(f"- **{v['name']}** ({v['source']}): Agora **{now_title}** - Confiança **{v['confidence']}%**")
-    (OUTPUT_DIR / "validation.md").write_text("\n".join(val_md) + "\n", "utf-8")
-
-    print(f"Sucesso! EPG gerado com {programme_count} programas unificados de {len(active_sources)} fontes.")
-
-if __name__ == "__main__":
-    main()
+    stage_start = time.perf_
