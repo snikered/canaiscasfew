@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """EPG universal adaptável (Zero-Dictionary, Multi-URL Segura)
-com Interceptador Xtream Codes Nativo (JSON Live TV), Injeção 1:1, Match Baseado em Nome e Espelho.
+com Interceptador Xtream Codes Nativo, Bloqueio de VOD Dinâmico, 
+Filtro Anti-Clone de TVID, e Bloqueio Definitivo por Extensão de Stream.
 """
 from __future__ import annotations
 
@@ -106,7 +107,7 @@ def normalizar_canal(nome: str) -> str:
     if not nome: return ""
     original_nome = nome
     nome = re.sub(r'\[.*?\]|\(.*?\)|\|.*?\|', ' ', nome)
-    nome = re.sub(r'[\¹\²\³\⁴]', ' ', nome) 
+    nome = re.sub(r'[\¹\²\³\⁴]', '', nome) 
     nome = re.sub(r'\bJOVEM PAN\b(?! NEWS)', 'JOVEM PAN NEWS', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bFOX SPORTS\b', 'ESPN 4', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bBOOMERANG\b', 'CARTOONITO', nome, flags=re.IGNORECASE)
@@ -527,6 +528,15 @@ def get_clean_aliases(entry: dict[str, object]) -> list[str]:
     return [v for v in unique_values if v and len(v) <= 220]
 
 def build_strict_compatibility_ids(entries: list[dict[str, object]]) -> dict[str, list[str]]:
+    tvg_id_norm_names = defaultdict(set)
+    for entry in entries:
+        target_id = str(entry.get("id", ""))
+        norm_base = normalize_name(target_id)
+        for t_id in entry.get("tvg_ids_to_export", []):
+            clean_t_id = str(t_id).strip()
+            if clean_t_id:
+                tvg_id_norm_names[clean_t_id].add(norm_base)
+                
     by_target = {}
     for entry in entries:
         target_id = str(entry.get("id", ""))
@@ -538,9 +548,10 @@ def build_strict_compatibility_ids(entries: list[dict[str, object]]) -> dict[str
                 
         for t_id in entry.get("tvg_ids_to_export", []):
             clean_t_id = str(t_id).strip()
-            if clean_t_id and clean_t_id not in ids_to_export:
-                ids_to_export.append(clean_t_id)
-                
+            if clean_t_id and (len(tvg_id_norm_names[clean_t_id]) == 1 or clean_t_id == target_id):
+                if clean_t_id not in ids_to_export:
+                    ids_to_export.append(clean_t_id)
+                    
         by_target[target_id] = ids_to_export
     return by_target
 
@@ -657,7 +668,7 @@ def write_epg_stream(
                 gz.write(data)
                 if plain is not None: plain.write(data)
 
-            generator = "EPG Universal Otimizado (Xtream Interceptor)"
+            generator = "EPG Universal Otimizado (Múltiplos Filtros)"
             source_name = "Consolidado Inteligente de Múltiplas Fontes"
             emit((f"<?xml version='1.0' encoding='utf-8'?>\n<tv generator-info-name={quoteattr(generator)} source-info-name={quoteattr(source_name)}>\n").encode("utf-8"))
 
@@ -700,7 +711,7 @@ def write_epg_stream(
     return programme_count, compatibility_alias_count
 
 def main() -> None:
-    print("Iniciando geração de EPG (Interceptador Xtream + Fallback M3U)...")
+    print("Iniciando geração de EPG (Xtream + M3U Fallback c/ Anti-Clone e Filtro VOD por URL)...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -725,7 +736,7 @@ def main() -> None:
         except Exception as e:
             print(f"Aviso: Não foi possível carregar o espelho: {e}")
             
-    VOD_BLACKLIST = {"FILME", "SERIE", "SÉRIE", "VOD", "LANCAMENTO", "LANÇAMENTO", "CINEMA", "SERIADO", "PLAYBACK", "ANIME", "MOVIE", "XXX", "ADULTO", "24H", "24HS", "EVENTO"}
+    VOD_BLACKLIST = {"VOD", "PLAYBACK", "XXX", "ADULTO", "EVENTO", "LANCAMENTO", "LANÇAMENTO"}
     
     for idx, url_raw in enumerate(M3U_URLS):
         url = url_raw.strip()
@@ -755,6 +766,13 @@ def main() -> None:
                             epg_id = str(ch.get("epg_channel_id", "")).strip()
                             if not name: continue
                             
+                            name_upper = name.upper()
+                            if re.search(r'\bS\d{1,3}\s*E\d{1,3}\b', name_upper) or \
+                               re.search(r'\bT\d{1,3}\s*EP?\d{1,3}\b', name_upper) or \
+                               re.search(r'\b24HS?\b', name_upper) or \
+                               re.search(r'^24\s*H\b', name_upper):
+                                continue
+                            
                             target_id = name
                             if target_id not in unique_entries:
                                 unique_entries[target_id] = {
@@ -772,22 +790,39 @@ def main() -> None:
                 print(f"  -> Falha ao usar API JSON ({e}). Tentando M3U tradicional...")
 
         if not success_json:
-            print("  -> Baixando arquivo M3U tradicional e aplicando filtro anti-VOD...")
+            print("  -> Baixando arquivo M3U tradicional e aplicando filtro anti-VOD por Extensão de URL...")
             try:
                 tmp_m3u = download_to_temp_file(url)
                 with tmp_m3u.open("r", encoding="utf-8", errors="ignore") as f:
+                    current_extinf = None
                     for line in f:
                         line = line.strip()
+                        if not line: continue
+                        
                         if line.startswith("#EXTINF:"):
-                            tvg_id_match = re.search(r'tvg-id="(.*?)"', line, re.IGNORECASE)
-                            tvg_name_match = re.search(r'tvg-name="(.*?)"', line, re.IGNORECASE)
-                            group_match = re.search(r'group-title="(.*?)"', line, re.IGNORECASE)
-                            name_match = re.search(r',(.*?)$', line)
+                            current_extinf = line
+                            
+                        elif line.startswith("http") and current_extinf:
+                            stream_url = line
+                            
+                            # Filtro VOD por extensão de arquivo na URL da stream
+                            parsed_stream = urllib.parse.urlparse(stream_url)
+                            path_lower = parsed_stream.path.lower()
+                            if path_lower.endswith(('.mp4', '.mkv', '.avi', '.mov', '.wmv', '.flv', '.webm')):
+                                current_extinf = None
+                                continue
+
+                            tvg_id_match = re.search(r'tvg-id="(.*?)"', current_extinf, re.IGNORECASE)
+                            tvg_name_match = re.search(r'tvg-name="(.*?)"', current_extinf, re.IGNORECASE)
+                            group_match = re.search(r'group-title="(.*?)"', current_extinf, re.IGNORECASE)
+                            name_match = re.search(r',(.*?)$', current_extinf)
                             
                             tvg_id = tvg_id_match.group(1).strip() if tvg_id_match else ""
                             tvg_name = tvg_name_match.group(1).strip() if tvg_name_match else ""
                             group = group_match.group(1).strip() if group_match else ""
                             name = name_match.group(1).strip() if name_match else ""
+                            
+                            current_extinf = None
                             
                             group_upper = group.upper()
                             if any(blacklisted in group_upper for blacklisted in VOD_BLACKLIST):
@@ -795,6 +830,13 @@ def main() -> None:
                                 
                             target_id = tvg_name or name
                             if not target_id: continue
+                            
+                            name_upper = target_id.upper()
+                            if re.search(r'\bS\d{1,3}\s*E\d{1,3}\b', name_upper) or \
+                               re.search(r'\bT\d{1,3}\s*EP?\d{1,3}\b', name_upper) or \
+                               re.search(r'\b24HS?\b', name_upper) or \
+                               re.search(r'^24\s*H\b', name_upper):
+                                continue
                             
                             if target_id not in unique_entries:
                                 unique_entries[target_id] = {
@@ -910,8 +952,8 @@ def main() -> None:
     (OUTPUT_DIR / "validation.json").write_text(json.dumps({"generated_at": now.isoformat(), "active_sources": [s.label for s in active_sources], "summary": counts, "channels": validations}, ensure_ascii=False, indent=2) + "\n", "utf-8")
 
     report_md = [
-        "# Relatório do EPG Universal — Isolamento de ID", "",
-        f"- Canais lidos nas listas M3U (Após corte de VOD): **{counts['playlist_channels']}**",
+        "# Relatório do EPG Universal — Filtros Avançados Ativos", "",
+        f"- Canais lidos nas listas M3U (Após VOD Inteligente): **{counts['playlist_channels']}**",
         f"- Canais com grade encontrada: **{counts['matched']}**",
         f"- Total de programas gravados: **{counts['programmes']}**",
         "", "## Fonte base utilizada por canal", ""
