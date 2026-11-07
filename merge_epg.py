@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""EPG universal adaptável que lê múltiplas M3U (Zero-Dictionary, Multi-URL Segura)
-com Bloqueio Anti-VOD, Injeção 1:1 Estrita, Match 100% Baseado em Nome e Espelho de Segurança.
+"""EPG universal adaptável (Zero-Dictionary, Multi-URL Segura)
+com Interceptador Xtream Codes Nativo (JSON Live TV), Injeção 1:1, Match Baseado em Nome e Espelho.
 """
 from __future__ import annotations
 
@@ -13,6 +13,7 @@ import tempfile
 import time
 import unicodedata
 import urllib.request
+import urllib.parse
 import xml.etree.ElementTree as ET
 from collections import Counter, defaultdict
 from dataclasses import dataclass
@@ -535,7 +536,6 @@ def build_strict_compatibility_ids(entries: list[dict[str, object]]) -> dict[str
             if alias not in ids_to_export:
                 ids_to_export.append(alias)
                 
-        # Garante que o ID do provedor esteja no XML para o player linkar
         for t_id in entry.get("tvg_ids_to_export", []):
             clean_t_id = str(t_id).strip()
             if clean_t_id and clean_t_id not in ids_to_export:
@@ -657,7 +657,7 @@ def write_epg_stream(
                 gz.write(data)
                 if plain is not None: plain.write(data)
 
-            generator = "EPG Universal Otimizado (Isolamento de ID de Provedor)"
+            generator = "EPG Universal Otimizado (Xtream Interceptor)"
             source_name = "Consolidado Inteligente de Múltiplas Fontes"
             emit((f"<?xml version='1.0' encoding='utf-8'?>\n<tv generator-info-name={quoteattr(generator)} source-info-name={quoteattr(source_name)}>\n").encode("utf-8"))
 
@@ -700,14 +700,13 @@ def write_epg_stream(
     return programme_count, compatibility_alias_count
 
 def main() -> None:
-    print("Iniciando geração de EPG (Agrupamento Estrito por Nome)...")
+    print("Iniciando geração de EPG (Interceptador Xtream + Fallback M3U)...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     stage_start = time.perf_counter()
     
     entries = []
-    m3u_files = []
     unique_entries = {}
     
     if ESPELHO_PATH.exists():
@@ -725,72 +724,102 @@ def main() -> None:
             print(f"Espelho recuperado com {len(unique_entries)} canais de backup.")
         except Exception as e:
             print(f"Aviso: Não foi possível carregar o espelho: {e}")
-    
-    for idx, url in enumerate(M3U_URLS):
-        if url.strip().startswith("http"):
-            print(f"Baixando lista secreta M3U {idx+1}...")
-            try:
-                tmp_m3u = download_to_temp_file(url.strip())
-                m3u_files.append(tmp_m3u)
-            except Exception as e:
-                print(f"⚠ Erro ao baixar lista remota: {e}. O Espelho será acionado.")
-                
-    m3u_files = list(set(m3u_files))
-    
-    # Lista Negra de VODs e Falsos Canais expandida
+            
     VOD_BLACKLIST = {"FILME", "SERIE", "SÉRIE", "VOD", "LANCAMENTO", "LANÇAMENTO", "CINEMA", "SERIADO", "PLAYBACK", "ANIME", "MOVIE", "XXX", "ADULTO", "24H", "24HS", "EVENTO"}
     
-    if m3u_files:
-        print(f"Processando arquivo(s) M3U com Leitura Leve (Desacoplando TVID)...")
-        for m3u_path in m3u_files:
-            with m3u_path.open("r", encoding="utf-8", errors="ignore") as f:
-                for line in f:
-                    line = line.strip()
-                    if line.startswith("#EXTINF:"):
-                        tvg_id_match = re.search(r'tvg-id="(.*?)"', line, re.IGNORECASE)
-                        tvg_name_match = re.search(r'tvg-name="(.*?)"', line, re.IGNORECASE)
-                        group_match = re.search(r'group-title="(.*?)"', line, re.IGNORECASE)
-                        name_match = re.search(r',(.*?)$', line)
-                        
-                        tvg_id = tvg_id_match.group(1).strip() if tvg_id_match else ""
-                        tvg_name = tvg_name_match.group(1).strip() if tvg_name_match else ""
-                        group = group_match.group(1).strip() if group_match else ""
-                        name = name_match.group(1).strip() if name_match else ""
-                        
-                        group_upper = group.upper()
-                        if any(blacklisted in group_upper for blacklisted in VOD_BLACKLIST):
-                            continue
-                            
-                        # SOLUÇÃO: Agrupa APENAS pelo nome. Ignora tvg_id do provedor para criar a chave!
-                        target_id = tvg_name or name
-                        if not target_id: continue
-                        
-                        if target_id not in unique_entries:
-                            unique_entries[target_id] = {
-                                "id": target_id,
-                                "name": name or tvg_name,
-                                "aliases": set(),
-                                "tvg_ids_to_export": set(),
-                                "group": group
-                            }
-                        
-                        if tvg_name: unique_entries[target_id]["aliases"].add(tvg_name)
-                        if name: unique_entries[target_id]["aliases"].add(name)
-                        # Guarda o tvg-id podre apenas para exportar no XML para o player conectar
-                        if tvg_id: unique_entries[target_id]["tvg_ids_to_export"].add(tvg_id)
+    for idx, url_raw in enumerate(M3U_URLS):
+        url = url_raw.strip()
+        if not url.startswith("http"): continue
         
-        for m3u_path in m3u_files:
-            if str(m3u_path).endswith('.tmp'):
-                try: m3u_path.unlink()
+        parsed_url = urllib.parse.urlparse(url)
+        query = urllib.parse.parse_qs(parsed_url.query)
+        
+        is_xtream = "get.php" in parsed_url.path and "username" in query and "password" in query
+        success_json = False
+        
+        print(f"\nProcessando Lista Secreta {idx+1}...")
+        
+        if is_xtream:
+            user = query["username"][0]
+            pwd = query["password"][0]
+            api_url = f"{parsed_url.scheme}://{parsed_url.netloc}/player_api.php?username={user}&password={pwd}&action=get_live_streams"
+            print("  -> Link Xtream Codes detectado! Acionando Extração via API JSON (Apenas Live TV)...")
+            try:
+                req = urllib.request.Request(api_url, headers={"User-Agent": "Mozilla/5.0"})
+                with urllib.request.urlopen(req, timeout=45) as resp:
+                    data = json.loads(resp.read().decode('utf-8'))
+                    if isinstance(data, list):
+                        print(f"  -> Sucesso! {len(data)} canais ao vivo obtidos. VODs ignorados nativamente na fonte.")
+                        for ch in data:
+                            name = str(ch.get("name", "")).strip()
+                            epg_id = str(ch.get("epg_channel_id", "")).strip()
+                            if not name: continue
+                            
+                            target_id = name
+                            if target_id not in unique_entries:
+                                unique_entries[target_id] = {
+                                    "id": target_id,
+                                    "name": name,
+                                    "aliases": set(),
+                                    "tvg_ids_to_export": set(),
+                                    "group": str(ch.get("category_id", ""))
+                                }
+                            unique_entries[target_id]["aliases"].add(name)
+                            if epg_id:
+                                unique_entries[target_id]["tvg_ids_to_export"].add(epg_id)
+                        success_json = True
+            except Exception as e:
+                print(f"  -> Falha ao usar API JSON ({e}). Tentando M3U tradicional...")
+
+        if not success_json:
+            print("  -> Baixando arquivo M3U tradicional e aplicando filtro anti-VOD...")
+            try:
+                tmp_m3u = download_to_temp_file(url)
+                with tmp_m3u.open("r", encoding="utf-8", errors="ignore") as f:
+                    for line in f:
+                        line = line.strip()
+                        if line.startswith("#EXTINF:"):
+                            tvg_id_match = re.search(r'tvg-id="(.*?)"', line, re.IGNORECASE)
+                            tvg_name_match = re.search(r'tvg-name="(.*?)"', line, re.IGNORECASE)
+                            group_match = re.search(r'group-title="(.*?)"', line, re.IGNORECASE)
+                            name_match = re.search(r',(.*?)$', line)
+                            
+                            tvg_id = tvg_id_match.group(1).strip() if tvg_id_match else ""
+                            tvg_name = tvg_name_match.group(1).strip() if tvg_name_match else ""
+                            group = group_match.group(1).strip() if group_match else ""
+                            name = name_match.group(1).strip() if name_match else ""
+                            
+                            group_upper = group.upper()
+                            if any(blacklisted in group_upper for blacklisted in VOD_BLACKLIST):
+                                continue
+                                
+                            target_id = tvg_name or name
+                            if not target_id: continue
+                            
+                            if target_id not in unique_entries:
+                                unique_entries[target_id] = {
+                                    "id": target_id,
+                                    "name": name or tvg_name,
+                                    "aliases": set(),
+                                    "tvg_ids_to_export": set(),
+                                    "group": group
+                                }
+                            
+                            if tvg_name: unique_entries[target_id]["aliases"].add(tvg_name)
+                            if name: unique_entries[target_id]["aliases"].add(name)
+                            if tvg_id: unique_entries[target_id]["tvg_ids_to_export"].add(tvg_id)
+                try: tmp_m3u.unlink()
                 except Exception: pass
-    else:
-        if not unique_entries:
-            print("Nenhuma lista e nenhum espelho disponíveis. Verifique seus links no GitHub Secrets.")
+            except Exception as e:
+                print(f"  -> Erro ao processar M3U: {e}")
 
     for v in unique_entries.values():
         v["aliases"] = list(v["aliases"])
         v["tvg_ids_to_export"] = list(v["tvg_ids_to_export"])
         entries.append(v)
+        
+    if not entries:
+        print("Nenhuma lista e nenhum espelho disponíveis. Verifique seus links no GitHub Secrets.")
         
     espelho_to_save = {"updated_at": datetime.now(timezone.utc).isoformat(), "channels": entries}
     (OUTPUT_DIR / "espelho.json").write_text(json.dumps(espelho_to_save, ensure_ascii=False, indent=2), "utf-8")
@@ -802,7 +831,7 @@ def main() -> None:
     timings["catalogo"] = round(time.perf_counter() - stage_start, 3)
 
     stage_start = time.perf_counter()
-    print(f"Baixando e indexando {len(SOURCE_SPECS)} fontes (máx {DOWNLOAD_WORKERS} workers para preservar RAM)...")
+    print(f"\nBaixando e indexando {len(SOURCE_SPECS)} fontes (máx {DOWNLOAD_WORKERS} workers)...")
     loaded: dict[int, tuple[EpgSource | None, str | None]] = {}
     
     with ThreadPoolExecutor(max_workers=DOWNLOAD_WORKERS) as executor:
