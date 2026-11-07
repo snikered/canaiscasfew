@@ -31,7 +31,7 @@ CATALOG_PATH = Path(os.environ.get("CHANNELS_FILE", "channels.json"))
 OVERRIDES_PATH = Path(os.environ.get("OVERRIDES_FILE", "overrides.json"))
 OUTPUT_DIR = Path(os.environ.get("OUTPUT_DIR", "output"))
 
-# GATILHOS DE MATCH OTIMIZADOS PARA AUMENTAR O NÚMERO DE CANAIS RECONHECIDOS
+# GATILHOS DE MATCH OTIMIZADOS
 FUZZY_THRESHOLD = float(os.environ.get("FUZZY_THRESHOLD", "0.84"))
 FUZZY_MARGIN = float(os.environ.get("FUZZY_MARGIN", "0.035"))
 AGREEMENT_THRESHOLD = float(os.environ.get("AGREEMENT_THRESHOLD", "0.55"))
@@ -105,15 +105,39 @@ class CandidateEvaluation:
     health: dict[str, object]; confidence: int; comparisons: list[dict[str, object]]
 
 # ==============================================================================
-# NOVA CAMADA DE PRÉ-NORMALIZAÇÃO (Aplica a alvos e fontes)
+# CAMADA DE PRÉ-NORMALIZAÇÃO UNIVERSAL (Ultra Otimizada)
 # ==============================================================================
 def normalizar_canal(nome: str) -> str:
     if not nome: return ""
+    original_nome = nome
+    
+    # 1. Remoção de blocos inúteis [BR], (VIP), |FHD|
+    nome = re.sub(r'\[.*?\]|\(.*?\)|\|.*?\|', ' ', nome)
+    
+    # 2. Rebrandings e Consolidações Históricas (Impede falhas em listas M3U desatualizadas)
+    nome = re.sub(r'\bJOVEM PAN\b(?! NEWS)', 'JOVEM PAN NEWS', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bFOX SPORTS\b', 'ESPN 4', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bBOOMERANG\b', 'CARTOONITO', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bMAX PRIME\b', 'HBO POP', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bFOX PREMIUM\b', 'STAR PREMIUM', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bFOX CHANNEL\b', 'STAR CHANNEL', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bFOX LIFE\b', 'STAR LIFE', nome, flags=re.IGNORECASE)
+    
+    # 3. Padronização de Emissoras Abertas 
     nome = re.sub(r'^GB\b', 'GLOBO', nome, flags=re.IGNORECASE)
     nome = re.sub(r'^RECORDTV\b', 'RECORD', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\b(SD|HD|FHD|UHD|4K|H265|LEG|HQ)\b[\*\²\³]*', '', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'[\[\]\(\)\-]', ' ', nome)
-    return ' '.join(nome.split()).strip().upper()
+    
+    # 4. Extermínio Massivo de Tags de Qualidade, Resolução, Idioma e Codecs
+    tags = r'\b(SD|HD|FHD|UHD|4K|8K|H264|H265|HEVC|LEG|LEGENDADO|DUB|DUBLADO|HQ|VIP|VOD|24H|24/7|1080P|720P|60FPS)\b[\*\²\³]*'
+    nome = re.sub(tags, '', nome, flags=re.IGNORECASE)
+    
+    # Limpeza de caracteres residuais (- _ =)
+    nome = re.sub(r'[*=_\-]', ' ', nome)
+    
+    nome_limpo = ' '.join(nome.split()).strip().upper()
+    
+    # Proteção: se a limpeza apagou tudo (ex: o canal se chamava literalmente "HD"), devolve o original
+    return nome_limpo if len(nome_limpo) > 1 else original_normalize_name(original_nome)
 
 def normalize_name(value: str) -> str:
     return original_normalize_name(normalizar_canal(value))
@@ -125,6 +149,7 @@ def inferir_emissora_pelo_grupo(nome_normalizado: str, nome_grupo: str) -> str:
     if "SBT" in grupo and not nome_normalizado.startswith("SBT"): return f"SBT {nome_normalizado}"
     if "RECORD" in grupo and not nome_normalizado.startswith("RECORD"): return f"RECORD {nome_normalizado}"
     if "BAND" in grupo and not nome_normalizado.startswith("BAND"): return f"BAND {nome_normalizado}"
+    if "PREMIERE" in grupo and not nome_normalizado.startswith("PREMIERE") and len(nome_normalizado) <= 4: return f"PREMIERE {nome_normalizado}"
     return nome_normalizado
 
 def local_tag(element: ET.Element) -> str: return element.tag.rsplit("}", 1)[-1]
@@ -542,11 +567,9 @@ def make_validation(entry: dict[str, object], chosen: CandidateEvaluation, all_e
     }
 
 # ==============================================================================
-# ALGORITMO DE SEPARAÇÃO ESTREITA 1:1
-# (Resolve o bug do "[H265]" que atrapalhava o "tvg-name" no Televizo)
+# ALGORITMO DE SEPARAÇÃO ESTREITA 1:1 E IDENTIDADE
 # ==============================================================================
 def get_clean_aliases(entry: dict[str, object]) -> list[str]:
-    """Retorna a lista de nomes originais presentes na lista M3U (via tvg_names e aliases originais)."""
     values = []
     tvg_names = entry.get("tvg_names", [])
     if tvg_names:
@@ -562,7 +585,6 @@ def get_clean_aliases(entry: dict[str, object]) -> list[str]:
     return [v for v in unique_values if v and len(v) <= 220]
 
 def build_strict_compatibility_ids(entries: list[dict[str, object]]) -> dict[str, list[str]]:
-    """Mapeia o ID do catálogo para os nomes literais que devem ser inseridos no XML."""
     by_target = {}
     for entry in entries:
         target_id = str(entry.get("id", ""))
@@ -672,7 +694,7 @@ def stitch_multi_source_schedule(
     return final_elements
 
 # ==============================================================================
-# ESCRITA DO EPG COM ISOLAMENTO DE CANAIS (A CORREÇÃO DO PROBLEMA DO TELEVIZO)
+# ESCRITA DO EPG (INJEÇÃO 1:1)
 # ==============================================================================
 def write_epg_stream(
     selected: list[tuple[dict[str, object], CandidateEvaluation, list[CandidateEvaluation], bool]],
@@ -692,7 +714,7 @@ def write_epg_stream(
                 gz.write(data)
                 if plain is not None: plain.write(data)
 
-            generator = "EPG Universal Otimizado (Separação 1:1 Estrita)"
+            generator = "EPG Universal Otimizado (Filtro Supremo)"
             source_name = "Consolidado Inteligente de Múltiplas Fontes"
             emit((f"<?xml version='1.0' encoding='utf-8'?>\n<tv generator-info-name={quoteattr(generator)} source-info-name={quoteattr(source_name)}>\n").encode("utf-8"))
 
@@ -701,17 +723,12 @@ def write_epg_stream(
                 ids_for_channel = compatibility_ids.get(target_id, [target_id])
                 compatibility_alias_count += max(0, len(ids_for_channel) - 1)
                 
-                # A MAGIA ACONTECE AQUI: Em vez de adicionar vários <display-name> num único canal, 
-                # criamos uma declaração de <channel> SEPARADA para cada variante!
                 for output_id in ids_for_channel:
                     channel = ET.Element("channel", {"id": output_id})
-                    
-                    # O display name é EXATAMENTE o id que estamos a injetar, para match perfeito
                     exact_name = ET.Element("display-name")
                     exact_name.text = output_id
                     channel.append(exact_name)
                     
-                    # Se o canal tiver ícone na fonte base, copiamos
                     source_channel = chosen.match.source.channels[chosen.match.channel_id]
                     for node in source_channel:
                         if local_tag(node) == "icon":
@@ -740,7 +757,7 @@ def write_epg_stream(
     return programme_count, compatibility_alias_count
 
 def main() -> None:
-    print("Iniciando geração de EPG (Com Pré-Normalização e Separação de Vínculos)...")
+    print("Iniciando geração de EPG (Com Normalização Agressiva e Isolamento)...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -763,7 +780,6 @@ def main() -> None:
     try: overrides = json.loads(OVERRIDES_PATH.read_text("utf-8")) if OVERRIDES_PATH.exists() else {}
     except Exception: overrides = {}
 
-    # Chama a nova função de compatibilidade que isola as strings exatas da M3U
     compatibility_ids = build_strict_compatibility_ids(entries)
     timings["catalogo"] = round(time.perf_counter() - stage_start, 3)
 
@@ -860,7 +876,6 @@ def main() -> None:
     report_md.append(f"- **Tempo Total:** {time.perf_counter() - run_start:.2f} s")
     (OUTPUT_DIR / "report.md").write_text("\n".join(report_md) + "\n", "utf-8")
     
-    # Gerar o validation.md para evitar falha no GitHub Actions
     val_md = ["# Validação e Consenso de Grade\n"]
     for v in validations:
         now_title = v['now']['title'] if v.get('now') else 'Sem programação'
