@@ -25,7 +25,6 @@ from statistics import mean
 from typing import Iterable, Any
 from xml.sax.saxutils import quoteattr
 
-# Importamos o normalize_name original com um alias para envelopá-lo depois
 from epg_utils import digit_signature, normalize_name as original_normalize_name, normalize_source_id
 
 CATALOG_PATH = Path(os.environ.get("CHANNELS_FILE", "channels.json"))
@@ -110,34 +109,22 @@ class CandidateEvaluation:
 # ==============================================================================
 def normalizar_canal(nome: str) -> str:
     if not nome: return ""
-    # Padroniza as principais emissoras abertas
     nome = re.sub(r'^GB\b', 'GLOBO', nome, flags=re.IGNORECASE)
     nome = re.sub(r'^RECORDTV\b', 'RECORD', nome, flags=re.IGNORECASE)
-    
-    # Remove as tags de resolução junto com qualquer caractere especial adjacente (*, ², ³, etc)
     nome = re.sub(r'\b(SD|HD|FHD|UHD|4K|H265|LEG|HQ)\b[\*\²\³]*', '', nome, flags=re.IGNORECASE)
-    
-    # Limpeza de caracteres residuais
     nome = re.sub(r'[\[\]\(\)\-]', ' ', nome)
     return ' '.join(nome.split()).strip().upper()
 
 def normalize_name(value: str) -> str:
-    """Wrapper sobre o normalize_name original para garantir a mesma limpeza em fontes e alvos."""
     return original_normalize_name(normalizar_canal(value))
 
 def inferir_emissora_pelo_grupo(nome_normalizado: str, nome_grupo: str) -> str:
     if not nome_grupo: return nome_normalizado
     grupo = nome_grupo.upper()
-    
-    if "GLOBO" in grupo and not nome_normalizado.startswith("GLOBO"):
-        return f"GLOBO {nome_normalizado}"
-    if "SBT" in grupo and not nome_normalizado.startswith("SBT"):
-        return f"SBT {nome_normalizado}"
-    if "RECORD" in grupo and not nome_normalizado.startswith("RECORD"):
-        return f"RECORD {nome_normalizado}"
-    if "BAND" in grupo and not nome_normalizado.startswith("BAND"):
-        return f"BAND {nome_normalizado}"
-        
+    if "GLOBO" in grupo and not nome_normalizado.startswith("GLOBO"): return f"GLOBO {nome_normalizado}"
+    if "SBT" in grupo and not nome_normalizado.startswith("SBT"): return f"SBT {nome_normalizado}"
+    if "RECORD" in grupo and not nome_normalizado.startswith("RECORD"): return f"RECORD {nome_normalizado}"
+    if "BAND" in grupo and not nome_normalizado.startswith("BAND"): return f"BAND {nome_normalizado}"
     return nome_normalizado
 
 def local_tag(element: ET.Element) -> str: return element.tag.rsplit("}", 1)[-1]
@@ -262,28 +249,19 @@ def read_optional_source(spec: SourceSpec) -> tuple[EpgSource | None, str | None
 def aliases_for(entry: dict[str, object]) -> list[str]:
     values: list[str] = [str(entry.get("name", ""))]
     values.extend(str(x) for x in entry.get("aliases", []) or [])
-    
-    # Busca a categoria (grupo) do canal na listagem original (M3U ou JSON processado)
     grupo = str(entry.get("group-title", entry.get("group_title", entry.get("group", ""))))
-    
     output, seen = [], set()
     for value in values:
-        # 1. Normaliza e infere contexto pelo grupo
         nome_limpo = normalizar_canal(value)
         nome_com_grupo = inferir_emissora_pelo_grupo(nome_limpo, grupo)
-        
-        # 2. Registra o alias inferido (Passa pelo novo normalize_name unificado)
         normalized = normalize_name(nome_com_grupo)
         if normalized and normalized not in seen:
             output.append(normalized)
             seen.add(normalized)
-            
-        # 3. Registra um fallback sem inferência do grupo caso ocorra alguma inconsistência
         norm_fallback = normalize_name(nome_limpo)
         if norm_fallback and norm_fallback not in seen:
             output.append(norm_fallback)
             seen.add(norm_fallback)
-            
     return output
 
 def old_id_hints_for(entry: dict[str, object]) -> list[str]:
@@ -564,48 +542,36 @@ def make_validation(entry: dict[str, object], chosen: CandidateEvaluation, all_e
     }
 
 # ==============================================================================
-# ALGORITMO MULTI-ID
-# Extrai as variações brutas de nomes SD, HD, FHD da M3U.
+# ALGORITMO DE SEPARAÇÃO ESTREITA 1:1
+# (Resolve o bug do "[H265]" que atrapalhava o "tvg-name" no Televizo)
 # ==============================================================================
-def _compatibility_candidates(entry: dict[str, object]) -> list[str]:
+def get_clean_aliases(entry: dict[str, object]) -> list[str]:
+    """Retorna a lista de nomes originais presentes na lista M3U (via tvg_names e aliases originais)."""
     values = []
-    target_id = str(entry.get("id", "")).strip()
-    values.append(target_id)
-    
-    for key in ["name", "aliases", "original_names", "blank_tvg_id_names", "blank_tvg_id_tvg_names", "tvg_names"]:
-        if key in entry:
-            data = entry[key]
-            if isinstance(data, list): values.extend(str(x).strip() for x in data if x)
-            elif isinstance(data, str): values.append(data.strip())
-            
-    values.extend(str(x).strip() for x in entry.get("old_tvg_ids", []) or [])
-    values.extend(LEGACY_INTERNAL_IDS.get(target_id, ()))
-    return [v for v in dict.fromkeys(values) if v and len(v) <= 220]
+    tvg_names = entry.get("tvg_names", [])
+    if tvg_names:
+        values.extend(str(x).strip() for x in tvg_names if x)
+    aliases = entry.get("aliases", [])
+    if aliases:
+        values.extend(str(x).strip() for x in aliases if x)
+        
+    unique_values = list(dict.fromkeys(values))
+    if not unique_values:
+        unique_values.append(str(entry.get("name", "")).strip())
+        
+    return [v for v in unique_values if v and len(v) <= 220]
 
-def build_compatibility_ids(entries: list[dict[str, object]]) -> tuple[dict[str, list[str]], dict[str, list[str]]]:
-    owners = defaultdict(set)
+def build_strict_compatibility_ids(entries: list[dict[str, object]]) -> dict[str, list[str]]:
+    """Mapeia o ID do catálogo para os nomes literais que devem ser inseridos no XML."""
+    by_target = {}
     for entry in entries:
         target_id = str(entry.get("id", ""))
-        for candidate in _compatibility_candidates(entry): owners[candidate].add(target_id)
-        
-    by_target, ambiguous = {}, {}
-    for entry in entries:
-        target_id = str(entry.get("id", ""))
-        target_norm = normalize_name(target_id.split('.')[-1] if '.' in target_id else target_id)
-        
-        ids, bad = [target_id], []
-        for candidate in _compatibility_candidates(entry):
-            if candidate == target_id: continue
-            
-            cand_norm = normalize_name(candidate)
-            if len(owners.get(candidate, set())) == 1 or cand_norm == target_norm:
-                ids.append(candidate)
-            else:
-                bad.append(candidate)
-                
-        by_target[target_id] = list(dict.fromkeys(ids))
-        if bad: ambiguous[target_id] = sorted(set(bad))
-    return by_target, ambiguous
+        ids_to_export = [target_id]
+        for alias in get_clean_aliases(entry):
+            if alias not in ids_to_export:
+                ids_to_export.append(alias)
+        by_target[target_id] = ids_to_export
+    return by_target
 
 # ==============================================================================
 # ALGORITMO DE COSTURA PERFEITA (SUBTRAÇÃO DE SEGMENTOS E TRIMMING)
@@ -706,7 +672,7 @@ def stitch_multi_source_schedule(
     return final_elements
 
 # ==============================================================================
-# ESCRITA DO EPG (MATCH EXPLÍCITO NO APLICATIVO)
+# ESCRITA DO EPG COM ISOLAMENTO DE CANAIS (A CORREÇÃO DO PROBLEMA DO TELEVIZO)
 # ==============================================================================
 def write_epg_stream(
     selected: list[tuple[dict[str, object], CandidateEvaluation, list[CandidateEvaluation], bool]],
@@ -726,7 +692,7 @@ def write_epg_stream(
                 gz.write(data)
                 if plain is not None: plain.write(data)
 
-            generator = "EPG Universal Otimizado (Multi-ID Plug&Play Exato)"
+            generator = "EPG Universal Otimizado (Separação 1:1 Estrita)"
             source_name = "Consolidado Inteligente de Múltiplas Fontes"
             emit((f"<?xml version='1.0' encoding='utf-8'?>\n<tv generator-info-name={quoteattr(generator)} source-info-name={quoteattr(source_name)}>\n").encode("utf-8"))
 
@@ -735,26 +701,22 @@ def write_epg_stream(
                 ids_for_channel = compatibility_ids.get(target_id, [target_id])
                 compatibility_alias_count += max(0, len(ids_for_channel) - 1)
                 
+                # A MAGIA ACONTECE AQUI: Em vez de adicionar vários <display-name> num único canal, 
+                # criamos uma declaração de <channel> SEPARADA para cada variante!
                 for output_id in ids_for_channel:
-                    channel = copy.deepcopy(chosen.match.source.channels[chosen.match.channel_id])
-                    channel.attrib["id"] = output_id
+                    channel = ET.Element("channel", {"id": output_id})
                     
-                    # 1. Apagar TODOS os nomes originais bagunçados para evitar que a TV se confunda
-                    for node in list(channel):
-                        if local_tag(node) == "display-name":
-                            channel.remove(node)
-                            
-                    # 2. Inserir o ID exato como PRIMEIRO nome. O player lê isto e conecta o guia na hora!
+                    # O display name é EXATAMENTE o id que estamos a injetar, para match perfeito
                     exact_name = ET.Element("display-name")
                     exact_name.text = output_id
-                    channel.insert(0, exact_name)
+                    channel.append(exact_name)
                     
-                    # 3. Inserir o nome canônico (limpo) como segundo nome para embelezar, caso precise
-                    canonical_text = str(entry.get("name", ""))
-                    if canonical_text and canonical_text.lower() != output_id.lower():
-                        canonical_name = ET.Element("display-name")
-                        canonical_name.text = canonical_text
-                        channel.insert(1, canonical_name)
+                    # Se o canal tiver ícone na fonte base, copiamos
+                    source_channel = chosen.match.source.channels[chosen.match.channel_id]
+                    for node in source_channel:
+                        if local_tag(node) == "icon":
+                            icon_node = copy.deepcopy(node)
+                            channel.append(icon_node)
                         
                     emit(ET.tostring(channel, encoding="utf-8"))
                     emit(b"\n")
@@ -763,10 +725,12 @@ def write_epg_stream(
                 target_id = str(entry.get("id", ""))
                 ids_for_channel = compatibility_ids.get(target_id, [target_id])
                 stitched_programmes = stitch_multi_source_schedule(all_evaluations, target_id, cutoff, overrides)
+                
                 for original in stitched_programmes:
                     for output_id in ids_for_channel:
-                        original.attrib["channel"] = output_id
-                        emit(ET.tostring(original, encoding="utf-8"))
+                        prog_copy = copy.deepcopy(original)
+                        prog_copy.attrib["channel"] = output_id
+                        emit(ET.tostring(prog_copy, encoding="utf-8"))
                         emit(b"\n")
                         programme_count += 1
             emit(b"</tv>\n")
@@ -776,7 +740,7 @@ def write_epg_stream(
     return programme_count, compatibility_alias_count
 
 def main() -> None:
-    print("Iniciando geração de EPG (Com Pré-Normalização e Match Global)...")
+    print("Iniciando geração de EPG (Com Pré-Normalização e Separação de Vínculos)...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -799,7 +763,8 @@ def main() -> None:
     try: overrides = json.loads(OVERRIDES_PATH.read_text("utf-8")) if OVERRIDES_PATH.exists() else {}
     except Exception: overrides = {}
 
-    compatibility_ids, ambiguous_old_ids = build_compatibility_ids(entries)
+    # Chama a nova função de compatibilidade que isola as strings exatas da M3U
+    compatibility_ids = build_strict_compatibility_ids(entries)
     timings["catalogo"] = round(time.perf_counter() - stage_start, 3)
 
     stage_start = time.perf_counter()
