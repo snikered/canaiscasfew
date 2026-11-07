@@ -25,7 +25,8 @@ from statistics import mean
 from typing import Iterable, Any
 from xml.sax.saxutils import quoteattr
 
-from epg_utils import digit_signature, normalize_name, normalize_source_id
+# Importamos o normalize_name original com um alias para envelopá-lo depois
+from epg_utils import digit_signature, normalize_name as original_normalize_name, normalize_source_id
 
 CATALOG_PATH = Path(os.environ.get("CHANNELS_FILE", "channels.json"))
 OVERRIDES_PATH = Path(os.environ.get("OVERRIDES_FILE", "overrides.json"))
@@ -103,6 +104,41 @@ class CandidateEvaluation:
     match: ChannelMatch; support_votes: int; vote_sources: int; support_weight: float; vote_weight: float
     support_families: int; weighted_ratio: float; avg_support_agreement: float; health_score: float
     health: dict[str, object]; confidence: int; comparisons: list[dict[str, object]]
+
+# ==============================================================================
+# NOVA CAMADA DE PRÉ-NORMALIZAÇÃO (Aplica a alvos e fontes)
+# ==============================================================================
+def normalizar_canal(nome: str) -> str:
+    if not nome: return ""
+    # Padroniza as principais emissoras abertas
+    nome = re.sub(r'^GB\b', 'GLOBO', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'^RECORDTV\b', 'RECORD', nome, flags=re.IGNORECASE)
+    
+    # Remove as tags de resolução junto com qualquer caractere especial adjacente (*, ², ³, etc)
+    nome = re.sub(r'\b(SD|HD|FHD|UHD|4K|H265|LEG|HQ)\b[\*\²\³]*', '', nome, flags=re.IGNORECASE)
+    
+    # Limpeza de caracteres residuais
+    nome = re.sub(r'[\[\]\(\)\-]', ' ', nome)
+    return ' '.join(nome.split()).strip().upper()
+
+def normalize_name(value: str) -> str:
+    """Wrapper sobre o normalize_name original para garantir a mesma limpeza em fontes e alvos."""
+    return original_normalize_name(normalizar_canal(value))
+
+def inferir_emissora_pelo_grupo(nome_normalizado: str, nome_grupo: str) -> str:
+    if not nome_grupo: return nome_normalizado
+    grupo = nome_grupo.upper()
+    
+    if "GLOBO" in grupo and not nome_normalizado.startswith("GLOBO"):
+        return f"GLOBO {nome_normalizado}"
+    if "SBT" in grupo and not nome_normalizado.startswith("SBT"):
+        return f"SBT {nome_normalizado}"
+    if "RECORD" in grupo and not nome_normalizado.startswith("RECORD"):
+        return f"RECORD {nome_normalizado}"
+    if "BAND" in grupo and not nome_normalizado.startswith("BAND"):
+        return f"BAND {nome_normalizado}"
+        
+    return nome_normalizado
 
 def local_tag(element: ET.Element) -> str: return element.tag.rsplit("}", 1)[-1]
 def format_xmltv_datetime(dt: datetime) -> str: return dt.astimezone(timezone.utc).strftime("%Y%m%d%H%M%S +0000")
@@ -226,12 +262,28 @@ def read_optional_source(spec: SourceSpec) -> tuple[EpgSource | None, str | None
 def aliases_for(entry: dict[str, object]) -> list[str]:
     values: list[str] = [str(entry.get("name", ""))]
     values.extend(str(x) for x in entry.get("aliases", []) or [])
+    
+    # Busca a categoria (grupo) do canal na listagem original (M3U ou JSON processado)
+    grupo = str(entry.get("group-title", entry.get("group_title", entry.get("group", ""))))
+    
     output, seen = [], set()
     for value in values:
-        normalized = normalize_name(value)
+        # 1. Normaliza e infere contexto pelo grupo
+        nome_limpo = normalizar_canal(value)
+        nome_com_grupo = inferir_emissora_pelo_grupo(nome_limpo, grupo)
+        
+        # 2. Registra o alias inferido (Passa pelo novo normalize_name unificado)
+        normalized = normalize_name(nome_com_grupo)
         if normalized and normalized not in seen:
             output.append(normalized)
             seen.add(normalized)
+            
+        # 3. Registra um fallback sem inferência do grupo caso ocorra alguma inconsistência
+        norm_fallback = normalize_name(nome_limpo)
+        if norm_fallback and norm_fallback not in seen:
+            output.append(norm_fallback)
+            seen.add(norm_fallback)
+            
     return output
 
 def old_id_hints_for(entry: dict[str, object]) -> list[str]:
@@ -724,7 +776,7 @@ def write_epg_stream(
     return programme_count, compatibility_alias_count
 
 def main() -> None:
-    print("Iniciando geração de EPG (Com Força Bruta Multi-IDs e Display Name Exato)...")
+    print("Iniciando geração de EPG (Com Pré-Normalização e Match Global)...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
