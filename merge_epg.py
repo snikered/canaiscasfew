@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""EPG universal multi-fonte escalável com Segment Subtraction (Gap-Filling + Trimming perfeito)
-e Mapeamento Multi-ID (Plug & Play Exato) focado no tvg-name.
+"""EPG universal adaptável que lê diretamente a M3U (Zero-Dictionary)
+com Segment Subtraction perfeito e Injeção 1:1 Estrita.
 """
 from __future__ import annotations
 
@@ -27,6 +27,7 @@ from xml.sax.saxutils import quoteattr
 
 from epg_utils import digit_signature, normalize_name as original_normalize_name, normalize_source_id
 
+M3U_PATH = Path(os.environ.get("M3U_FILE", "lista.m3u"))
 CATALOG_PATH = Path(os.environ.get("CHANNELS_FILE", "channels.json"))
 OVERRIDES_PATH = Path(os.environ.get("OVERRIDES_FILE", "overrides.json"))
 OUTPUT_DIR = Path(os.environ.get("OUTPUT_DIR", "output"))
@@ -114,7 +115,7 @@ def normalizar_canal(nome: str) -> str:
     # 1. Remoção de blocos inúteis [BR], (VIP), |FHD|
     nome = re.sub(r'\[.*?\]|\(.*?\)|\|.*?\|', ' ', nome)
     
-    # 2. Rebrandings e Consolidações Históricas (Impede falhas em listas M3U desatualizadas)
+    # 2. Rebrandings e Consolidações Históricas
     nome = re.sub(r'\bJOVEM PAN\b(?! NEWS)', 'JOVEM PAN NEWS', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bFOX SPORTS\b', 'ESPN 4', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bBOOMERANG\b', 'CARTOONITO', nome, flags=re.IGNORECASE)
@@ -135,8 +136,6 @@ def normalizar_canal(nome: str) -> str:
     nome = re.sub(r'[*=_\-]', ' ', nome)
     
     nome_limpo = ' '.join(nome.split()).strip().upper()
-    
-    # Proteção: se a limpeza apagou tudo (ex: o canal se chamava literalmente "HD"), devolve o original
     return nome_limpo if len(nome_limpo) > 1 else original_normalize_name(original_nome)
 
 def normalize_name(value: str) -> str:
@@ -274,7 +273,7 @@ def read_optional_source(spec: SourceSpec) -> tuple[EpgSource | None, str | None
 def aliases_for(entry: dict[str, object]) -> list[str]:
     values: list[str] = [str(entry.get("name", ""))]
     values.extend(str(x) for x in entry.get("aliases", []) or [])
-    grupo = str(entry.get("group-title", entry.get("group_title", entry.get("group", ""))))
+    grupo = str(entry.get("group", entry.get("group-title", entry.get("group_title", ""))))
     output, seen = [], set()
     for value in values:
         nome_limpo = normalizar_canal(value)
@@ -566,38 +565,17 @@ def make_validation(entry: dict[str, object], chosen: CandidateEvaluation, all_e
         "cross_sources": chosen.comparisons, "candidates": candidates,
     }
 
-# ==============================================================================
-# ALGORITMO DE SEPARAÇÃO ESTREITA 1:1 E IDENTIDADE
-# ==============================================================================
-def get_clean_aliases(entry: dict[str, object]) -> list[str]:
-    values = []
-    tvg_names = entry.get("tvg_names", [])
-    if tvg_names:
-        values.extend(str(x).strip() for x in tvg_names if x)
-    aliases = entry.get("aliases", [])
-    if aliases:
-        values.extend(str(x).strip() for x in aliases if x)
-        
-    unique_values = list(dict.fromkeys(values))
-    if not unique_values:
-        unique_values.append(str(entry.get("name", "")).strip())
-        
-    return [v for v in unique_values if v and len(v) <= 220]
-
 def build_strict_compatibility_ids(entries: list[dict[str, object]]) -> dict[str, list[str]]:
     by_target = {}
     for entry in entries:
         target_id = str(entry.get("id", ""))
         ids_to_export = [target_id]
-        for alias in get_clean_aliases(entry):
+        for alias in entry.get("aliases", []):
             if alias not in ids_to_export:
                 ids_to_export.append(alias)
         by_target[target_id] = ids_to_export
     return by_target
 
-# ==============================================================================
-# ALGORITMO DE COSTURA PERFEITA (SUBTRAÇÃO DE SEGMENTOS E TRIMMING)
-# ==============================================================================
 def stitch_multi_source_schedule(
     all_evaluations: list[CandidateEvaluation], target_channel_id: str, cutoff: datetime, overrides: dict[str, object]
 ) -> list[ET.Element]:
@@ -693,9 +671,6 @@ def stitch_multi_source_schedule(
         final_elements.append(el)
     return final_elements
 
-# ==============================================================================
-# ESCRITA DO EPG (INJEÇÃO 1:1)
-# ==============================================================================
 def write_epg_stream(
     selected: list[tuple[dict[str, object], CandidateEvaluation, list[CandidateEvaluation], bool]],
     compatibility_ids: dict[str, list[str]],
@@ -714,7 +689,7 @@ def write_epg_stream(
                 gz.write(data)
                 if plain is not None: plain.write(data)
 
-            generator = "EPG Universal Otimizado (Filtro Supremo)"
+            generator = "EPG Universal Otimizado (M3U Direto)"
             source_name = "Consolidado Inteligente de Múltiplas Fontes"
             emit((f"<?xml version='1.0' encoding='utf-8'?>\n<tv generator-info-name={quoteattr(generator)} source-info-name={quoteattr(source_name)}>\n").encode("utf-8"))
 
@@ -757,25 +732,62 @@ def write_epg_stream(
     return programme_count, compatibility_alias_count
 
 def main() -> None:
-    print("Iniciando geração de EPG (Com Normalização Agressiva e Isolamento)...")
+    print("Iniciando geração de EPG (Leitura Direta da M3U - Zero Dictionary)...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
     stage_start = time.perf_counter()
-    try: catalog_data = json.loads(CATALOG_PATH.read_text("utf-8"))
-    except FileNotFoundError: catalog_data = {}
     
-    raw_channels = catalog_data.get("channels", [])
     entries = []
-    if isinstance(raw_channels, dict):
-        for k, v in raw_channels.items():
-            if isinstance(v, dict):
-                v_copy = dict(v)
-                v_copy.setdefault("id", k)
-                v_copy.setdefault("name", k)
-                entries.append(v_copy)
-    elif isinstance(raw_channels, list): entries = [e for e in raw_channels if isinstance(e, dict)]
+    if M3U_PATH.exists():
+        print(f"Lendo canais diretamente do arquivo: {M3U_PATH.name}")
+        m3u_text = M3U_PATH.read_text("utf-8", errors="ignore")
+        unique_entries = {}
+        for line in m3u_text.splitlines():
+            line = line.strip()
+            if line.startswith("#EXTINF:"):
+                tvg_id_match = re.search(r'tvg-id="(.*?)"', line, re.IGNORECASE)
+                tvg_name_match = re.search(r'tvg-name="(.*?)"', line, re.IGNORECASE)
+                group_match = re.search(r'group-title="(.*?)"', line, re.IGNORECASE)
+                name_match = re.search(r',(.*?)$', line)
+                
+                tvg_id = tvg_id_match.group(1).strip() if tvg_id_match else ""
+                tvg_name = tvg_name_match.group(1).strip() if tvg_name_match else ""
+                group = group_match.group(1).strip() if group_match else ""
+                name = name_match.group(1).strip() if name_match else ""
+                
+                target_id = tvg_id or tvg_name or name
+                if not target_id: continue
+                
+                if target_id not in unique_entries:
+                    unique_entries[target_id] = {
+                        "id": target_id,
+                        "name": name or tvg_name or target_id,
+                        "aliases": set(),
+                        "group": group
+                    }
+                if tvg_name: unique_entries[target_id]["aliases"].add(tvg_name)
+                if name: unique_entries[target_id]["aliases"].add(name)
+                if tvg_id: unique_entries[target_id]["aliases"].add(tvg_id)
+        
+        for v in unique_entries.values():
+            v["aliases"] = list(v["aliases"])
+            entries.append(v)
+    else:
+        print(f"M3U não encontrada. Usando fallback para {CATALOG_PATH.name}...")
+        try: catalog_data = json.loads(CATALOG_PATH.read_text("utf-8"))
+        except FileNotFoundError: catalog_data = {}
+        raw_channels = catalog_data.get("channels", [])
+        if isinstance(raw_channels, dict):
+            for k, v in raw_channels.items():
+                if isinstance(v, dict):
+                    v_copy = dict(v)
+                    v_copy.setdefault("id", k)
+                    v_copy.setdefault("name", k)
+                    entries.append(v_copy)
+        elif isinstance(raw_channels, list): 
+            entries = [e for e in raw_channels if isinstance(e, dict)]
 
     try: overrides = json.loads(OVERRIDES_PATH.read_text("utf-8")) if OVERRIDES_PATH.exists() else {}
     except Exception: overrides = {}
@@ -864,10 +876,10 @@ def main() -> None:
     (OUTPUT_DIR / "validation.json").write_text(json.dumps({"generated_at": now.isoformat(), "active_sources": [s.label for s in active_sources], "summary": counts, "channels": validations}, ensure_ascii=False, indent=2) + "\n", "utf-8")
 
     report_md = [
-        "# Relatório do EPG Universal — Força Bruta Multi-IDs e Trimming", "",
-        f"- Canais no catálogo: **{counts['playlist_channels']}**",
+        "# Relatório do EPG Universal — Zero Dictionary", "",
+        f"- Canais lidos na lista M3U: **{counts['playlist_channels']}**",
         f"- Canais com grade encontrada: **{counts['matched']}**",
-        f"- Total de programas gravados (grade costurada e clonada): **{counts['programmes']}**",
+        f"- Total de programas gravados: **{counts['programmes']}**",
         "", "## Fonte base utilizada por canal", ""
     ]
     for source in active_sources: report_md.append(f"- **{source.label}:** {source_counts[source.label]} canal(is)")
