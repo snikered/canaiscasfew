@@ -1,17 +1,15 @@
 #!/usr/bin/env python3
 """EPG universal adaptável (Zero-Dictionary, Multi-URL Segura)
-com Interceptador Xtream Codes, Execução Automática de Scripts Locais,
-Filtro VOD por URL e Força Bruta Baseada EXCLUSIVAMENTE em Nomes.
+com Interceptador Xtream Codes, Filtro VOD por URL e
+Força Bruta Baseada EXCLUSIVAMENTE em Nomes (Ignorando tvg-id).
 """
 from __future__ import annotations
 
 import copy
-import glob
 import gzip
 import json
 import os
 import re
-import subprocess
 import tempfile
 import time
 import unicodedata
@@ -29,28 +27,11 @@ from statistics import mean
 from xml.sax.saxutils import quoteattr
 from typing import Iterable, Any
 
-# ==========================================
-# 1. EXECUÇÃO DOS SCRIPTS LOCAIS (.py)
-# ==========================================
-def run_local_scrapers():
-    print("Buscando scripts extratores locais (.py)...")
-    scripts = [s for s in glob.glob("*.py") if s not in ["merge_epg.py", "epg_utils.py"]]
-    if not scripts:
-        print("Nenhum script extrator local encontrado.")
-    for script in scripts:
-        print(f"Executando {script}...")
-        try:
-            subprocess.run(["python3", script], check=False)
-        except Exception as e:
-            print(f"Erro ao rodar {script}: {e}")
-
-run_local_scrapers()
-
-# Importações que dependem do repositório local
+# Garante a importação das funções de utilidade
 try:
     from epg_utils import digit_signature, normalize_name as original_normalize_name, normalize_source_id
 except ImportError:
-    print("epg_utils.py não encontrado. Baixando...")
+    print("epg_utils.py não encontrado. Baixando do repositório base...")
     urllib.request.urlretrieve("https://raw.githubusercontent.com/Limaalef/M3uEpg/main/epg_utils.py", "epg_utils.py")
     from epg_utils import digit_signature, normalize_name as original_normalize_name, normalize_source_id
 
