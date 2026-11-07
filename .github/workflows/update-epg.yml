@@ -55,6 +55,10 @@ jobs:
           echo "CHANNELS_FILE=channels.json" >> "$GITHUB_ENV"
 
       - name: Gerar EPG Costurado e Consolidado
+        env:
+          M3U_URL_1: ${{ secrets.M3U_URL_1 }}
+          M3U_URL_2: ${{ secrets.M3U_URL_2 }}
+          M3U_URL_3: ${{ secrets.M3U_URL_3 }}
         run: python merge_epg.py
 
       - name: Publicar somente EPG e relatórios na branch epg
