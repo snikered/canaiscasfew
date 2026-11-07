@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """EPG universal adaptável (Zero-Dictionary, Multi-URL Segura)
-com Interceptador Xtream Codes Nativo, Bloqueio de VOD Dinâmico, 
-Filtro Anti-Clone de TVID, e Bloqueio Definitivo por Extensão de Stream.
+com Interceptador Xtream Codes Nativo, Filtro VOD por URL e
+Força Bruta Baseada EXCLUSIVAMENTE em Nomes (Ignorando tvg-id).
 """
 from __future__ import annotations
 
@@ -108,6 +108,7 @@ def normalizar_canal(nome: str) -> str:
     original_nome = nome
     nome = re.sub(r'\[.*?\]|\(.*?\)|\|.*?\|', ' ', nome)
     nome = re.sub(r'[\¹\²\³\⁴]', '', nome) 
+    nome = re.sub(r'\bJP NEWS\b', 'JOVEM PAN NEWS', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bJOVEM PAN\b(?! NEWS)', 'JOVEM PAN NEWS', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bFOX SPORTS\b', 'ESPN 4', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bBOOMERANG\b', 'CARTOONITO', nome, flags=re.IGNORECASE)
@@ -513,46 +514,53 @@ def make_validation(entry: dict[str, object], chosen: CandidateEvaluation, all_e
     }
 
 def get_clean_aliases(entry: dict[str, object]) -> list[str]:
+    """Retorna uma lista de nomes limpos e expandidos do canal para atuar como IDs no XML."""
     values = []
-    tvg_names = entry.get("tvg_names", [])
-    if tvg_names:
-        values.extend(str(x).strip() for x in tvg_names if x)
-    aliases = entry.get("aliases", [])
-    if aliases:
-        values.extend(str(x).strip() for x in aliases if x)
+    if entry.get("tvg_names"):
+        values.extend(str(x).strip() for x in entry.get("tvg_names", []) if x)
+    if entry.get("aliases"):
+        values.extend(str(x).strip() for x in entry.get("aliases", []) if x)
         
-    unique_values = list(dict.fromkeys(values))
-    if not unique_values:
-        unique_values.append(str(entry.get("name", "")).strip())
+    raw_name = str(entry.get("name", "")).strip()
+    if raw_name:
+        values.append(raw_name)
         
-    return [v for v in unique_values if v and len(v) <= 220]
+    unique_values = []
+    for v in values:
+        if v and v not in unique_values:
+            unique_values.append(v)
+            
+    expanded = list(unique_values)
+    for v in unique_values:
+        # Remove colchetes ou parenteses ao final (ex: "HBO HD [2]" -> "HBO HD")
+        no_brackets = re.sub(r'\s*[\[\(].*?[\]\)]\s*$', '', v).strip()
+        if no_brackets and no_brackets not in expanded:
+            expanded.append(no_brackets)
+            
+        # Remove tags de qualidade e status (ex: "HBO HD" -> "HBO")
+        tags = r'\b(SD|HD|FHD|UHD|4K|8K|H264|H265|HEVC|HDR\+?|LEG|LEGENDADO|DUB|DUBLADO|HQ|VIP|VOD|24H[S]?|24/7|1080P|720P|60FPS|PPV|EVENTOS?)\b[\*\²\³\¹\⁴\+]*'
+        no_tags = re.sub(tags, '', no_brackets, flags=re.IGNORECASE)
+        no_tags = re.sub(r'[*=_\-]', ' ', no_tags)
+        no_tags = ' '.join(no_tags.split()).strip()
+        
+        if no_tags and no_tags not in expanded:
+            expanded.append(no_tags)
+            
+    return [v for v in expanded if v and len(v) <= 220]
 
-def build_strict_compatibility_ids(entries: list[dict[str, object]]) -> dict[str, list[str]]:
-    tvg_id_norm_names = defaultdict(set)
-    for entry in entries:
-        target_id = str(entry.get("id", ""))
-        norm_base = normalize_name(target_id)
-        for t_id in entry.get("tvg_ids_to_export", []):
-            clean_t_id = str(t_id).strip()
-            if clean_t_id:
-                tvg_id_norm_names[clean_t_id].add(norm_base)
-                
+def build_name_based_ids(entries: list[dict[str, object]]) -> dict[str, list[str]]:
+    """Gera dicionário de exportação ignorando COMPLETAMENTE o tvg-id."""
     by_target = {}
     for entry in entries:
         target_id = str(entry.get("id", ""))
-        ids_to_export = [target_id]
+        ids_to_export = []
         
         for alias in get_clean_aliases(entry):
             if alias not in ids_to_export:
                 ids_to_export.append(alias)
                 
-        for t_id in entry.get("tvg_ids_to_export", []):
-            clean_t_id = str(t_id).strip()
-            if clean_t_id and (len(tvg_id_norm_names[clean_t_id]) == 1 or clean_t_id == target_id):
-                if clean_t_id not in ids_to_export:
-                    ids_to_export.append(clean_t_id)
-                    
         by_target[target_id] = ids_to_export
+        
     return by_target
 
 def stitch_multi_source_schedule(
@@ -668,7 +676,7 @@ def write_epg_stream(
                 gz.write(data)
                 if plain is not None: plain.write(data)
 
-            generator = "EPG Universal Otimizado (Múltiplos Filtros)"
+            generator = "EPG Universal Otimizado (Name-Based Match)"
             source_name = "Consolidado Inteligente de Múltiplas Fontes"
             emit((f"<?xml version='1.0' encoding='utf-8'?>\n<tv generator-info-name={quoteattr(generator)} source-info-name={quoteattr(source_name)}>\n").encode("utf-8"))
 
@@ -711,7 +719,7 @@ def write_epg_stream(
     return programme_count, compatibility_alias_count
 
 def main() -> None:
-    print("Iniciando geração de EPG (Xtream + M3U Fallback c/ Anti-Clone e Filtro VOD por URL)...")
+    print("Iniciando geração de EPG (Ignorando TVG-ID dos Provedores, Apenas Nomes)...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -729,7 +737,6 @@ def main() -> None:
                     "id": ch["id"],
                     "name": ch["name"],
                     "aliases": set(ch["aliases"]),
-                    "tvg_ids_to_export": set(ch.get("tvg_ids_to_export", [])),
                     "group": ch.get("group", "")
                 }
             print(f"Espelho recuperado com {len(unique_entries)} canais de backup.")
@@ -763,7 +770,6 @@ def main() -> None:
                         print(f"  -> Sucesso! {len(data)} canais ao vivo obtidos. VODs ignorados nativamente na fonte.")
                         for ch in data:
                             name = str(ch.get("name", "")).strip()
-                            epg_id = str(ch.get("epg_channel_id", "")).strip()
                             if not name: continue
                             
                             name_upper = name.upper()
@@ -779,12 +785,9 @@ def main() -> None:
                                     "id": target_id,
                                     "name": name,
                                     "aliases": set(),
-                                    "tvg_ids_to_export": set(),
                                     "group": str(ch.get("category_id", ""))
                                 }
                             unique_entries[target_id]["aliases"].add(name)
-                            if epg_id:
-                                unique_entries[target_id]["tvg_ids_to_export"].add(epg_id)
                         success_json = True
             except Exception as e:
                 print(f"  -> Falha ao usar API JSON ({e}). Tentando M3U tradicional...")
@@ -805,19 +808,16 @@ def main() -> None:
                         elif line.startswith("http") and current_extinf:
                             stream_url = line
                             
-                            # Filtro VOD por extensão de arquivo na URL da stream
                             parsed_stream = urllib.parse.urlparse(stream_url)
                             path_lower = parsed_stream.path.lower()
                             if path_lower.endswith(('.mp4', '.mkv', '.avi', '.mov', '.wmv', '.flv', '.webm')):
                                 current_extinf = None
                                 continue
 
-                            tvg_id_match = re.search(r'tvg-id="(.*?)"', current_extinf, re.IGNORECASE)
                             tvg_name_match = re.search(r'tvg-name="(.*?)"', current_extinf, re.IGNORECASE)
                             group_match = re.search(r'group-title="(.*?)"', current_extinf, re.IGNORECASE)
                             name_match = re.search(r',(.*?)$', current_extinf)
                             
-                            tvg_id = tvg_id_match.group(1).strip() if tvg_id_match else ""
                             tvg_name = tvg_name_match.group(1).strip() if tvg_name_match else ""
                             group = group_match.group(1).strip() if group_match else ""
                             name = name_match.group(1).strip() if name_match else ""
@@ -843,13 +843,11 @@ def main() -> None:
                                     "id": target_id,
                                     "name": name or tvg_name,
                                     "aliases": set(),
-                                    "tvg_ids_to_export": set(),
                                     "group": group
                                 }
                             
                             if tvg_name: unique_entries[target_id]["aliases"].add(tvg_name)
                             if name: unique_entries[target_id]["aliases"].add(name)
-                            if tvg_id: unique_entries[target_id]["tvg_ids_to_export"].add(tvg_id)
                 try: tmp_m3u.unlink()
                 except Exception: pass
             except Exception as e:
@@ -857,7 +855,6 @@ def main() -> None:
 
     for v in unique_entries.values():
         v["aliases"] = list(v["aliases"])
-        v["tvg_ids_to_export"] = list(v["tvg_ids_to_export"])
         entries.append(v)
         
     if not entries:
@@ -869,7 +866,7 @@ def main() -> None:
     try: overrides = json.loads(OVERRIDES_PATH.read_text("utf-8")) if OVERRIDES_PATH.exists() else {}
     except Exception: overrides = {}
 
-    compatibility_ids = build_strict_compatibility_ids(entries)
+    compatibility_ids = build_name_based_ids(entries)
     timings["catalogo"] = round(time.perf_counter() - stage_start, 3)
 
     stage_start = time.perf_counter()
@@ -952,7 +949,7 @@ def main() -> None:
     (OUTPUT_DIR / "validation.json").write_text(json.dumps({"generated_at": now.isoformat(), "active_sources": [s.label for s in active_sources], "summary": counts, "channels": validations}, ensure_ascii=False, indent=2) + "\n", "utf-8")
 
     report_md = [
-        "# Relatório do EPG Universal — Filtros Avançados Ativos", "",
+        "# Relatório do EPG Universal — Filtro Baseado em Nome Ativo", "",
         f"- Canais lidos nas listas M3U (Após VOD Inteligente): **{counts['playlist_channels']}**",
         f"- Canais com grade encontrada: **{counts['matched']}**",
         f"- Total de programas gravados: **{counts['programmes']}**",
