@@ -1,17 +1,15 @@
 #!/usr/bin/env python3
 """EPG universal adaptável (Zero-Dictionary, Multi-URL Segura)
-com Execução de Scripts Locais e Pura Força Bruta por Nome.
+com Pura Força Bruta por Nome.
 (Ignora 100% o tvg-id e epg_channel_id do provedor para forçar o match do player).
 """
 from __future__ import annotations
 
 import copy
-import glob
 import gzip
 import json
 import os
 import re
-import subprocess
 import tempfile
 import time
 import unicodedata
@@ -28,23 +26,6 @@ from pathlib import Path
 from statistics import mean
 from xml.sax.saxutils import quoteattr
 from typing import Iterable, Any
-
-# ==========================================
-# 1. EXECUÇÃO DOS SCRIPTS LOCAIS (.py)
-# ==========================================
-def run_local_scrapers():
-    print("Buscando scripts extratores locais (.py)...")
-    scripts = [s for s in glob.glob("*.py") if s not in ["merge_epg.py", "epg_utils.py"]]
-    if not scripts:
-        print("Nenhum script extrator local encontrado.")
-    for script in scripts:
-        print(f"Executando {script}...")
-        try:
-            subprocess.run(["python3", script], check=False)
-        except Exception as e:
-            print(f"Erro ao rodar {script}: {e}")
-
-run_local_scrapers()
 
 # Garante a importação das funções de utilidade
 try:
