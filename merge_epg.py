@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 """EPG universal adaptável (Zero-Dictionary, Multi-URL Segura)
-com Interceptador Xtream Codes Nativo, Filtro VOD por URL e
-Força Bruta Baseada EXCLUSIVAMENTE em Nomes (Ignorando tvg-id).
+com Interceptador Xtream Codes, Execução Automática de Scripts Locais,
+Filtro VOD por URL e Força Bruta Baseada EXCLUSIVAMENTE em Nomes.
 """
 from __future__ import annotations
 
 import copy
+import glob
 import gzip
 import json
 import os
 import re
+import subprocess
 import tempfile
 import time
 import unicodedata
@@ -27,7 +29,30 @@ from statistics import mean
 from xml.sax.saxutils import quoteattr
 from typing import Iterable, Any
 
-from epg_utils import digit_signature, normalize_name as original_normalize_name, normalize_source_id
+# ==========================================
+# 1. EXECUÇÃO DOS SCRIPTS LOCAIS (.py)
+# ==========================================
+def run_local_scrapers():
+    print("Buscando scripts extratores locais (.py)...")
+    scripts = [s for s in glob.glob("*.py") if s not in ["merge_epg.py", "epg_utils.py"]]
+    if not scripts:
+        print("Nenhum script extrator local encontrado.")
+    for script in scripts:
+        print(f"Executando {script}...")
+        try:
+            subprocess.run(["python3", script], check=False)
+        except Exception as e:
+            print(f"Erro ao rodar {script}: {e}")
+
+run_local_scrapers()
+
+# Importações que dependem do repositório local
+try:
+    from epg_utils import digit_signature, normalize_name as original_normalize_name, normalize_source_id
+except ImportError:
+    print("epg_utils.py não encontrado. Baixando...")
+    urllib.request.urlretrieve("https://raw.githubusercontent.com/Limaalef/M3uEpg/main/epg_utils.py", "epg_utils.py")
+    from epg_utils import digit_signature, normalize_name as original_normalize_name, normalize_source_id
 
 CATALOG_PATH = Path(os.environ.get("CHANNELS_FILE", "channels.json"))
 OVERRIDES_PATH = Path(os.environ.get("OVERRIDES_FILE", "overrides.json"))
@@ -186,13 +211,13 @@ def download_to_temp_file(url: str, attempts: int = 4) -> Path:
     if tmp_path.exists(): tmp_path.unlink()
     raise RuntimeError(f"Falha ao baixar {url}: {last_error}")
 
-def read_source_from_file(spec: SourceSpec, tmp_path: Path) -> EpgSource:
+def read_source_from_file(spec: SourceSpec, file_path: Path) -> EpgSource:
     channels: dict[str, ET.Element] = {}
     names, normalized_names = {}, {}
     programs, rows = defaultdict(list), defaultdict(list)
     exact_index, fuzzy_index, normalized_id_index = defaultdict(set), defaultdict(lambda: defaultdict(set)), defaultdict(set)
 
-    with tmp_path.open("rb") as f:
+    with file_path.open("rb") as f:
         magic = f.read(2)
         f.seek(0)
         file_obj = gzip.GzipFile(fileobj=f) if magic == b"\x1f\x8b" else f
@@ -244,10 +269,18 @@ def read_source_from_file(spec: SourceSpec, tmp_path: Path) -> EpgSource:
 def read_optional_source(spec: SourceSpec) -> tuple[EpgSource | None, str | None]:
     tmp_path = None
     try:
-        tmp_path = download_to_temp_file(spec.url)
-        src = read_source_from_file(spec, tmp_path)
+        if spec.url.startswith("http"):
+            tmp_path = download_to_temp_file(spec.url)
+            src = read_source_from_file(spec, tmp_path)
+        else:
+            local_path = Path(spec.url)
+            if local_path.exists():
+                src = read_source_from_file(spec, local_path)
+            else:
+                return None, f"Arquivo local não encontrado: {spec.url}"
         return src, None
-    except Exception as exc: return None, str(exc)
+    except Exception as exc: 
+        return None, str(exc)
     finally:
         if tmp_path and tmp_path.exists() and str(tmp_path).endswith(".tmp"):
             try: tmp_path.unlink()
@@ -532,12 +565,10 @@ def get_clean_aliases(entry: dict[str, object]) -> list[str]:
             
     expanded = list(unique_values)
     for v in unique_values:
-        # Remove colchetes ou parenteses ao final (ex: "HBO HD [2]" -> "HBO HD")
         no_brackets = re.sub(r'\s*[\[\(].*?[\]\)]\s*$', '', v).strip()
         if no_brackets and no_brackets not in expanded:
             expanded.append(no_brackets)
             
-        # Remove tags de qualidade e status (ex: "HBO HD" -> "HBO")
         tags = r'\b(SD|HD|FHD|UHD|4K|8K|H264|H265|HEVC|HDR\+?|LEG|LEGENDADO|DUB|DUBLADO|HQ|VIP|VOD|24H[S]?|24/7|1080P|720P|60FPS|PPV|EVENTOS?)\b[\*\²\³\¹\⁴\+]*'
         no_tags = re.sub(tags, '', no_brackets, flags=re.IGNORECASE)
         no_tags = re.sub(r'[*=_\-]', ' ', no_tags)
