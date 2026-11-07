@@ -1,0 +1,655 @@
+# Validação e Consenso de Grade
+
+- **HBO** (TV Map): Agora **Não Solte!** - Confiança **79%**
+- **HBO POP** (Claro): Agora **O Morro dos Ventos Uivantes** - Confiança **82%**
+- **PREMIERE CLUBES** (EPGShare BR2): Agora **VT - Bahia x São Paulo** - Confiança **65%**
+- **HBO MUNDI** (VivoPlay): Agora **O Bolo do Presidente** - Confiança **82%**
+- **HBO XTREME** (VivoPlay): Agora **Relatos de um Assassino** - Confiança **82%**
+- **Animal Planet** (EPGShare BR1): Agora **Patrulheiros da Natureza** - Confiança **78%**
+- **HBO SIGNATURE** (Claro): Agora **Mary Tyler Moore: A Dama da TV** - Confiança **85%**
+- **PREMIERE 2** (Genius): Agora **Premiere 2** - Confiança **64%**
+- **PREMIERE 3** (Genius): Agora **Premiere 3** - Confiança **61%**
+- **PREMIERE 4** (VivoPlay): Agora **Premiere 4** - Confiança **59%**
+- **SporTV 1** (Globo): Agora **Bundesliga: Mainz x Bayern De Munique - ao vivo** - Confiança **67%**
+- **HBO FAMILY** (VivoPlay): Agora **Homem-Aranha 2** - Confiança **85%**
+- **History** (GuiaDeTV): Agora **Mistérios Inexplorados com Danny Trejo** - Confiança **81%**
+- **SPORTV 2** (EPGShare BR2): Agora **VT - Fluminense x Osasco** - Confiança **76%**
+- **BAND SPORTS** (Meu Guia): Agora **Oléé** - Confiança **72%**
+- **COMBATE** (EPGShare BR2): Agora **Oktagon 96** - Confiança **53%**
+- **ESPN** (Open-EPG BR): Agora **Leeds United x Tottenham Hotspur** - Confiança **82%**
+- **HBO 2** (EPGShare BR1): Agora **Anjos da Noite: Guerras de Sangue** - Confiança **87%**
+- **HBO Plus** (EPGShare BR1): Agora **Godzilla e Kong: O Novo Império** - Confiança **83%**
+- **CARTOON NETWORK** (EPGShare BR1): Agora **O Mundo (Sem Filtro) de Any Malu** - Confiança **79%**
+- **CNN BRASIL** (TV Map): Agora **Sem programação** - Confiança **56%**
+- **ESPN 2** (EPGShare BR1): Agora **ATP Masters 1000: Paris: Semifinal - Ao Vivo** - Confiança **72%**
+- **ESPN 3** (TV Map): Agora **NBA Action** - Confiança **72%**
+- **FISH TV** (Genius): Agora **A Meta** - Confiança **62%**
+- **History 2** (IPTV-EPG BR): Agora **Humanidade: A História de Todos Nós** - Confiança **73%**
+- **PREMIERE 5** (GuiaDeTV): Agora **Com o PREMIERE dá jogo!** - Confiança **62%**
+- **PREMIERE 6** (GuiaDeTV): Agora **Com o PREMIERE dá jogo!** - Confiança **59%**
+- **PREMIERE 7** (IPTV-EPG BR): Agora **Premiere 7** - Confiança **60%**
+- **BAND NEWS** (TV Map): Agora **Manhã BandNews** - Confiança **81%**
+- **Cartoonito** (TV Plus): Agora **Lucas A Aranha** - Confiança **68%**
+- **ESPN 5** (Meu Guia): Agora **VT - NBB: Unifacisa x Corinthians** - Confiança **77%**
+- **Food Network** (Open-EPG BR): Agora **Receitas de Humor da Daphne** - Confiança **62%**
+- **GLOOB** (GuiaDeTV): Agora **Miraculous - As Aventuras De Ladybug** - Confiança **87%**
+- **SPORTV 3** (EPGShare BR2): Agora **Aquecimento sportv - Ao Vivo** - Confiança **68%**
+- **ESPN 4** (Meu Guia): Agora **Moto 3: GP do Catar: Classificação** - Confiança **81%**
+- **Multishow** (Globo): Agora **Volte sempre** - Confiança **79%**
+- **REDE TV** (TV Map): Agora **Igreja Universal do Reino de Deus** - Confiança **73%**
+- **DISCOVERY KIDS** (Meu Guia): Agora **Peppa Pig** - Confiança **77%**
+- **ESPN 6** (TV Plus): Agora **VT - NFL: Chicago Bears x Seattle Seahawks** - Confiança **66%**
+- **BAND SP** (Open-EPG BR): Agora **Fórmula Band** - Confiança **59%**
+- **BIS** (IPTV-EPG BR): Agora **Cazuza - Boas Novas** - Confiança **87%**
+- **GLOOBINHO** (EPGShare BR1): Agora **Little Angel** - Confiança **73%**
+- **MODO VIAGEM** (Open-EPG BR 4): Agora **Vinhos.br : Os Giovannini** - Confiança **53%**
+- **Canal OFF** (Meu Guia): Agora **Euceano** - Confiança **82%**
+- **TV CULTURA** (Genius): Agora **Gildo** - Confiança **82%**
+- **GNT** (GuiaDeTV): Agora **Que História É Essa, Porchat?** - Confiança **78%**
+- **RECORD NEWS** (Genius): Agora **Cosme Rímoli** - Confiança **85%**
+- **DISCOVERY TURBO** (GuiaDeTV): Agora **Máquinas Muito Loucas** - Confiança **73%**
+- **GB SP** (IPTV-EPG BR): Agora **É de Casa** - Confiança **71%**
+- **LIFETIME** (IPTV-EPG BR): Agora **Procurando a Mamãe Noel** - Confiança **85%**
+- **GB RJ** (Genius): Agora **É de Casa** - Confiança **64%**
+- **HGTV** (IPTV-EPG BR): Agora **A Batalha dos Decoradores** - Confiança **72%**
+- **RECORDTV SP** (GuiaDeTV): Agora **Fala Brasil - Edição de Sábado** - Confiança **72%**
+- **TLC** (Open-EPG BR): Agora **Bem-Vindo à Família Plath** - Confiança **84%**
+- **TOONCAST** (MiTV): Agora **As Trapalhadas de Flapjack** - Confiança **79%**
+- **TV APARECIDA** (VivoPlay): Agora **Sábado no Santuário** - Confiança **70%**
+- **X SPORTS** (Open-EPG BR 4): Agora **Manchester City x West Ham United - Campeonato Inglês Feminino : Manchester City x West Ham United** - Confiança **46%**
+- **Curta!** (IPTV-EPG BR): Agora **De Longe Toda Serra É Azul** - Confiança **80%**
+- **Discovery Home & Health** (Genius): Agora **Reforma na Montanha: A Competição** - Confiança **87%**
+- **E!** (GuiaDeTV): Agora **Keeping Up With the Kardashians** - Confiança **66%**
+- **PREMIERE 8** (Genius): Agora **Premiere 8** - Confiança **71%**
+- **TV RA TIM BUM** (Open-EPG BR): Agora **Isso Disso** - Confiança **78%**
+- **CANCAO NOVA** (VivoPlay): Agora **Viagem Apostólica do Papa Leão XIV ao Uruguai : Santa Missa no Parque París Londres** - Confiança **68%**
+- **GB BRASILIA** (IPTV-EPG BR): Agora **É de Casa** - Confiança **63%**
+- **GB NORDESTE** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **52%**
+- **GB RBS PORTO ALEGRE** (Genius): Agora **É de Casa** - Confiança **49%**
+- **REDE VIDA** (TV Map): Agora **Novena Maria Passa na Frente** - Confiança **72%**
+- **SBT NEWS** (TV Map): Agora **News Sábado** - Confiança **62%**
+- **SBT SP** (Genius): Agora **Teleton 2026** - Confiança **62%**
+- **Sony** (Open-EPG BR): Agora **Robin Hood - O Príncipe dos Ladrões** - Confiança **81%**
+- **TV NOVO TEMPO** (VivoPlay): Agora **Adoração Especial : Especial** - Confiança **63%**
+- **VIVA** (Meu Guia): Agora **As Filhas Da Senhora Garcia** - Confiança **70%**
+- **ARTE 1** (IPTV-EPG BR): Agora **Arte Indígena Contemporânea** - Confiança **79%**
+- **AXN** (Meu Guia): Agora **Alert: Missing Persons Unit** - Confiança **76%**
+- **CANAL DO BOI** (Claro): Agora **Conexão Bela Vista e Parceiros - Synetics Brasil** - Confiança **66%**
+- **GB NEWS** (Genius): Agora **Jornal GloboNews - Edição das 10 Horas** - Confiança **84%**
+- **Megapix** (TV Map): Agora **Sing 2** - Confiança **80%**
+- **SBT** (Open-EPG BR): Agora **Teleton 2026 - Ao Vivo** - Confiança **79%**
+- **TNT** (GuiaDeTV): Agora **Um Maluco no Pedaço** - Confiança **82%**
+- **EPTV CAMPINAS** (Open-EPG BR): Agora **NFL : Compacto - Seattle Seahawks x Chicago Bears** - Confiança **59%**
+- **EPTV RIBEIRÃO PRETO** (Open-EPG BR): Agora **Masters de Paris de Tênis Masculino 2026 - Semifinal : Semifinal** - Confiança **59%**
+- **GB MINAS** (Genius): Agora **É de Casa** - Confiança **49%**
+- **GB TV BAHIA** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **51%**
+- **GB TV GAZETA VITORIA** (Genius): Agora **É de Casa** - Confiança **49%**
+- **GB TV SERGIPE** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **36%**
+- **INTER TV GRANDE MINAS** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **38%**
+- **Music Box Brazil** (IPTV-EPG BR): Agora **Jukebox** - Confiança **63%**
+- **NSC JOINVILLE** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **37%**
+- **NSC TV CHAPECO** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **38%**
+- **RPC FOZ DO IGUACU** (MiTV): Agora **Tire 5 Cartas** - Confiança **37%**
+- **RPC MARINGA** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **38%**
+- **RPC TV PARANAVAI** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **37%**
+- **RPC TV PONTA GROSSA** (MiTV): Agora **Tire 5 Cartas** - Confiança **37%**
+- **TELECINE PIPOCA** (VivoPlay): Agora **A Bela e a Fera** - Confiança **83%**
+- **TELECINE PREMIUM** (TV Map): Agora **Chernobyl: O Filme** - Confiança **74%**
+- **TV BRASIL** (GuiaDeTV): Agora **Ninhos em Movimento** - Confiança **79%**
+- **TV DIARIO** (Open-EPG BR): Agora **Nordeste Empreendedor** - Confiança **60%**
+- **TV GAZETA SUL** (Meu Guia): Agora **Gazeta Imóveis** - Confiança **56%**
+- **TV MIRANTE SAO LUIS** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **38%**
+- **TV RIO SUL** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **38%**
+- **TV TEM BAURU** (Open-EPG BR 4): Agora **Sem programação** - Confiança **37%**
+- **TV TEM ITAPETININGA** (Open-EPG BR 4): Agora **Sem programação** - Confiança **37%**
+- **TV TEM SOROCABA** (IPTV-EPG BR): Agora **No Data** - Confiança **48%**
+- **TV TRIBUNA SANTOS** (IPTV-EPG BR): Agora **No Data** - Confiança **60%**
+- **Warner** (Meu Guia): Agora **The Big Bang Theory** - Confiança **65%**
+- **AGROMAIS** (MiTV): Agora **Energia Agro** - Confiança **49%**
+- **FUTURA** (EPGShare BR1): Agora **Negros Em Foco** - Confiança **79%**
+- **GLOBO BRASÍLIA** (IPTV-EPG BR): Agora **É de Casa** - Confiança **63%**
+- **GLOBO RJ** (Genius): Agora **É de Casa** - Confiança **64%**
+- **GLOBO SP** (IPTV-EPG BR): Agora **É de Casa** - Confiança **71%**
+- **PRIME BOX BRAZIL** (IPTV-EPG BR): Agora **Adolescer** - Confiança **74%**
+- **Space** (IPTV-EPG BR): Agora **CSI: Miami** - Confiança **77%**
+- **TELECINE ACTION** (Open-EPG BR 4): Agora **Fúria em Alto Mar** - Confiança **86%**
+- **TELECINE CULT** (Claro): Agora **Orgulho E Preconceito** - Confiança **87%**
+- **TELECINE FUN** (TV Map): Agora **A Família da Noiva** - Confiança **77%**
+- **TELECINE TOUCH** (Claro): Agora **A Princesa Prometida** - Confiança **86%**
+- **TNT Séries** (IPTV-EPG BR): Agora **Major Crimes** - Confiança **78%**
+- **EPTV SUL DE MINAS** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **38%**
+- **Fashion TV** (VivoPlay): Agora **Duelo de Marceneiros** - Confiança **71%**
+- **GB TV ANHANGUERA** (Open-EPG BR): Agora **É de Casa** - Confiança **61%**
+- **GB TV CABO BRANCO** (IPTV-EPG BR): Agora **É de Casa** - Confiança **60%**
+- **GB TV GAZETA ALAGOAS** (IPTV-EPG BR): Agora **No Data** - Confiança **48%**
+- **GLOBO NEWS** (Genius): Agora **Jornal GloboNews - Edição das 10 Horas** - Confiança **84%**
+- **GLOBO NORDESTE** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **52%**
+- **JOVEN PAN NEWS** (IPTV-EPG BR): Agora **Morning Show** - Confiança **67%**
+- **RECORDTV MANAUS** (Genius): Agora **Fala Brasil - Edição de Sábado** - Confiança **49%**
+- **RECORDTV MG** (Meu Guia): Agora **Fala Brasil - Edição de Sábado** - Confiança **71%**
+- **Travel Box Brazil** (IPTV-EPG BR): Agora **Patty Leone Top Travels** - Confiança **73%**
+- **TV DIARIO MOGI DAS CRUZES** (Open-EPG BR 4): Agora **Sem programação** - Confiança **37%**
+- **CANAL WOOHOO** (Meu Guia): Agora **Blind Trick** - Confiança **72%**
+- **GLOBO MINAS** (Genius): Agora **É de Casa** - Confiança **49%**
+- **RECORD SP** (GuiaDeTV): Agora **Fala Brasil - Edição de Sábado** - Confiança **75%**
+- **RECORD TV BELEM** (MiTV): Agora **Fala Brasil - Edição de Sábado** - Confiança **37%**
+- **Trace Brazuca** (MiTV): Agora **Pulso PALOP** - Confiança **59%**
+- **BAND CAMPINAS** (IPTV-EPG BR): Agora **No Data** - Confiança **34%**
+- **CANAL RURAL** (GuiaDeTV): Agora **Planeta Campo** - Confiança **74%**
+- **Discovery** (GuiaDeTV): Agora **África** - Confiança **79%**
+- **INTER TV DOS VALES** (Open-EPG BR 4): Agora **Sem programação** - Confiança **37%**
+- **NHK** (IPTV-EPG BR): Agora **Venue101** - Confiança **65%**
+- **NSC BLUMENAU** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **37%**
+- **RECORDTV RJ** (Meu Guia): Agora **Fala Brasil - Edição de Sábado** - Confiança **73%**
+- **RECORDTV RS** (Meu Guia): Agora **Fala Brasil - Edição de Sábado** - Confiança **71%**
+- **TV GAZETA SP** (IPTV-EPG BR): Agora **Gazeta Imóveis** - Confiança **57%**
+- **USA Network** (TV Plus): Agora **Suits** - Confiança **56%**
+- **FOX NEWS** (GuiaDeTV): Agora **Fox & Friends Weekend** - Confiança **69%**
+- **GLOBOPLAY NOVELAS** (Claro): Agora **As Filhas Da Senhora Garcia** - Confiança **67%**
+- **SBT RJ** (Genius): Agora **Teleton 2026** - Confiança **62%**
+- **TV SENADO** (Claro): Agora **Assunto de Estado: Eleições** - Confiança **75%**
+- **ZooMoo** (Open-EPG BR): Agora **PH Explica** - Confiança **48%**
+- **A&E** (Open-EPG BR): Agora **Quem Dá Mais?** - Confiança **76%**
+- **Adult Swim** (TV Plus): Agora **Frieren e a Jornada para o Além** - Confiança **54%**
+- **BAND RJ** (Open-EPG BR): Agora **PodPeople** - Confiança **66%**
+- **CANAL UOL** (Open-EPG BR): Agora **UOL News Especial - Ao Vivo** - Confiança **67%**
+- **CNBC BRASIL** (TV Map): Agora **Sem programação** - Confiança **54%**
+- **CNN INTERNACIONAL** (Open-EPG BR): Agora **The Chris Wallace Show** - Confiança **63%**
+- **DISNEY PLUS 2** (Genius): Agora **Semifinal** - Confiança **48%**
+- **DISNEY PLUS 3** (Genius): Agora **No Data** - Confiança **48%**
+- **DISNEY PLUS 4** (Genius): Agora **No Data** - Confiança **48%**
+- **Dog TV** (IPTV-EPG BR): Agora **Estímulo** - Confiança **62%**
+- **EPTV CENTRAL SAO CARLOS** (Open-EPG BR 4): Agora **Sem programação** - Confiança **37%**
+- **GB REDE AMAZONICA MANAUS** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **37%**
+- **GLOBO BAHIA** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **50%**
+- **GLOBO RBS PORTO ALEGRE** (Genius): Agora **É de Casa** - Confiança **49%**
+- **GLOBO SJRP** (IPTV-EPG BR): Agora **É de Casa** - Confiança **67%**
+- **GLOBO TV ALVORADA DO SUL** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **37%**
+- **INTER TV ALTO LITORAL** (Open-EPG BR 4): Agora **Sem programação** - Confiança **36%**
+- **JOVEM PAN NEWS** (IPTV-EPG BR): Agora **Morning Show** - Confiança **68%**
+- **NSC TV BLUMENAU** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **38%**
+- **NSC TV CRICIUMA** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **38%**
+- **PAI ETERNO** (Claro): Agora **Dedo de Prosa** - Confiança **47%**
+- **PARAMOUNT PLUS 1** (Open-EPG BR): Agora **Libertadores e Sulamericana** - Confiança **59%**
+- **PARAMOUNT PLUS 2** (TV Plus): Agora **Libertadores e Sulamericana** - Confiança **62%**
+- **PARAMOUNT PLUS 3** (TV Plus): Agora **Libertadores e Sulamericana** - Confiança **62%**
+- **PARAMOUNT PLUS 4** (TV Plus): Agora **Libertadores e Sulamericana** - Confiança **62%**
+- **RECORD RIO** (Open-EPG BR): Agora **Fala Brasil - Edição de Sábado** - Confiança **47%**
+- **RECORD RS** (Meu Guia): Agora **Fala Brasil - Edição de Sábado** - Confiança **71%**
+- **RECORDTV DF** (Meu Guia): Agora **Fala Brasil - Edição de Sábado** - Confiança **71%**
+- **RECORDTV PAULISTA** (MiTV): Agora **Fala Brasil - Edição de Sábado** - Confiança **37%**
+- **RECORDTV RJ INTERIOR** (Open-EPG BR 4): Agora **Sem programação** - Confiança **37%**
+- **RECORDTV SP INTERIOR** (Open-EPG BR 4): Agora **Sem programação** - Confiança **37%**
+- **TV SANTA CRUZ** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **38%**
+- **WOHOO** (Meu Guia): Agora **Blind Trick** - Confiança **68%**
+- **BAND** (GuiaDeTV): Agora **Fórmula Band** - Confiança **72%**
+- **BAND RS** (Open-EPG BR 4): Agora **Sem programação** - Confiança **37%**
+- **BOA VONTADE** (Open-EPG BR): Agora **Momento Ecumênico de Oração** - Confiança **48%**
+- **DUMDUM** (Open-EPG BR 4): Agora **PH Explica : Visita ao Museu da Imaginação** - Confiança **49%**
+- **GLOBO ANHANGUERA GOIANIA** (Genius): Agora **É de Casa** - Confiança **49%**
+- **GLOBO BELÉM** (Genius): Agora **É de Casa** - Confiança **49%**
+- **GLOBO EPCAMPINAS** (Genius): Agora **NFL : Compacto - Seattle Seahawks x Chicago Bears** - Confiança **49%**
+- **GLOBO TEM SOROCABA** (Genius): Agora **No Data** - Confiança **49%**
+- **GLOBO TRIBUNA SANTOS** (Genius): Agora **No Data** - Confiança **49%**
+- **RECORD ITAPOAN** (MiTV): Agora **Fala Brasil - Edição de Sábado** - Confiança **37%**
+- **RECORDTV GOIAS** (Open-EPG BR): Agora **Fala Brasil - Edição de Sábado** - Confiança **64%**
+- **TV CAMARA** (Open-EPG BR): Agora **Comissão** - Confiança **67%**
+- **TV EVANGELIZAR** (Open-EPG BR 4): Agora **Conhecendo Igrejas** - Confiança **64%**
+- **TV JUSTICA** (Meu Guia): Agora **Artigo 5º** - Confiança **60%**
+- **Universal TV** (Claro): Agora **Chicago Fire** - Confiança **72%**
+- **AMC** (Meu Guia): Agora **As Aventuras de Tintim** - Confiança **81%**
+- **BAND BAHIA** (MiTV): Agora **Codisman** - Confiança **37%**
+- **Band Belem** (MiTV): Agora **Fórmula Band** - Confiança **38%**
+- **BLOOMBERG** (Open-EPG BR): Agora **Bloomberg This Weekend** - Confiança **64%**
+- **BOA VONTADE TV** (MiTV): Agora **Momento Ecumênico de Oração** - Confiança **60%**
+- **CANAL BRASIL** (VivoPlay): Agora **Gonzaga - De Pai pra Filho** - Confiança **72%**
+- **Cinemax** (VivoPlay): Agora **Hellboy** - Confiança **84%**
+- **Discovery Science** (TV Map): Agora **O Caçador de Múmias : Morte para o Céu** - Confiança **71%**
+- **Discovery Theater** (IPTV-EPG BR): Agora **Trabalho Sujo** - Confiança **78%**
+- **Discovery World** (Meu Guia): Agora **O Poder dos Alimentos** - Confiança **78%**
+- **Film & Arts** (EPGShare BR1): Agora **Billy Cobham Projeto Spectrum 50** - Confiança **85%**
+- **GB TV REDE AMAZONICA MANAUS** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **37%**
+- **GB TV REDE AMAZONICA RIO BRANCO** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **36%**
+- **GE TV** (Globo): Agora **Sem programação** - Confiança **57%**
+- **Globo EPTV Campinas** (Genius): Agora **NFL : Compacto - Seattle Seahawks x Chicago Bears** - Confiança **49%**
+- **GLOBO GAZETA VITÓRIA** (Genius): Agora **É de Casa** - Confiança **49%**
+- **Globo TV TEM Sao Jose do Rio Preto** (Genius): Agora **É de Casa** - Confiança **49%**
+- **IDEAL TV** (Open-EPG BR): Agora **Manchester City x West Ham United** - Confiança **58%**
+- **Investigação Discovery** (Genius): Agora **Michael Jackson: A Faking It** - Confiança **75%**
+- **JOVEM PAN** (IPTV-EPG BR): Agora **Morning Show** - Confiança **68%**
+- **MALHAÇÃO FAST** (Open-EPG BR): Agora **Malhação - 1997** - Confiança **59%**
+- **Nsports** (GuiaDeTV): Agora **Um Assado Para... Rafael Oliveira** - Confiança **56%**
+- **RECORD** (Meu Guia): Agora **Fala Brasil - Edição de Sábado** - Confiança **76%**
+- **RECORD BRASILIA** (Genius): Agora **Fala Brasil - Edição de Sábado** - Confiança **60%**
+- **RECORD GOIAS** (Open-EPG BR): Agora **Fala Brasil - Edição de Sábado** - Confiança **61%**
+- **RECORD INTERIOR SP** (Open-EPG BR 4): Agora **Sem programação** - Confiança **37%**
+- **RECORD MANAUS** (Genius): Agora **Fala Brasil - Edição de Sábado** - Confiança **49%**
+- **RECORDTV BA** (Meu Guia): Agora **Fala Brasil - Edição de Sábado** - Confiança **71%**
+- **RECORD TV CAMPINAS** (Genius): Agora **Fala Brasil - Edição de Sábado** - Confiança **38%**
+- **RECORDTV GO** (Meu Guia): Agora **Fala Brasil - Edição de Sábado** - Confiança **73%**
+- **RECORDTV ITAPOAN** (MiTV): Agora **Fala Brasil - Edição de Sábado** - Confiança **37%**
+- **REDE SUPER** (MiTV): Agora **Fé para Vencer** - Confiança **47%**
+- **REDETV PAMPA** (MiTV): Agora **Programa Religioso** - Confiança **55%**
+- **RIT TV** (Open-EPG BR 4): Agora **Mulheres que Vencem** - Confiança **54%**
+- **SBT REDE MASSA** (Open-EPG BR 4): Agora **Teleton 2026** - Confiança **60%**
+- **Universal Studio** (Meu Guia): Agora **Sob o Céu de Natal** - Confiança **80%**
+- **TERRA VIVA** (Open-EPG BR 4): Agora **Central de Negócios - Estância Bahia** - Confiança **69%**
+- **TNT Novelas** (GuiaDeTV): Agora **Os Dez Mandamentos** - Confiança **69%**
+- **TV ANHANGUERA LUZIANIA** (Open-EPG BR 4): Agora **Sem programação** - Confiança **36%**
+- **TVE** (MiTV): Agora **Ninhos em Movimento** - Confiança **45%**
+- **TV GAZETA SUL ES** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **37%**
+- **TV OESTE** (Open-EPG BR 4): Agora **Conversa com Augusto Nunes** - Confiança **62%**
+- **TV PAI ETERNO** (Claro): Agora **Dedo de Prosa** - Confiança **47%**
+- **TV PARAIBA** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **38%**
+- **TV UNIAO** (MiTV): Agora **Ao vivo - União News - 1ª Edição** - Confiança **57%**
+- **ASSEMBLÉIA LEGISLATIVA** (MiTV): Agora **Ao vivo - Alcance Enem** - Confiança **48%**
+- **BAND NATAL** (MiTV): Agora **Vem com a Gente** - Confiança **37%**
+- **Band SP [1]** (Open-EPG BR): Agora **Fórmula Band** - Confiança **59%**
+- **BAND TV CAMPINAS** (IPTV-EPG BR): Agora **No Data** - Confiança **48%**
+- **BAND TV RJ** (Open-EPG BR): Agora **PodPeople** - Confiança **65%**
+- **BAND TV SP** (Open-EPG BR): Agora **Fórmula Band** - Confiança **58%**
+- **CNN BRASIL MONEY** (Open-EPG BR): Agora **CNN Money News - Ao Vivo** - Confiança **60%**
+- **CNN ESPANHOL** (MiTV): Agora **Fiebre por la realeza: por qué EE.UU. no logra desvincularse de la Corona** - Confiança **58%**
+- **Conmebol TV 1** (Genius): Agora **No Data** - Confiança **60%**
+- **GLOBO DIARIO MOGI DAS CRUZES** (Open-EPG BR 4): Agora **Sem programação** - Confiança **36%**
+- **Globo EPTV Ribeirao Preto** (IPTV-EPG BR): Agora **Masters de Paris de Tênis Masculino 2026 - Semifinal : Semifinal** - Confiança **58%**
+- **Globo NSC TV Florianopolis** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **37%**
+- **Globo RBS TV Porto Alegre** (Genius): Agora **É de Casa** - Confiança **50%**
+- **Globo Rede Amazonica Manaus** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **37%**
+- **GLOBO RPC PONTA GROSSA** (MiTV): Agora **Tire 5 Cartas** - Confiança **37%**
+- **GLOBO TERESINA** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **38%**
+- **Globo TV Gazeta Vitoria** (Genius): Agora **É de Casa** - Confiança **49%**
+- **GLOBO TV MIRANTE SAO LUIS** (Open-EPG BR): Agora **É de Casa** - Confiança **47%**
+- **Globo TV TEM Bauru** (Genius): Agora **É de Casa** - Confiança **49%**
+- **GLOBO TV TEM SOROCABA** (Genius): Agora **No Data** - Confiança **60%**
+- **Globo TV Tribuna Santos [1]** (Genius): Agora **No Data** - Confiança **60%**
+- **Globo TV Vanguarda S J dos Campos** (Genius): Agora **No Data** - Confiança **49%**
+- **MARKKET** (VivoPlay): Agora **Marketing que te Marca** - Confiança **61%**
+- **MUSIC BOX BRASIL** (Open-EPG BR): Agora **Jukebox** - Confiança **71%**
+- **POLISHOP** (TV Map): Agora **Programa Pago** - Confiança **44%**
+- **PRIME BOX BRASIL** (IPTV-EPG BR): Agora **Adolescer** - Confiança **71%**
+- **RECORD BAHIA** (MiTV): Agora **Fala Brasil - Edição de Sábado** - Confiança **37%**
+- **RECORD BELEM** (MiTV): Agora **Fala Brasil - Edição de Sábado** - Confiança **37%**
+- **RECORD MINAS** (Open-EPG BR): Agora **Fala Brasil - Edição de Sábado** - Confiança **47%**
+- **RECORD TV BAHIA** (MiTV): Agora **Fala Brasil - Edição de Sábado** - Confiança **37%**
+- **RECORD TV BRASILIA** (IPTV-EPG BR): Agora **Fala Brasil - Edição de Sábado** - Confiança **63%**
+- **Record TV SP [2]** (GuiaDeTV): Agora **Fala Brasil - Edição de Sábado** - Confiança **69%**
+- **REDE GOSPEL** (Claro): Agora **De Bem Com a Vida** - Confiança **58%**
+- **SBT BRASILIA** (Open-EPG BR): Agora **Teleton 2026** - Confiança **64%**
+- **SBT PARA** (MiTV): Agora **Ao vivo - Teleton 2026** - Confiança **59%**
+- **SBT PR** (Genius): Agora **Teleton 2026** - Confiança **49%**
+- **SBT RS** (MiTV): Agora **Ao vivo - Teleton 2026** - Confiança **59%**
+- **SBT SP [2]** (Genius): Agora **Teleton 2026** - Confiança **62%**
+- **SESCTV** (MiTV): Agora **O Menino que Engoliu o Sol** - Confiança **59%**
+- **BAND GOIANIA** (MiTV): Agora **Band Esporte Clube** - Confiança **36%**
+- **BAND MINAS** (MiTV): Agora **Carros e Consórcios** - Confiança **32%**
+- **BAND PAULISTA** (Open-EPG BR 4): Agora **Sem programação** - Confiança **37%**
+- **BAND RIO** (Open-EPG BR): Agora **PodPeople** - Confiança **58%**
+- **Band SP [2]** (Open-EPG BR): Agora **Fórmula Band** - Confiança **59%**
+- **BAND TRIANGULO** (Open-EPG BR 4): Agora **Sem programação** - Confiança **37%**
+- **BAND TV GOIANIA** (MiTV): Agora **Band Esporte Clube** - Confiança **37%**
+- **BAND TV MINAS** (Open-EPG BR): Agora **Carros e Consórcios** - Confiança **47%**
+- **BAND TV NEWS** (TV Map): Agora **Manhã BandNews** - Confiança **75%**
+- **BAND TV RS** (Open-EPG BR 4): Agora **Sem programação** - Confiança **36%**
+- **BAND TV SPORTS** (Meu Guia): Agora **Oléé** - Confiança **73%**
+- **BAND VALE** (Open-EPG BR 4): Agora **Sem programação** - Confiança **37%**
+- **CNN** (Open-EPG BR): Agora **Smerconish** - Confiança **54%**
+- **CNN EN ESPANOL** (MiTV): Agora **Fiebre por la realeza: por qué EE.UU. no logra desvincularse de la Corona** - Confiança **59%**
+- **CO Canal 1** (Open-EPG BR 4): Agora **Bonnie e Clyde - Uma Rajada de Balas** - Confiança **48%**
+- **Conmebol TV 2** (Genius): Agora **No Data** - Confiança **60%**
+- **Conmebol TV 3** (Genius): Agora **No Data** - Confiança **60%**
+- **Conmebol TV 4** (IPTV-EPG BR): Agora **No Data** - Confiança **48%**
+- **Discovery TLC [3]** (GuiaDeTV): Agora **África** - Confiança **70%**
+- **DPA FAST** (Open-EPG BR): Agora **D.P.A.- Detetives Do Prédio Azul** - Confiança **59%**
+- **ESPN 2 [1]** (EPGShare BR1): Agora **ATP Masters 1000: Paris: Semifinal - Ao Vivo** - Confiança **72%**
+- **ESPN 2 [2]** (EPGShare BR1): Agora **ATP Masters 1000: Paris: Semifinal - Ao Vivo** - Confiança **72%**
+- **FOX SPORTS** (Meu Guia): Agora **Moto 3: GP do Catar: Classificação** - Confiança **81%**
+- **GB USA** (Genius): Agora **Vinhos.br** - Confiança **48%**
+- **GLOBO BELO HORIZONTE (BR2)** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **38%**
+- **Globo Brasília [1]** (IPTV-EPG BR): Agora **É de Casa** - Confiança **63%**
+- **GLOBO EPTV CAMPINAS (BR2)** (Genius): Agora **NFL : Compacto - Seattle Seahawks x Chicago Bears** - Confiança **49%**
+- **GLOBO EPTV RIBEIRAO PRETO (BR2)** (IPTV-EPG BR): Agora **Masters de Paris de Tênis Masculino 2026 - Semifinal : Semifinal** - Confiança **58%**
+- **Globo EPTV Sul de Minas** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **37%**
+- **GLOBO EPTV SUL DE MINAS (BR2)** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **37%**
+- **GLOBO INTER TV DOS VALES (BR2)** (Open-EPG BR 4): Agora **Sem programação** - Confiança **36%**
+- **Globo Inter TV Grande Minas** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **37%**
+- **GLOBO NATAL** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **38%**
+- **GLOBO NSC TV FLORIANOPOLIS (BR2)** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **37%**
+- **GLOBO RBS PORTO ALEGRE (BR2)** (Genius): Agora **É de Casa** - Confiança **49%**
+- **GLOBO RBS TV PELOTAS (BR2)** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **37%**
+- **GLOBO RECIFE** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **38%**
+- **Globo Rede Amazonica Rio Branco** (Open-EPG BR): Agora **É de Casa** - Confiança **47%**
+- **Globo Rio [1]** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **38%**
+- **GLOBO RJ (BR2)** (Genius): Agora **É de Casa** - Confiança **64%**
+- **Globo RPC Cascavel** (Open-EPG BR 4): Agora **Sem programação** - Confiança **37%**
+- **GLOBO RPC FOZ DO IGUACU** (MiTV): Agora **Tire 5 Cartas** - Confiança **37%**
+- **GLOBO RPC FOZ DO IGUACU (BR2)** (MiTV): Agora **Tire 5 Cartas** - Confiança **37%**
+- **Globo São Paulo [1]** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **38%**
+- **GLOBO TV ANHANGUERA GOIANIA** (Genius): Agora **É de Casa** - Confiança **49%**
+- **GLOBO TV BAHIA** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **51%**
+- **GLOBO TV DIARIO MOGI DAS CRUZES** (Open-EPG BR 4): Agora **Sem programação** - Confiança **36%**
+- **GLOBO TV GAZETA VITORIA (BR2)** (Genius): Agora **É de Casa** - Confiança **49%**
+- **GLOBO TV NORDESTE** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **51%**
+- **GLOBO TV TEM BAURU (BR2)** (Genius): Agora **É de Casa** - Confiança **49%**
+- **GLOBO TV TEM SOROCABA (BR2)** (Genius): Agora **No Data** - Confiança **60%**
+- **GLOBO TV TRIBUNA SANTOS (BR2)** (Genius): Agora **No Data** - Confiança **60%**
+- **Multishow [1]** (Globo): Agora **Volte sempre** - Confiança **79%**
+- **NBR** (MiTV): Agora **Farol** - Confiança **58%**
+- **NICK** (IPTV-EPG BR): Agora **No Data** - Confiança **48%**
+- **Off [3]** (Meu Guia): Agora **Euceano** - Confiança **76%**
+- **POLISHOP TV** (TV Map): Agora **Programa Pago** - Confiança **43%**
+- **Premiere 2 [1]** (Genius): Agora **Premiere 2** - Confiança **64%**
+- **Premiere 2 [2]** (Genius): Agora **Premiere 2** - Confiança **64%**
+- **Premiere 3 [1]** (Genius): Agora **Premiere 3** - Confiança **61%**
+- **Premiere 3 [2]** (Genius): Agora **Premiere 3** - Confiança **61%**
+- **PT CARTOON NETWORK** (Open-EPG BR): Agora **O Mundo (Sem Filtro) de Any Malu** - Confiança **76%**
+- **PT DISCOVERY** (GuiaDeTV): Agora **África** - Confiança **71%**
+- **PT DISNEY JUNIOR** (IPTV-EPG BR): Agora **No Data** - Confiança **48%**
+- **PT FOX LIFE** (IPTV-EPG BR): Agora **No Data** - Confiança **48%**
+- **PT GLOBO** (Globo): Agora **É de Casa - ao vivo** - Confiança **47%**
+- **PT NAT GEO WILD** (IPTV-EPG BR): Agora **No Data** - Confiança **48%**
+- **PT NATIONAL GEOGRAPHIC** (MiTV): Agora **Mayday! Desastres Aéreos** - Confiança **37%**
+- **PT NICKELODEON** (EPGShare BR2): Agora **Sem programação** - Confiança **37%**
+- **PT NICK JR** (MiTV): Agora **Canal Não Disponível** - Confiança **61%**
+- **RAI** (Open-EPG BR 4): Agora **Buongiorno Benessere** - Confiança **61%**
+- **RECEITAS FAST** (Globo): Agora **Um Brinde Ao Vinho** - Confiança **47%**
+- **RECORD CAMPINAS** (Genius): Agora **Fala Brasil - Edição de Sábado** - Confiança **49%**
+- **RECORD PAULISTA** (MiTV): Agora **Fala Brasil - Edição de Sábado** - Confiança **37%**
+- **RECORD RJ** (Meu Guia): Agora **Fala Brasil - Edição de Sábado** - Confiança **73%**
+- **RECORDTV BR** (Meu Guia): Agora **Fala Brasil - Edição de Sábado** - Confiança **76%**
+- **RECORDTV CABRALIA** (Genius): Agora **Fala Brasil - Edição de Sábado** - Confiança **48%**
+- **RECORDTV CURITIBA** (MiTV): Agora **Fala Brasil - Edição de Sábado** - Confiança **37%**
+- **RECORDTV FLORIANOPOLIS** (MiTV): Agora **Fala Brasil - Edição de Sábado** - Confiança **37%**
+- **RECORD TV MINAS** (IPTV-EPG BR): Agora **Fala Brasil - Edição de Sábado** - Confiança **48%**
+- **RECORDTV NDTV FLORIANOPOLIS** (MiTV): Agora **Fala Brasil - Edição de Sábado** - Confiança **37%**
+- **Record TV SP [1]** (GuiaDeTV): Agora **Fala Brasil - Edição de Sábado** - Confiança **69%**
+- **RECORDTV VITORIA** (Open-EPG BR 4): Agora **Sem programação** - Confiança **36%**
+- **REDE AMAZONICA MANACAPURU** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **37%**
+- **SBT CUIABA** (MiTV): Agora **Ao vivo - Teleton 2026** - Confiança **59%**
+- **SBT DIFUSORA** (Genius): Agora **Teleton 2026** - Confiança **49%**
+- **SBT INTERIOR SP** (Open-EPG BR 4): Agora **Sem programação** - Confiança **37%**
+- **SBT MARINGA** (Open-EPG BR 4): Agora **Sem programação** - Confiança **36%**
+- **SBT NOVA FRIBURGO** (Open-EPG BR 4): Agora **Sem programação** - Confiança **37%**
+- **SBT RIO (BR2)** (MiTV): Agora **Ao vivo - Teleton 2026** - Confiança **59%**
+- **SBT SERRA DOURADA** (MiTV): Agora **Ao vivo - Teleton 2026** - Confiança **58%**
+- **SBT SP [1]** (Genius): Agora **Teleton 2026** - Confiança **62%**
+- **SBT TV ALTEROSA** (Open-EPG BR): Agora **Teleton 2026** - Confiança **48%**
+- **SBT TV ALTEROSA MG** (MiTV): Agora **Ao vivo - Teleton 2026** - Confiança **58%**
+- **SBT TV SERRA DOURADA** (MiTV): Agora **Ao vivo - Teleton 2026** - Confiança **58%**
+- **SBT VITORIOSA** (MiTV): Agora **Circulando** - Confiança **36%**
+- **SPORTSNET** (GuiaDeTV): Agora **Ao vivo - Esquenta Estúdio** - Confiança **52%**
+- **SporTV1 [1]** (Globo): Agora **Bundesliga: Mainz x Bayern De Munique - ao vivo** - Confiança **67%**
+- **SporTV1 [2]** (Globo): Agora **Bundesliga: Mainz x Bayern De Munique - ao vivo** - Confiança **67%**
+- **SporTV2 [1]** (EPGShare BR2): Agora **VT - Fluminense x Osasco** - Confiança **76%**
+- **SporTV2 [2]** (EPGShare BR2): Agora **VT - Fluminense x Osasco** - Confiança **76%**
+- **SporTV3 [1]** (EPGShare BR2): Agora **Aquecimento sportv - Ao Vivo** - Confiança **68%**
+- **SporTV3 [2]** (EPGShare BR2): Agora **Aquecimento sportv - Ao Vivo** - Confiança **68%**
+- **Sportynet PLUS 1 [3]** (TV Plus): Agora **Programação Esportiva** - Confiança **60%**
+- **Sportynet PLUS 2 [1]** (TV Plus): Agora **Programação Esportiva** - Confiança **60%**
+- **TBS** (Meu Guia): Agora **Um Milagre** - Confiança **55%**
+- **TVE BAHIA** (MiTV): Agora **TV Brasil Animada** - Confiança **59%**
+- **TV GAZETA** (TV Map): Agora **Gazeta Imóveis** - Confiança **61%**
+- **TV PAMPA RS** (Open-EPG BR): Agora **Programa Religioso** - Confiança **57%**
+- **UNIVERSAL REALITY** (Open-EPG BR 4): Agora **Below Deck Mediterranean : Uma Queda e Tanto** - Confiança **55%**
+- **US FOX SPORTS 2** (TV Map): Agora **Sem programação** - Confiança **39%**
+- **US TLC** (Open-EPG BR): Agora **Bem-Vindo à Família Plath** - Confiança **84%**
+- **24H FUTURAMA** (GuiaDeTV): Agora **Negros Em Foco** - Confiança **72%**
+- **Adult Swin [3]** (TV Plus): Agora **Frieren e a Jornada para o Além** - Confiança **53%**
+- **Agro+** (GuiaDeTV): Agora **Energia Agro** - Confiança **66%**
+- **Animal Planet [1]** (EPGShare BR1): Agora **Patrulheiros da Natureza** - Confiança **78%**
+- **Band Bahia [1]** (MiTV): Agora **Codisman** - Confiança **37%**
+- **BAND BRASILIA** (Open-EPG BR): Agora **Fórmula Band** - Confiança **60%**
+- **Band Brasilia [1]** (Open-EPG BR): Agora **Fórmula Band** - Confiança **60%**
+- **Band Brasília [2]** (Open-EPG BR): Agora **Fórmula Band** - Confiança **60%**
+- **Band Campinas [1]** (IPTV-EPG BR): Agora **No Data** - Confiança **34%**
+- **Band Campinas [2]** (IPTV-EPG BR): Agora **No Data** - Confiança **34%**
+- **Band Curitiba [1]** (Open-EPG BR 4): Agora **Bora PR** - Confiança **61%**
+- **Band Curitiba [2]** (Open-EPG BR 4): Agora **Bora PR** - Confiança **61%**
+- **Band Goiania [2]** (Open-EPG BR): Agora **Band Esporte Clube** - Confiança **47%**
+- **Band Maceio [2]** (MiTV): Agora **Vem com a Gente** - Confiança **37%**
+- **Band News [1]** (TV Map): Agora **Manhã BandNews** - Confiança **81%**
+- **Band RJ [1]** (Open-EPG BR): Agora **PodPeople** - Confiança **66%**
+- **Band RJ [2]** (Open-EPG BR): Agora **PodPeople** - Confiança **66%**
+- **Band RS [1]** (Open-EPG BR 4): Agora **Sem programação** - Confiança **37%**
+- **Band RS [2]** (Open-EPG BR 4): Agora **Sem programação** - Confiança **37%**
+- **Band Sports [1]** (Meu Guia): Agora **Oléé** - Confiança **72%**
+- **Bis [3]** (IPTV-EPG BR): Agora **Cazuza - Boas Novas** - Confiança **87%**
+- **BOX KIDS TV** (VivoPlay): Agora **Jogos de Inventar : Bicicleta Enferrujada** - Confiança **61%**
+- **Canal UOL [2]** (Open-EPG BR): Agora **UOL News Especial - Ao Vivo** - Confiança **67%**
+- **Canção Nova [2]** (VivoPlay): Agora **Viagem Apostólica do Papa Leão XIV ao Uruguai : Santa Missa no Parque París Londres** - Confiança **68%**
+- **CARTOON** (VivoPlay): Agora **O Mundo (Sem Filtro) de Any Malu : Pop Quiz** - Confiança **60%**
+- **Cartoonito [1]** (TV Plus): Agora **Lucas A Aranha** - Confiança **68%**
+- **Cartoon Network [1]** (EPGShare BR1): Agora **O Mundo (Sem Filtro) de Any Malu** - Confiança **79%**
+- **Chef TV [1]** (IPTV-EPG BR): Agora **Dicas Imperdíveis** - Confiança **65%**
+- **CINEMAX FHDR** (VivoPlay): Agora **Hellboy** - Confiança **84%**
+- **CNN Brasil [1]** (TV Map): Agora **Sem programação** - Confiança **56%**
+- **CNN Brasil Money [2]** (Open-EPG BR): Agora **CNN Money News - Ao Vivo** - Confiança **60%**
+- **CNT** (Open-EPG BR 4): Agora **Problemas e Soluções** - Confiança **65%**
+- **CO Canal 1 (movil)** (Open-EPG BR 4): Agora **Bonnie e Clyde - Uma Rajada de Balas** - Confiança **48%**
+- **COMBATE [1]** (EPGShare BR2): Agora **Oktagon 96** - Confiança **53%**
+- **Curta! [3]** (IPTV-EPG BR): Agora **De Longe Toda Serra É Azul** - Confiança **80%**
+- **Discovery [1]** (GuiaDeTV): Agora **África** - Confiança **79%**
+- **Discovery Home & Health [1]** (Genius): Agora **Reforma na Montanha: A Competição** - Confiança **87%**
+- **Discovery Kids [3]** (Meu Guia): Agora **Peppa Pig** - Confiança **77%**
+- **DISCOVERY KIDS FHDR** (Meu Guia): Agora **Peppa Pig** - Confiança **71%**
+- **Discovery Science [1]** (TV Map): Agora **O Caçador de Múmias : Morte para o Céu** - Confiança **71%**
+- **DISCOVERY SCIENCE FHDR** (TV Map): Agora **O Caçador de Múmias : Morte para o Céu** - Confiança **65%**
+- **Discovery Theater [1]** (IPTV-EPG BR): Agora **Trabalho Sujo** - Confiança **78%**
+- **Discovery Turbo [1]** (GuiaDeTV): Agora **Máquinas Muito Loucas** - Confiança **73%**
+- **DISCOVERY TURBO FHDR** (Meu Guia): Agora **Máquinas Muito Loucas** - Confiança **66%**
+- **Discovery World [1]** (Meu Guia): Agora **O Poder dos Alimentos** - Confiança **78%**
+- **DISCOVERY WORLD FHDR** (Meu Guia): Agora **O Poder dos Alimentos** - Confiança **77%**
+- **DISNEY PLUS 2 [1]** (Genius): Agora **Semifinal** - Confiança **48%**
+- **DISNEY PLUS 3 [1]** (Genius): Agora **No Data** - Confiança **48%**
+- **DISNEY PLUS 5 [1]** (Genius): Agora **No Data** - Confiança **48%**
+- **DISNEY PLUS 6 [1]** (Genius): Agora **No Data** - Confiança **48%**
+- **DREAMWORKS** (TV Map): Agora **Kung Fu Panda - Punhos do Destino : O Dragão Azul Brinca com Fogo** - Confiança **59%**
+- **E! [3]** (GuiaDeTV): Agora **Keeping Up With the Kardashians** - Confiança **66%**
+- **ESPN 3 [1]** (TV Map): Agora **NBA Action** - Confiança **72%**
+- **ESPN 3 [2]** (TV Map): Agora **NBA Action** - Confiança **72%**
+- **ESPN 4 [1]** (Meu Guia): Agora **Moto 3: GP do Catar: Classificação** - Confiança **81%**
+- **ESPN 4 [2]** (Meu Guia): Agora **Moto 3: GP do Catar: Classificação** - Confiança **81%**
+- **ESPN 5 [3]** (Meu Guia): Agora **VT - NBB: Unifacisa x Corinthians** - Confiança **77%**
+- **ESPN 6 [3]** (TV Plus): Agora **VT - NFL: Chicago Bears x Seattle Seahawks** - Confiança **66%**
+- **Fashion TV [3]** (VivoPlay): Agora **Duelo de Marceneiros** - Confiança **71%**
+- **Film&Arts [3]** (EPGShare BR1): Agora **Billy Cobham Projeto Spectrum 50** - Confiança **85%**
+- **Fish TV [3]** (Genius): Agora **A Meta** - Confiança **62%**
+- **Food Network [1]** (Open-EPG BR): Agora **Receitas de Humor da Daphne** - Confiança **62%**
+- **FR France 24 [3]** (Open-EPG BR): Agora **Esrpl Noticias** - Confiança **50%**
+- **Globo** (EPGShare BR2): Agora **É de Casa** - Confiança **73%**
+- **GLOBO ANHANGUERA** (Open-EPG BR): Agora **É de Casa** - Confiança **61%**
+- **GLOBO ANHANGUERA JATAI** (Open-EPG BR): Agora **É de Casa** - Confiança **60%**
+- **GLOBO ANHANGUERA LUZIANIA** (Genius): Agora **É de Casa** - Confiança **49%**
+- **Globo EPTV Campinas [1]** (Genius): Agora **NFL : Compacto - Seattle Seahawks x Chicago Bears** - Confiança **49%**
+- **Globo EPTV Ribeirão Preto [1]** (IPTV-EPG BR): Agora **Masters de Paris de Tênis Masculino 2026 - Semifinal : Semifinal** - Confiança **58%**
+- **Globo EPTV Ribeirão Preto [2]** (IPTV-EPG BR): Agora **Masters de Paris de Tênis Masculino 2026 - Semifinal : Semifinal** - Confiança **58%**
+- **Globo EPTV Sul de Minas [1]** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **37%**
+- **Globo Inter TV Grande Minas [1]** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **37%**
+- **Globo Minas [1]** (Genius): Agora **É de Casa** - Confiança **49%**
+- **Globo News [1]** (Genius): Agora **Jornal GloboNews - Edição das 10 Horas** - Confiança **84%**
+- **Globo News [2]** (Genius): Agora **Jornal GloboNews - Edição das 10 Horas** - Confiança **84%**
+- **Globo Nordeste [3]** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **52%**
+- **Globo Novelas [1]** (Claro): Agora **As Filhas Da Senhora Garcia** - Confiança **66%**
+- **GLOBO PE (ASA BRANCA)** (GuiaDeTV): Agora **É de Casa** - Confiança **63%**
+- **Globo RBS Porto Alegre [1]** (Genius): Agora **É de Casa** - Confiança **49%**
+- **Globo RBS TV Pelotas** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **37%**
+- **Globo Recife PE [2]** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **37%**
+- **Globo Rede Amazônica Manaus [3]** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **37%**
+- **Globo Rede Amazônica Rio Branco AC [1]** (Open-EPG BR): Agora **É de Casa** - Confiança **47%**
+- **GLOBO RIO SUL** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **37%**
+- **Globo Rio Sul [1]** (MiTV): Agora **Ao vivo - É de Casa** - Confiança **37%**
+- **Globo RPC Cascavel [1]** (Open-EPG BR 4): Agora **Sem programação** - Confiança **37%**
+- **Globo RPC Foz do Iguaçu [1]** (MiTV): Agora **Tire 5 Cartas** - Confiança **37%**
+- **Globo RPC Ponta Grossa [1]** (MiTV): Agora **Tire 5 Cartas** - Confiança **37%**
+- **Globo TV Anhanguera Goiânia [1]** (Genius): Agora **É de Casa** - Confiança **49%**
+- **Globo TV Anhanguera Goiania [3]** (Genius): Agora **É de Casa** - Confiança **49%**
+- **GLOBO TV ANHANGUERA LUZIANIA** (Genius): Agora **É de Casa** - Confiança **48%**
+- **Globo TV Diário Mogi das Cruzes [2]** (Open-EPG BR 4): Agora **Sem programação** - Confiança **36%**
+- **GLOBO TV GAZETA ALAGOAS** (IPTV-EPG BR): Agora **No Data** - Confiança **48%**
+- **Globo TV Gazeta Alagoas [1]** (IPTV-EPG BR): Agora **No Data** - Confiança **48%**
+- **Globo TV Gazeta Vitoria [1]** (Genius): Agora **É de Casa** - Confiança **49%**
+- **GLOBO TV GAZETA VITORIA ES** (Genius): Agora **É de Casa** - Confiança **49%**
+- **Globo TV TEM Bauru [3]** (Genius): Agora **É de Casa** - Confiança **49%**
+- **Globo TV TEM Itapetininga [1]** (Open-EPG BR 4): Agora **Sem programação** - Confiança **36%**
+- **Globo TV TEM Sorocaba [3]** (Genius): Agora **No Data** - Confiança **60%**
+- **Globo TV Tribuna Santos** (Genius): Agora **No Data** - Confiança **60%**
+- **Globo Vanguarda S J dos Campos [3]** (Genius): Agora **No Data** - Confiança **49%**
+- **Gloob [3]** (GuiaDeTV): Agora **Miraculous - As Aventuras De Ladybug** - Confiança **87%**
+- **Gloobinho [3]** (EPGShare BR1): Agora **Little Angel** - Confiança **73%**
+- **GNT [1]** (GuiaDeTV): Agora **Que História É Essa, Porchat?** - Confiança **78%**
+- **HBO 2 [2]** (EPGShare BR1): Agora **Anjos da Noite: Guerras de Sangue** - Confiança **87%**
+- **HBO Family [2]** (VivoPlay): Agora **Homem-Aranha 2** - Confiança **85%**
+- **HBO FAMILY FHDR** (Open-EPG BR): Agora **Homem-Aranha 2** - Confiança **48%**
+- **HBO Mundi [2]** (VivoPlay): Agora **O Bolo do Presidente** - Confiança **82%**
+- **HBO PLUS [2]** (EPGShare BR1): Agora **Godzilla e Kong: O Novo Império** - Confiança **83%**
+- **HBO Pop [2]** (Claro): Agora **O Morro dos Ventos Uivantes** - Confiança **82%**
+- **HBO Signature [2]** (Claro): Agora **Mary Tyler Moore: A Dama da TV** - Confiança **85%**
+- **HBO Xtreme [1]** (VivoPlay): Agora **Relatos de um Assassino** - Confiança **82%**
+- **HGTV [1]** (IPTV-EPG BR): Agora **A Batalha dos Decoradores** - Confiança **72%**
+- **History [1]** (GuiaDeTV): Agora **Mistérios Inexplorados com Danny Trejo** - Confiança **81%**
+- **History 2 [1]** (IPTV-EPG BR): Agora **Humanidade: A História de Todos Nós** - Confiança **73%**
+- **ID Investigação Discovery [1]** (Genius): Agora **Michael Jackson: A Faking It** - Confiança **75%**
+- **JP News [1]** (TV Plus): Agora **Morning Show - Melhores Momentos** - Confiança **49%**
+- **LA Boomerang** (TV Plus): Agora **Lucas A Aranha** - Confiança **57%**
+- **LA Cartoon Network** (Open-EPG BR): Agora **O Mundo (Sem Filtro) de Any Malu** - Confiança **76%**
+- **LA Discovery** (GuiaDeTV): Agora **África** - Confiança **71%**
+- **LA Discovery KIDS** (Meu Guia): Agora **Peppa Pig** - Confiança **72%**
+- **LA Discovery Science** (TV Map): Agora **O Caçador de Múmias : Morte para o Céu** - Confiança **64%**
+- **LA Discovery Turbo** (Meu Guia): Agora **Máquinas Muito Loucas** - Confiança **67%**
+- **LA HBO Family** (VivoPlay): Agora **Homem-Aranha 2** - Confiança **82%**
+- **LA HBO PLUS** (EPGShare BR1): Agora **Godzilla e Kong: O Novo Império** - Confiança **83%**
+- **LIKE** (Open-EPG BR): Agora **Programe-se com as Dicas do Like** - Confiança **59%**
+- **Like [3]** (Open-EPG BR): Agora **Programe-se com as Dicas do Like** - Confiança **59%**
+- **MEgaTV** (MiTV): Agora **Prosperidade com Deus** - Confiança **59%**
+- **Modo Viagem [3]** (Open-EPG BR 4): Agora **Vinhos.br : Os Giovannini** - Confiança **53%**
+- **Music Box Brasil [3]** (Open-EPG BR): Agora **Jukebox** - Confiança **71%**
+- **MUSIC BOX BRAZIL FHDR** (GuiaDeTV): Agora **Jukebox (videoclipes)** - Confiança **63%**
+- **MX Disney XD** (IPTV-EPG BR): Agora **No Data** - Confiança **48%**
+- **MX FOX Sport 2** (TV Map): Agora **Sem programação** - Confiança **39%**
+- **MX Natgeo KIDS** (IPTV-EPG BR): Agora **No Data** - Confiança **48%**
+- **MX Tooncast** (MiTV): Agora **As Trapalhadas de Flapjack** - Confiança **78%**
+- **Novo Tempo** (VivoPlay): Agora **Adoração Especial : Especial** - Confiança **55%**
+- **Nsports [3]** (GuiaDeTV): Agora **Um Assado Para... Rafael Oliveira** - Confiança **56%**
+- **PARAMOUNT PLUS 1 FHDR** (Open-EPG BR): Agora **Libertadores e Sulamericana** - Confiança **58%**
+- **PARAMOUNT PLUS 2 FHDR** (TV Plus): Agora **Libertadores e Sulamericana** - Confiança **61%**
+- **PARAMOUNT PLUS 3 FHDR** (TV Plus): Agora **Libertadores e Sulamericana** - Confiança **61%**
+- **Premiere 4 [1]** (VivoPlay): Agora **Premiere 4** - Confiança **59%**
+- **Premiere 4 [2]** (VivoPlay): Agora **Premiere 4** - Confiança **59%**
+- **Premiere 5 [1]** (GuiaDeTV): Agora **Com o PREMIERE dá jogo!** - Confiança **62%**
+- **Premiere 5 [2]** (GuiaDeTV): Agora **Com o PREMIERE dá jogo!** - Confiança **62%**
+- **Premiere 6 [1]** (GuiaDeTV): Agora **Com o PREMIERE dá jogo!** - Confiança **59%**
+- **Premiere 6 [2]** (GuiaDeTV): Agora **Com o PREMIERE dá jogo!** - Confiança **59%**
+- **Premiere 7 [1]** (IPTV-EPG BR): Agora **Premiere 7** - Confiança **60%**
+- **Premiere 7 [2]** (IPTV-EPG BR): Agora **Premiere 7** - Confiança **60%**
+- **Premiere 8 [1]** (Genius): Agora **Premiere 8** - Confiança **71%**
+- **Premiere 8 [2]** (Genius): Agora **Premiere 8** - Confiança **71%**
+- **PRIME BOX BRAZIL FHDR** (IPTV-EPG BR): Agora **Adolescer** - Confiança **71%**
+- **RECORD ES** (TV Map): Agora **Sem programação** - Confiança **42%**
+- **RECORD MT** (Meu Guia): Agora **Fala Brasil - Edição de Sábado** - Confiança **69%**
+- **RECORD NATAL** (Genius): Agora **Fala Brasil - Edição de Sábado** - Confiança **49%**
+- **Record News [3]** (Genius): Agora **Cosme Rímoli** - Confiança **85%**
+- **RECORD PA** (Meu Guia): Agora **Fala Brasil - Edição de Sábado** - Confiança **71%**
+- **RECORD PR** (Meu Guia): Agora **Fala Brasil - Edição de Sábado** - Confiança **71%**
+- **RECORD RN** (Meu Guia): Agora **Fala Brasil - Edição de Sábado** - Confiança **71%**
+- **RECORD SC** (Meu Guia): Agora **Fala Brasil - Edição de Sábado** - Confiança **71%**
+- **RECORD TO** (Meu Guia): Agora **Fala Brasil - Edição de Sábado** - Confiança **67%**
+- **Record TV Bahia [1]** (MiTV): Agora **Fala Brasil - Edição de Sábado** - Confiança **37%**
+- **Record TV Bahia [2]** (MiTV): Agora **Fala Brasil - Edição de Sábado** - Confiança **37%**
+- **Record TV Belém [1]** (MiTV): Agora **Fala Brasil - Edição de Sábado** - Confiança **37%**
+- **Record TV Belém [2]** (MiTV): Agora **Fala Brasil - Edição de Sábado** - Confiança **37%**
+- **Record TV Brasilia [1]** (IPTV-EPG BR): Agora **Fala Brasil - Edição de Sábado** - Confiança **63%**
+- **Record TV Brasilia [2]** (IPTV-EPG BR): Agora **Fala Brasil - Edição de Sábado** - Confiança **63%**
+- **Record TV Campinas [1]** (Genius): Agora **Fala Brasil - Edição de Sábado** - Confiança **37%**
+- **Record TV Campinas [2]** (Genius): Agora **Fala Brasil - Edição de Sábado** - Confiança **37%**
+- **Record TV Curitiba [1]** (MiTV): Agora **Fala Brasil - Edição de Sábado** - Confiança **37%**
+- **Record TV Florianópolis [1]** (MiTV): Agora **Fala Brasil - Edição de Sábado** - Confiança **37%**
+- **Record TV Fortaleza [1]** (Open-EPG BR): Agora **Igreja Universal do Reino de Deus** - Confiança **47%**
+- **Record TV Goiás [1]** (Open-EPG BR): Agora **Fala Brasil - Edição de Sábado** - Confiança **61%**
+- **Record TV Goias [2]** (Open-EPG BR): Agora **Fala Brasil - Edição de Sábado** - Confiança **61%**
+- **Record TV Manaus [1]** (Genius): Agora **Fala Brasil - Edição de Sábado** - Confiança **37%**
+- **Record TV Manaus [2]** (Genius): Agora **Fala Brasil - Edição de Sábado** - Confiança **37%**
+- **Record TV Minas [1]** (IPTV-EPG BR): Agora **Fala Brasil - Edição de Sábado** - Confiança **48%**
+- **Record TV Minas [2]** (IPTV-EPG BR): Agora **Fala Brasil - Edição de Sábado** - Confiança **48%**
+- **RECORD TV NEWS** (Genius): Agora **Cosme Rímoli** - Confiança **84%**
+- **Record TV Recife [1]** (MiTV): Agora **Igreja Universal do Reino de Deus** - Confiança **36%**
+- **Record TV Recife [2]** (MiTV): Agora **Igreja Universal do Reino de Deus** - Confiança **36%**
+- **Record TV Rio [1]** (IPTV-EPG BR): Agora **Fala Brasil - Edição de Sábado** - Confiança **69%**
+- **Record TV Rio [2]** (IPTV-EPG BR): Agora **Fala Brasil - Edição de Sábado** - Confiança **69%**
+- **Record TV Rio Preto [1]** (Open-EPG BR 4): Agora **Sem programação** - Confiança **37%**
+- **Record TV SC [2]** (GuiaDeTV): Agora **Fala Brasil - Edição de Sábado** - Confiança **66%**
+- **REDE 21** (MiTV): Agora **Igreja Universal** - Confiança **58%**
+- **Rede Brasil** (GuiaDeTV): Agora **Zorro** - Confiança **71%**
+- **REDE BRASIL TV** (GuiaDeTV): Agora **Zorro** - Confiança **70%**
+- **REDE CNT** (MiTV): Agora **Temperando o Papo** - Confiança **37%**
+- **REDE FAMILIA** (Genius): Agora **Novena Maria Passa na Frente** - Confiança **32%**
+- **REDE MINAS** (MiTV): Agora **Matula 98** - Confiança **58%**
+- **RedeTV! [3]** (TV Map): Agora **Igreja Universal do Reino de Deus** - Confiança **73%**
+- **Rede Vida [3]** (TV Map): Agora **Novena Maria Passa na Frente** - Confiança **72%**
+- **RIT TV [2]** (Genius): Agora **No Data** - Confiança **50%**
+- **Sabor & Art [3]** (TV Map): Agora **Que Seja Eterno Enquanto Cure** - Confiança **61%**
+- **SBT Brasília [2]** (Open-EPG BR): Agora **Teleton 2026** - Confiança **64%**
+- **SBT CENTRAL** (Open-EPG BR 4): Agora **Sem programação** - Confiança **37%**
+- **SBT CUIABA MT** (Open-EPG BR): Agora **Teleton 2026** - Confiança **48%**
+- **SBT PI** (Genius): Agora **Teleton 2026** - Confiança **49%**
+- **SBT PI [2]** (Genius): Agora **Teleton 2026** - Confiança **49%**
+- **SBT PIAUI** (MiTV): Agora **Ao vivo - Teleton 2026** - Confiança **59%**
+- **SBT RIBEIRÃO PRETO** (IPTV-EPG BR): Agora **Masters de Paris de Tênis Masculino 2026 - Semifinal : Semifinal** - Confiança **58%**
+- **SBT RJ [2]** (Genius): Agora **Teleton 2026** - Confiança **62%**
+- **SBT RS [2]** (MiTV): Agora **Ao vivo - Teleton 2026** - Confiança **59%**
+- **SBT TV BRASILIA** (Open-EPG BR): Agora **Teleton 2026** - Confiança **59%**
+- **SBT TV PIAUI** (MiTV): Agora **Ao vivo - Teleton 2026** - Confiança **58%**
+- **SBT TV Tambaú (PB)** (Open-EPG BR): Agora **Teleton 2026** - Confiança **47%**
+- **SPACE FHDR** (Open-EPG BR): Agora **CSI: Miami** - Confiança **48%**
+- **SPORTV 2 FHDR** (Open-EPG BR): Agora **VT - Fluminense x Osasco** - Confiança **48%**
+- **SPORTV 3 FHDR** (Open-EPG BR): Agora **Aquecimento SporTV : Fórmula 1: 3º Treino Livre - GP do Brasil** - Confiança **48%**
+- **SPORTV FHDR** (Open-EPG BR): Agora **Mainz x Bayern de Munique - Ao Vivo** - Confiança **48%**
+- **Sportynet PLUS 3 [1]** (TV Plus): Agora **Programação Esportiva** - Confiança **60%**
+- **STUDIO UNIVERSAL FHDR** (Meu Guia): Agora **Sob o Céu de Natal** - Confiança **79%**
+- **TCM** (IPTV-EPG BR): Agora **Bonnie e Clyde - Uma Rajada de Balas** - Confiança **78%**
+- **Telecine Action [2]** (Open-EPG BR 4): Agora **Fúria em Alto Mar** - Confiança **86%**
+- **Telecine Cult [2]** (Claro): Agora **Orgulho E Preconceito** - Confiança **87%**
+- **Telecine Fun [2]** (TV Map): Agora **A Família da Noiva** - Confiança **77%**
+- **Telecine Pipoca [2]** (VivoPlay): Agora **A Bela e a Fera** - Confiança **83%**
+- **Telecine Premium [2]** (TV Map): Agora **Chernobyl: O Filme** - Confiança **74%**
+- **Telecine Touch [2]** (Claro): Agora **A Princesa Prometida** - Confiança **86%**
+- **Times Brasil CNBC [1]** (TV Map): Agora **Radar : Edição de Sábado** - Confiança **43%**
+- **TIMES Exclusivo CNBC [2]** (Claro): Agora **Radar - Edição de Sábado** - Confiança **60%**
+- **Tooncast [1]** (MiTV): Agora **As Trapalhadas de Flapjack** - Confiança **79%**
+- **Travel Box Brazil [3]** (IPTV-EPG BR): Agora **Patty Leone Top Travels** - Confiança **73%**
+- **TruTV** (Genius): Agora **Frieren e a Jornada para o Além** - Confiança **65%**
+- **TV A CRÍTICA** (IPTV-EPG BR): Agora **Aquecimento** - Confiança **61%**
+- **TV BRASIL 2** (Open-EPG BR): Agora **Sem programação** - Confiança **37%**
+- **TV Brasil [3]** (GuiaDeTV): Agora **Ninhos em Movimento** - Confiança **79%**
+- **TV Cultura [3]** (Genius): Agora **Gildo** - Confiança **82%**
+- **TV ESCOLA** (Meu Guia): Agora **Ao Pé da Letra - Alunos** - Confiança **34%**
+- **TV MEIO NORTE** (Open-EPG BR): Agora **Pré-Enem Day** - Confiança **48%**
+- **TV Novo Tempo [3]** (VivoPlay): Agora **Adoração Especial : Especial** - Confiança **63%**
+- **TV Pai Eterno [3]** (Claro): Agora **Dedo de Prosa** - Confiança **47%**
+- **TV PAMPA** (Open-EPG BR): Agora **Programa Religioso** - Confiança **58%**
+- **TV Ra Tim Bum [3]** (Open-EPG BR): Agora **Isso Disso** - Confiança **78%**
+- **TV WS BRASIL** (GuiaDeTV): Agora **Ninhos em Movimento** - Confiança **75%**
+- **Universo TV** (TV Plus): Agora **Chicago Fire** - Confiança **43%**
+- **US Animal Planet** (Claro): Agora **Patrulheiros da Natureza** - Confiança **70%**
+- **US BBC World NEWS** (TV Map): Agora **Sem programação** - Confiança **57%**
+- **US Boomerang** (TV Plus): Agora **Lucas A Aranha** - Confiança **57%**
+- **US Cartoon Network** (Open-EPG BR): Agora **O Mundo (Sem Filtro) de Any Malu** - Confiança **76%**
+- **US Discovery** (GuiaDeTV): Agora **África** - Confiança **71%**
+- **US Disney Junior** (IPTV-EPG BR): Agora **No Data** - Confiança **48%**
+- **US FOOD Network (east)** (Open-EPG BR): Agora **Receitas de Humor da Daphne** - Confiança **61%**
+- **US FOX NEWS** (GuiaDeTV): Agora **Fox & Friends Weekend** - Confiança **66%**
+- **US HBO Family** (VivoPlay): Agora **Homem-Aranha 2** - Confiança **82%**
+- **US HBO Signature** (Open-EPG BR): Agora **Mary Tyler Moore - A Dama da TV** - Confiança **83%**
+- **US History** (GuiaDeTV): Agora **Mistérios Inexplorados com Danny Trejo** - Confiança **72%**
+- **US Lifetime** (IPTV-EPG BR): Agora **Procurando a Mamãe Noel** - Confiança **84%**
+- **US MTV LIVE** (IPTV-EPG BR): Agora **No Data** - Confiança **48%**
+- **US NICK JR** (MiTV): Agora **Canal Não Disponível** - Confiança **61%**
+- **US Paramount Network** (EPGShare BR1): Agora **Sem programação** - Confiança **37%**
+- **US SONY Movie** (VivoPlay): Agora **A Caminho de Casa** - Confiança **70%**
+- **US SONY Movies** (VivoPlay): Agora **A Caminho de Casa** - Confiança **70%**
+- **US USA Network** (TV Plus): Agora **Suits** - Confiança **56%**
+- **Xsports [1]** (Open-EPG BR 4): Agora **Manchester City x West Ham United - Campeonato Inglês Feminino : Manchester City x West Ham United** - Confiança **46%**
+- **Xsports [2]** (Open-EPG BR 4): Agora **Manchester City x West Ham United - Campeonato Inglês Feminino : Manchester City x West Ham United** - Confiança **46%**
+- **XXX Sextreme [2]** (Open-EPG BR): Agora **Clientes Satisfeitos** - Confiança **58%**
+- **Zoomooo [3]** (MiTV): Agora **PH Explica** - Confiança **44%**
+- **Paramount Channel** (Genius): Agora **No Data** - Confiança **60%**
+- **Sabor & Arte** (TV Map): Agora **Que Seja Eterno Enquanto Cure** - Confiança **61%**
