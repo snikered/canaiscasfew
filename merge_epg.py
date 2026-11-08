@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""EPG Universal Consolidado — Baseado em Dicionário Persistente (channels.json)
-+ Espelho + M3U/Xtream + Explosão Automática de Variantes (SD/HD/FHD/H265/4K).
+"""EPG Universal Consolidado — Ultra Compacto (<15MB para GitHub)
+Lê Dicionário (channels.json) + Qualquer arquivo .m3u local + Espelho + URLs Secretas.
+Agrupa todas as variantes (SD/HD/FHD/H265) em <display-name> sem duplicar programas!
 """
 from __future__ import annotations
 
 import copy
+import glob
 import gzip
 import json
 import os
@@ -50,8 +52,9 @@ AGREEMENT_THRESHOLD = float(os.environ.get("AGREEMENT_THRESHOLD", "0.55"))
 MIN_COMPARABLE_PROGRAMMES = int(os.environ.get("MIN_COMPARABLE_PROGRAMMES", "3"))
 
 DOWNLOAD_WORKERS = max(1, min(4, int(os.environ.get("DOWNLOAD_WORKERS", "3"))))
-GZIP_LEVEL = max(1, min(9, int(os.environ.get("GZIP_LEVEL", "6"))))
-OUTPUT_PAST_HOURS = max(0, int(os.environ.get("OUTPUT_PAST_HOURS", "12")))
+GZIP_LEVEL = max(1, min(9, int(os.environ.get("GZIP_LEVEL", "9"))))
+OUTPUT_PAST_HOURS = max(0, int(os.environ.get("OUTPUT_PAST_HOURS", "6")))
+OUTPUT_FUTURE_HOURS = max(24, int(os.environ.get("OUTPUT_FUTURE_HOURS", "72")))
 WRITE_PLAIN_XML = os.environ.get("WRITE_PLAIN_XML", "0").strip().lower() in {"1", "true", "yes"}
 
 IPTV_USER_AGENTS = [
@@ -152,7 +155,6 @@ CHANNEL_SYNONYMS = {
 }
 
 def strip_qualities_keep_case(name: str) -> str:
-    """Remove tags de qualidade (SD/HD/FHD/H265) mantendo a grafia original do canal."""
     if not name: return ""
     s = re.sub(r'\[.*?\]|\(.*?\)|\|.*?\|', ' ', name)
     s = re.sub(r'[\¹\²\³\⁴]', '', s)
@@ -423,7 +425,6 @@ def best_fuzzy(source: EpgSource, aliases: list[str]) -> tuple[str | None, float
     return best[1], best[0], second_score, f"aproximação {best[0]:.3f}: {best[2]} ~ {best[3]}"
 
 def find_match(source: EpgSource, aliases: list[str], source_ids: list[str] = None) -> ChannelMatch | None:
-    # 1. Tenta pelo ID normalizado do dicionário (se existir)
     for raw_sid in (source_ids or []):
         norm_sid = normalize_source_id(raw_sid)
         if norm_sid and norm_sid in source.normalized_id_index:
@@ -431,11 +432,9 @@ def find_match(source: EpgSource, aliases: list[str], source_ids: list[str] = No
             best_cid = max(cands, key=lambda cid: len(source.programs.get(cid, [])))
             return ChannelMatch(source, best_cid, f"id do dicionário: {raw_sid}", 1.0)
 
-    # 2. Tenta pelo nome exato
     exact_id, reason = choose_exact(source, aliases)
     if exact_id: return ChannelMatch(source, exact_id, reason, 1.0)
     
-    # 3. Tenta por aproximação (Fuzzy)
     fuzzy_id, best_score, second_score, fuzzy_reason = best_fuzzy(source, aliases)
     if fuzzy_id and best_score >= FUZZY_THRESHOLD and (best_score - second_score) >= FUZZY_MARGIN:
         return ChannelMatch(source, fuzzy_id, fuzzy_reason, best_score)
@@ -639,7 +638,7 @@ def make_validation(entry: dict[str, object], chosen: CandidateEvaluation, all_e
     }
 
 def generate_quality_variants(base_names: Iterable[str]) -> list[str]:
-    """Explode um nome base (ex: 'AXN') em todas as variantes usadas pelas listas IPTV."""
+    """Gera todas as variações de nome para <display-name> (sem duplicar programas!)."""
     suffixes = [
         "",
         " SD",
@@ -652,14 +651,13 @@ def generate_quality_variants(base_names: Iterable[str]) -> list[str]:
         " [H265]",
         " H265",
         " 4K",
-        " UHD",
     ]
     result = []
     seen = set()
     for base in base_names:
         clean_base = strip_qualities_keep_case(base)
         for root in (base.strip(), clean_base):
-            if not root or len(root) > 180:
+            if not root or len(root) > 160:
                 continue
             for suf in suffixes:
                 cand = f"{root}{suf}".strip()
@@ -678,7 +676,6 @@ def get_clean_aliases(entry: dict[str, object]) -> list[str]:
     if entry.get("aliases"):
         values.extend(str(x).strip() for x in entry.get("aliases", []) if x)
         
-    # Adiciona sinônimos conhecidos à lista de bases para gerar variantes (ex: Universal Channel / Universal TV)
     norm_clean = normalizar_canal(raw_name)
     for syn in CHANNEL_SYNONYMS.get(norm_clean, []):
         values.append(syn)
@@ -686,40 +683,36 @@ def get_clean_aliases(entry: dict[str, object]) -> list[str]:
 
     return generate_quality_variants(values)
 
-def get_all_export_ids(entry: dict[str, object]) -> list[str]:
+def get_primary_export_ids(entry: dict[str, object]) -> list[str]:
+    """Retorna APENAS os IDs técnicos (Máx 2 por canal) para não explodir o tamanho do XML!"""
     ids = []
     seen = set()
     raw_name = str(entry.get("name", "")).strip()
     target_id = str(entry.get("id", "")).strip()
+    clean_base = strip_qualities_keep_case(raw_name) or target_id
 
     def add_id(val: str):
         v = val.strip()
-        if v and v not in seen and len(v) <= 220:
+        if v and v not in seen and len(v) <= 180:
             ids.append(v)
             seen.add(v)
 
-    # 1. ID primário do dicionário (ex: "AMC.br")
-    if target_id:
-        add_id(target_id)
-
-    # 2. IDs de compatibilidade do dicionário e TVIDs validados das listas
+    # 1. TVIDs oficiais validados (ex: "AMC.br")
     for cid in entry.get("compatibility_ids", []) or []:
-        add_id(str(cid))
+        if is_valid_provider_tvid(raw_name, str(cid)):
+            add_id(str(cid))
     for t_id in entry.get("tvg_ids_to_export", []) or []:
-        t_id_str = str(t_id).strip()
-        if t_id_str and is_valid_provider_tvid(raw_name, t_id_str):
-            add_id(t_id_str)
+        if is_valid_provider_tvid(raw_name, str(t_id)):
+            add_id(str(t_id))
 
-    # 3. Nome exato e todas as variantes de qualidade (SD, HD, FHD, FHD [H265])
-    if raw_name:
-        add_id(raw_name)
-    for alias in get_clean_aliases(entry):
-        add_id(alias)
+    # 2. Se não tiver TVID oficial ou além dele, garante o ID de nome base único
+    add_id(clean_base)
 
-    return ids
+    # Limita a no máximo 2 IDs com programação por emissora para manter o arquivo < 15 MB
+    return ids[:2]
 
 def stitch_multi_source_schedule(
-    all_evaluations: list[CandidateEvaluation], target_channel_id: str, cutoff: datetime, overrides: dict[str, object]
+    all_evaluations: list[CandidateEvaluation], target_channel_id: str, cutoff: datetime, max_future: datetime, overrides: dict[str, object]
 ) -> list[ET.Element]:
     if not all_evaluations: return []
 
@@ -761,7 +754,7 @@ def stitch_multi_source_schedule(
             if sp_dt is None or sp_dt <= s_dt:
                 sp_dt = parsed[i + 1]["start"] if i + 1 < len(parsed) else s_dt + timedelta(hours=2)
             if i + 1 < len(parsed) and sp_dt > parsed[i + 1]["start"]: sp_dt = parsed[i + 1]["start"]
-            if sp_dt < cutoff: continue
+            if sp_dt < cutoff or s_dt > max_future: continue
             cleaned_source_progs.append({"start": s_dt, "stop": sp_dt, "el": prog["el"]})
 
         if not merged_timeline:
@@ -823,14 +816,15 @@ def write_epg_stream(
     plain = plain_path.open("wb") if WRITE_PLAIN_XML else None
     programme_count = 0
     cutoff = now - timedelta(hours=OUTPUT_PAST_HOURS)
+    max_future = now + timedelta(hours=OUTPUT_FUTURE_HOURS)
 
     xml_id_to_data: dict[str, tuple[CandidateEvaluation, list[ET.Element], list[str]]] = {}
     
     for entry, chosen, all_evaluations, _forced in selected:
         target_id = str(entry.get("id", ""))
-        stitched = stitch_multi_source_schedule(all_evaluations, target_id, cutoff, overrides)
+        stitched = stitch_multi_source_schedule(all_evaluations, target_id, cutoff, max_future, overrides)
         all_names = get_clean_aliases(entry)
-        export_ids = get_all_export_ids(entry)
+        export_ids = get_primary_export_ids(entry)
         
         for out_id in export_ids:
             if out_id not in xml_id_to_data:
@@ -847,7 +841,7 @@ def write_epg_stream(
                 gz.write(data)
                 if plain is not None: plain.write(data)
 
-            generator = "EPG Universal Otimizado (Dicionário + Explosão de Variantes)"
+            generator = "EPG Universal Otimizado (Ultra Compacto)"
             source_name = "Consolidado Inteligente de Múltiplas Fontes"
             emit((f"<?xml version='1.0' encoding='utf-8'?>\n<tv generator-info-name={quoteattr(generator)} source-info-name={quoteattr(source_name)}>\n").encode("utf-8"))
 
@@ -887,18 +881,20 @@ def write_epg_stream(
     if plain is not None: plain.close()
     elif plain_path.exists(): plain_path.unlink()
     
+    size_mb = gzip_path.stat().st_size / (1024 * 1024)
+    print(f"Tamanho final do epg.xml.gz: {size_mb:.2f} MB (Limite do GitHub: 100 MB)")
     return programme_count, len(xml_id_to_data)
 
 def main() -> None:
-    print("Iniciando geração de EPG (Dicionário Persistente + Espelho + Explosão de Variantes)...")
+    print("Iniciando geração de EPG (Dicionário + M3U Local + Ultra Compactação)...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     stage_start = time.perf_counter()
     
     entries = []
-    # Agrupa canais por nome normalizado para não recalcular a mesma emissora 5 vezes (SD, HD, FHD, H265)
     grouped_by_norm: dict[str, dict[str, Any]] = {}
+    VOD_BLACKLIST = {"VOD", "PLAYBACK", "XXX", "ADULTO", "EVENTO", "LANCAMENTO", "LANÇAMENTO", "FILMES", "SERIES", "SÉRIES"}
 
     def merge_channel_record(ch_id: str, name: str, aliases: Iterable[str] = (), tvg_ids: Iterable[str] = (), comp_ids: Iterable[str] = (), source_ids: Iterable[str] = (), group: str = "") -> None:
         base_name = name or ch_id
@@ -927,7 +923,53 @@ def main() -> None:
         if group and not rec["group"]:
             rec["group"] = group
 
-    # 1. Carrega o Dicionário Persistente (channels.json) compilado na etapa anterior
+    def parse_m3u_file_into_records(m3u_file: Path) -> int:
+        count = 0
+        with m3u_file.open("r", encoding="utf-8", errors="ignore") as f:
+            current_extinf = None
+            for line in f:
+                line = line.strip()
+                if not line: continue
+                if line.startswith("#EXTINF:"):
+                    current_extinf = line
+                elif (line.startswith("http") or line.startswith("rtmp")) and current_extinf:
+                    lower_url = line.split("?")[0].lower()
+                    if lower_url.endswith(('.mp4', '.mkv', '.avi', '.mov', '.wmv', '.flv', '.webm')):
+                        current_extinf = None
+                        continue
+
+                    tvg_id_match = re.search(r'tvg-id="(.*?)"', current_extinf, re.IGNORECASE)
+                    tvg_name_match = re.search(r'tvg-name="(.*?)"', current_extinf, re.IGNORECASE)
+                    group_match = re.search(r'group-title="(.*?)"', current_extinf, re.IGNORECASE)
+                    name_match = re.search(r',([^,]*?)$', current_extinf)
+                    
+                    tvg_id = tvg_id_match.group(1).strip() if tvg_id_match else ""
+                    tvg_name = tvg_name_match.group(1).strip() if tvg_name_match else ""
+                    group = group_match.group(1).strip() if group_match else ""
+                    name = name_match.group(1).strip() if name_match else ""
+                    current_extinf = None
+                    
+                    if any(blacklisted in group.upper() for blacklisted in VOD_BLACKLIST):
+                        continue
+                        
+                    target_id = tvg_name or name
+                    if not target_id: continue
+                    
+                    name_upper = target_id.upper()
+                    if re.search(r'\bS\d{1,3}\s*E\d{1,3}\b|\bT\d{1,3}\s*EP?\d{1,3}\b|\b24HS?\b|^24\s*H\b', name_upper):
+                        continue
+                    
+                    merge_channel_record(
+                        ch_id=target_id,
+                        name=name or tvg_name,
+                        aliases=[x for x in (tvg_name, name) if x],
+                        tvg_ids=[tvg_id] if tvg_id else [],
+                        group=group,
+                    )
+                    count += 1
+        return count
+
+    # 1. Carrega Dicionário Persistente (channels.json)
     if CATALOG_PATH.exists():
         try:
             print(f"Lendo Dicionário Persistente ({CATALOG_PATH})...")
@@ -944,11 +986,23 @@ def main() -> None:
                     source_ids=ch.get("source_ids", []) or [],
                     group=str(ch.get("group", ch.get("group-title", ""))),
                 )
-            print(f"  -> {len(grouped_by_norm)} canais base carregados do dicionário.")
+            print(f"  -> {len(grouped_by_norm)} emissoras base carregadas do dicionário.")
         except Exception as e:
             print(f"Aviso ao ler {CATALOG_PATH}: {e}")
 
-    # 2. Carrega o Espelho de Segurança (espelho.json)
+    # 2. Carrega automaticamente QUALQUER arquivo .m3u ou .m3u8 do repositório (sem precisar renomear)
+    local_m3us = sorted(set(
+        glob.glob("*.m3u") + glob.glob("*.m3u8") +
+        glob.glob("learning/*.m3u") + glob.glob("learning/*.m3u8")
+    ))
+    for m3u_file_str in local_m3us:
+        try:
+            c = parse_m3u_file_into_records(Path(m3u_file_str))
+            print(f"Lido arquivo M3U local [{m3u_file_str}]: {c} canais extraídos.")
+        except Exception as e:
+            print(f"Aviso ao ler M3U local {m3u_file_str}: {e}")
+
+    # 3. Carrega o Espelho de Segurança (espelho.json)
     if ESPELHO_PATH.exists():
         try:
             print("Lendo Espelho de Segurança...")
@@ -963,13 +1017,11 @@ def main() -> None:
                     source_ids=ch.get("source_ids", []) or [],
                     group=str(ch.get("group", "")),
                 )
-            print(f"  -> Total após mesclar espelho: {len(grouped_by_norm)} canais base.")
+            print(f"  -> Total após mesclar espelho: {len(grouped_by_norm)} emissoras base.")
         except Exception as e:
             print(f"Aviso: Não foi possível carregar o espelho: {e}")
-            
-    VOD_BLACKLIST = {"VOD", "PLAYBACK", "XXX", "ADULTO", "EVENTO", "LANCAMENTO", "LANÇAMENTO", "FILMES", "SERIES", "SÉRIES"}
     
-    # 3. Complementa com as Listas M3U/Xtream que estiverem acessíveis
+    # 4. Complementa com as Listas M3U/Xtream remotas
     for idx, url_raw in enumerate(M3U_URLS):
         url = url_raw.strip()
         if not url.startswith("http"): continue
@@ -998,10 +1050,7 @@ def main() -> None:
                         if not name: continue
                         
                         name_upper = name.upper()
-                        if re.search(r'\bS\d{1,3}\s*E\d{1,3}\b', name_upper) or \
-                           re.search(r'\bT\d{1,3}\s*EP?\d{1,3}\b', name_upper) or \
-                           re.search(r'\b24HS?\b', name_upper) or \
-                           re.search(r'^24\s*H\b', name_upper):
+                        if re.search(r'\bS\d{1,3}\s*E\d{1,3}\b|\bT\d{1,3}\s*EP?\d{1,3}\b|\b24HS?\b|^24\s*H\b', name_upper):
                             continue
                         
                         merge_channel_record(
@@ -1019,61 +1068,12 @@ def main() -> None:
             print("  -> Baixando arquivo M3U tradicional...")
             try:
                 tmp_m3u = download_to_temp_file(url)
-                added_m3u = 0
-                with tmp_m3u.open("r", encoding="utf-8", errors="ignore") as f:
-                    current_extinf = None
-                    for line in f:
-                        line = line.strip()
-                        if not line: continue
-                        
-                        if line.startswith("#EXTINF:"):
-                            current_extinf = line
-                        elif line.startswith("http") and current_extinf:
-                            stream_url = line
-                            parsed_stream = urllib.parse.urlparse(stream_url)
-                            path_lower = parsed_stream.path.lower()
-                            if path_lower.endswith(('.mp4', '.mkv', '.avi', '.mov', '.wmv', '.flv', '.webm')):
-                                current_extinf = None
-                                continue
-
-                            tvg_id_match = re.search(r'tvg-id="(.*?)"', current_extinf, re.IGNORECASE)
-                            tvg_name_match = re.search(r'tvg-name="(.*?)"', current_extinf, re.IGNORECASE)
-                            group_match = re.search(r'group-title="(.*?)"', current_extinf, re.IGNORECASE)
-                            name_match = re.search(r',(.*?)$', current_extinf)
-                            
-                            tvg_id = tvg_id_match.group(1).strip() if tvg_id_match else ""
-                            tvg_name = tvg_name_match.group(1).strip() if tvg_name_match else ""
-                            group = group_match.group(1).strip() if group_match else ""
-                            name = name_match.group(1).strip() if name_match else ""
-                            current_extinf = None
-                            
-                            group_upper = group.upper()
-                            if any(blacklisted in group_upper for blacklisted in VOD_BLACKLIST):
-                                continue
-                                
-                            target_id = tvg_name or name
-                            if not target_id: continue
-                            
-                            name_upper = target_id.upper()
-                            if re.search(r'\bS\d{1,3}\s*E\d{1,3}\b', name_upper) or \
-                               re.search(r'\bT\d{1,3}\s*EP?\d{1,3}\b', name_upper) or \
-                               re.search(r'\b24HS?\b', name_upper) or \
-                               re.search(r'^24\s*H\b', name_upper):
-                                continue
-                            
-                            merge_channel_record(
-                                ch_id=target_id,
-                                name=name or tvg_name,
-                                aliases=[x for x in (tvg_name, name) if x],
-                                tvg_ids=[tvg_id] if tvg_id else [],
-                                group=group,
-                            )
-                            added_m3u += 1
+                added_m3u = parse_m3u_file_into_records(tmp_m3u)
                 print(f"  -> Sucesso via M3U! {added_m3u} canais processados.")
                 try: tmp_m3u.unlink()
                 except Exception: pass
             except Exception as e:
-                print(f"  -> Lista {idx+1} bloqueada para o IP do GitHub ({e}). Usando canais do Dicionário e Espelho!")
+                print(f"  -> Lista {idx+1} bloqueada para o IP do GitHub ({e}). Usando Dicionário/M3U Local!")
 
     for v in grouped_by_norm.values():
         v["aliases"] = sorted(v["aliases"])
@@ -1082,7 +1082,7 @@ def main() -> None:
         v["source_ids"] = sorted(v["source_ids"])
         entries.append(v)
         
-    print(f"\nCatálogo unificado pronto: {len(entries)} canais base únicos (com explosão automática para SD/HD/FHD/H265).")
+    print(f"\nCatálogo unificado pronto: {len(entries)} emissoras base únicas.")
         
     espelho_to_save = {"updated_at": datetime.now(timezone.utc).isoformat(), "channels": entries}
     (OUTPUT_DIR / "espelho.json").write_text(json.dumps(espelho_to_save, ensure_ascii=False, indent=2), "utf-8")
@@ -1173,10 +1173,10 @@ def main() -> None:
     (OUTPUT_DIR / "validation.json").write_text(json.dumps({"generated_at": now.isoformat(), "active_sources": [s.label for s in active_sources], "summary": counts, "channels": validations}, ensure_ascii=False, indent=2) + "\n", "utf-8")
 
     report_md = [
-        "# Relatório do EPG Universal — Dicionário + Variantes", "",
-        f"- Canais base consolidados (Dicionário + Espelho + M3U): **{counts['playlist_channels']}**",
-        f"- Canais base com grade encontrada: **{counts['matched']}**",
-        f"- Identificadores Exportados (SD/HD/FHD/H265 + TVIDs): **{counts['exported_ids']}**",
+        "# Relatório do EPG Universal — Ultra Compacto", "",
+        f"- Emissoras base consolidadas: **{counts['playlist_channels']}**",
+        f"- Emissoras com grade encontrada: **{counts['matched']}**",
+        f"- Canais XML gerados: **{counts['exported_ids']}**",
         f"- Total de programas gravados: **{counts['programmes']}**",
         "", "## Fonte base utilizada por canal", ""
     ]
@@ -1192,7 +1192,7 @@ def main() -> None:
         val_md.append(f"- **{v['name']}** ({v['source']}): Agora **{now_title}** - Confiança **{v['confidence']}%**")
     (OUTPUT_DIR / "validation.md").write_text("\n".join(val_md) + "\n", "utf-8")
 
-    print(f"Sucesso! EPG gerado com {programme_count} programas e {ids_count} variantes de canais.")
+    print(f"Sucesso! EPG gerado com {programme_count} programas em {ids_count} canais base.")
 
 if __name__ == "__main__":
     main()
