@@ -1,90 +1,88 @@
-name: Atualizar EPG Universal
+name: Atualizar EPG
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 7,19 * * *"
-      timezone: "America/Maceio"
+    - cron: "0 */6 * * *" # Roda a cada 6 horas automaticamente
 
 permissions:
   contents: write
 
-concurrency:
-  group: atualizar-epg-universal
-  cancel-in-progress: false
-
 jobs:
   atualizar:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
     env:
       PYTHONUNBUFFERED: "1"
       DOWNLOAD_WORKERS: "4"
-      GZIP_LEVEL: "6"
-      OUTPUT_PAST_HOURS: "12"
+      GZIP_LEVEL: "9"
+      OUTPUT_PAST_HOURS: "6"
+      OUTPUT_FUTURE_HOURS: "72"
+      CHANNELS_FILE: "channels.json"
 
     steps:
       - name: Baixar o repositório
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Preparar Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          
+
       - name: Instalar dependências de Extração
-        run: pip install requests beautifulsoup4
+        run: |
+          pip install --upgrade pip
+          pip install requests beautifulsoup4 lxml pytz cloudscraper urllib3
 
       - name: Rodar Extratores (Em Paralelo)
         run: |
           set -e
-          python tvplus.py &
-          python tvmap.py &
-          python mitv.py &
-          python meuguia.py &
-          python guiadetv.py &
-          python urbantv.py &
+          for script in guiadetv.py meuguia.py tvmap.py tvplus.py mitv.py urbantv.py; do
+            if [ -f "$script" ]; then
+              python3 "$script" &
+            fi
+          done
           wait
           echo "Todos os extratores locais foram finalizados."
 
       - name: Compilar dicionário persistente
-        shell: bash
         run: |
-          set -euo pipefail
-          python compile_dictionary.py --catalog channels.json
-          echo "CHANNELS_FILE=channels.json" >> "$GITHUB_ENV"
+          if [ -f "compile_dictionary.py" ]; then
+            python3 compile_dictionary.py
+          fi
 
       - name: Recuperar Espelho (Cache de Segurança)
         run: |
-          echo "Tentando baixar o espelho de segurança da nuvem..."
-          curl -s -f -o espelho.json https://raw.githubusercontent.com/${{ github.repository }}/epg/espelho.json || echo '{"channels": []}' > espelho.json
+          git fetch origin epg:epg 2>/dev/null || true
+          git checkout epg -- espelho.json 2>/dev/null || true
 
       - name: Gerar EPG Costurado e Consolidado
-        env:
-          M3U_URL_1: ${{ secrets.M3U_URL_1 }}
-          M3U_URL_2: ${{ secrets.M3U_URL_2 }}
-          M3U_URL_3: ${{ secrets.M3U_URL_3 }}
-        run: python merge_epg.py
+        run: |
+          python3 merge_epg.py
 
       - name: Publicar EPG e Espelho na branch epg
-        shell: bash
         run: |
           set -e
-          rm -rf /tmp/epg-publicado
-          mkdir -p /tmp/epg-publicado
-          cp output/epg.xml.gz /tmp/epg-publicado/epg.xml.gz
-          cp output/report.md /tmp/epg-publicado/report.md
-          cp output/report.json /tmp/epg-publicado/report.json
-          cp output/validation.md /tmp/epg-publicado/validation.md
-          cp output/validation.json /tmp/epg-publicado/validation.json
-          cp output/espelho.json /tmp/epg-publicado/espelho.json || true
-
+          if [ ! -f "output/epg.xml.gz" ]; then
+            echo "Erro: output/epg.xml.gz não foi gerado!"
+            exit 1
+          fi
+          
           git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
           git checkout --orphan publicacao-epg
           git rm -rf .
-          cp /tmp/epg-publicado/* .
-          printf '# EPG Universal com Scrapers Locais + APIs Abertas\n\nGeração unificada por consenso de 16 fontes.\n' > README.md
-          git add epg.xml.gz report.md report.json validation.md validation.json README.md espelho.json
+          
+          cp output/epg.xml.gz epg.xml.gz
+          cp output/espelho.json espelho.json
+          cp output/report.json report.json
+          cp output/report.md report.md
+          cp output/validation.json validation.json
+          cp output/validation.md validation.md
+          
+          echo "# EPG Consolidado" > README.md
+          echo "Atualizado automaticamente via GitHub Actions." >> README.md
+          
+          git add epg.xml.gz espelho.json report.json report.md validation.json validation.md README.md
           git commit -m "Atualiza EPG multi-fonte e Espelho"
           git push --force origin HEAD:epg
