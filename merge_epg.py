@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """EPG universal adaptável (Zero-Dictionary, Multi-URL Segura)
-com Pura Força Bruta por Nome.
-(Ignora 100% o tvg-id e epg_channel_id do provedor para forçar o match do player).
+com Suporte Nativo a Xtream Codes e Múltiplas Qualidades (SD/HD/FHD).
 """
 from __future__ import annotations
 
@@ -528,7 +527,6 @@ def make_validation(entry: dict[str, object], chosen: CandidateEvaluation, all_e
     }
 
 def get_clean_aliases(entry: dict[str, object]) -> list[str]:
-    """Gera variações do nome do canal para injetar como MULTIPLOS <display-name>."""
     values = []
     if entry.get("tvg_names"):
         values.extend(str(x).strip() for x in entry.get("tvg_names", []) if x)
@@ -559,6 +557,28 @@ def get_clean_aliases(entry: dict[str, object]) -> list[str]:
             expanded.append(no_tags)
             
     return [v for v in expanded if v and len(v) <= 220]
+
+def get_all_export_ids(entry: dict[str, object]) -> list[str]:
+    """Coleta todos os IDs e Nomes que o player pode usar para procurar este canal"""
+    ids = []
+    
+    # 1. O ID oficial do Xtream Codes (Se o SD, HD e FHD tem o mesmo ID, todos caem aqui!)
+    for t_id in entry.get("tvg_ids_to_export", []):
+        t_id_str = str(t_id).strip()
+        if t_id_str and t_id_str not in ids:
+            ids.append(t_id_str)
+            
+    # 2. O Nome Exato do canal ("CNN Brasil FHD [H265]")
+    exact_name = str(entry.get("name", "")).strip()
+    if exact_name and exact_name not in ids:
+        ids.append(exact_name)
+        
+    # 3. As variações de nome ("CNN Brasil FHD", "CNN Brasil")
+    for alias in get_clean_aliases(entry):
+        if alias not in ids:
+            ids.append(alias)
+            
+    return ids
 
 def stitch_multi_source_schedule(
     all_evaluations: list[CandidateEvaluation], target_channel_id: str, cutoff: datetime, overrides: dict[str, object]
@@ -666,50 +686,49 @@ def write_epg_stream(
     programme_count = 0
     cutoff = now - timedelta(hours=OUTPUT_PAST_HOURS)
 
+    # Dicionário mestre para NÃO duplicar IDs no XML, mas garantir que todos existam
+    xml_id_to_data = {}
+    
+    for entry, chosen, all_evaluations, _forced in selected:
+        target_id = str(entry.get("id", ""))
+        stitched = stitch_multi_source_schedule(all_evaluations, target_id, cutoff, overrides)
+        
+        export_ids = get_all_export_ids(entry)
+        for out_id in export_ids:
+            # Se o Xtream API colocou "cnn.br" no HD e no FHD, eles caem no mesmo bloco aqui pacificamente.
+            if out_id not in xml_id_to_data:
+                xml_id_to_data[out_id] = (chosen, stitched)
+
     with gzip_path.open("wb") as raw_gzip:
         with gzip.GzipFile(filename="epg.xml", mode="wb", fileobj=raw_gzip, mtime=0, compresslevel=GZIP_LEVEL) as gz:
             def emit(data: bytes) -> None:
                 gz.write(data)
                 if plain is not None: plain.write(data)
 
-            generator = "EPG Universal Otimizado (Múltiplos Nomes)"
+            generator = "EPG Universal Otimizado (Multi-Identificadores Pacificados)"
             source_name = "Consolidado Inteligente de Múltiplas Fontes"
             emit((f"<?xml version='1.0' encoding='utf-8'?>\n<tv generator-info-name={quoteattr(generator)} source-info-name={quoteattr(source_name)}>\n").encode("utf-8"))
 
-            for entry, chosen, _evaluations, _forced in selected:
-                # O ID do canal no XML é ESTRITAMENTE o nome exato da sua lista IPTV (Sem riscos de colisão)
-                target_id = str(entry.get("id", ""))
-                
-                channel = ET.Element("channel", {"id": target_id})
-                
-                # Tag de nome principal (Garante match perfeito se o player for rigoroso)
+            for out_id, (chosen, _) in xml_id_to_data.items():
+                channel = ET.Element("channel", {"id": out_id})
                 exact_name = ET.Element("display-name")
-                exact_name.text = target_id
+                exact_name.text = out_id
                 channel.append(exact_name)
                 
-                # Tags de nomes alternativos (Cria uma "teia" para capturar o canal no Fallback do Tivimate)
-                for alias in get_clean_aliases(entry):
-                    if alias != target_id:
-                        alias_node = ET.Element("display-name")
-                        alias_node.text = alias
-                        channel.append(alias_node)
-                        
-                source_channel = chosen.match.source.channels[chosen.match.channel_id]
-                for node in source_channel:
-                    if local_tag(node) == "icon":
-                        icon_node = copy.deepcopy(node)
-                        channel.append(icon_node)
-                        
+                source_channel = chosen.match.source.channels.get(chosen.match.channel_id)
+                if source_channel is not None:
+                    for node in source_channel:
+                        if local_tag(node) == "icon":
+                            icon_node = copy.deepcopy(node)
+                            channel.append(icon_node)
+                            
                 emit(ET.tostring(channel, encoding="utf-8"))
                 emit(b"\n")
 
-            for entry, chosen, all_evaluations, _forced in selected:
-                target_id = str(entry.get("id", ""))
-                stitched_programmes = stitch_multi_source_schedule(all_evaluations, target_id, cutoff, overrides)
-                
+            for out_id, (_, stitched_programmes) in xml_id_to_data.items():
                 for original in stitched_programmes:
                     prog_copy = copy.deepcopy(original)
-                    prog_copy.attrib["channel"] = target_id
+                    prog_copy.attrib["channel"] = out_id
                     emit(ET.tostring(prog_copy, encoding="utf-8"))
                     emit(b"\n")
                     programme_count += 1
@@ -718,10 +737,11 @@ def write_epg_stream(
 
     if plain is not None: plain.close()
     elif plain_path.exists(): plain_path.unlink()
-    return programme_count, 0
+    
+    return programme_count, len(xml_id_to_data)
 
 def main() -> None:
-    print("Iniciando geração de EPG (Ignorando 100% o TVG-ID, Força Bruta por Nomes)...")
+    print("Iniciando geração de EPG (Mapeamento Total de Xtream IDs e Nomes)...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -739,6 +759,7 @@ def main() -> None:
                     "id": ch["id"],
                     "name": ch["name"],
                     "aliases": set(ch["aliases"]),
+                    "tvg_ids_to_export": set(ch.get("tvg_ids_to_export", [])),
                     "group": ch.get("group", "")
                 }
             print(f"Espelho recuperado com {len(unique_entries)} canais de backup.")
@@ -763,7 +784,7 @@ def main() -> None:
             user = query["username"][0]
             pwd = query["password"][0]
             api_url = f"{parsed_url.scheme}://{parsed_url.netloc}/player_api.php?username={user}&password={pwd}&action=get_live_streams"
-            print("  -> Link Xtream Codes detectado! Extraindo APENAS os nomes (Zero TVID)...")
+            print("  -> Link Xtream Codes detectado! Extraindo API JSON (Coletando Nomes e TVIDs Oficiais)...")
             try:
                 req = urllib.request.Request(api_url, headers={"User-Agent": "Mozilla/5.0"})
                 with urllib.request.urlopen(req, timeout=45) as resp:
@@ -772,6 +793,7 @@ def main() -> None:
                         print(f"  -> Sucesso! {len(data)} canais ao vivo obtidos.")
                         for ch in data:
                             name = str(ch.get("name", "")).strip()
+                            epg_id = str(ch.get("epg_channel_id", "")).strip()
                             if not name: continue
                             
                             name_upper = name.upper()
@@ -787,15 +809,18 @@ def main() -> None:
                                     "id": target_id,
                                     "name": name,
                                     "aliases": set(),
+                                    "tvg_ids_to_export": set(),
                                     "group": str(ch.get("category_id", ""))
                                 }
                             unique_entries[target_id]["aliases"].add(name)
+                            if epg_id:
+                                unique_entries[target_id]["tvg_ids_to_export"].add(epg_id)
                         success_json = True
             except Exception as e:
                 print(f"  -> Falha ao usar API JSON ({e}). Tentando M3U tradicional...")
 
         if not success_json:
-            print("  -> Baixando arquivo M3U tradicional (Ignorando tvg-id)...")
+            print("  -> Baixando arquivo M3U tradicional (Coletando Nomes e TVIDs)...")
             try:
                 tmp_m3u = download_to_temp_file(url)
                 with tmp_m3u.open("r", encoding="utf-8", errors="ignore") as f:
@@ -815,10 +840,12 @@ def main() -> None:
                                 current_extinf = None
                                 continue
 
+                            tvg_id_match = re.search(r'tvg-id="(.*?)"', current_extinf, re.IGNORECASE)
                             tvg_name_match = re.search(r'tvg-name="(.*?)"', current_extinf, re.IGNORECASE)
                             group_match = re.search(r'group-title="(.*?)"', current_extinf, re.IGNORECASE)
                             name_match = re.search(r',(.*?)$', current_extinf)
                             
+                            tvg_id = tvg_id_match.group(1).strip() if tvg_id_match else ""
                             tvg_name = tvg_name_match.group(1).strip() if tvg_name_match else ""
                             group = group_match.group(1).strip() if group_match else ""
                             name = name_match.group(1).strip() if name_match else ""
@@ -844,10 +871,12 @@ def main() -> None:
                                     "id": target_id,
                                     "name": name or tvg_name,
                                     "aliases": set(),
+                                    "tvg_ids_to_export": set(),
                                     "group": group
                                 }
                             if tvg_name: unique_entries[target_id]["aliases"].add(tvg_name)
                             if name: unique_entries[target_id]["aliases"].add(name)
+                            if tvg_id: unique_entries[target_id]["tvg_ids_to_export"].add(tvg_id)
                 try: tmp_m3u.unlink()
                 except Exception: pass
             except Exception as e:
@@ -855,6 +884,7 @@ def main() -> None:
 
     for v in unique_entries.values():
         v["aliases"] = list(v["aliases"])
+        v["tvg_ids_to_export"] = list(v.get("tvg_ids_to_export", []))
         entries.append(v)
         
     if not entries:
@@ -931,7 +961,7 @@ def main() -> None:
     timings["matching_consenso_validacao"] = round(time.perf_counter() - stage_start, 3)
 
     stage_start = time.perf_counter()
-    programme_count, _ = write_epg_stream(selected, now, overrides)
+    programme_count, ids_count = write_epg_stream(selected, now, overrides)
     timings["serializacao_e_gzip"] = round(time.perf_counter() - stage_start, 3)
 
     source_counts = {source.label: sum(1 for row in report_rows if row.get("source") == source.label) for source in active_sources}
@@ -940,6 +970,7 @@ def main() -> None:
         "matched": sum(1 for row in report_rows if row["status"] == "matched"),
         "missing": sum(1 for row in report_rows if row["status"] == "missing"),
         "programmes": programme_count,
+        "exported_ids": ids_count,
         "timing_seconds": timings, "selected_by_source": source_counts,
     }
 
@@ -947,9 +978,10 @@ def main() -> None:
     (OUTPUT_DIR / "validation.json").write_text(json.dumps({"generated_at": now.isoformat(), "active_sources": [s.label for s in active_sources], "summary": counts, "channels": validations}, ensure_ascii=False, indent=2) + "\n", "utf-8")
 
     report_md = [
-        "# Relatório do EPG Universal — Força Bruta por Nome", "",
+        "# Relatório do EPG Universal — Integração Total Xtream", "",
         f"- Canais lidos nas listas M3U (Após VOD Inteligente): **{counts['playlist_channels']}**",
         f"- Canais com grade encontrada: **{counts['matched']}**",
+        f"- Identificadores Exportados (Nomes + TVIDs): **{counts['exported_ids']}**",
         f"- Total de programas gravados: **{counts['programmes']}**",
         "", "## Fonte base utilizada por canal", ""
     ]
