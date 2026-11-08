@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""EPG universal adaptável com Validação Anti-Erro de Provedor,
-Tradução Nativa de Categorias Xtream Codes e Exportação Multi-Alias Completa.
+"""EPG universal adaptável com Bypass Anti-403 (User-Agent Rotation),
+Validação Anti-Erro de Provedor e Exportação Multi-Alias Completa.
 """
 from __future__ import annotations
 
@@ -53,6 +53,15 @@ DOWNLOAD_WORKERS = max(1, min(4, int(os.environ.get("DOWNLOAD_WORKERS", "3"))))
 GZIP_LEVEL = max(1, min(9, int(os.environ.get("GZIP_LEVEL", "6"))))
 OUTPUT_PAST_HOURS = max(0, int(os.environ.get("OUTPUT_PAST_HOURS", "12")))
 WRITE_PLAIN_XML = os.environ.get("WRITE_PLAIN_XML", "0").strip().lower() in {"1", "true", "yes"}
+
+# Lista de User-Agents de Players reais para evitar HTTP 403 Forbidden nos painéis IPTV
+IPTV_USER_AGENTS = [
+    "TiviMate/4.7.0 (Android 12)",
+    "IPTVSmartersPlayer",
+    "VLC/3.0.18 LibVLC/3.0.18",
+    "Lavf/60.3.100",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+]
 
 EPG_SOURCES_CONFIG = [
     ("Meu Guia", "epg_meuguia.xml", "meuguia", 3.0),
@@ -107,7 +116,6 @@ class CandidateEvaluation:
     support_families: int; weighted_ratio: float; avg_support_agreement: float; health_score: float
     health: dict[str, object]; confidence: int; comparisons: list[dict[str, object]]
 
-# Sinônimos bidirecionais de canais brasileiros que mudaram de nome ou variam entre provedores e guias
 CHANNEL_SYNONYMS = {
     "UNIVERSAL CHANNEL": ["UNIVERSAL TV", "UNIVERSAL"],
     "UNIVERSAL TV": ["UNIVERSAL CHANNEL", "UNIVERSAL"],
@@ -134,16 +142,17 @@ CHANNEL_SYNONYMS = {
     "PRIME BOX BRAZIL": ["PRIME BOX BRASIL"],
     "CANAL BRASIL": ["CANAL BRASIL"],
     "CARTOONITO": ["CARTOONITO", "BOOMERANG"],
+    "SPORTTV": ["SPORTV"],
+    "SPORTTV 2": ["SPORTV 2"],
+    "SPORTTV 3": ["SPORTV 3"],
 }
 
 def normalizar_canal(nome: str) -> str:
     if not nome: return ""
     original_nome = nome
-    # Remove qualquer conteúdo entre colchetes, parênteses ou barras verticais
     nome = re.sub(r'\[.*?\]|\(.*?\)|\|.*?\|', ' ', nome)
     nome = re.sub(r'[\¹\²\³\⁴]', '', nome)
     
-    # Padronizações diretas
     nome = re.sub(r'\bJP NEWS\b', 'JOVEM PAN NEWS', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bJOVEM PAN\b(?! NEWS)', 'JOVEM PAN NEWS', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bFOX SPORTS\b', 'ESPN 4', nome, flags=re.IGNORECASE)
@@ -156,8 +165,8 @@ def normalizar_canal(nome: str) -> str:
     nome = re.sub(r'^RECORDTV\b', 'RECORD', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bREDE\s+TV!?\b', 'REDETV', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bAGRO\s*\+\b', 'AGROMAIS', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bSPORTTV\b', 'SPORTV', nome, flags=re.IGNORECASE)
     
-    # Remove tags técnicas mesmo quando coladas ou fora de colchetes (ex: "FHD H265")
     tags = r'\b(SD|HD|FHD|UHD|4K|8K|H\.?264|H\.?265|HEVC|HDR\+?|LEG|LEGENDADO|DUB|DUBLADO|HQ|VIP|VOD|24H[S]?|24/7|1080P|720P|60FPS|PPV|EVENTOS?|ALTERNATIVO|BACKUP)\b[\*\²\³\¹\⁴\+]*'
     nome = re.sub(tags, ' ', nome, flags=re.IGNORECASE)
     nome = re.sub(r'[*=_\-!]', ' ', nome)
@@ -179,21 +188,18 @@ def inferir_emissora_pelo_grupo(nome_normalizado: str, nome_grupo: str) -> str:
     return nome_normalizado
 
 def is_valid_provider_tvid(channel_name: str, tvid: str) -> bool:
-    """Impede que um TVID errado do provedor (ex: GloboNews na Jovem Pan) contamine o canal."""
     if not tvid or len(tvid) < 2: return False
     tvid_clean = re.sub(r'\.(br|us|uk|pt|ar|mx|cl|co|pe|latam|int)$', '', tvid.lower())
     tvid_clean = re.sub(r'^(auto\.|yt\.|br\.|canais\.)', '', tvid_clean)
     tvid_clean = re.sub(r'[^a-z0-9]', '', tvid_clean)
     if not tvid_clean: return False
 
-    # Verifica contra o nome limpo e todos os sinônimos possíveis do canal
     base_clean = normalizar_canal(channel_name)
     candidates = [base_clean] + CHANNEL_SYNONYMS.get(base_clean, [])
     
     for cand in candidates:
         cand_alnum = re.sub(r'[^a-z0-9]', '', normalize_name(cand).lower())
         if not cand_alnum: continue
-        # Confere números do canal (ex: HBO 2 não pode aceitar ID do HBO 1)
         cand_digits = re.findall(r'\d+', cand_alnum)
         tvid_digits = re.findall(r'\d+', tvid_clean)
         if cand_digits != tvid_digits:
@@ -235,22 +241,36 @@ def parse_xmltv_datetime(value: str, default_offset: str = "+0000") -> datetime 
         except (ValueError, IndexError): pass
     return None
 
+def fetch_iptv_json(url: str, timeout: int = 45) -> Any:
+    """Tenta baixar JSON da API Xtream rotacionando User-Agents de Players conhecidos."""
+    last_err = None
+    for ua in IPTV_USER_AGENTS:
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": ua, "Accept": "*/*"})
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                return json.loads(resp.read().decode("utf-8", errors="ignore"))
+        except Exception as exc:
+            last_err = exc
+            time.sleep(1)
+    raise RuntimeError(f"Todos os User-Agents falharam: {last_err}")
+
 def download_to_temp_file(url: str, attempts: int = 4) -> Path:
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".tmp")
     tmp_path = Path(tmp.name)
     tmp.close()
     last_error = None
     for attempt in range(1, attempts + 1):
+        ua = IPTV_USER_AGENTS[(attempt - 1) % len(IPTV_USER_AGENTS)]
         try:
-            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)", "Accept": "*/*"})
+            req = urllib.request.Request(url, headers={"User-Agent": ua, "Accept": "*/*"})
             with urllib.request.urlopen(req, timeout=120) as resp, tmp_path.open("wb") as out:
                 while chunk := resp.read(1024 * 512): out.write(chunk)
             return tmp_path
         except Exception as exc:
             last_error = exc
-            if attempt < attempts: time.sleep(attempt * 4) 
+            if attempt < attempts: time.sleep(attempt * 2) 
     if tmp_path.exists(): tmp_path.unlink()
-    raise RuntimeError(f"Falha ao baixar {url}: {last_error}")
+    raise RuntimeError(f"Falha ao baixar ({last_error})")
 
 def read_source_from_file(spec: SourceSpec, file_path: Path) -> EpgSource:
     channels: dict[str, ET.Element] = {}
@@ -346,11 +366,9 @@ def aliases_for(entry: dict[str, object]) -> list[str]:
         add_norm(nome_com_grupo)
         add_norm(nome_limpo)
         
-        # Adiciona sinônimos conhecidos (ex: Universal Channel -> Universal TV)
         for syn in CHANNEL_SYNONYMS.get(nome_limpo, []):
             add_norm(syn)
             
-        # Remove sufixos de estados brasileiros no final (ex: "TV GAZETA SP" -> "TV GAZETA")
         sem_uf = re.sub(r'\s+(SP|RJ|RS|MG|BA|PR|PE|CE|PA|MA|SC|GO|PB|ES|AM|RN|AL|PI|MT|DF|MS|SE|RO|TO|AC|AP|RR)$', '', nome_limpo)
         if sem_uf != nome_limpo:
             add_norm(sem_uf)
@@ -619,13 +637,16 @@ def get_clean_aliases(entry: dict[str, object]) -> list[str]:
             
     expanded = list(unique_values)
     for v in unique_values:
-        # 1. Sem colchetes/parênteses em qualquer posição (ex: "AMC FHD [H265]" -> "AMC FHD")
         no_brackets = re.sub(r'\s*[\[\(].*?[\]\)]\s*', ' ', v).strip()
         no_brackets = ' '.join(no_brackets.split())
         if no_brackets and no_brackets not in expanded:
             expanded.append(no_brackets)
             
-        # 2. Sem tags de resolução/codec soltas (ex: "SportTV FHD H265" -> "SportTV")
+        no_codec = re.sub(r'\b(H\.?264|H\.?265|HEVC|HDR\+?)\b', ' ', no_brackets, flags=re.IGNORECASE)
+        no_codec = ' '.join(no_codec.split()).strip()
+        if no_codec and no_codec not in expanded:
+            expanded.append(no_codec)
+            
         tags = r'\b(SD|HD|FHD|UHD|4K|8K|H\.?264|H\.?265|HEVC|HDR\+?|LEG|LEGENDADO|DUB|DUBLADO|HQ|VIP|VOD|24H[S]?|24/7|1080P|720P|60FPS|PPV|EVENTOS?)\b[\*\²\³\¹\⁴\+]*'
         no_tags = re.sub(tags, ' ', no_brackets, flags=re.IGNORECASE)
         no_tags = re.sub(r'[*=_\-]', ' ', no_tags)
@@ -637,22 +658,18 @@ def get_clean_aliases(entry: dict[str, object]) -> list[str]:
     return [v for v in expanded if v and len(v) <= 220]
 
 def get_all_export_ids(entry: dict[str, object]) -> list[str]:
-    """Gera a lista de IDs validados + todas as variações de nome para exportação no XML."""
     ids = []
     raw_name = str(entry.get("name", "")).strip()
     
-    # 1. Só exporta o TVID do provedor se ele passar na validação anti-erro!
     for t_id in entry.get("tvg_ids_to_export", []):
         t_id_str = str(t_id).strip()
         if t_id_str and is_valid_provider_tvid(raw_name, t_id_str):
             if t_id_str not in ids:
                 ids.append(t_id_str)
             
-    # 2. Nome exato do canal (ex: "CNN Brasil FHD [H265]")
     if raw_name and raw_name not in ids:
         ids.append(raw_name)
         
-    # 3. Variações limpas (ex: "CNN Brasil FHD", "CNN Brasil")
     for alias in get_clean_aliases(entry):
         if alias not in ids:
             ids.append(alias)
@@ -777,7 +794,6 @@ def write_epg_stream(
             if out_id not in xml_id_to_data:
                 xml_id_to_data[out_id] = (chosen, stitched, list(all_names))
             else:
-                # Agrega display-names de todas as variantes (SD/HD/FHD/H265) no mesmo ID compartilhado
                 existing_names = xml_id_to_data[out_id][2]
                 for n in all_names:
                     if n not in existing_names:
@@ -789,19 +805,17 @@ def write_epg_stream(
                 gz.write(data)
                 if plain is not None: plain.write(data)
 
-            generator = "EPG Universal Otimizado (Revisado)"
+            generator = "EPG Universal Otimizado (Anti-403 & Multi-Alias)"
             source_name = "Consolidado Inteligente de Múltiplas Fontes"
             emit((f"<?xml version='1.0' encoding='utf-8'?>\n<tv generator-info-name={quoteattr(generator)} source-info-name={quoteattr(source_name)}>\n").encode("utf-8"))
 
             for out_id, (chosen, _, display_names) in xml_id_to_data.items():
                 channel = ET.Element("channel", {"id": out_id})
                 
-                # Primeiro display-name é o próprio ID exportado
                 primary_dn = ET.Element("display-name")
                 primary_dn.text = out_id
                 channel.append(primary_dn)
                 
-                # Adiciona todos os nomes alternativos para garantir fallback no TiviMate
                 for dn in display_names:
                     if dn != out_id:
                         dn_node = ET.Element("display-name")
@@ -834,7 +848,7 @@ def write_epg_stream(
     return programme_count, len(xml_id_to_data)
 
 def main() -> None:
-    print("Iniciando geração de EPG (Com Validação Anti-Erro de TVID e Sinônimos)...")
+    print("Iniciando geração de EPG (Com Bypass Anti-403, Validação de TVID e Sinônimos)...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -876,67 +890,47 @@ def main() -> None:
         if is_xtream:
             user = query["username"][0]
             pwd = query["password"][0]
-            base_api = f"{parsed_url.scheme}://{parsed_url.netloc}/player_api.php?username={user}&password={pwd}"
-            
-            # Busca os nomes reais das categorias para ajudar na inferência de canais (ex: Globo, Premiere)
-            cat_map = {}
+            api_url = f"{parsed_url.scheme}://{parsed_url.netloc}/player_api.php?username={user}&password={pwd}&action=get_live_streams"
+            print("  -> Link Xtream Codes detectado! Extraindo API JSON (Rotacionando User-Agents)...")
             try:
-                req_cat = urllib.request.Request(f"{base_api}&action=get_live_categories", headers={"User-Agent": "Mozilla/5.0"})
-                with urllib.request.urlopen(req_cat, timeout=30) as resp_cat:
-                    cats = json.loads(resp_cat.read().decode('utf-8'))
-                    if isinstance(cats, list):
-                        for c in cats:
-                            cat_map[str(c.get("category_id", ""))] = str(c.get("category_name", ""))
-            except Exception:
-                pass
-
-            api_url = f"{base_api}&action=get_live_streams"
-            print("  -> Link Xtream Codes detectado! Extraindo API JSON...")
-            try:
-                req = urllib.request.Request(api_url, headers={"User-Agent": "Mozilla/5.0"})
-                with urllib.request.urlopen(req, timeout=45) as resp:
-                    data = json.loads(resp.read().decode('utf-8'))
-                    if isinstance(data, list):
-                        print(f"  -> Sucesso! {len(data)} canais ao vivo obtidos.")
-                        for ch in data:
-                            name = str(ch.get("name", "")).strip()
-                            epg_id = str(ch.get("epg_channel_id", "")).strip()
-                            cat_id = str(ch.get("category_id", ""))
-                            group_name = cat_map.get(cat_id, cat_id)
-                            
-                            if not name: continue
-                            
-                            name_upper = name.upper()
-                            if re.search(r'\bS\d{1,3}\s*E\d{1,3}\b', name_upper) or \
-                               re.search(r'\bT\d{1,3}\s*EP?\d{1,3}\b', name_upper) or \
-                               re.search(r'\b24HS?\b', name_upper) or \
-                               re.search(r'^24\s*H\b', name_upper):
-                                continue
-                            
-                            target_id = name
-                            if target_id not in unique_entries:
-                                unique_entries[target_id] = {
-                                    "id": target_id,
-                                    "name": name,
-                                    "aliases": set(),
-                                    "tvg_ids_to_export": set(),
-                                    "group": group_name
-                                }
-                            else:
-                                if group_name and not unique_entries[target_id].get("group"):
-                                    unique_entries[target_id]["group"] = group_name
-                                    
-                            unique_entries[target_id]["aliases"].add(name)
-                            if epg_id:
-                                unique_entries[target_id]["tvg_ids_to_export"].add(epg_id)
-                        success_json = True
+                data = fetch_iptv_json(api_url, timeout=45)
+                if isinstance(data, list):
+                    print(f"  -> Sucesso! {len(data)} canais ao vivo obtidos via API.")
+                    for ch in data:
+                        name = str(ch.get("name", "")).strip()
+                        epg_id = str(ch.get("epg_channel_id", "")).strip()
+                        cat_id = str(ch.get("category_id", ""))
+                        
+                        if not name: continue
+                        
+                        name_upper = name.upper()
+                        if re.search(r'\bS\d{1,3}\s*E\d{1,3}\b', name_upper) or \
+                           re.search(r'\bT\d{1,3}\s*EP?\d{1,3}\b', name_upper) or \
+                           re.search(r'\b24HS?\b', name_upper) or \
+                           re.search(r'^24\s*H\b', name_upper):
+                            continue
+                        
+                        target_id = name
+                        if target_id not in unique_entries:
+                            unique_entries[target_id] = {
+                                "id": target_id,
+                                "name": name,
+                                "aliases": set(),
+                                "tvg_ids_to_export": set(),
+                                "group": cat_id
+                            }
+                        unique_entries[target_id]["aliases"].add(name)
+                        if epg_id:
+                            unique_entries[target_id]["tvg_ids_to_export"].add(epg_id)
+                    success_json = True
             except Exception as e:
-                print(f"  -> Falha ao usar API JSON ({e}). Tentando M3U tradicional...")
+                print(f"  -> Aviso na API JSON ({e}). Tentando M3U tradicional...")
 
         if not success_json:
-            print("  -> Baixando arquivo M3U tradicional...")
+            print("  -> Baixando arquivo M3U tradicional (Rotacionando User-Agents)...")
             try:
                 tmp_m3u = download_to_temp_file(url)
+                added_m3u = 0
                 with tmp_m3u.open("r", encoding="utf-8", errors="ignore") as f:
                     current_extinf = None
                     for line in f:
@@ -991,10 +985,12 @@ def main() -> None:
                             if tvg_name: unique_entries[target_id]["aliases"].add(tvg_name)
                             if name: unique_entries[target_id]["aliases"].add(name)
                             if tvg_id: unique_entries[target_id]["tvg_ids_to_export"].add(tvg_id)
+                            added_m3u += 1
+                print(f"  -> Sucesso via M3U! {added_m3u} canais processados.")
                 try: tmp_m3u.unlink()
                 except Exception: pass
             except Exception as e:
-                print(f"  -> Erro ao processar M3U: {e}")
+                print(f"  -> Erro ao processar M3U (Possível Geo-Block para IPs dos EUA/GitHub): {e}")
 
     for v in unique_entries.values():
         v["aliases"] = list(v["aliases"])
@@ -1092,7 +1088,7 @@ def main() -> None:
     (OUTPUT_DIR / "validation.json").write_text(json.dumps({"generated_at": now.isoformat(), "active_sources": [s.label for s in active_sources], "summary": counts, "channels": validations}, ensure_ascii=False, indent=2) + "\n", "utf-8")
 
     report_md = [
-        "# Relatório do EPG Universal — Revisado", "",
+        "# Relatório do EPG Universal — Bypass Anti-403", "",
         f"- Canais lidos nas listas M3U (Após VOD Inteligente): **{counts['playlist_channels']}**",
         f"- Canais com grade encontrada: **{counts['matched']}**",
         f"- Identificadores Exportados (Nomes + TVIDs): **{counts['exported_ids']}**",
