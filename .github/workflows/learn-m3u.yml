@@ -27,13 +27,12 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Ler todos os arquivos .m3u e atualizar Dicionário
+      - name: Extrair canais de todos os .m3u e proteger credenciais
         run: |
           python3 - << 'EOF'
-          import glob, json, os, re, subprocess
+          import glob, json, re, subprocess
           from pathlib import Path
 
-          # Busca qualquer arquivo .m3u ou .m3u8 em qualquer pasta (sem precisar renomear)
           m3u_files = sorted(set(
               glob.glob("*.m3u") + glob.glob("*.m3u8") +
               glob.glob("learning/*.m3u") + glob.glob("learning/*.m3u8") +
@@ -45,16 +44,17 @@ jobs:
               print("Nenhum arquivo .m3u encontrado.")
               exit(0)
 
-          # Se os scripts originais do repositório existirem, tenta chamá-los para cada arquivo
-          if Path("learn_channels.py").exists():
-              for f in m3u_files:
-                  print(f"Processando {f} com learn_channels.py...")
-                  subprocess.run(["python3", "learn_channels.py", f], check=False)
-
-          # Extrator direto e universal para garantir que TODAS as listas .m3u alimentem o channels.json e espelho.json
           VOD_BLACKLIST = {"VOD", "PLAYBACK", "XXX", "ADULTO", "EVENTO", "LANCAMENTO", "LANÇAMENTO", "FILMES", "SERIES", "SÉRIES"}
           
-          def load_json_channels(path_str):
+          def strip_qualities(name):
+              s = re.sub(r'\[.*?\]|\(.*?\)|\|.*?\|', ' ', name or "")
+              s = re.sub(r'[\¹\²\³\⁴]', '', s)
+              tags = r'\b(SD|HD|FHD|UHD|4K|8K|H\.?264|H\.?265|HEVC|HDR\+?|LEG|LEGENDADO|DUB|DUBLADO|HQ|VIP|VOD|24H[S]?|24/7|1080P|720P|60FPS|PPV|EVENTOS?|ALTERNATIVO|BACKUP)\b[\*\²\³\¹\⁴\+]*'
+              s = re.sub(tags, ' ', s, flags=re.I)
+              s = re.sub(r'[*=_\-]', ' ', s)
+              return ' '.join(s.split()).strip()
+
+          def load_existing(path_str):
               p = Path(path_str)
               if not p.exists(): return {}
               try:
@@ -62,27 +62,31 @@ jobs:
                   ch_list = data.get("channels", []) if isinstance(data, dict) else (data if isinstance(data, list) else [])
                   out = {}
                   for c in ch_list:
-                      if isinstance(c, dict) and c.get("id"):
-                          cid = str(c["id"]).strip()
-                          out[cid] = {
-                              "id": cid,
-                              "name": str(c.get("name", cid)).strip(),
-                              "aliases": set(c.get("aliases", []) or []),
-                              "tvg_ids_to_export": set(c.get("tvg_ids_to_export", []) or []),
-                              "group": str(c.get("group", c.get("group-title", ""))).strip()
-                          }
+                      if isinstance(c, dict) and (c.get("id") or c.get("name")):
+                          raw_n = str(c.get("name", c.get("id"))).strip()
+                          base_key = strip_qualities(raw_n).upper() or raw_n.upper()
+                          if base_key not in out:
+                              out[base_key] = {
+                                  "id": str(c.get("id", raw_n)).strip(),
+                                  "name": strip_qualities(raw_n) or raw_n,
+                                  "aliases": set(c.get("aliases", []) or []),
+                                  "tvg_ids_to_export": set(c.get("tvg_ids_to_export", []) or []),
+                                  "group": str(c.get("group", c.get("group-title", ""))).strip()
+                              }
+                          else:
+                              out[base_key]["aliases"].update(c.get("aliases", []) or [])
+                              out[base_key]["tvg_ids_to_export"].update(c.get("tvg_ids_to_export", []) or [])
                   return out
               except Exception as e:
                   print(f"Aviso ao ler {path_str}: {e}")
                   return {}
 
-          catalog = load_json_channels("channels.json")
-          espelho = load_json_channels("espelho.json")
-          merged = {**espelho, **catalog}
-
+          merged = {**load_existing("espelho.json"), **load_existing("channels.json")}
           total_learned = 0
+
           for m3u_path in m3u_files:
-              print(f"Extraindo canais ao vivo de: {m3u_path}")
+              print(f"Processando e higienizando: {m3u_path}")
+              sanitized_lines = ["#EXTM3U"]
               with open(m3u_path, "r", encoding="utf-8", errors="ignore") as f:
                   current_extinf = None
                   for line in f:
@@ -105,6 +109,8 @@ jobs:
                           tvg_name = tvg_name_m.group(1).strip() if tvg_name_m else ""
                           group = group_m.group(1).strip() if group_m else ""
                           name = name_m.group(1).strip() if name_m else ""
+                          
+                          extinf_saved = current_extinf
                           current_extinf = None
 
                           if any(b in group.upper() for b in VOD_BLACKLIST):
@@ -112,25 +118,35 @@ jobs:
 
                           target = name or tvg_name
                           if not target: continue
-                          t_up = target.upper()
-                          if re.search(r'\bS\d{1,3}\s*E\d{1,3}\b|\bT\d{1,3}\s*EP?\d{1,3}\b|\b24HS?\b|^24\s*H\b', t_up):
+                          if re.search(r'\bS\d{1,3}\s*E\d{1,3}\b|\bT\d{1,3}\s*EP?\d{1,3}\b|\b24HS?\b|^24\s*H\b', target.upper()):
                               continue
 
-                          if target not in merged:
-                              merged[target] = {
-                                  "id": target,
-                                  "name": target,
+                          base_clean = strip_qualities(target) or target
+                          base_key = base_clean.upper()
+
+                          if base_key not in merged:
+                              merged[base_key] = {
+                                  "id": base_clean,
+                                  "name": base_clean,
                                   "aliases": set(),
                                   "tvg_ids_to_export": set(),
                                   "group": group
                               }
-                          if name: merged[target]["aliases"].add(name)
-                          if tvg_name: merged[target]["aliases"].add(tvg_name)
-                          if tvg_id: merged[target]["tvg_ids_to_export"].add(tvg_id)
+                          if name: merged[base_key]["aliases"].add(name)
+                          if tvg_name: merged[base_key]["aliases"].add(tvg_name)
+                          if tvg_id: merged[base_key]["tvg_ids_to_export"].add(tvg_id)
+                          
+                          # Salva apenas a linha EXTINF e uma URL fictícia (remove sua senha do arquivo!)
+                          sanitized_lines.append(extinf_saved)
+                          sanitized_lines.append("http://stream.local/live.ts")
                           total_learned += 1
 
+              # Sobrescreve o arquivo .m3u removendo VODs e credenciais privadas
+              Path(m3u_path).write_text("\n".join(sanitized_lines) + "\n", "utf-8")
+
           final_list = []
-          for v in merged.values():
+          for k in sorted(merged.keys()):
+              v = merged[k]
               final_list.append({
                   "id": v["id"],
                   "name": v["name"],
@@ -141,18 +157,16 @@ jobs:
 
           Path("channels.json").write_text(json.dumps({"channels": final_list}, ensure_ascii=False, indent=2) + "\n", "utf-8")
           Path("espelho.json").write_text(json.dumps({"channels": final_list}, ensure_ascii=False, indent=2) + "\n", "utf-8")
-          print(f"Sucesso! {total_learned} entradas lidas. Total consolidado: {len(final_list)} canais.")
+          print(f"Concluído! {total_learned} canais processados -> {len(final_list)} emissoras base salvas no channels.json.")
 
           if Path("compile_dictionary.py").exists():
               subprocess.run(["python3", "compile_dictionary.py"], check=False)
           EOF
 
-      - name: Salvar Dicionário e Espelho no Repositório
+      - name: Salvar Dicionário e M3U Higienizado
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add channels.json espelho.json
-          if [ -f channel_dictionary.json ]; then git add channel_dictionary.json; fi
-          if [ -f learned_ids.json ]; then git add learned_ids.json; fi
-          git diff --cached --quiet || git commit -m "Atualiza dicionário com novas listas .m3u"
+          git add -A
+          git diff --cached --quiet || git commit -m "Aprende canais das listas .m3u e higieniza credenciais"
           git push
