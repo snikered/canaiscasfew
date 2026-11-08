@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""EPG universal adaptável (Zero-Dictionary, Multi-URL Segura)
-com Suporte Nativo a Xtream Codes e Múltiplas Qualidades (SD/HD/FHD).
+"""EPG universal adaptável com Validação Anti-Erro de Provedor,
+Tradução Nativa de Categorias Xtream Codes e Exportação Multi-Alias Completa.
 """
 from __future__ import annotations
 
@@ -26,7 +26,6 @@ from statistics import mean
 from xml.sax.saxutils import quoteattr
 from typing import Iterable, Any
 
-# Garante a importação das funções de utilidade
 try:
     from epg_utils import digit_signature, normalize_name as original_normalize_name, normalize_source_id
 except ImportError:
@@ -45,8 +44,8 @@ for i in range(1, 6):
     if url and url.startswith("http"):
         M3U_URLS.append(url.strip())
 
-FUZZY_THRESHOLD = float(os.environ.get("FUZZY_THRESHOLD", "0.84"))
-FUZZY_MARGIN = float(os.environ.get("FUZZY_MARGIN", "0.035"))
+FUZZY_THRESHOLD = float(os.environ.get("FUZZY_THRESHOLD", "0.82"))
+FUZZY_MARGIN = float(os.environ.get("FUZZY_MARGIN", "0.03"))
 AGREEMENT_THRESHOLD = float(os.environ.get("AGREEMENT_THRESHOLD", "0.55"))
 MIN_COMPARABLE_PROGRAMMES = int(os.environ.get("MIN_COMPARABLE_PROGRAMMES", "3"))
 
@@ -108,11 +107,43 @@ class CandidateEvaluation:
     support_families: int; weighted_ratio: float; avg_support_agreement: float; health_score: float
     health: dict[str, object]; confidence: int; comparisons: list[dict[str, object]]
 
+# Sinônimos bidirecionais de canais brasileiros que mudaram de nome ou variam entre provedores e guias
+CHANNEL_SYNONYMS = {
+    "UNIVERSAL CHANNEL": ["UNIVERSAL TV", "UNIVERSAL"],
+    "UNIVERSAL TV": ["UNIVERSAL CHANNEL", "UNIVERSAL"],
+    "UNIVERSAL STUDIO": ["STUDIO UNIVERSAL"],
+    "STUDIO UNIVERSAL": ["UNIVERSAL STUDIO"],
+    "WARNER": ["WARNER TV", "WARNER CHANNEL"],
+    "WARNER TV": ["WARNER", "WARNER CHANNEL"],
+    "WARNER CHANNEL": ["WARNER TV", "WARNER"],
+    "SONY CHANNEL": ["SONY", "SONY ENTERTAINMENT TELEVISION"],
+    "SONY": ["SONY CHANNEL"],
+    "USA": ["USA NETWORK", "SYFY"],
+    "USA NETWORK": ["USA", "SYFY"],
+    "SYFY": ["USA", "USA NETWORK"],
+    "TNT SERIES": ["TNT SERIES", "TNT SERIE"],
+    "AGROMAIS": ["AGRO+", "AGRO MAIS"],
+    "AGRO+": ["AGROMAIS", "AGRO MAIS"],
+    "REDE TV": ["REDETV!", "REDETV"],
+    "REDETV": ["REDE TV", "REDETV!"],
+    "TV GAZETA SP": ["TV GAZETA", "GAZETA"],
+    "TV PAMPA RS": ["TV PAMPA", "PAMPA"],
+    "CNN INTERNACIONAL": ["CNN INTERNATIONAL"],
+    "JOVEM PAN": ["JOVEM PAN NEWS", "JP NEWS"],
+    "JOVEM PAN NEWS": ["JOVEM PAN", "JP NEWS"],
+    "PRIME BOX BRAZIL": ["PRIME BOX BRASIL"],
+    "CANAL BRASIL": ["CANAL BRASIL"],
+    "CARTOONITO": ["CARTOONITO", "BOOMERANG"],
+}
+
 def normalizar_canal(nome: str) -> str:
     if not nome: return ""
     original_nome = nome
+    # Remove qualquer conteúdo entre colchetes, parênteses ou barras verticais
     nome = re.sub(r'\[.*?\]|\(.*?\)|\|.*?\|', ' ', nome)
-    nome = re.sub(r'[\¹\²\³\⁴]', '', nome) 
+    nome = re.sub(r'[\¹\²\³\⁴]', '', nome)
+    
+    # Padronizações diretas
     nome = re.sub(r'\bJP NEWS\b', 'JOVEM PAN NEWS', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bJOVEM PAN\b(?! NEWS)', 'JOVEM PAN NEWS', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bFOX SPORTS\b', 'ESPN 4', nome, flags=re.IGNORECASE)
@@ -123,10 +154,13 @@ def normalizar_canal(nome: str) -> str:
     nome = re.sub(r'\bFOX LIFE\b', 'STAR LIFE', nome, flags=re.IGNORECASE)
     nome = re.sub(r'^GB\b', 'GLOBO', nome, flags=re.IGNORECASE)
     nome = re.sub(r'^RECORDTV\b', 'RECORD', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bREDE\s+TV!?\b', 'REDETV', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bAGRO\s*\+\b', 'AGROMAIS', nome, flags=re.IGNORECASE)
     
-    tags = r'\b(SD|HD|FHD|UHD|4K|8K|H264|H265|HEVC|HDR\+?|LEG|LEGENDADO|DUB|DUBLADO|HQ|VIP|VOD|24H[S]?|24/7|1080P|720P|60FPS|PPV|EVENTOS?)\b[\*\²\³\¹\⁴\+]*'
-    nome = re.sub(tags, '', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'[*=_\-]', ' ', nome)
+    # Remove tags técnicas mesmo quando coladas ou fora de colchetes (ex: "FHD H265")
+    tags = r'\b(SD|HD|FHD|UHD|4K|8K|H\.?264|H\.?265|HEVC|HDR\+?|LEG|LEGENDADO|DUB|DUBLADO|HQ|VIP|VOD|24H[S]?|24/7|1080P|720P|60FPS|PPV|EVENTOS?|ALTERNATIVO|BACKUP)\b[\*\²\³\¹\⁴\+]*'
+    nome = re.sub(tags, ' ', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'[*=_\-!]', ' ', nome)
     nome_limpo = ' '.join(nome.split()).strip().upper()
     return nome_limpo if len(nome_limpo) > 1 else original_normalize_name(original_nome)
 
@@ -136,12 +170,39 @@ def normalize_name(value: str) -> str:
 def inferir_emissora_pelo_grupo(nome_normalizado: str, nome_grupo: str) -> str:
     if not nome_grupo: return nome_normalizado
     grupo = nome_grupo.upper()
-    if "GLOBO" in grupo and not nome_normalizado.startswith("GLOBO"): return f"GLOBO {nome_normalizado}"
+    if "GLOBO" in grupo and not nome_normalizado.startswith("GLOBO") and " NEWS" not in nome_normalizado:
+        return f"GLOBO {nome_normalizado}"
     if "SBT" in grupo and not nome_normalizado.startswith("SBT"): return f"SBT {nome_normalizado}"
     if "RECORD" in grupo and not nome_normalizado.startswith("RECORD"): return f"RECORD {nome_normalizado}"
     if "BAND" in grupo and not nome_normalizado.startswith("BAND"): return f"BAND {nome_normalizado}"
     if "PREMIERE" in grupo and not nome_normalizado.startswith("PREMIERE") and len(nome_normalizado) <= 4: return f"PREMIERE {nome_normalizado}"
     return nome_normalizado
+
+def is_valid_provider_tvid(channel_name: str, tvid: str) -> bool:
+    """Impede que um TVID errado do provedor (ex: GloboNews na Jovem Pan) contamine o canal."""
+    if not tvid or len(tvid) < 2: return False
+    tvid_clean = re.sub(r'\.(br|us|uk|pt|ar|mx|cl|co|pe|latam|int)$', '', tvid.lower())
+    tvid_clean = re.sub(r'^(auto\.|yt\.|br\.|canais\.)', '', tvid_clean)
+    tvid_clean = re.sub(r'[^a-z0-9]', '', tvid_clean)
+    if not tvid_clean: return False
+
+    # Verifica contra o nome limpo e todos os sinônimos possíveis do canal
+    base_clean = normalizar_canal(channel_name)
+    candidates = [base_clean] + CHANNEL_SYNONYMS.get(base_clean, [])
+    
+    for cand in candidates:
+        cand_alnum = re.sub(r'[^a-z0-9]', '', normalize_name(cand).lower())
+        if not cand_alnum: continue
+        # Confere números do canal (ex: HBO 2 não pode aceitar ID do HBO 1)
+        cand_digits = re.findall(r'\d+', cand_alnum)
+        tvid_digits = re.findall(r'\d+', tvid_clean)
+        if cand_digits != tvid_digits:
+            continue
+        if tvid_clean in cand_alnum or cand_alnum in tvid_clean:
+            return True
+        if SequenceMatcher(None, tvid_clean, cand_alnum).ratio() >= 0.65:
+            return True
+    return False
 
 def local_tag(element: ET.Element) -> str: return element.tag.rsplit("}", 1)[-1]
 def format_xmltv_datetime(dt: datetime) -> str: return dt.astimezone(timezone.utc).strftime("%Y%m%d%H%M%S +0000")
@@ -271,17 +332,31 @@ def aliases_for(entry: dict[str, object]) -> list[str]:
     values.extend(str(x) for x in entry.get("aliases", []) or [])
     grupo = str(entry.get("group", entry.get("group-title", entry.get("group_title", ""))))
     output, seen = [], set()
+    
+    def add_norm(val: str):
+        n = original_normalize_name(val)
+        if n and n not in seen:
+            output.append(n)
+            seen.add(n)
+
     for value in values:
         nome_limpo = normalizar_canal(value)
         nome_com_grupo = inferir_emissora_pelo_grupo(nome_limpo, grupo)
-        normalized = normalize_name(nome_com_grupo)
-        if normalized and normalized not in seen:
-            output.append(normalized)
-            seen.add(normalized)
-        norm_fallback = normalize_name(nome_limpo)
-        if norm_fallback and norm_fallback not in seen:
-            output.append(norm_fallback)
-            seen.add(norm_fallback)
+        
+        add_norm(nome_com_grupo)
+        add_norm(nome_limpo)
+        
+        # Adiciona sinônimos conhecidos (ex: Universal Channel -> Universal TV)
+        for syn in CHANNEL_SYNONYMS.get(nome_limpo, []):
+            add_norm(syn)
+            
+        # Remove sufixos de estados brasileiros no final (ex: "TV GAZETA SP" -> "TV GAZETA")
+        sem_uf = re.sub(r'\s+(SP|RJ|RS|MG|BA|PR|PE|CE|PA|MA|SC|GO|PB|ES|AM|RN|AL|PI|MT|DF|MS|SE|RO|TO|AC|AP|RR)$', '', nome_limpo)
+        if sem_uf != nome_limpo:
+            add_norm(sem_uf)
+            for syn in CHANNEL_SYNONYMS.get(sem_uf, []):
+                add_norm(syn)
+
     return output
 
 def choose_exact(source: EpgSource, aliases: Iterable[str]) -> tuple[str | None, str]:
@@ -544,12 +619,15 @@ def get_clean_aliases(entry: dict[str, object]) -> list[str]:
             
     expanded = list(unique_values)
     for v in unique_values:
-        no_brackets = re.sub(r'\s*[\[\(].*?[\]\)]\s*$', '', v).strip()
+        # 1. Sem colchetes/parênteses em qualquer posição (ex: "AMC FHD [H265]" -> "AMC FHD")
+        no_brackets = re.sub(r'\s*[\[\(].*?[\]\)]\s*', ' ', v).strip()
+        no_brackets = ' '.join(no_brackets.split())
         if no_brackets and no_brackets not in expanded:
             expanded.append(no_brackets)
             
-        tags = r'\b(SD|HD|FHD|UHD|4K|8K|H264|H265|HEVC|HDR\+?|LEG|LEGENDADO|DUB|DUBLADO|HQ|VIP|VOD|24H[S]?|24/7|1080P|720P|60FPS|PPV|EVENTOS?)\b[\*\²\³\¹\⁴\+]*'
-        no_tags = re.sub(tags, '', no_brackets, flags=re.IGNORECASE)
+        # 2. Sem tags de resolução/codec soltas (ex: "SportTV FHD H265" -> "SportTV")
+        tags = r'\b(SD|HD|FHD|UHD|4K|8K|H\.?264|H\.?265|HEVC|HDR\+?|LEG|LEGENDADO|DUB|DUBLADO|HQ|VIP|VOD|24H[S]?|24/7|1080P|720P|60FPS|PPV|EVENTOS?)\b[\*\²\³\¹\⁴\+]*'
+        no_tags = re.sub(tags, ' ', no_brackets, flags=re.IGNORECASE)
         no_tags = re.sub(r'[*=_\-]', ' ', no_tags)
         no_tags = ' '.join(no_tags.split()).strip()
         
@@ -559,21 +637,22 @@ def get_clean_aliases(entry: dict[str, object]) -> list[str]:
     return [v for v in expanded if v and len(v) <= 220]
 
 def get_all_export_ids(entry: dict[str, object]) -> list[str]:
-    """Coleta todos os IDs e Nomes que o player pode usar para procurar este canal"""
+    """Gera a lista de IDs validados + todas as variações de nome para exportação no XML."""
     ids = []
+    raw_name = str(entry.get("name", "")).strip()
     
-    # 1. O ID oficial do Xtream Codes (Se o SD, HD e FHD tem o mesmo ID, todos caem aqui!)
+    # 1. Só exporta o TVID do provedor se ele passar na validação anti-erro!
     for t_id in entry.get("tvg_ids_to_export", []):
         t_id_str = str(t_id).strip()
-        if t_id_str and t_id_str not in ids:
-            ids.append(t_id_str)
+        if t_id_str and is_valid_provider_tvid(raw_name, t_id_str):
+            if t_id_str not in ids:
+                ids.append(t_id_str)
             
-    # 2. O Nome Exato do canal ("CNN Brasil FHD [H265]")
-    exact_name = str(entry.get("name", "")).strip()
-    if exact_name and exact_name not in ids:
-        ids.append(exact_name)
+    # 2. Nome exato do canal (ex: "CNN Brasil FHD [H265]")
+    if raw_name and raw_name not in ids:
+        ids.append(raw_name)
         
-    # 3. As variações de nome ("CNN Brasil FHD", "CNN Brasil")
+    # 3. Variações limpas (ex: "CNN Brasil FHD", "CNN Brasil")
     for alias in get_clean_aliases(entry):
         if alias not in ids:
             ids.append(alias)
@@ -686,18 +765,23 @@ def write_epg_stream(
     programme_count = 0
     cutoff = now - timedelta(hours=OUTPUT_PAST_HOURS)
 
-    # Dicionário mestre para NÃO duplicar IDs no XML, mas garantir que todos existam
-    xml_id_to_data = {}
+    xml_id_to_data: dict[str, tuple[CandidateEvaluation, list[ET.Element], list[str]]] = {}
     
     for entry, chosen, all_evaluations, _forced in selected:
         target_id = str(entry.get("id", ""))
         stitched = stitch_multi_source_schedule(all_evaluations, target_id, cutoff, overrides)
-        
+        all_names = get_clean_aliases(entry)
         export_ids = get_all_export_ids(entry)
+        
         for out_id in export_ids:
-            # Se o Xtream API colocou "cnn.br" no HD e no FHD, eles caem no mesmo bloco aqui pacificamente.
             if out_id not in xml_id_to_data:
-                xml_id_to_data[out_id] = (chosen, stitched)
+                xml_id_to_data[out_id] = (chosen, stitched, list(all_names))
+            else:
+                # Agrega display-names de todas as variantes (SD/HD/FHD/H265) no mesmo ID compartilhado
+                existing_names = xml_id_to_data[out_id][2]
+                for n in all_names:
+                    if n not in existing_names:
+                        existing_names.append(n)
 
     with gzip_path.open("wb") as raw_gzip:
         with gzip.GzipFile(filename="epg.xml", mode="wb", fileobj=raw_gzip, mtime=0, compresslevel=GZIP_LEVEL) as gz:
@@ -705,15 +789,24 @@ def write_epg_stream(
                 gz.write(data)
                 if plain is not None: plain.write(data)
 
-            generator = "EPG Universal Otimizado (Multi-Identificadores Pacificados)"
+            generator = "EPG Universal Otimizado (Revisado)"
             source_name = "Consolidado Inteligente de Múltiplas Fontes"
             emit((f"<?xml version='1.0' encoding='utf-8'?>\n<tv generator-info-name={quoteattr(generator)} source-info-name={quoteattr(source_name)}>\n").encode("utf-8"))
 
-            for out_id, (chosen, _) in xml_id_to_data.items():
+            for out_id, (chosen, _, display_names) in xml_id_to_data.items():
                 channel = ET.Element("channel", {"id": out_id})
-                exact_name = ET.Element("display-name")
-                exact_name.text = out_id
-                channel.append(exact_name)
+                
+                # Primeiro display-name é o próprio ID exportado
+                primary_dn = ET.Element("display-name")
+                primary_dn.text = out_id
+                channel.append(primary_dn)
+                
+                # Adiciona todos os nomes alternativos para garantir fallback no TiviMate
+                for dn in display_names:
+                    if dn != out_id:
+                        dn_node = ET.Element("display-name")
+                        dn_node.text = dn
+                        channel.append(dn_node)
                 
                 source_channel = chosen.match.source.channels.get(chosen.match.channel_id)
                 if source_channel is not None:
@@ -725,7 +818,7 @@ def write_epg_stream(
                 emit(ET.tostring(channel, encoding="utf-8"))
                 emit(b"\n")
 
-            for out_id, (_, stitched_programmes) in xml_id_to_data.items():
+            for out_id, (_, stitched_programmes, _) in xml_id_to_data.items():
                 for original in stitched_programmes:
                     prog_copy = copy.deepcopy(original)
                     prog_copy.attrib["channel"] = out_id
@@ -741,7 +834,7 @@ def write_epg_stream(
     return programme_count, len(xml_id_to_data)
 
 def main() -> None:
-    print("Iniciando geração de EPG (Mapeamento Total de Xtream IDs e Nomes)...")
+    print("Iniciando geração de EPG (Com Validação Anti-Erro de TVID e Sinônimos)...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -758,7 +851,7 @@ def main() -> None:
                 unique_entries[ch["id"]] = {
                     "id": ch["id"],
                     "name": ch["name"],
-                    "aliases": set(ch["aliases"]),
+                    "aliases": set(ch.get("aliases", [])),
                     "tvg_ids_to_export": set(ch.get("tvg_ids_to_export", [])),
                     "group": ch.get("group", "")
                 }
@@ -766,7 +859,7 @@ def main() -> None:
         except Exception as e:
             print(f"Aviso: Não foi possível carregar o espelho: {e}")
             
-    VOD_BLACKLIST = {"VOD", "PLAYBACK", "XXX", "ADULTO", "EVENTO", "LANCAMENTO", "LANÇAMENTO"}
+    VOD_BLACKLIST = {"VOD", "PLAYBACK", "XXX", "ADULTO", "EVENTO", "LANCAMENTO", "LANÇAMENTO", "FILMES", "SERIES", "SÉRIES"}
     
     for idx, url_raw in enumerate(M3U_URLS):
         url = url_raw.strip()
@@ -783,8 +876,22 @@ def main() -> None:
         if is_xtream:
             user = query["username"][0]
             pwd = query["password"][0]
-            api_url = f"{parsed_url.scheme}://{parsed_url.netloc}/player_api.php?username={user}&password={pwd}&action=get_live_streams"
-            print("  -> Link Xtream Codes detectado! Extraindo API JSON (Coletando Nomes e TVIDs Oficiais)...")
+            base_api = f"{parsed_url.scheme}://{parsed_url.netloc}/player_api.php?username={user}&password={pwd}"
+            
+            # Busca os nomes reais das categorias para ajudar na inferência de canais (ex: Globo, Premiere)
+            cat_map = {}
+            try:
+                req_cat = urllib.request.Request(f"{base_api}&action=get_live_categories", headers={"User-Agent": "Mozilla/5.0"})
+                with urllib.request.urlopen(req_cat, timeout=30) as resp_cat:
+                    cats = json.loads(resp_cat.read().decode('utf-8'))
+                    if isinstance(cats, list):
+                        for c in cats:
+                            cat_map[str(c.get("category_id", ""))] = str(c.get("category_name", ""))
+            except Exception:
+                pass
+
+            api_url = f"{base_api}&action=get_live_streams"
+            print("  -> Link Xtream Codes detectado! Extraindo API JSON...")
             try:
                 req = urllib.request.Request(api_url, headers={"User-Agent": "Mozilla/5.0"})
                 with urllib.request.urlopen(req, timeout=45) as resp:
@@ -794,6 +901,9 @@ def main() -> None:
                         for ch in data:
                             name = str(ch.get("name", "")).strip()
                             epg_id = str(ch.get("epg_channel_id", "")).strip()
+                            cat_id = str(ch.get("category_id", ""))
+                            group_name = cat_map.get(cat_id, cat_id)
+                            
                             if not name: continue
                             
                             name_upper = name.upper()
@@ -810,8 +920,12 @@ def main() -> None:
                                     "name": name,
                                     "aliases": set(),
                                     "tvg_ids_to_export": set(),
-                                    "group": str(ch.get("category_id", ""))
+                                    "group": group_name
                                 }
+                            else:
+                                if group_name and not unique_entries[target_id].get("group"):
+                                    unique_entries[target_id]["group"] = group_name
+                                    
                             unique_entries[target_id]["aliases"].add(name)
                             if epg_id:
                                 unique_entries[target_id]["tvg_ids_to_export"].add(epg_id)
@@ -820,7 +934,7 @@ def main() -> None:
                 print(f"  -> Falha ao usar API JSON ({e}). Tentando M3U tradicional...")
 
         if not success_json:
-            print("  -> Baixando arquivo M3U tradicional (Coletando Nomes e TVIDs)...")
+            print("  -> Baixando arquivo M3U tradicional...")
             try:
                 tmp_m3u = download_to_temp_file(url)
                 with tmp_m3u.open("r", encoding="utf-8", errors="ignore") as f:
@@ -978,7 +1092,7 @@ def main() -> None:
     (OUTPUT_DIR / "validation.json").write_text(json.dumps({"generated_at": now.isoformat(), "active_sources": [s.label for s in active_sources], "summary": counts, "channels": validations}, ensure_ascii=False, indent=2) + "\n", "utf-8")
 
     report_md = [
-        "# Relatório do EPG Universal — Integração Total Xtream", "",
+        "# Relatório do EPG Universal — Revisado", "",
         f"- Canais lidos nas listas M3U (Após VOD Inteligente): **{counts['playlist_channels']}**",
         f"- Canais com grade encontrada: **{counts['matched']}**",
         f"- Identificadores Exportados (Nomes + TVIDs): **{counts['exported_ids']}**",
