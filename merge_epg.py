@@ -70,7 +70,6 @@ EPG_SOURCES_CONFIG = [
     ("TV Plus", "epg_tvplus.xml", "tvplus", 1.5),
     ("MiTV", "epg_mitv.xml", "mitv", 1.5),
     ("TV Map", "epg_tvmap.xml", "tvmap", 1.5),
-    ("UrbanTV", "epg_urbantv.xml", "urbantv", 1.5),
     ("Genius", os.environ.get("PRIMARY_EPG_URL", "https://github.com/ferteque/Curated-M3U-Repository/raw/refs/heads/main/epg13.xml.gz"), "genius", 1.5),
     ("Open-EPG BR 4", "https://www.open-epg.com/files/brazil4.xml", "openepg", 1.0),
     ("Open-EPG BR", "https://www.open-epg.com/files/brazil.xml", "openepg", 1.0),
