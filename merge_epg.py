@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """EPG Universal Consolidado — Ultra Detalhado (Ano, Classificação, Gênero, TxxExx e Web Fallback)
 - Formato Filmes: "2015 Livre Comédia/Família. Sinopse..."
-- Formato Séries: "2022 14 Anos Drama/Crime. T02 E05 - Subtítulo. Sinopse..."
+- Formato Séries: "2019 14 Anos Drama/Crime. T02 E05 - Subtítulo. Sinopse..."
 - Consulta automática na Wikipedia PT / iTunes BR API com cache persistente (metadata_cache.json).
-- Compatibilidade total com as chaves reais do channels.json (old_tvg_ids, groups, blank_tvg_id_names).
+- Compatibilidade com canais esporádicos de Esportes e PPV (Sem perda de eventos e com busca ultrarrápida).
 """
 from __future__ import annotations
 
@@ -59,7 +59,7 @@ GZIP_LEVEL = max(1, min(9, int(os.environ.get("GZIP_LEVEL", "9"))))
 OUTPUT_PAST_HOURS = max(0, int(os.environ.get("OUTPUT_PAST_HOURS", "6")))
 OUTPUT_FUTURE_HOURS = max(24, int(os.environ.get("OUTPUT_FUTURE_HOURS", "72")))
 WRITE_PLAIN_XML = os.environ.get("WRITE_PLAIN_XML", "0").strip().lower() in {"1", "true", "yes"}
-MAX_WEB_LOOKUPS_PER_RUN = int(os.environ.get("MAX_WEB_LOOKUPS_PER_RUN", "180"))
+MAX_WEB_LOOKUPS_PER_RUN = int(os.environ.get("MAX_WEB_LOOKUPS_PER_RUN", "200"))
 
 IPTV_USER_AGENTS = [
     "TiviMate/4.7.0 (Android 12)",
@@ -226,7 +226,6 @@ SERIES_CATEGORY_KEYWORDS = (
     "INFANTIL",
 )
 
-# Tradução e padronização de gêneros em inglês/português para exibição limpa
 GENRE_TRANSLATION = {
     "ACTION": "Ação",
     "ACAO": "Ação",
@@ -369,14 +368,14 @@ CHANNEL_SYNONYMS = {
     "JOVEM PAN NEWS": ["JOVEM PAN", "JP NEWS", "JOVEN PAN NEWS"],
     "JOVEN PAN NEWS": ["JOVEM PAN NEWS", "JOVEM PAN", "JP NEWS"],
     "PRIME BOX BRAZIL": ["PRIME BOX BRASIL"],
-    "PRIME BOX BRASIL": ["PRIME BOX BRAZIL"],
+    "PRIME BOX BRAZIL": ["PRIME BOX BRAZIL"],
     "CARTOONITO": ["CARTOONITO", "BOOMERANG"],
     "SPORTTV": ["SPORTV"],
     "SPORTV": ["SPORTTV"],
     "SPORTTV 2": ["SPORTV 2"],
-    "SPORTV 2": ["SPORTTV 2"],
+    "SPORTV 2": ["SPORTV 2"],
     "SPORTTV 3": ["SPORTV 3"],
-    "SPORTV 3": ["SPORTTV 3"],
+    "SPORTV 3": ["SPORTV 3"],
     "GLOBOPLAY NOVELAS": ["VIVA", "CANAL VIVA"],
     "VIVA": ["GLOBOPLAY NOVELAS", "CANAL VIVA"],
 }
@@ -528,7 +527,7 @@ def download_to_temp_file(url: str, attempts: int = 4) -> Path:
     raise RuntimeError(f"Falha ao baixar ({last_error})")
 
 # =====================================================================
-# EXTRAÇÃO DE METADADOS + CACHE + FALLBACK WEB (WIKIPEDIA PT & ITUNES BR)
+# METADADOS WEB (WIKIPEDIA PT & ITUNES BR) + CACHE
 # =====================================================================
 _METADATA_CACHE: dict[str, dict[str, str]] = {}
 _WEB_LOOKUPS_COUNT = 0
@@ -562,7 +561,6 @@ _RE_RATING_IN_TEXT = re.compile(
 )
 
 def normalize_rating_label(raw_rating: str) -> str:
-    """Padroniza a classificação indicativa (ex: 'Livre', '10 Anos', '12 Anos', '14 Anos', '16 Anos', '18 Anos')."""
     if not raw_rating:
         return ""
     r = raw_rating.strip().upper()
@@ -581,7 +579,6 @@ def normalize_rating_label(raw_rating: str) -> str:
     return ""
 
 def normalize_genres_list(raw_categories: Iterable[str]) -> str:
-    """Limpa, traduz e formata até 2 gêneros no padrão 'Comédia/Família'."""
     cleaned: list[str] = []
     for raw in raw_categories:
         if not raw:
@@ -595,7 +592,6 @@ def normalize_genres_list(raw_categories: Iterable[str]) -> str:
                 continue
             mapped = GENRE_TRANSLATION.get(p_up)
             if not mapped:
-                # Tenta sem acentos
                 p_no_acc = "".join(c for c in unicodedata.normalize("NFKD", p_up) if not unicodedata.combining(c))
                 mapped = GENRE_TRANSLATION.get(p_no_acc, p.title())
             if mapped and mapped.upper() not in IGNORED_GENERIC_CATEGORIES and mapped not in cleaned:
@@ -636,7 +632,6 @@ def is_likely_movie_or_sport(categories: Iterable[str], desc: str, duration_minu
     return False
 
 def query_web_metadata(clean_title: str, is_movie: bool) -> dict[str, str]:
-    """Consulta iTunes Search API (BR) e Wikipedia PT API para obter Ano, Classificação, Gênero e Sinopse."""
     global _WEB_LOOKUPS_COUNT
     cache_key = f"{'M' if is_movie else 'S'}:{normalize_programme_title(clean_title)}"
     if not clean_title or len(clean_title) < 2:
@@ -649,7 +644,6 @@ def query_web_metadata(clean_title: str, is_movie: bool) -> dict[str, str]:
     _WEB_LOOKUPS_COUNT += 1
     found = {"year": "", "rating": "", "genre": "", "desc": ""}
 
-    # 1. Consulta rápida na API aberta do iTunes / Apple TV Brasil (Retorna Ano, Classificação BR, Gênero em PT e Sinopse)
     try:
         entity = "movie" if is_movie else "tvSeason"
         q = urllib.parse.quote(clean_title)
@@ -681,7 +675,6 @@ def query_web_metadata(clean_title: str, is_movie: bool) -> dict[str, str]:
     except Exception:
         pass
 
-    # 2. Fallback na API da Wikipedia em Português caso ainda falte Ano ou Gênero
     if not found["year"] or not found["genre"]:
         try:
             q_wiki = urllib.parse.quote(f"{clean_title} {'filme' if is_movie else 'série'}")
@@ -713,7 +706,6 @@ def query_web_metadata(clean_title: str, is_movie: bool) -> dict[str, str]:
     return found
 
 def clean_redundant_title_subtitle(title: str, sub_title: str) -> tuple[str, str]:
-    """Remove subtítulos repetidos como 'Boca Juniors x Defensa y Justicia - Campeonato Argentino : Boca Juniors x Defensa y Justicia'."""
     t = title.strip()
     s = sub_title.strip()
     if " : " in t and not s:
@@ -727,12 +719,10 @@ def clean_redundant_title_subtitle(title: str, sub_title: str) -> tuple[str, str
         if not norm_s or norm_s == norm_t or norm_s in norm_t:
             s = ""
         elif norm_t in norm_s and len(s) > len(t):
-            # Se o subtítulo for mais completo que o título e já contiver o título
             s = ""
     return t, s
 
 def extract_program_metadata(el: ET.Element, channel_name: str = "", duration_minutes: float = 0.0) -> dict[str, Any]:
-    """Extrai Título, Subtítulo, Sinopse, Ano, Classificação Indicativa, Gênero, Temporada e Episódio."""
     title = ""
     sub_title = ""
     desc = ""
@@ -786,21 +776,17 @@ def extract_program_metadata(el: ET.Element, channel_name: str = "", duration_mi
 
     blob = f"{title} | {sub_title} | {desc}"
 
-    # Extrai Ano do texto caso não haja tag <date>
     if not date_str:
         m_y = _RE_YEAR_IN_TEXT.search(blob)
         if m_y:
             date_str = m_y.group(1)
-            # Remove o ano do final do título se estiver entre parênteses ex: "Minions (2015)" -> "Minions"
             title = re.sub(r"\s*[\(\[]\s*(?:19\d\d|20\d\d)\s*[\)\]]\s*$", "", title).strip()
 
-    # Extrai Classificação Indicativa do texto caso não haja tag <rating>
     if not rating_str:
         m_r = _RE_RATING_IN_TEXT.search(blob)
         if m_r:
             rating_str = normalize_rating_label(m_r.group(1))
 
-    # Extrai Temporada e Episódio via Regex estrita
     if season is None and episode is None:
         for pat in _RE_SE_PATTERNS:
             m = pat.search(blob)
@@ -990,6 +976,11 @@ def best_fuzzy(source: EpgSource, aliases: list[str]) -> tuple[str | None, float
     second_score = scored[1][0] if len(scored) > 1 else 0.0
     return best[1], best[0], second_score, f"aproximação {best[0]:.3f}: {best[2]} ~ {best[3]}"
 
+_RE_SPORADIC_PPV = re.compile(
+    r'(\b(?:DAZN|GOAT|SPORTYNET|DISNEY\s*PLUS|DISNEY\+|PARAMOUNT\+|MAX|CONMEBOL\s*TV|PAULIST[AÃ]O|NOSSO\s*FUTEBOL)\s*[\(\[]?\s*\d+\s*[\)\]]?\b|\bPPV\s*\d+\b)',
+    re.IGNORECASE
+)
+
 def find_match(source: EpgSource, aliases: list[str], source_ids: list[str] = None) -> ChannelMatch | None:
     for raw_sid in (source_ids or []):
         norm_sid = normalize_source_id(raw_sid)
@@ -1001,6 +992,9 @@ def find_match(source: EpgSource, aliases: list[str], source_ids: list[str] = No
     exact_id, reason = choose_exact(source, aliases)
     if exact_id: return ChannelMatch(source, exact_id, reason, 1.0)
     
+    if aliases and _RE_SPORADIC_PPV.search(aliases[0]):
+        return None
+
     fuzzy_id, best_score, second_score, fuzzy_reason = best_fuzzy(source, aliases)
     if fuzzy_id and best_score >= FUZZY_THRESHOLD and (best_score - second_score) >= FUZZY_MARGIN:
         return ChannelMatch(source, fuzzy_id, fuzzy_reason, best_score)
@@ -1353,7 +1347,7 @@ def get_primary_export_ids(entry: dict[str, object]) -> list[str]:
 def apply_rich_metadata_to_element(
     el: ET.Element, meta_pool: list[dict[str, Any]], channel_name: str, duration_minutes: float
 ) -> None:
-    """Formata a descrição no modelo exato:
+    """Formata no modelo exato solicitado pelo usuário:
     - Filme: '2015 Livre Comédia/Família. Sinopse...'
     - Série: '2019 14 Anos Drama/Crime. T02 E05 - Episódio. Sinopse...'
     """
@@ -1386,8 +1380,6 @@ def apply_rich_metadata_to_element(
                 merged_cats.append(c)
 
     is_movie_or_sport = is_likely_movie_or_sport(merged_cats, best_desc, duration_minutes, channel_name)
-    is_sport_news = is_sport_or_news_channel(channel_name)
-
     if is_movie_or_sport:
         best_season = None
         best_episode = None
@@ -1404,9 +1396,8 @@ def apply_rich_metadata_to_element(
 
     genre_str = normalize_genres_list(merged_cats)
 
-    # Se faltar Ano ou Gênero (e não for telejornal/jogo ao vivo), consulta Wikipedia PT / iTunes BR!
     is_live_match = " X " in clean_title.upper() or clean_title.upper().startswith(("AO VIVO", "VT -", "TELEJORNAL", "JORNAL "))
-    if not is_sport_news and not is_live_match and (not best_date or not genre_str or not best_rating):
+    if not is_sport_or_news_channel(channel_name) and not is_live_match and (not best_date or not genre_str or not best_rating):
         web_info = query_web_metadata(clean_title, is_movie=is_movie_or_sport)
         if web_info:
             if not best_date and web_info.get("year"):
@@ -1418,7 +1409,6 @@ def apply_rich_metadata_to_element(
             if not best_desc and web_info.get("desc"):
                 best_desc = web_info["desc"]
 
-    # Etiqueta de Temporada e Episódio (apenas para Séries)
     se_badge = ""
     if not is_movie_or_sport:
         if best_season is not None and best_episode is not None:
@@ -1443,7 +1433,7 @@ def apply_rich_metadata_to_element(
         elif sub_node is not None:
             el.remove(sub_node)
 
-    # Monta o cabeçalho no formato pedido: "2015 Livre Comédia/Família." + (Se série: "T01 E02 - Subtítulo.") + "Sinopse..."
+    # Monta exatamente no modelo: "2015 Livre Comédia/Família. [T01 E02 - Subtítulo]. Sinopse..."
     meta_tokens = []
     if best_date:
         meta_tokens.append(best_date)
@@ -1462,7 +1452,6 @@ def apply_rich_metadata_to_element(
     elif best_sub and not is_movie_or_sport:
         series_info = best_sub
 
-    # Limpa da sinopse original caso ela já comece repetindo o mesmo ano/gênero
     clean_desc = (best_desc or "").strip()
     if best_date and clean_desc.startswith(f"({best_date})"):
         clean_desc = clean_desc[len(f"({best_date})"):].strip(" -•.")
@@ -1816,7 +1805,6 @@ def main() -> None:
                     count += 1
         return count
 
-    # 1. Lê TODAS as chaves reais do channels.json (incluindo old_tvg_ids, original_names, blank_tvg_id_names e groups)
     if CATALOG_PATH.exists():
         try:
             print(f"Lendo Dicionário Persistente ({CATALOG_PATH})...")
@@ -2037,7 +2025,7 @@ def main() -> None:
     (OUTPUT_DIR / "validation.json").write_text(json.dumps({"generated_at": now.isoformat(), "active_sources": [s.label for s in active_sources], "summary": counts, "channels": validations}, ensure_ascii=False, indent=2) + "\n", "utf-8")
 
     report_md = [
-        "# Relatório do EPG Universal — Metadados Completos (Ano, Classificação e Gênero)", "",
+        "# Relatório do EPG Universal — Filmes Limpos & Séries Detalhadas", "",
         f"- Emissoras base consolidadas: **{counts['playlist_channels']}**",
         f"- Emissoras com grade encontrada: **{counts['matched']}**",
         f"- Canais XML gerados: **{counts['exported_ids']}**",
