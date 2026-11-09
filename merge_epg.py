@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
-"""EPG Universal Consolidado — Ultra Detalhado (Ano, Classificação, Gênero, TxxExx e Web Fallback)
+"""EPG Universal Consolidado — Blindado contra TVG-IDs errados nas listas M3U
+- Bloqueia TVG-IDs envenenados nos servidores M3U (ex: Cartoonito com tvg-id="AandE.br" ou "agromais.br",
+  HBO com "HBO2.br", RedeTV com "SBT.br", Jovem Pan com "globonews.br"), forçando o player a casar pelo nome exato!
+- Gera todas as variações de nomes das listas M3U (incluindo sufixos [1], [2], [3], ², [H265]) para casamento 100% automático.
+- Valida dígitos nos source_ids do dicionário (impede ESPN 2 de puxar Espn.br ou HBO de puxar HBO2.br).
 - Formato Filmes: "2015 Livre Comédia/Família. Sinopse..."
 - Formato Séries: "2019 14 Anos Drama/Crime. T02 E05 - Subtítulo. Sinopse..."
-- Consulta automática na Wikipedia PT / iTunes BR API com cache persistente (metadata_cache.json).
-- Compatibilidade com canais esporádicos de Esportes e PPV (Sem perda de eventos e com busca ultrarrápida).
-- Filtro estrito de consenso na costura (bloqueia fontes com 'vote': 'diverge').
 """
 from __future__ import annotations
 
 import copy
 import glob
 import gzip
+import html
 import json
 import os
 import re
@@ -88,6 +90,21 @@ EPG_SOURCES_CONFIG = [
     ("Genius", os.environ.get("PRIMARY_EPG_URL", "https://github.com/ferteque/Curated-M3U-Repository/raw/refs/heads/main/epg13.xml.gz"), "genius", 1.0),
     ("EPG pw BR", "https://epg.pw/xmltv/epg_BR.xml", "epgpw", 0.8),
 ]
+
+# TVG-IDs que os servidores IPTV colocaram em canais errados nas listas M3U!
+# Ao NÃO exportar esses IDs como <channel id="..."> no XML, o player ignora o tvg-id errado da M3U
+# e faz o casamento automático pelo tvg-name / nome do canal (ex: "Cartoonito HD [1]", "CARTOONITO FHD").
+POISONED_PROVIDER_TVIDS = {
+    "aande.br",        # Usado erroneamente em Cartoonito HD [1], Tooncast, TV Brasil, Record News, Music Box
+    "agromais.br",     # Usado erroneamente em CARTOONITO FHD/HD/SD, Travel Box Brazil, SBT TV Jornal Recife
+    "hbo2.br",         # Usado erroneamente em HBO HD [2]
+    "sbt.br",          # Usado erroneamente em RedeTV! HD [3]
+    "globonews.br",    # Usado erroneamente em JOVEM PAN HD/FHD e Globo Inter TV dos Vales
+    "espn.br",         # Usado erroneamente em ESPN 2 HD/SD
+    "espn2.br",        # Usado erroneamente em ESPN 3 FHD/HD/SD
+    "globorj.br",      # Usado erroneamente em dezenas de afiliadas Globo SP/Sul/Nordeste
+    "globosp.br",      # Usado erroneamente em dezenas de afiliadas Globo de outros estados
+}
 
 PLACEHOLDER_TITLES = {
     "",
@@ -370,37 +387,70 @@ CHANNEL_SYNONYMS = {
     "JOVEN PAN NEWS": ["JOVEM PAN NEWS", "JOVEM PAN", "JP NEWS"],
     "PRIME BOX BRAZIL": ["PRIME BOX BRASIL"],
     "PRIME BOX BRASIL": ["PRIME BOX BRAZIL"],
+    "TRAVEL BOX BRAZIL": ["TRAVEL BOX BRASIL"],
+    "TRAVEL BOX BRASIL": ["TRAVEL BOX BRAZIL"],
+    "MUSIC BOX BRAZIL": ["MUSIC BOX BRASIL"],
+    "MUSIC BOX BRASIL": ["MUSIC BOX BRAZIL"],
     "CARTOONITO": ["CARTOONITO", "BOOMERANG"],
-    "SPORTTV": ["SPORTV"],
-    "SPORTV": ["SPORTTV"],
-    "SPORTTV 2": ["SPORTV 2"],
-    "SPORTV 2": ["SPORTTV 2"],
-    "SPORTTV 3": ["SPORTV 3"],
-    "SPORTV 3": ["SPORTTV 3"],
-    "GLOBOPLAY NOVELAS": ["VIVA", "CANAL VIVA"],
-    "VIVA": ["GLOBOPLAY NOVELAS", "CANAL VIVA"],
+    "SPORTTV": ["SPORTV", "SPORTV 1", "SPORTV1"],
+    "SPORTV": ["SPORTTV", "SPORTV 1", "SPORTV1"],
+    "SPORTV 1": ["SPORTV", "SPORTTV", "SPORTV1"],
+    "SPORTTV 2": ["SPORTV 2", "SPORTV2"],
+    "SPORTV 2": ["SPORTTV 2", "SPORTV2"],
+    "SPORTTV 3": ["SPORTV 3", "SPORTV3"],
+    "SPORTV 3": ["SPORTTV 3", "SPORTV3"],
+    "ESPN": ["ESPN 1", "ESPN BRASIL"],
+    "ESPN 1": ["ESPN", "ESPN BRASIL"],
+    "ESPN 4": ["FOX SPORTS"],
+    "ESPN 5": ["FOX SPORTS 2"],
+    "GLOBOPLAY NOVELAS": ["VIVA", "CANAL VIVA", "GLOBO NOVELAS"],
+    "VIVA": ["GLOBOPLAY NOVELAS", "CANAL VIVA", "GLOBO NOVELAS"],
+    "PREMIERE CLUBES": ["PREMIERE 1", "PREMIERE"],
+    "PREMIERE 1": ["PREMIERE CLUBES", "PREMIERE"],
+    "HISTORY 2": ["H2"],
+    "H2": ["HISTORY 2"],
+    "INVESTIGACAO DISCOVERY": ["ID - INVESTIGACAO DISCOVERY", "ID INVESTIGACAO DISCOVERY"],
+    "DISCOVERY HOME & HEALTH": ["DISCOVERY H&H", "DISCOVERY HOME AND HEALTH"],
+    "TLC": ["DISCOVERY TLC"],
 }
 
 def strip_qualities_keep_case(name: str) -> str:
     if not name: return ""
-    s = re.sub(r'\[.*?\]|\(.*?\)|\|.*?\|', ' ', name)
-    s = re.sub(r'[\¹\²\³\⁴]', '', s)
+    s = html.unescape(name)
+    s = re.sub(r'\[.*?\]|\(.*?\)|\|.*?\|', ' ', s)
+    s = re.sub(r'[\¹\²\³\⁴\~]', ' ', s)
     tags = r'\b(SD|HD|FHD|UHD|4K|8K|H\.?264|H\.?265|HEVC|HDR\+?|LEG|LEGENDADO|DUB|DUBLADO|HQ|VIP|VOD|24H[S]?|24/7|1080P|720P|60FPS|PPV|EVENTOS?|ALTERNATIVO|BACKUP|ALT)\b[\*\²\³\¹\⁴\+]*'
     s = re.sub(tags, ' ', s, flags=re.IGNORECASE)
     s = re.sub(r'[*=_\-]', ' ', s)
+    s = re.sub(r'\.\s*$', '', s)
     return ' '.join(s.split()).strip()
 
 def normalizar_canal(nome: str) -> str:
     if not nome: return ""
-    original_nome = nome
-    nome = strip_qualities_keep_case(nome)
+    original_nome = html.unescape(nome)
+    nome = strip_qualities_keep_case(original_nome)
     
     nome = re.sub(r'\bJP NEWS\b', 'JOVEM PAN NEWS', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bJOVEN PAN\b', 'JOVEM PAN', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bJOVEM PAN\b(?! NEWS)', 'JOVEM PAN NEWS', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bFOX SPORTS 2\b', 'ESPN 5', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bFOX SPORTS\b', 'ESPN 4', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bESPN EXTRA\b', 'ESPN 6', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bESPN\s*1\b', 'ESPN', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bSPORTV\s*1\b', 'SPORTV 1', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bSPORTV\s*2\b', 'SPORTV 2', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bSPORTV\s*3\b', 'SPORTV 3', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bPREMIERE\s*1\b', 'PREMIERE CLUBES', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bBOOMERANG\b', 'CARTOONITO', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bMAX PRIME\b', 'HBO POP', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bHBO\s*\+\b', 'HBO PLUS', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bH2\b', 'HISTORY 2', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bDISCOVERY H&H\b', 'DISCOVERY HOME & HEALTH', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bDISCOVERY TLC\b', 'TLC', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bID\s+INVESTIGA[CÇ][AÃ]O DISCOVERY\b', 'INVESTIGACAO DISCOVERY', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bGLOBO NOVELAS\b', 'GLOBOPLAY NOVELAS', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bMUSIC BOX BRASIL\b', 'MUSIC BOX BRAZIL', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bZOOMOOO\b', 'ZOOMOO', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bFOX PREMIUM\b', 'STAR PREMIUM', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bFOX CHANNEL\b', 'STAR CHANNEL', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bFOX LIFE\b', 'STAR LIFE', nome, flags=re.IGNORECASE)
@@ -434,7 +484,11 @@ def inferir_emissora_pelo_grupo(nome_normalizado: str, nome_grupo: str) -> str:
     return nome_normalizado
 
 def is_valid_provider_tvid(channel_name: str, tvid: str) -> bool:
+    """Valida estritamente se um tvg-id pertence mesmo ao canal e não está na lista de IDs envenenados."""
     if not tvid or len(tvid) < 2: return False
+    if tvid.strip().lower() in POISONED_PROVIDER_TVIDS:
+        return False
+
     tvid_clean = re.sub(r'\.(br|us|uk|pt|ar|mx|cl|co|pe|latam|int|bt)$', '', tvid.lower())
     tvid_clean = re.sub(r'^(auto\.|yt\.|br\.|canais\.)', '', tvid_clean)
     tvid_clean = re.sub(r'[^a-z0-9]', '', tvid_clean)
@@ -452,7 +506,7 @@ def is_valid_provider_tvid(channel_name: str, tvid: str) -> bool:
             continue
         if tvid_clean in cand_alnum or cand_alnum in tvid_clean:
             return True
-        if SequenceMatcher(None, tvid_clean, cand_alnum).ratio() >= 0.65:
+        if SequenceMatcher(None, tvid_clean, cand_alnum).ratio() >= 0.72:
             return True
     return False
 
@@ -982,10 +1036,17 @@ _RE_SPORADIC_PPV = re.compile(
     re.IGNORECASE
 )
 
-def find_match(source: EpgSource, aliases: list[str], source_ids: list[str] = None) -> ChannelMatch | None:
+def find_match(source: EpgSource, aliases: list[str], source_ids: list[str] = None, channel_name: str = "") -> ChannelMatch | None:
+    allowed_digit_sigs = {digit_signature(a) for a in aliases if a}
     for raw_sid in (source_ids or []):
+        if channel_name and not is_valid_provider_tvid(channel_name, raw_sid):
+            continue
         norm_sid = normalize_source_id(raw_sid)
-        if norm_sid and norm_sid in source.normalized_id_index:
+        if not norm_sid:
+            continue
+        if allowed_digit_sigs and digit_signature(norm_sid) not in allowed_digit_sigs:
+            continue
+        if norm_sid in source.normalized_id_index:
             cands = source.normalized_id_index[norm_sid]
             best_cid = max(cands, key=lambda cid: len(source.rows.get(cid, [])))
             return ChannelMatch(source, best_cid, f"id do dicionário: {raw_sid}", 1.0)
@@ -1278,31 +1339,48 @@ def make_validation(entry: dict[str, object], chosen: CandidateEvaluation, all_e
     }
 
 def generate_quality_variants(base_names: Iterable[str]) -> list[str]:
+    """Gera variações de qualidade + sufixos de listas M3U ([1], [2], [3], [H265], ²)."""
     suffixes = [
         "",
         " SD",
         " HD",
         " FHD",
+        " 4K",
         " FHD [H265]",
         " FHD H265",
         " HD [H265]",
         " HD H265",
         " [H265]",
         " H265",
-        " 4K",
+        " HD [1]",
+        " HD [2]",
+        " HD [3]",
+        " FHD [1]",
+        " FHD [2]",
+        " FHD [3]",
+        " SD [1]",
+        " SD [2]",
+        " SD [3]",
+        " [1]",
+        " [2]",
+        " [3]",
+        " FHD ²",
+        " HD ²",
+        " SD ²",
     ]
     result = []
     seen = set()
     for base in base_names:
-        clean_base = strip_qualities_keep_case(base)
-        for root in (base.strip(), clean_base):
+        b_unesc = html.unescape(str(base)).strip()
+        clean_base = strip_qualities_keep_case(b_unesc)
+        for root in (b_unesc, clean_base, clean_base.upper(), clean_base.title()):
             if not root or len(root) > 160:
                 continue
             for suf in suffixes:
                 cand = f"{root}{suf}".strip()
-                if cand and cand.upper() not in seen:
+                if cand and cand not in seen:
                     result.append(cand)
-                    seen.add(cand.upper())
+                    seen.add(cand)
     return result
 
 def get_clean_aliases(entry: dict[str, object]) -> list[str]:
@@ -1323,7 +1401,7 @@ def get_clean_aliases(entry: dict[str, object]) -> list[str]:
     return generate_quality_variants(values)
 
 def get_primary_export_ids(entry: dict[str, object]) -> list[str]:
-    """Exporta o TVID oficial (.br) + o Nome Limpo Exato (e antigo, se renomeado) para evitar conflito no player."""
+    """Exporta IDs seguros (bloqueando qualquer TVG-ID envenenado como AandE.br ou agromais.br)."""
     ids = []
     seen = set()
     raw_name = str(entry.get("name", "")).strip()
@@ -1332,7 +1410,11 @@ def get_primary_export_ids(entry: dict[str, object]) -> list[str]:
 
     def add_id(val: str):
         v = val.strip()
-        if v and v.lower() not in seen and len(v) <= 180:
+        if not v or len(v) > 180:
+            return
+        if v.lower() in POISONED_PROVIDER_TVIDS:
+            return
+        if v.lower() not in seen:
             ids.append(v)
             seen.add(v.lower())
 
@@ -1343,26 +1425,28 @@ def get_primary_export_ids(entry: dict[str, object]) -> list[str]:
         if is_valid_provider_tvid(raw_name, str(t_id)):
             add_id(str(t_id))
 
-    # Garante sempre o nome limpo como ID direto para listas sem tvg-id
     add_id(clean_base)
 
-    # Casos especiais de canais que mudaram de nome recentemente nas listas M3U
-    norm_up = clean_base.upper()
+    norm_up = normalizar_canal(clean_base)
     if norm_up == "CARTOONITO":
         add_id("cartoonito.br")
         add_id("Boomerang.br")
     elif norm_up == "GLOBOPLAY NOVELAS":
         add_id("viva.br")
+    elif norm_up == "ESPN 4":
+        add_id("foxsports.br")
+        add_id("espn4.br")
+    elif norm_up == "ESPN 5":
+        add_id("foxsports2.br")
+        add_id("espn5.br")
+    elif norm_up == "ESPN":
+        add_id("espnbrasil.br")
 
     return ids[:3]
 
 def apply_rich_metadata_to_element(
     el: ET.Element, meta_pool: list[dict[str, Any]], channel_name: str, duration_minutes: float
 ) -> None:
-    """Formata no modelo exato solicitado pelo usuário:
-    - Filme: '2015 Livre Comédia/Família. Sinopse...'
-    - Série: '2019 14 Anos Drama/Crime. T02 E05 - Episódio. Sinopse...'
-    """
     base_meta = extract_program_metadata(el, channel_name, duration_minutes)
     all_metas = [base_meta, *(meta_pool or [])]
 
@@ -1445,7 +1529,6 @@ def apply_rich_metadata_to_element(
         elif sub_node is not None:
             el.remove(sub_node)
 
-    # Monta exatamente no modelo: "2015 Livre Comédia/Família. [T01 E02 - Subtítulo]. Sinopse..."
     meta_tokens = []
     if best_date:
         meta_tokens.append(best_date)
@@ -1505,8 +1588,6 @@ def stitch_multi_source_schedule(
     shift_by_source_key: dict[str, int] = {leader_key: 0}
     trusted_source_keys: set[str] = {leader_key}
 
-    # CRÍTICO: Só aceita costurar ou puxar metadados de fontes que CONCORDAM com a fonte líder!
-    # Fontes com 'vote': 'diverge' (ex: Genius com grade de outro país no Cartoonito/HBO) são bloqueadas!
     for comp in leader_ev.comparisons:
         other_key = str(comp.get("other_source_key", ""))
         vote = str(comp.get("vote", ""))
@@ -1515,7 +1596,6 @@ def stitch_multi_source_schedule(
             trusted_source_keys.add(other_key)
             shift_by_source_key[other_key] = int(comp.get("detected_shift") or 0)
         elif vote == "sem_dados" and len(all_evaluations) <= 2:
-            # Só usa fonte sem_dados se quase não houver fontes para o canal
             trusted_source_keys.add(other_key)
             shift_by_source_key[other_key] = 0
 
@@ -1525,7 +1605,7 @@ def stitch_multi_source_schedule(
     for ev in all_evaluations:
         src = ev.match.source
         if src.spec.key not in trusted_source_keys:
-            continue  # Ignora completamente fontes que divergiram da grade verdadeira!
+            continue
 
         cid = ev.match.channel_id
         fixed_rows = src.rows.get(cid, [])
@@ -1750,7 +1830,7 @@ def write_epg_stream(
     return programme_count, len(xml_id_to_data)
 
 def main() -> None:
-    print("Iniciando geração de EPG (Ano + Classificação + Gênero + Séries TxxExx)...")
+    print("Iniciando geração de EPG (Blindado contra TVG-IDs envenenados nas listas M3U)...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -1762,7 +1842,7 @@ def main() -> None:
     VOD_BLACKLIST = {"VOD", "PLAYBACK", "XXX", "ADULTO", "EVENTO", "LANCAMENTO", "LANÇAMENTO", "FILMES", "SERIES", "SÉRIES"}
 
     def merge_channel_record(ch_id: str, name: str, aliases: Iterable[str] = (), tvg_ids: Iterable[str] = (), comp_ids: Iterable[str] = (), source_ids: Iterable[str] = (), group: str = "") -> None:
-        base_name = name or ch_id
+        base_name = html.unescape(name or ch_id).strip()
         if not base_name: return
         norm_key = normalize_name(base_name) or base_name.strip().upper()
         if norm_key not in grouped_by_norm:
@@ -1778,13 +1858,19 @@ def main() -> None:
         rec = grouped_by_norm[norm_key]
         if base_name: rec["aliases"].add(base_name)
         for a in aliases:
-            if a: rec["aliases"].add(str(a).strip())
+            if a: rec["aliases"].add(html.unescape(str(a)).strip())
         for t in tvg_ids:
-            if t: rec["tvg_ids_to_export"].add(str(t).strip())
+            if t and is_valid_provider_tvid(base_name, str(t)):
+                rec["tvg_ids_to_export"].add(str(t).strip())
+            elif t and not is_valid_provider_tvid(base_name, str(t)):
+                # Detectou um tvg-id colocado em canal errado pelo provedor! Bloqueia globalmente!
+                POISONED_PROVIDER_TVIDS.add(str(t).strip().lower())
         for c in comp_ids:
-            if c: rec["compatibility_ids"].add(str(c).strip())
+            if c and is_valid_provider_tvid(base_name, str(c)):
+                rec["compatibility_ids"].add(str(c).strip())
         for s in source_ids:
-            if s: rec["source_ids"].add(str(s).strip())
+            if s and is_valid_provider_tvid(base_name, str(s)):
+                rec["source_ids"].add(str(s).strip())
         if group and not rec["group"]:
             rec["group"] = group
 
@@ -1797,33 +1883,23 @@ def main() -> None:
                 if not line: continue
                 if line.startswith("#EXTINF:"):
                     current_extinf = line
-                elif (line.startswith("http") or line.startswith("rtmp")) and current_extinf:
-                    lower_url = line.split("?")[0].lower()
-                    if lower_url.endswith(('.mp4', '.mkv', '.avi', '.mov', '.wmv', '.flv', '.webm')):
-                        current_extinf = None
-                        continue
-
                     tvg_id_match = re.search(r'tvg-id="(.*?)"', current_extinf, re.IGNORECASE)
                     tvg_name_match = re.search(r'tvg-name="(.*?)"', current_extinf, re.IGNORECASE)
                     group_match = re.search(r'group-title="(.*?)"', current_extinf, re.IGNORECASE)
                     name_match = re.search(r',([^,]*?)$', current_extinf)
                     
                     tvg_id = tvg_id_match.group(1).strip() if tvg_id_match else ""
-                    tvg_name = tvg_name_match.group(1).strip() if tvg_name_match else ""
+                    tvg_name = html.unescape(tvg_name_match.group(1).strip()) if tvg_name_match else ""
                     group = group_match.group(1).strip() if group_match else ""
-                    name = name_match.group(1).strip() if name_match else ""
-                    current_extinf = None
+                    name = html.unescape(name_match.group(1).strip()) if name_match else ""
                     
                     if any(blacklisted in group.upper() for blacklisted in VOD_BLACKLIST):
                         continue
-                        
                     target_id = tvg_name or name
                     if not target_id: continue
-                    
                     name_upper = target_id.upper()
                     if re.search(r'\bS\d{1,3}\s*E\d{1,3}\b|\bT\d{1,3}\s*EP?\d{1,3}\b|\b24HS?\b|^24\s*H\b', name_upper):
                         continue
-                    
                     merge_channel_record(
                         ch_id=target_id,
                         name=name or tvg_name,
@@ -1954,12 +2030,13 @@ def main() -> None:
 
     for v in grouped_by_norm.values():
         v["aliases"] = sorted(v["aliases"])
-        v["tvg_ids_to_export"] = sorted(v["tvg_ids_to_export"])
-        v["compatibility_ids"] = sorted(v["compatibility_ids"])
+        v["tvg_ids_to_export"] = sorted(t for t in v["tvg_ids_to_export"] if t.lower() not in POISONED_PROVIDER_TVIDS)
+        v["compatibility_ids"] = sorted(c for c in v["compatibility_ids"] if c.lower() not in POISONED_PROVIDER_TVIDS)
         v["source_ids"] = sorted(v["source_ids"])
         entries.append(v)
         
     print(f"\nCatálogo unificado pronto: {len(entries)} emissoras base únicas.")
+    print(f"TVG-IDs envenenados bloqueados automaticamente: {sorted(POISONED_PROVIDER_TVIDS)}")
 
     try: overrides = json.loads(OVERRIDES_PATH.read_text("utf-8")) if OVERRIDES_PATH.exists() else {}
     except Exception: overrides = {}
@@ -2001,7 +2078,7 @@ def main() -> None:
         visible_name = str(entry.get("name", ""))
         aliases = aliases_for(entry)
         source_ids = [str(x) for x in entry.get("source_ids", []) or []]
-        matches = [m for source in active_sources if (m := find_match(source, aliases, source_ids)) is not None]
+        matches = [m for source in active_sources if (m := find_match(source, aliases, source_ids, visible_name)) is not None]
 
         override_source_key, override_id = manual_override(overrides, target_id)
         forced = False
