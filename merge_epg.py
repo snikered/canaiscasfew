@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""EPG Universal Consolidado — Alta Precisão de Horários + Metadados Estritos para Séries
-- Remove "E1" falso de Filmes, Esportes e Jornalismo.
-- Limpa tags <episode-num> indevidas que fazem o TiviMate exibir E1 em filmes.
-- Mantém Temporada e Episódio (Txx Exx) exclusivamente quando for Série/Episódio real.
+"""EPG Universal Consolidado — Ultra Detalhado (Ano, Classificação, Gênero, TxxExx e Web Fallback)
+- Formato Filmes: "2015 Livre Comédia/Família. Sinopse..."
+- Formato Séries: "2022 14 Anos Drama/Crime. T02 E05 - Subtítulo. Sinopse..."
+- Consulta automática na Wikipedia PT / iTunes BR API com cache persistente (metadata_cache.json).
+- Compatibilidade total com as chaves reais do channels.json (old_tvg_ids, groups, blank_tvg_id_names).
 """
 from __future__ import annotations
 
@@ -40,6 +41,7 @@ CATALOG_PATH = Path(os.environ.get("CHANNELS_FILE", "channels.json"))
 OVERRIDES_PATH = Path(os.environ.get("OVERRIDES_FILE", "overrides.json"))
 OUTPUT_DIR = Path(os.environ.get("OUTPUT_DIR", "output"))
 ESPELHO_PATH = Path("espelho.json")
+METADATA_CACHE_PATH = Path("metadata_cache.json")
 
 M3U_URLS = []
 for i in range(1, 6):
@@ -57,6 +59,7 @@ GZIP_LEVEL = max(1, min(9, int(os.environ.get("GZIP_LEVEL", "9"))))
 OUTPUT_PAST_HOURS = max(0, int(os.environ.get("OUTPUT_PAST_HOURS", "6")))
 OUTPUT_FUTURE_HOURS = max(24, int(os.environ.get("OUTPUT_FUTURE_HOURS", "72")))
 WRITE_PLAIN_XML = os.environ.get("WRITE_PLAIN_XML", "0").strip().lower() in {"1", "true", "yes"}
+MAX_WEB_LOOKUPS_PER_RUN = int(os.environ.get("MAX_WEB_LOOKUPS_PER_RUN", "180"))
 
 IPTV_USER_AGENTS = [
     "TiviMate/4.7.0 (Android 12)",
@@ -101,9 +104,14 @@ PLACEHOLDER_TITLES = {
     "ENCERRAMENTO",
 }
 
-# Palavras-chave de canais que NUNCA devem receber numeração de Temporada/Episódio (Filmes Puros, Esportes e Notícias)
 NON_SERIES_CHANNEL_KEYWORDS = (
     "TELECINE",
+    "TC ACTION",
+    "TC PREMIUM",
+    "TC PIPOCA",
+    "TC TOUCH",
+    "TC FUN",
+    "TC CULT",
     "MEGAPIX",
     "CINEMAX",
     "PARAMOUNT",
@@ -124,13 +132,17 @@ NON_SERIES_CHANNEL_KEYWORDS = (
     "XSPORTS",
     "GLOBO NEWS",
     "GLOBONEWS",
+    "GB NEWS",
     "CNN",
     "JOVEM PAN",
+    "JOVEN PAN",
     "JP NEWS",
     "RECORD NEWS",
     "BAND NEWS",
     "BANDNEWS",
     "SBT NEWS",
+    "CNBC",
+    "BLOOMBERG",
     "BM&C",
     "TV SENADO",
     "TV CAMARA",
@@ -141,29 +153,54 @@ NON_SERIES_CHANNEL_KEYWORDS = (
     "TERRA VIVA",
 )
 
-# Categorias XMLTV que identificam Filmes, Esportes ou Telejornais (onde temporada/episódio nunca deve ser exibido)
+SPORT_OR_NEWS_CHANNEL_KEYWORDS = (
+    "SPORTV",
+    "ESPN",
+    "PREMIERE",
+    "COMBATE",
+    "BANDSPORTS",
+    "BAND SPORTS",
+    "FOX SPORTS",
+    "TNT SPORTS",
+    "CAZETV",
+    "XSPORTS",
+    "DAZN",
+    "GOAT",
+    "SPORTYNET",
+    "UFC",
+    "CONMEBOL",
+    "GLOBO NEWS",
+    "GLOBONEWS",
+    "GB NEWS",
+    "CNN",
+    "JOVEM PAN",
+    "JOVEN PAN",
+    "JP NEWS",
+    "RECORD NEWS",
+    "BAND NEWS",
+    "BANDNEWS",
+    "SBT NEWS",
+    "CNBC",
+    "BLOOMBERG",
+    "TV SENADO",
+    "TV CAMARA",
+    "AGROMAIS",
+    "CANAL RURAL",
+    "CANAL DO BOI",
+)
+
 NON_SERIES_CATEGORY_KEYWORDS = (
     "FILME",
     "MOVIE",
     "CINEMA",
     "LONGA",
     "FEATURE FILM",
-    "ACAO",
-    "AÇÃO",
-    "COMEDIA",
-    "COMÉDIA",
-    "DRAMA",
-    "SUSPENSE",
-    "TERROR",
-    "FICCAO",
-    "FICÇÃO",
-    "ROMANCE",
-    "AVENTURA",
-    "FAROESTE",
     "ESPORTE",
     "SPORT",
     "FUTEBOL",
     "SOCCER",
+    "LUTAS",
+    "BOXE",
     "JORNALISMO",
     "NOTICIAS",
     "NOTÍCIAS",
@@ -180,11 +217,96 @@ SERIES_CATEGORY_KEYWORDS = (
     "TELENOVELA",
     "MINISSERIE",
     "MINISSÉRIE",
-    " EPISODIO",
-    " EPISÓDIO",
+    "EPISODIO",
+    "EPISÓDIO",
     "ANIME",
     "DESENHO",
+    "ANIMACAO",
+    "ANIMAÇÃO",
+    "INFANTIL",
 )
+
+# Tradução e padronização de gêneros em inglês/português para exibição limpa
+GENRE_TRANSLATION = {
+    "ACTION": "Ação",
+    "ACAO": "Ação",
+    "AÇÃO": "Ação",
+    "ADVENTURE": "Aventura",
+    "AVENTURA": "Aventura",
+    "ANIMATION": "Animação",
+    "ANIMACAO": "Animação",
+    "ANIMAÇÃO": "Animação",
+    "COMEDY": "Comédia",
+    "COMEDIA": "Comédia",
+    "COMÉDIA": "Comédia",
+    "CRIME": "Crime",
+    "POLICIAL": "Policial",
+    "DOCUMENTARY": "Documentário",
+    "DOCUMENTARIO": "Documentário",
+    "DOCUMENTÁRIO": "Documentário",
+    "DRAMA": "Drama",
+    "FAMILY": "Família",
+    "FAMILIA": "Família",
+    "FAMÍLIA": "Família",
+    "FANTASY": "Fantasia",
+    "FANTASIA": "Fantasia",
+    "HISTORY": "História",
+    "HISTORIA": "História",
+    "HISTÓRIA": "História",
+    "HORROR": "Terror",
+    "TERROR": "Terror",
+    "MUSIC": "Música",
+    "MUSICA": "Música",
+    "MÚSICA": "Música",
+    "MUSICAL": "Musical",
+    "MYSTERY": "Mistério",
+    "MISTERIO": "Mistério",
+    "MISTÉRIO": "Mistério",
+    "ROMANCE": "Romance",
+    "SCI-FI": "Ficção Científica",
+    "SCIENCE FICTION": "Ficção Científica",
+    "FICCAO CIENTIFICA": "Ficção Científica",
+    "FICÇÃO CIENTÍFICA": "Ficção Científica",
+    "FICCAO": "Ficção",
+    "FICÇÃO": "Ficção",
+    "THRILLER": "Suspense",
+    "SUSPENSE": "Suspense",
+    "WAR": "Guerra",
+    "GUERRA": "Guerra",
+    "WESTERN": "Faroeste",
+    "FAROESTE": "Faroeste",
+    "KIDS": "Infantil",
+    "CHILDREN": "Infantil",
+    "INFANTIL": "Infantil",
+    "REALITY": "Reality",
+    "REALITY-TV": "Reality",
+    "REALITY SHOW": "Reality",
+    "CULINARIA": "Culinária",
+    "CULINÁRIA": "Culinária",
+    "GASTRONOMIA": "Culinária",
+    "BIOGRAPHY": "Biografia",
+    "BIOGRAFIA": "Biografia",
+    "SPORTS": "Esporte",
+    "SPORT": "Esporte",
+    "ESPORTE": "Esporte",
+    "ESPORTES": "Esporte",
+    "FUTEBOL": "Futebol",
+    "NEWS": "Jornalismo",
+    "JORNALISMO": "Jornalismo",
+    "NOTICIAS": "Jornalismo",
+    "NOTÍCIAS": "Jornalismo",
+    "VARIETY": "Variedades",
+    "VARIEDADES": "Variedades",
+    "TALK SHOW": "Talk Show",
+    "NOVELA": "Novela",
+    "TELENOVELA": "Novela",
+}
+
+IGNORED_GENERIC_CATEGORIES = {
+    "FILME", "FILMES", "MOVIE", "MOVIES", "SERIE", "SÉRIE", "SERIES", "SÉRIES",
+    "TV SHOW", "SHOW", "PROGRAMA", "OUTROS", "OTHER", "GENERAL", "GERAL", "HD", "FHD",
+    "2024", "2025", "2026", "CANAL", "AO VIVO", "LIVE",
+}
 
 @dataclass(frozen=True)
 class SourceSpec:
@@ -243,8 +365,9 @@ CHANNEL_SYNONYMS = {
     "TV PAMPA": ["TV PAMPA RS", "PAMPA"],
     "CNN INTERNACIONAL": ["CNN INTERNATIONAL"],
     "CNN INTERNATIONAL": ["CNN INTERNACIONAL"],
-    "JOVEM PAN": ["JOVEM PAN NEWS", "JP NEWS"],
-    "JOVEM PAN NEWS": ["JOVEM PAN", "JP NEWS"],
+    "JOVEM PAN": ["JOVEM PAN NEWS", "JP NEWS", "JOVEN PAN NEWS"],
+    "JOVEM PAN NEWS": ["JOVEM PAN", "JP NEWS", "JOVEN PAN NEWS"],
+    "JOVEN PAN NEWS": ["JOVEM PAN NEWS", "JOVEM PAN", "JP NEWS"],
     "PRIME BOX BRAZIL": ["PRIME BOX BRASIL"],
     "PRIME BOX BRASIL": ["PRIME BOX BRAZIL"],
     "CARTOONITO": ["CARTOONITO", "BOOMERANG"],
@@ -254,13 +377,15 @@ CHANNEL_SYNONYMS = {
     "SPORTV 2": ["SPORTTV 2"],
     "SPORTTV 3": ["SPORTV 3"],
     "SPORTV 3": ["SPORTTV 3"],
+    "GLOBOPLAY NOVELAS": ["VIVA", "CANAL VIVA"],
+    "VIVA": ["GLOBOPLAY NOVELAS", "CANAL VIVA"],
 }
 
 def strip_qualities_keep_case(name: str) -> str:
     if not name: return ""
     s = re.sub(r'\[.*?\]|\(.*?\)|\|.*?\|', ' ', name)
     s = re.sub(r'[\¹\²\³\⁴]', '', s)
-    tags = r'\b(SD|HD|FHD|UHD|4K|8K|H\.?264|H\.?265|HEVC|HDR\+?|LEG|LEGENDADO|DUB|DUBLADO|HQ|VIP|VOD|24H[S]?|24/7|1080P|720P|60FPS|PPV|EVENTOS?|ALTERNATIVO|BACKUP)\b[\*\²\³\¹\⁴\+]*'
+    tags = r'\b(SD|HD|FHD|UHD|4K|8K|H\.?264|H\.?265|HEVC|HDR\+?|LEG|LEGENDADO|DUB|DUBLADO|HQ|VIP|VOD|24H[S]?|24/7|1080P|720P|60FPS|PPV|EVENTOS?|ALTERNATIVO|BACKUP|ALT)\b[\*\²\³\¹\⁴\+]*'
     s = re.sub(tags, ' ', s, flags=re.IGNORECASE)
     s = re.sub(r'[*=_\-]', ' ', s)
     return ' '.join(s.split()).strip()
@@ -271,6 +396,7 @@ def normalizar_canal(nome: str) -> str:
     nome = strip_qualities_keep_case(nome)
     
     nome = re.sub(r'\bJP NEWS\b', 'JOVEM PAN NEWS', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bJOVEN PAN\b', 'JOVEM PAN', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bJOVEM PAN\b(?! NEWS)', 'JOVEM PAN NEWS', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bFOX SPORTS\b', 'ESPN 4', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bBOOMERANG\b', 'CARTOONITO', nome, flags=re.IGNORECASE)
@@ -309,7 +435,7 @@ def inferir_emissora_pelo_grupo(nome_normalizado: str, nome_grupo: str) -> str:
 
 def is_valid_provider_tvid(channel_name: str, tvid: str) -> bool:
     if not tvid or len(tvid) < 2: return False
-    tvid_clean = re.sub(r'\.(br|us|uk|pt|ar|mx|cl|co|pe|latam|int)$', '', tvid.lower())
+    tvid_clean = re.sub(r'\.(br|us|uk|pt|ar|mx|cl|co|pe|latam|int|bt)$', '', tvid.lower())
     tvid_clean = re.sub(r'^(auto\.|yt\.|br\.|canais\.)', '', tvid_clean)
     tvid_clean = re.sub(r'[^a-z0-9]', '', tvid_clean)
     if not tvid_clean: return False
@@ -402,56 +528,216 @@ def download_to_temp_file(url: str, attempts: int = 4) -> Path:
     raise RuntimeError(f"Falha ao baixar ({last_error})")
 
 # =====================================================================
-# EXTRAÇÃO E ENRIQUECIMENTO DE METADADOS (ESTRITO PARA SÉRIES REAIS)
+# EXTRAÇÃO DE METADADOS + CACHE + FALLBACK WEB (WIKIPEDIA PT & ITUNES BR)
 # =====================================================================
+_METADATA_CACHE: dict[str, dict[str, str]] = {}
+_WEB_LOOKUPS_COUNT = 0
+
+def load_metadata_cache() -> None:
+    global _METADATA_CACHE
+    if METADATA_CACHE_PATH.exists():
+        try:
+            _METADATA_CACHE = json.loads(METADATA_CACHE_PATH.read_text("utf-8"))
+        except Exception:
+            _METADATA_CACHE = {}
+
+def save_metadata_cache() -> None:
+    try:
+        METADATA_CACHE_PATH.write_text(json.dumps(_METADATA_CACHE, ensure_ascii=False, indent=2) + "\n", "utf-8")
+    except Exception:
+        pass
+
 _RE_XMLTV_NS = re.compile(r"^\s*(\d+)\s*\.\s*(\d+)\s*\.")
-# Exige SEMPRE Temporada + Episódio explícitos (nunca aceita "E1" solto sem temporada ou sem "Ep.")
 _RE_SE_PATTERNS = [
     re.compile(r"\bS(\d{1,2})\s*[:\-]?\s*E(?:P)?(\d{1,3})\b", re.IGNORECASE),
     re.compile(r"\bT(?:EMP(?:ORADA)?)?\s*\.?\s*(\d{1,2})\s*[\-:/, ]+\s*E(?:P(?:IS[OÓ]DIO)?)?\s*\.?\s*(\d{1,3})\b", re.IGNORECASE),
     re.compile(r"\b(\d{1,2})\s*[ªº]\s*T(?:EMP(?:ORADA)?)?\s*[\-:/, ]*\s*E(?:P(?:IS[OÓ]DIO)?)?\s*\.?\s*(\d{1,3})\b", re.IGNORECASE),
 ]
-# Episódio sem temporada só é aceito se estiver escrito explicitamente "Ep." ou "Episódio" (nunca apenas a letra "E")
 _RE_EXPLICIT_EPISODE = re.compile(r"\b(?:EPIS[OÓ]DIO|EP\.)\s*(\d{1,3})\b", re.IGNORECASE)
-# Remove sufixos indevidos como " - E1", "(E1)", "[E1]" que algumas fontes colocam em títulos de filmes
 _RE_TRAILING_FAKE_EP = re.compile(r"(?:\s*[\-\|:]\s*|\s+)(?:\[|\()?E(?:P)?\.?\s*0*1(?:\]|\))?\s*$", re.IGNORECASE)
+_RE_YEAR_IN_TEXT = re.compile(r"(?:[\(\[\-\|]\s*|\b(?:ANO|LANCAMENTO|LANÇAMENTO)\s*[:\-]?\s*)((?:19[3-9]\d|20[0-2]\d))(?:\s*[\)\]\-\|]|\b)", re.IGNORECASE)
+_RE_RATING_IN_TEXT = re.compile(
+    r"(?:\bCLASSIFICA[CÇ][AÃ]O(?:\s+INDICATIVA)?\s*[:\-]?\s*|\[\s*|\(\s*)(LIVRE|L|10|12|14|16|18|A10|A12|A14|A16|A18)(?:\s*ANOS?)?(?:\s*\]|\s*\)|\b)",
+    re.IGNORECASE,
+)
+
+def normalize_rating_label(raw_rating: str) -> str:
+    """Padroniza a classificação indicativa (ex: 'Livre', '10 Anos', '12 Anos', '14 Anos', '16 Anos', '18 Anos')."""
+    if not raw_rating:
+        return ""
+    r = raw_rating.strip().upper()
+    if r in {"L", "LIVRE", "AL", "ALL", "G", "TV-G", "TV-Y", "TV-Y7", "0", "PARA TODOS"} or "LIVRE" in r:
+        return "Livre"
+    if r in {"PG", "10", "A10", "+10", "10 ANOS"} or re.search(r"\b10\b", r):
+        return "10 Anos"
+    if r in {"PG-13", "TV-PG", "12", "A12", "+12", "12 ANOS"} or re.search(r"\b12\b", r):
+        return "12 Anos"
+    if r in {"TV-14", "14", "A14", "+14", "14 ANOS"} or re.search(r"\b14\b", r):
+        return "14 Anos"
+    if r in {"R", "16", "A16", "+16", "16 ANOS"} or re.search(r"\b16\b", r):
+        return "16 Anos"
+    if r in {"NC-17", "TV-MA", "18", "A18", "+18", "18 ANOS"} or re.search(r"\b18\b", r):
+        return "18 Anos"
+    return ""
+
+def normalize_genres_list(raw_categories: Iterable[str]) -> str:
+    """Limpa, traduz e formata até 2 gêneros no padrão 'Comédia/Família'."""
+    cleaned: list[str] = []
+    for raw in raw_categories:
+        if not raw:
+            continue
+        for part in re.split(r"[/,|•\-]+", str(raw)):
+            p = part.strip()
+            if not p:
+                continue
+            p_up = p.upper()
+            if p_up in IGNORED_GENERIC_CATEGORIES or len(p_up) <= 2:
+                continue
+            mapped = GENRE_TRANSLATION.get(p_up)
+            if not mapped:
+                # Tenta sem acentos
+                p_no_acc = "".join(c for c in unicodedata.normalize("NFKD", p_up) if not unicodedata.combining(c))
+                mapped = GENRE_TRANSLATION.get(p_no_acc, p.title())
+            if mapped and mapped.upper() not in IGNORED_GENERIC_CATEGORIES and mapped not in cleaned:
+                cleaned.append(mapped)
+            if len(cleaned) >= 2:
+                break
+        if len(cleaned) >= 2:
+            break
+    return "/".join(cleaned[:2])
 
 def is_non_series_channel(channel_name: str) -> bool:
     norm_ch = normalizar_canal(channel_name)
     return any(kw in norm_ch for kw in NON_SERIES_CHANNEL_KEYWORDS)
 
+def is_sport_or_news_channel(channel_name: str) -> bool:
+    norm_ch = normalizar_canal(channel_name)
+    return any(kw in norm_ch for kw in SPORT_OR_NEWS_CHANNEL_KEYWORDS)
+
 def is_likely_movie_or_sport(categories: Iterable[str], desc: str, duration_minutes: float, channel_name: str) -> bool:
-    """Identifica se o programa é Filme, Esporte ou Jornalismo para bloquear qualquer tag de episódio."""
     if is_non_series_channel(channel_name):
         return True
 
     cats_upper = " | ".join(c.upper() for c in categories if c)
     desc_upper = (desc or "").upper()
 
-    # Se a categoria disser explicitamente que é Série/Novela/Sitcom/Desenho, permite episódio
     if any(skw in cats_upper for skw in SERIES_CATEGORY_KEYWORDS):
         return False
 
-    # Se a categoria disser que é Filme, Cinema, Longa, Esporte ou Notícias -> Bloqueia episódio!
     if any(mkw in cats_upper for mkw in NON_SERIES_CATEGORY_KEYWORDS):
         return True
 
-    # Se a sinopse começa com ficha técnica de filme ou menciona direção/elenco de longa-metragem e dura >= 80 min
     if duration_minutes >= 85:
         if any(w in desc_upper for w in ("DIREÇÃO:", "DIRECAO:", "SINOPSE:", "LONGA-METRAGEM", "FILME DE ")):
             return True
-        # Programas com mais de 85 minutos sem menção a "série/temporada/episódio/capítulo" na categoria ou descrição são filmes/eventos
         if not any(w in desc_upper for w in ("TEMPORADA", "EPISÓDIO", "EPISODIO", "SÉRIE", "SERIE", "CAPÍTULO", "CAPITULO")):
             return True
 
     return False
 
+def query_web_metadata(clean_title: str, is_movie: bool) -> dict[str, str]:
+    """Consulta iTunes Search API (BR) e Wikipedia PT API para obter Ano, Classificação, Gênero e Sinopse."""
+    global _WEB_LOOKUPS_COUNT
+    cache_key = f"{'M' if is_movie else 'S'}:{normalize_programme_title(clean_title)}"
+    if not clean_title or len(clean_title) < 2:
+        return {}
+    if cache_key in _METADATA_CACHE:
+        return _METADATA_CACHE[cache_key]
+    if _WEB_LOOKUPS_COUNT >= MAX_WEB_LOOKUPS_PER_RUN:
+        return {}
+
+    _WEB_LOOKUPS_COUNT += 1
+    found = {"year": "", "rating": "", "genre": "", "desc": ""}
+
+    # 1. Consulta rápida na API aberta do iTunes / Apple TV Brasil (Retorna Ano, Classificação BR, Gênero em PT e Sinopse)
+    try:
+        entity = "movie" if is_movie else "tvSeason"
+        q = urllib.parse.quote(clean_title)
+        itunes_url = f"https://itunes.apple.com/search?term={q}&country=BR&language=pt_br&entity={entity}&limit=3"
+        req = urllib.request.Request(itunes_url, headers={"User-Agent": IPTV_USER_AGENTS[-1]})
+        with urllib.request.urlopen(req, timeout=3.5) as resp:
+            data = json.loads(resp.read().decode("utf-8", errors="ignore"))
+            results = data.get("results", [])
+            norm_target = normalize_programme_title(clean_title)
+            for item in results:
+                cand_name = item.get("trackName") or item.get("collectionName") or ""
+                norm_cand = normalize_programme_title(cand_name)
+                if not norm_cand:
+                    continue
+                if norm_target == norm_cand or norm_target in norm_cand or SequenceMatcher(None, norm_target, norm_cand).ratio() >= 0.78:
+                    rel_date = str(item.get("releaseDate", ""))
+                    if len(rel_date) >= 4 and rel_date[:4].isdigit():
+                        found["year"] = rel_date[:4]
+                    rating_raw = str(item.get("contentAdvisoryRating", ""))
+                    if rating_raw:
+                        found["rating"] = normalize_rating_label(rating_raw)
+                    genre_raw = str(item.get("primaryGenreName", ""))
+                    if genre_raw:
+                        found["genre"] = normalize_genres_list([genre_raw])
+                    long_desc = str(item.get("longDescription") or item.get("shortDescription") or "").strip()
+                    if long_desc and len(long_desc) > 25:
+                        found["desc"] = long_desc
+                    break
+    except Exception:
+        pass
+
+    # 2. Fallback na API da Wikipedia em Português caso ainda falte Ano ou Gênero
+    if not found["year"] or not found["genre"]:
+        try:
+            q_wiki = urllib.parse.quote(f"{clean_title} {'filme' if is_movie else 'série'}")
+            wiki_url = f"https://pt.wikipedia.org/w/api.php?action=query&list=search&srsearch={q_wiki}&utf8=&format=json&srlimit=2"
+            req = urllib.request.Request(wiki_url, headers={"User-Agent": "EPGUniversalBot/1.0"})
+            with urllib.request.urlopen(req, timeout=3.5) as resp:
+                wdata = json.loads(resp.read().decode("utf-8", errors="ignore"))
+                search_hits = wdata.get("query", {}).get("search", [])
+                if search_hits:
+                    snippet = re.sub(r"<.*?>", " ", search_hits[0].get("snippet", ""))
+                    if not found["year"]:
+                        ym = re.search(r"\b(19[5-9]\d|20[0-2]\d)\b", snippet)
+                        if ym:
+                            found["year"] = ym.group(1)
+                    if not found["genre"]:
+                        found_genres = []
+                        for kw, pt_g in GENRE_TRANSLATION.items():
+                            if len(kw) >= 5 and re.search(rf"\b{re.escape(kw)}\b", snippet, re.IGNORECASE):
+                                if pt_g not in found_genres:
+                                    found_genres.append(pt_g)
+                            if len(found_genres) >= 2:
+                                break
+                        if found_genres:
+                            found["genre"] = "/".join(found_genres[:2])
+        except Exception:
+            pass
+
+    _METADATA_CACHE[cache_key] = found
+    return found
+
+def clean_redundant_title_subtitle(title: str, sub_title: str) -> tuple[str, str]:
+    """Remove subtítulos repetidos como 'Boca Juniors x Defensa y Justicia - Campeonato Argentino : Boca Juniors x Defensa y Justicia'."""
+    t = title.strip()
+    s = sub_title.strip()
+    if " : " in t and not s:
+        parts = [p.strip() for p in t.split(" : ", 1)]
+        if len(parts) == 2 and parts[0] and parts[1]:
+            t, s = parts[0], parts[1]
+
+    if s:
+        norm_t = normalize_programme_title(t)
+        norm_s = normalize_programme_title(s)
+        if not norm_s or norm_s == norm_t or norm_s in norm_t:
+            s = ""
+        elif norm_t in norm_s and len(s) > len(t):
+            # Se o subtítulo for mais completo que o título e já contiver o título
+            s = ""
+    return t, s
+
 def extract_program_metadata(el: ET.Element, channel_name: str = "", duration_minutes: float = 0.0) -> dict[str, Any]:
-    """Extrai metadados garantindo que Filmes nunca recebam Temporada/Episódio falsos."""
+    """Extrai Título, Subtítulo, Sinopse, Ano, Classificação Indicativa, Gênero, Temporada e Episódio."""
     title = ""
     sub_title = ""
     desc = ""
     date_str = ""
+    rating_str = ""
     categories: list[str] = []
     season: int | None = None
     episode: int | None = None
@@ -459,6 +745,12 @@ def extract_program_metadata(el: ET.Element, channel_name: str = "", duration_mi
     for child in el:
         tag = local_tag(child)
         txt = (child.text or "").strip()
+        if tag == "rating":
+            val_node = child.find("value")
+            r_val = (val_node.text or "").strip() if val_node is not None else txt
+            if r_val and not rating_str:
+                rating_str = normalize_rating_label(r_val)
+            continue
         if not txt:
             continue
         if tag == "title" and not title:
@@ -468,7 +760,9 @@ def extract_program_metadata(el: ET.Element, channel_name: str = "", duration_mi
         elif tag == "desc" and len(txt) > len(desc):
             desc = txt
         elif tag == "date" and not date_str:
-            date_str = txt[:4]
+            m_yr = re.search(r"\b(19\d\d|20\d\d)\b", txt)
+            if m_yr:
+                date_str = m_yr.group(1)
         elif tag == "category" and txt not in categories:
             categories.append(txt)
         elif tag == "episode-num":
@@ -478,7 +772,6 @@ def extract_program_metadata(el: ET.Element, channel_name: str = "", duration_mi
                 if m:
                     s_val = int(m.group(1)) + 1
                     e_val = int(m.group(2)) + 1
-                    # Ignora "0.0." (S1E1 genérico que fontes colocam em filmes) a menos que a categoria confirme Série
                     if not (s_val == 1 and e_val == 1 and "0.0." in txt):
                         season, episode = s_val, e_val
             else:
@@ -488,23 +781,29 @@ def extract_program_metadata(el: ET.Element, channel_name: str = "", duration_mi
                         season, episode = int(m.group(1)), int(m.group(2))
                         break
 
-    # Se o título vier com subtítulo acoplado (ex: "Duelo com Bobby Flay : Um Pouco Caipira")
-    if " : " in title and not sub_title:
-        parts = [p.strip() for p in title.split(" : ", 1)]
-        if len(parts) == 2 and parts[0] and parts[1]:
-            if parts[0].upper() == parts[1].upper():
-                title = parts[0]
-            else:
-                title, sub_title = parts[0], parts[1]
-
-    # Limpa "E1" falso no final do título se houver
+    title, sub_title = clean_redundant_title_subtitle(title, sub_title)
     title = _RE_TRAILING_FAKE_EP.sub("", title).strip()
 
-    # Busca temporada e episódio via Regex estrita (SxxExx ou Txx Exx)
+    blob = f"{title} | {sub_title} | {desc}"
+
+    # Extrai Ano do texto caso não haja tag <date>
+    if not date_str:
+        m_y = _RE_YEAR_IN_TEXT.search(blob)
+        if m_y:
+            date_str = m_y.group(1)
+            # Remove o ano do final do título se estiver entre parênteses ex: "Minions (2015)" -> "Minions"
+            title = re.sub(r"\s*[\(\[]\s*(?:19\d\d|20\d\d)\s*[\)\]]\s*$", "", title).strip()
+
+    # Extrai Classificação Indicativa do texto caso não haja tag <rating>
+    if not rating_str:
+        m_r = _RE_RATING_IN_TEXT.search(blob)
+        if m_r:
+            rating_str = normalize_rating_label(m_r.group(1))
+
+    # Extrai Temporada e Episódio via Regex estrita
     if season is None and episode is None:
-        search_blob = f"{title} | {sub_title} | {desc}"
         for pat in _RE_SE_PATTERNS:
-            m = pat.search(search_blob)
+            m = pat.search(blob)
             if m:
                 s_val, e_val = int(m.group(1)), int(m.group(2))
                 if 0 < s_val <= 60 and 0 < e_val <= 999:
@@ -517,12 +816,10 @@ def extract_program_metadata(el: ET.Element, channel_name: str = "", duration_mi
                 if 0 < e_val <= 1500:
                     episode = e_val
 
-    # Verifica se é Filme, Esporte ou Jornalismo: se for, ZERA temporada e episódio!
     if is_likely_movie_or_sport(categories, desc, duration_minutes, channel_name):
         season = None
         episode = None
 
-    # Limpa códigos S01E02 repetidos do título e do subtítulo
     for pat in _RE_SE_PATTERNS:
         title = pat.sub("", title).strip(" -:|")
         if sub_title:
@@ -539,6 +836,7 @@ def extract_program_metadata(el: ET.Element, channel_name: str = "", duration_mi
         "episode": episode,
         "categories": categories,
         "date": date_str,
+        "rating": rating_str,
     }
 
 def read_source_from_file(spec: SourceSpec, file_path: Path) -> EpgSource:
@@ -740,9 +1038,10 @@ def programme_rows(source: EpgSource, channel_id: str) -> list[ProgrammeRow]: re
 def now_next_for(source: EpgSource, channel_id: str, now: datetime) -> tuple[dict | None, dict | None]:
     current, next_item = None, None
     for row in programme_rows(source, channel_id):
-        if row.start <= now < row.stop: current = {"start": row.start, "stop": row.stop, "title": row.title}
+        clean_t, _ = clean_redundant_title_subtitle(row.title, "")
+        if row.start <= now < row.stop: current = {"start": row.start, "stop": row.stop, "title": clean_t}
         elif row.start > now and next_item is None:
-            next_item = {"start": row.start, "stop": row.stop, "title": row.title}
+            next_item = {"start": row.start, "stop": row.stop, "title": clean_t}
             if current is not None: break
     return current, next_item
 
@@ -822,9 +1121,10 @@ def schedule_health(source: EpgSource, channel_id: str, now: datetime) -> dict[s
         dur_m = (r.stop - r.start).total_seconds() / 60.0
         meta = extract_program_metadata(r.element, channel_id, dur_m)
         pts = 0.0
-        if meta["desc"] and len(meta["desc"]) >= 30: pts += 0.55
-        if meta["sub_title"]: pts += 0.25
-        if meta["season"] is not None or meta["episode"] is not None: pts += 0.20
+        if meta["desc"] and len(meta["desc"]) >= 30: pts += 0.45
+        if meta["categories"]: pts += 0.20
+        if meta["date"] or meta["rating"]: pts += 0.20
+        if meta["sub_title"] or meta["season"] is not None or meta["episode"] is not None: pts += 0.15
         rich_points += min(1.0, pts)
     richness_score = round(rich_points / len(sample_rows), 4) if sample_rows else 0.0
 
@@ -1053,7 +1353,10 @@ def get_primary_export_ids(entry: dict[str, object]) -> list[str]:
 def apply_rich_metadata_to_element(
     el: ET.Element, meta_pool: list[dict[str, Any]], channel_name: str, duration_minutes: float
 ) -> None:
-    """Aplica metadados mantendo Filmes 100% limpos (sem E1) e enriquecendo apenas Séries reais."""
+    """Formata a descrição no modelo exato:
+    - Filme: '2015 Livre Comédia/Família. Sinopse...'
+    - Série: '2019 14 Anos Drama/Crime. T02 E05 - Episódio. Sinopse...'
+    """
     base_meta = extract_program_metadata(el, channel_name, duration_minutes)
     all_metas = [base_meta, *(meta_pool or [])]
 
@@ -1062,6 +1365,7 @@ def apply_rich_metadata_to_element(
     best_season: int | None = None
     best_episode: int | None = None
     best_date = ""
+    best_rating = ""
     merged_cats: list[str] = []
 
     for m in all_metas:
@@ -1075,28 +1379,46 @@ def apply_rich_metadata_to_element(
             best_episode = m["episode"]
         if not best_date and m.get("date"):
             best_date = m["date"]
+        if not best_rating and m.get("rating"):
+            best_rating = m["rating"]
         for c in m.get("categories", []):
             if c not in merged_cats:
                 merged_cats.append(c)
 
-    # Verifica com o conjunto completo de categorias e descrição se é Filme/Esporte/Jornalismo
     is_movie_or_sport = is_likely_movie_or_sport(merged_cats, best_desc, duration_minutes, channel_name)
+    is_sport_news = is_sport_or_news_channel(channel_name)
+
     if is_movie_or_sport:
         best_season = None
         best_episode = None
 
-    # SEMPRE remove tags <episode-num> originais (pois fontes como Open-EPG colocam 0.0. em filmes, fazendo o TiviMate mostrar "E1")
     for old_ep in list(el.findall("episode-num")):
         el.remove(old_ep)
 
-    # Limpa o título principal
     title_node = el.find("title")
-    clean_title = base_meta["title"] or (title_node.text.strip() if title_node is not None and title_node.text else "")
+    raw_title = base_meta["title"] or (title_node.text.strip() if title_node is not None and title_node.text else "")
+    clean_title, best_sub = clean_redundant_title_subtitle(raw_title, best_sub)
     clean_title = _RE_TRAILING_FAKE_EP.sub("", clean_title).strip()
     if title_node is not None and clean_title:
         title_node.text = clean_title
 
-    # Só cria etiqueta de Temporada/Episódio se NÃO for filme/esporte e tiver temporada + episódio válidos
+    genre_str = normalize_genres_list(merged_cats)
+
+    # Se faltar Ano ou Gênero (e não for telejornal/jogo ao vivo), consulta Wikipedia PT / iTunes BR!
+    is_live_match = " X " in clean_title.upper() or clean_title.upper().startswith(("AO VIVO", "VT -", "TELEJORNAL", "JORNAL "))
+    if not is_sport_news and not is_live_match and (not best_date or not genre_str or not best_rating):
+        web_info = query_web_metadata(clean_title, is_movie=is_movie_or_sport)
+        if web_info:
+            if not best_date and web_info.get("year"):
+                best_date = web_info["year"]
+            if not best_rating and web_info.get("rating"):
+                best_rating = web_info["rating"]
+            if not genre_str and web_info.get("genre"):
+                genre_str = web_info["genre"]
+            if not best_desc and web_info.get("desc"):
+                best_desc = web_info["desc"]
+
+    # Etiqueta de Temporada e Episódio (apenas para Séries)
     se_badge = ""
     if not is_movie_or_sport:
         if best_season is not None and best_episode is not None:
@@ -1104,10 +1426,8 @@ def apply_rich_metadata_to_element(
         elif best_episode is not None and best_episode > 1:
             se_badge = f"Ep. {best_episode}"
 
-    # Atualiza ou remove <sub-title> redundante
     sub_node = el.find("sub-title")
     if is_movie_or_sport:
-        # Em filmes, remove subtítulos que sejam apenas repetição do título ou tags falsas
         if sub_node is not None:
             el.remove(sub_node)
         best_sub = ""
@@ -1123,22 +1443,43 @@ def apply_rich_metadata_to_element(
         elif sub_node is not None:
             el.remove(sub_node)
 
-    # Constrói a descrição (<desc>)
-    header_parts = []
-    if se_badge and (not best_desc or se_badge.lower() not in best_desc.lower()):
-        header_parts.append(f"[{se_badge}]")
-    if best_sub and best_sub.upper() != clean_title.upper() and (not best_desc or best_sub.lower() not in best_desc.lower()):
-        header_parts.append(best_sub)
-    if best_date and (not best_desc or best_date not in best_desc):
-        header_parts.append(f"({best_date})")
+    # Monta o cabeçalho no formato pedido: "2015 Livre Comédia/Família." + (Se série: "T01 E02 - Subtítulo.") + "Sinopse..."
+    meta_tokens = []
+    if best_date:
+        meta_tokens.append(best_date)
+    if best_rating:
+        meta_tokens.append(best_rating)
+    if genre_str:
+        meta_tokens.append(genre_str)
 
-    prefix_str = " ".join(header_parts).strip()
-    if prefix_str and best_desc:
-        final_desc = f"{prefix_str} — {best_desc}"
-    elif prefix_str:
-        final_desc = prefix_str
+    lead_info = " ".join(meta_tokens).strip()
+
+    series_info = ""
+    if se_badge and best_sub:
+        series_info = f"{se_badge} - {best_sub}"
+    elif se_badge:
+        series_info = se_badge
+    elif best_sub and not is_movie_or_sport:
+        series_info = best_sub
+
+    # Limpa da sinopse original caso ela já comece repetindo o mesmo ano/gênero
+    clean_desc = (best_desc or "").strip()
+    if best_date and clean_desc.startswith(f"({best_date})"):
+        clean_desc = clean_desc[len(f"({best_date})"):].strip(" -•.")
+
+    prefix_blocks = []
+    if lead_info:
+        prefix_blocks.append(f"{lead_info}.")
+    if series_info and (not clean_desc or series_info.lower() not in clean_desc.lower()):
+        prefix_blocks.append(f"{series_info}.")
+
+    prefix_text = " ".join(prefix_blocks).strip()
+    if prefix_text and clean_desc:
+        final_desc = f"{prefix_text} {clean_desc}"
+    elif prefix_text:
+        final_desc = prefix_text
     else:
-        final_desc = best_desc
+        final_desc = clean_desc
 
     if final_desc:
         desc_node = el.find("desc")
@@ -1146,7 +1487,6 @@ def apply_rich_metadata_to_element(
             desc_node = ET.SubElement(el, "desc")
         desc_node.text = final_desc
 
-    # Só grava a tag <episode-num> no XML se tiver CERTEZA que é uma Série com Temporada e Episódio reais!
     if not is_movie_or_sport and best_season is not None and best_episode is not None:
         s_idx = max(0, best_season - 1)
         e_idx = max(0, best_episode - 1)
@@ -1294,7 +1634,16 @@ def stitch_multi_source_schedule(
 
         if not matching_time_metas and norm_title in metadata_by_norm_title:
             matching_time_metas = [
-                {"title": m["title"], "sub_title": "", "desc": m["desc"], "season": None, "episode": None, "categories": m["categories"], "date": m["date"]}
+                {
+                    "title": m["title"],
+                    "sub_title": "",
+                    "desc": m["desc"],
+                    "season": None,
+                    "episode": None,
+                    "categories": m["categories"],
+                    "date": m["date"],
+                    "rating": m.get("rating", ""),
+                }
                 for m in metadata_by_norm_title[norm_title]
             ]
 
@@ -1338,7 +1687,7 @@ def write_epg_stream(
                 gz.write(data)
                 if plain is not None: plain.write(data)
 
-            generator = "EPG Universal Otimizado (Filmes Limpos + Séries com TxxExx)"
+            generator = "EPG Universal Otimizado (Ano/Classificação/Gênero + Séries TxxExx)"
             source_name = "Consolidado Inteligente de Múltiplas Fontes"
             emit((f"<?xml version='1.0' encoding='utf-8'?>\n<tv generator-info-name={quoteattr(generator)} source-info-name={quoteattr(source_name)}>\n").encode("utf-8"))
 
@@ -1383,10 +1732,11 @@ def write_epg_stream(
     return programme_count, len(xml_id_to_data)
 
 def main() -> None:
-    print("Iniciando geração de EPG (Filmes Limpos sem E1 + Séries com TxxExx)...")
+    print("Iniciando geração de EPG (Ano + Classificação + Gênero + Séries TxxExx)...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    load_metadata_cache()
     stage_start = time.perf_counter()
     
     entries = []
@@ -1466,6 +1816,7 @@ def main() -> None:
                     count += 1
         return count
 
+    # 1. Lê TODAS as chaves reais do channels.json (incluindo old_tvg_ids, original_names, blank_tvg_id_names e groups)
     if CATALOG_PATH.exists():
         try:
             print(f"Lendo Dicionário Persistente ({CATALOG_PATH})...")
@@ -1473,14 +1824,27 @@ def main() -> None:
             cat_list = cat_data.get("channels", []) if isinstance(cat_data, dict) else (cat_data if isinstance(cat_data, list) else [])
             for ch in cat_list:
                 if not isinstance(ch, dict): continue
+                ch_groups = ch.get("groups", []) or []
+                grp_str = " | ".join(str(g) for g in ch_groups) if isinstance(ch_groups, list) else str(ch.get("group", ch.get("group-title", "")))
+                all_ch_aliases = [
+                    *(ch.get("aliases", []) or []),
+                    *(ch.get("tvg_names", []) or []),
+                    *(ch.get("original_names", []) or []),
+                    *(ch.get("blank_tvg_id_names", []) or []),
+                    *(ch.get("blank_tvg_id_tvg_names", []) or []),
+                ]
+                all_ch_tvg_ids = [
+                    *(ch.get("tvg_ids_to_export", []) or []),
+                    *(ch.get("old_tvg_ids", []) or []),
+                ]
                 merge_channel_record(
                     ch_id=str(ch.get("id", ch.get("name", ""))).strip(),
                     name=str(ch.get("name", ch.get("id", ""))).strip(),
-                    aliases=[*(ch.get("aliases", []) or []), *(ch.get("tvg_names", []) or [])],
-                    tvg_ids=ch.get("tvg_ids_to_export", []) or [],
+                    aliases=all_ch_aliases,
+                    tvg_ids=all_ch_tvg_ids,
                     comp_ids=ch.get("compatibility_ids", []) or [],
-                    source_ids=ch.get("source_ids", []) or [],
-                    group=str(ch.get("group", ch.get("group-title", ""))),
+                    source_ids=[*(ch.get("source_ids", []) or []), *(ch.get("old_tvg_ids", []) or [])],
+                    group=grp_str,
                 )
             print(f"  -> {len(grouped_by_norm)} emissoras base carregadas do dicionário.")
         except Exception as e:
@@ -1509,7 +1873,7 @@ def main() -> None:
                     ch_id=str(ch.get("id", "")).strip(),
                     name=ch_name,
                     aliases=ch.get("aliases", []) or [],
-                    tvg_ids=ch.get("tvg_ids_to_export", []) or [],
+                    tvg_ids=[*(ch.get("tvg_ids_to_export", []) or []), *(ch.get("old_tvg_ids", []) or [])],
                     comp_ids=ch.get("compatibility_ids", []) or [],
                     source_ids=ch.get("source_ids", []) or [],
                     group=str(ch.get("group", "")),
@@ -1647,7 +2011,7 @@ def main() -> None:
         validations.append(make_validation(entry, chosen, evaluations, now))
 
     matched_ids = {str(e.get("id", "")) for e, _, _, _ in selected}
-    clean_espelho_entries = [e for e in entries if str(e.get("id", "")) in matched_ids or len(entries) <= 1200]
+    clean_espelho_entries = [e for e in entries if str(e.get("id", "")) in matched_ids]
     espelho_to_save = {"updated_at": datetime.now(timezone.utc).isoformat(), "channels": clean_espelho_entries}
     (OUTPUT_DIR / "espelho.json").write_text(json.dumps(espelho_to_save, ensure_ascii=False, indent=2), "utf-8")
 
@@ -1655,6 +2019,7 @@ def main() -> None:
 
     stage_start = time.perf_counter()
     programme_count, ids_count = write_epg_stream(selected, now, overrides)
+    save_metadata_cache()
     timings["serializacao_e_gzip"] = round(time.perf_counter() - stage_start, 3)
 
     source_counts = {source.label: sum(1 for row in report_rows if row.get("source") == source.label) for source in active_sources}
@@ -1664,6 +2029,7 @@ def main() -> None:
         "missing": sum(1 for row in report_rows if row["status"] == "missing"),
         "programmes": programme_count,
         "exported_ids": ids_count,
+        "web_metadata_cached": len(_METADATA_CACHE),
         "timing_seconds": timings, "selected_by_source": source_counts,
     }
 
@@ -1671,11 +2037,12 @@ def main() -> None:
     (OUTPUT_DIR / "validation.json").write_text(json.dumps({"generated_at": now.isoformat(), "active_sources": [s.label for s in active_sources], "summary": counts, "channels": validations}, ensure_ascii=False, indent=2) + "\n", "utf-8")
 
     report_md = [
-        "# Relatório do EPG Universal — Filmes Limpos & Séries Detalhadas", "",
+        "# Relatório do EPG Universal — Metadados Completos (Ano, Classificação e Gênero)", "",
         f"- Emissoras base consolidadas: **{counts['playlist_channels']}**",
         f"- Emissoras com grade encontrada: **{counts['matched']}**",
         f"- Canais XML gerados: **{counts['exported_ids']}**",
         f"- Total de programas gravados: **{counts['programmes']}**",
+        f"- Títulos no Cache Web (Wikipedia/iTunes BR): **{counts['web_metadata_cached']}**",
         "", "## Fonte base utilizada por canal", ""
     ]
     for source in active_sources: report_md.append(f"- **{source.label}:** {source_counts[source.label]} canal(is)")
