@@ -2,6 +2,7 @@
 """EPG Universal Consolidado — Ultra Compacto (<15MB para GitHub)
 Lê Dicionário (channels.json) + Qualquer arquivo .m3u local + Espelho + URLs Secretas.
 Agrupa todas as variantes (SD/HD/FHD/H265) em <display-name> sem duplicar programas!
+Com Costura Inteligente Anti-Buracos (Multi-Source Gap Filler).
 """
 from __future__ import annotations
 
@@ -82,6 +83,23 @@ EPG_SOURCES_CONFIG = [
     ("IPTV-EPG BR", "https://iptv-epg.org/files/epg-br.xml", "iptvepg", 1.0),
     ("EPGShare BR2", "https://epgshare01.online/epgshare01/epg_ripper_BR2.xml.gz", "epgshare", 1.0),
 ]
+
+# Títulos inválidos/placeholders que NUNCA devem bloquear o preenchimento por outras fontes
+PLACEHOLDER_TITLES = {
+    "",
+    "SEM PROGRAMACAO",
+    "SEM PROGRAMAÇÃO",
+    "PROGRAMACAO NAO DISPONIVEL",
+    "PROGRAMAÇÃO NÃO DISPONÍVEL",
+    "NAO DISPONIVEL",
+    "NÃO DISPONÍVEL",
+    "A DEFINIR",
+    "TBA",
+    "TO BE ANNOUNCED",
+    "NO INFORMATION",
+    "OFF AIR",
+    "ENCERRAMENTO",
+}
 
 @dataclass(frozen=True)
 class SourceSpec:
@@ -175,6 +193,12 @@ def normalizar_canal(nome: str) -> str:
     nome = re.sub(r'\bFOX PREMIUM\b', 'STAR PREMIUM', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bFOX CHANNEL\b', 'STAR CHANNEL', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bFOX LIFE\b', 'STAR LIFE', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bTC\s+ACTION\b', 'TELECINE ACTION', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bTC\s+PREMIUM\b', 'TELECINE PREMIUM', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bTC\s+PIPOCA\b', 'TELECINE PIPOCA', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bTC\s+TOUCH\b', 'TELECINE TOUCH', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bTC\s+FUN\b', 'TELECINE FUN', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bTC\s+CULT\b', 'TELECINE CULT', nome, flags=re.IGNORECASE)
     nome = re.sub(r'^GB\b', 'GLOBO', nome, flags=re.IGNORECASE)
     nome = re.sub(r'^RECORDTV\b', 'RECORD', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bREDE\s+TV!?\b', 'REDETV', nome, flags=re.IGNORECASE)
@@ -220,6 +244,17 @@ def is_valid_provider_tvid(channel_name: str, tvid: str) -> bool:
         if SequenceMatcher(None, tvid_clean, cand_alnum).ratio() >= 0.65:
             return True
     return False
+
+def is_meaningful_programme(norm_title: str, channel_norm_name: str = "") -> bool:
+    """Retorna False se o programa for um placeholder vazio ('Sem programação', etc.)."""
+    if not norm_title or len(norm_title) < 2:
+        return False
+    if norm_title in PLACEHOLDER_TITLES:
+        return False
+    for bad in ("SEM PROGRAMACAO", "NAO DISPONIVEL", "PROGRAMACAO INDISPONIVEL"):
+        if bad in norm_title:
+            return False
+    return True
 
 def local_tag(element: ET.Element) -> str: return element.tag.rsplit("}", 1)[-1]
 def format_xmltv_datetime(dt: datetime) -> str: return dt.astimezone(timezone.utc).strftime("%Y%m%d%H%M%S +0000")
@@ -317,21 +352,32 @@ def read_source_from_file(spec: SourceSpec, file_path: Path) -> EpgSource:
         elif tag == "programme":
             channel_id = child.attrib.get("channel", "").strip()
             if not channel_id: continue
-            programs[channel_id].append(child)
             start = parse_xmltv_datetime(child.attrib.get("start", ""), spec.default_offset)
             stop = parse_xmltv_datetime(child.attrib.get("stop", ""), spec.default_offset)
             if start is None: continue
             title = programme_title(child)
-            rows[channel_id].append(ProgrammeRow(start=start, stop=stop or start, title=title, normalized_title=normalize_programme_title(title), element=child))
+            norm_title = normalize_programme_title(title)
+            if not is_meaningful_programme(norm_title):
+                continue
+            programs[channel_id].append(child)
+            rows[channel_id].append(ProgrammeRow(start=start, stop=stop or start, title=title, normalized_title=norm_title, element=child))
 
     for channel_id, channel_rows in rows.items():
         channel_rows.sort(key=lambda item: item.start)
         fixed_rows: list[ProgrammeRow] = []
         for idx, row in enumerate(channel_rows):
+            next_start = channel_rows[idx + 1].start if idx + 1 < len(channel_rows) else None
             stop = row.stop
             if stop <= row.start:
-                next_start = channel_rows[idx + 1].start if idx + 1 < len(channel_rows) else None
-                stop = next_start if (next_start and next_start > row.start) else row.start + timedelta(hours=2)
+                if next_start and next_start > row.start:
+                    stop = min(next_start, row.start + timedelta(hours=3))
+                else:
+                    stop = row.start + timedelta(hours=1, minutes=30)
+            elif next_start and stop > next_start:
+                stop = next_start
+            # Ignora programas corrompidos com mais de 8h seguidas
+            if (stop - row.start) > timedelta(hours=8):
+                stop = next_start if (next_start and next_start > row.start and (next_start - row.start) <= timedelta(hours=4)) else row.start + timedelta(hours=2)
             fixed_rows.append(ProgrammeRow(start=row.start, stop=stop, title=row.title, normalized_title=row.normalized_title, element=row.element))
         rows[channel_id] = fixed_rows
     root.clear()
@@ -390,7 +436,7 @@ def aliases_for(entry: dict[str, object]) -> list[str]:
 def choose_exact(source: EpgSource, aliases: Iterable[str]) -> tuple[str | None, str]:
     for alias in aliases:
         candidates = source.exact_index.get(alias, set())
-        if candidates: return max(candidates, key=lambda cid: len(source.programs.get(cid, []))), f"nome exato: {alias}"
+        if candidates: return max(candidates, key=lambda cid: len(source.rows.get(cid, []))), f"nome exato: {alias}"
     return None, ""
 
 def _sequence_ratio_upper_bound(left: str, right: str, left_counter: Counter[str] | None = None) -> float:
@@ -428,7 +474,7 @@ def find_match(source: EpgSource, aliases: list[str], source_ids: list[str] = No
         norm_sid = normalize_source_id(raw_sid)
         if norm_sid and norm_sid in source.normalized_id_index:
             cands = source.normalized_id_index[norm_sid]
-            best_cid = max(cands, key=lambda cid: len(source.programs.get(cid, [])))
+            best_cid = max(cands, key=lambda cid: len(source.rows.get(cid, [])))
             return ChannelMatch(source, best_cid, f"id do dicionário: {raw_sid}", 1.0)
 
     exact_id, reason = choose_exact(source, aliases)
@@ -509,16 +555,16 @@ def _calc_agreement(a_rows: list[ProgrammeRow], b_rows: list[ProgrammeRow], offs
     return {"comparable": len(similarities), "agreement": round(agreed / len(similarities), 4), "average_similarity": round(mean(similarities), 4), "detected_shift": int(offset.total_seconds() // 3600)}
 
 def cross_source_programme_agreement(a_source: EpgSource, a_id: str, b_source: EpgSource, b_id: str, now: datetime) -> dict[str, object]:
-    left_key, right_key = (a_source.spec.key, a_id), (b_source.spec.key, b_id)
-    cache_key = (*left_key, *right_key) if left_key <= right_key else (*right_key, *left_key)
+    cache_key = (a_source.spec.key, a_id, b_source.spec.key, b_id)
     if (cached := _AGREEMENT_CACHE.get(cache_key)) is not None: return cached
     window_start, window_end = now - timedelta(hours=6), now + timedelta(hours=36)
     a_rows = [r for r in programme_rows(a_source, a_id) if r.stop >= window_start and r.start <= window_end]
     b_rows = [r for r in programme_rows(b_source, b_id) if r.stop >= window_start and r.start <= window_end]
     result = _calc_agreement(a_rows, b_rows, timedelta(0))
     if result["comparable"] >= 3 and (result["agreement"] or 0) < AGREEMENT_THRESHOLD:
+        # Testa se b_rows precisa ser deslocado para alinhar com a_rows
         for offset_h in (-3, 3, -1, 1, -2, 2, -4, 4):
-            res_test = _calc_agreement(a_rows, b_rows, timedelta(hours=offset_h))
+            res_test = _calc_agreement(b_rows, a_rows, timedelta(hours=offset_h))
             if res_test["comparable"] >= MIN_COMPARABLE_PROGRAMMES and (res_test["agreement"] or 0) > (result["agreement"] or 0):
                 result = res_test
                 if result["agreement"] >= 0.8: break
@@ -532,18 +578,37 @@ def schedule_health(source: EpgSource, channel_id: str, now: datetime) -> dict[s
     current, next_item = now_next_for(source, channel_id, now)
     invalid, overlaps, gaps = 0, 0, 0
     previous_stop = None
+    
+    # Avalia buracos especificamente nas próximas 24h (onde o usuário sente falta à noite)
+    window_end = now + timedelta(hours=24)
+    near_rows = [r for r in rows if r.stop > now and r.start < window_end]
+    near_covered_sec = 0.0
+    for row in near_rows:
+        s = max(now, row.start)
+        e = min(window_end, row.stop)
+        if e > s:
+            near_covered_sec += (e - s).total_seconds()
+    near_coverage_ratio = min(1.0, near_covered_sec / (24.0 * 3600.0))
+
     for row in rows:
         start, stop = row.start, row.stop
         duration = stop - start
         if duration.total_seconds() <= 0 or duration > timedelta(hours=12): invalid += 1
         if previous_stop is not None:
             if start < previous_stop - timedelta(seconds=30): overlaps += 1
-            elif start > previous_stop + timedelta(minutes=30): gaps += 1
+            elif start > previous_stop + timedelta(minutes=15): gaps += 1
         if previous_stop is None or stop > previous_stop: previous_stop = stop
+        
     future_end = max((row.stop for row in rows if row.stop > now), default=None)
     future_hours = max(0.0, (future_end - now).total_seconds() / 3600) if future_end else 0.0
-    score = ((0.35 if current else 0.0) + (0.15 if next_item else 0.0) + (0.30 * min(future_hours / 24.0, 1.0)) + (0.20 * min(len(rows) / 10.0, 1.0)))
-    score -= min(0.25, invalid * 0.08 + overlaps * 0.02 + max(0, gaps - 3) * 0.01)
+    score = (
+        (0.25 if current else 0.0)
+        + (0.10 if next_item else 0.0)
+        + (0.35 * near_coverage_ratio)
+        + (0.20 * min(future_hours / 36.0, 1.0))
+        + (0.10 * min(len(rows) / 12.0, 1.0))
+    )
+    score -= min(0.30, invalid * 0.08 + overlaps * 0.02 + gaps * 0.03)
     result = {"score": round(max(0.0, min(1.0, score)), 4), "rows": len(rows), "current": current, "next": next_item, "future_hours": round(future_hours, 1), "invalid_durations": invalid, "overlaps": overlaps, "gaps": gaps}
     _HEALTH_CACHE[cache_key] = result
     return result
@@ -556,7 +621,6 @@ def evaluate_candidates(matches: list[ChannelMatch], now: datetime, max_active_v
     for other in sorted_matches[1:]:
         res = cross_source_programme_agreement(leader.source, leader.channel_id, other.source, other.channel_id, now)
         pairwise[(leader.source.spec.key, other.source.spec.key)] = res
-        pairwise[(other.source.spec.key, leader.source.spec.key)] = res
     evaluations: list[CandidateEvaluation] = []
     for match in matches:
         supporters = [match.source]
@@ -583,18 +647,28 @@ def evaluate_candidates(matches: list[ChannelMatch], now: datetime, max_active_v
                     supporters.append(other.source)
                     support_agreements.append(agreement)
                 else: vote = "diverge"
-            comparisons.append({"other_source": other.source.label, "other_source_key": other.source.spec.key, "other_channel_id": other.channel_id, "other_match_method": other.method, "comparable": comparable, "agreement": agreement, "average_similarity": result.get("average_similarity"), "vote": vote})
+            comparisons.append({
+                "other_source": other.source.label,
+                "other_source_key": other.source.spec.key,
+                "other_channel_id": other.channel_id,
+                "other_match_method": other.method,
+                "comparable": comparable,
+                "agreement": agreement,
+                "average_similarity": result.get("average_similarity"),
+                "detected_shift": result.get("detected_shift", 0),
+                "vote": vote,
+            })
         support_families = len({src.spec.family for src in supporters})
         weighted_ratio = support_weight / vote_weight if vote_weight else 0.0
         avg_support = mean(support_agreements) if support_agreements else 0.0
         health_score = float(health_by_source[match.source.spec.key]["score"])
-        quality = 0.55 * weighted_ratio + 0.20 * health_score + 0.10 * match.match_score + 0.15 * avg_support
+        quality = 0.50 * weighted_ratio + 0.25 * health_score + 0.10 * match.match_score + 0.15 * avg_support
         evidence_factor = 0.55 + 0.45 * min(vote_weight / max(max_active_vote_weight, 0.5), 1.0)
         confidence = round(100 * max(0.0, min(1.0, quality * evidence_factor)))
         evaluations.append(CandidateEvaluation(match=match, support_votes=support_votes, vote_sources=vote_sources, support_weight=round(support_weight, 3), vote_weight=round(vote_weight, 3), support_families=support_families, weighted_ratio=round(weighted_ratio, 4), avg_support_agreement=round(avg_support, 4), health_score=round(health_score, 4), health=health_by_source[match.source.spec.key], confidence=confidence, comparisons=comparisons))
 
     def rank(ev: CandidateEvaluation) -> tuple[int, float, int, float, float, float, float, int]:
-        has_programmes = int(bool(ev.match.source.programs.get(ev.match.channel_id)))
+        has_programmes = int(bool(ev.match.source.rows.get(ev.match.channel_id)))
         return (has_programmes, ev.support_weight, ev.support_families, ev.weighted_ratio, ev.avg_support_agreement, ev.health_score, ev.match.match_score, -ev.match.source.spec.priority)
 
     evaluations.sort(key=rank, reverse=True)
@@ -637,7 +711,6 @@ def make_validation(entry: dict[str, object], chosen: CandidateEvaluation, all_e
     }
 
 def generate_quality_variants(base_names: Iterable[str]) -> list[str]:
-    """Gera todas as variações de nome para <display-name> (sem duplicar programas!)."""
     suffixes = [
         "",
         " SD",
@@ -683,7 +756,6 @@ def get_clean_aliases(entry: dict[str, object]) -> list[str]:
     return generate_quality_variants(values)
 
 def get_primary_export_ids(entry: dict[str, object]) -> list[str]:
-    """Retorna APENAS os IDs técnicos (Máx 2 por canal) para não explodir o tamanho do XML!"""
     ids = []
     seen = set()
     raw_name = str(entry.get("name", "")).strip()
@@ -696,7 +768,6 @@ def get_primary_export_ids(entry: dict[str, object]) -> list[str]:
             ids.append(v)
             seen.add(v)
 
-    # 1. TVIDs oficiais validados (ex: "AMC.br")
     for cid in entry.get("compatibility_ids", []) or []:
         if is_valid_provider_tvid(raw_name, str(cid)):
             add_id(str(cid))
@@ -704,16 +775,22 @@ def get_primary_export_ids(entry: dict[str, object]) -> list[str]:
         if is_valid_provider_tvid(raw_name, str(t_id)):
             add_id(str(t_id))
 
-    # 2. Se não tiver TVID oficial ou além dele, garante o ID de nome base único
     add_id(clean_base)
-
-    # Limita a no máximo 2 IDs com programação por emissora para manter o arquivo < 15 MB
     return ids[:2]
 
 def stitch_multi_source_schedule(
     all_evaluations: list[CandidateEvaluation], target_channel_id: str, cutoff: datetime, max_future: datetime, overrides: dict[str, object]
 ) -> list[ET.Element]:
+    """Costura programas de múltiplas fontes preenchendo qualquer buraco (>= 10 min) sem retalhar filmes."""
     if not all_evaluations: return []
+
+    leader_ev = all_evaluations[0]
+    shift_by_source_key: dict[str, int] = {leader_ev.match.source.spec.key: 0}
+    for comp in leader_ev.comparisons:
+        other_key = str(comp.get("other_source_key", ""))
+        # Se a fonte secundária tiver deslocamento de fuso detectado em relação à líder, corrige!
+        if comp.get("agreement") and float(comp["agreement"]) >= 0.50:
+            shift_by_source_key[other_key] = int(comp.get("detected_shift") or 0)
 
     best_descriptions: dict[str, str] = {}
     for ev in all_evaluations:
@@ -722,65 +799,109 @@ def stitch_multi_source_schedule(
             if desc_node is not None and desc_node.text:
                 desc_text = desc_node.text.strip()
                 norm_title = prog_row.normalized_title
-                if len(desc_text) > len(best_descriptions.get(norm_title, "")):
+                if norm_title and len(desc_text) > len(best_descriptions.get(norm_title, "")):
                     best_descriptions[norm_title] = desc_text
 
     merged_timeline: list[dict[str, Any]] = []
+    MIN_GAP_SECONDS = 10 * 60  # Qualquer buraco de 10+ minutos será preenchido pelas demais fontes
+    MAX_EDGE_TRIM_SECONDS = 15 * 60  # Permite aparar até 15 min de borda para encaixar um programa inteiro num buraco
 
     for ev in all_evaluations:
         src = ev.match.source
         cid = ev.match.channel_id
-        raw_elements = src.programs.get(cid, [])
-        if not raw_elements: continue
+        # IMPORTANTE: Usa `rows` (já validado, ordenado e com `stop` corrigido) em vez de `programs` cru!
+        fixed_rows = src.rows.get(cid, [])
+        if not fixed_rows: continue
 
         ch_shift = float(overrides.get("channel_timeshifts", {}).get(target_channel_id, 0.0))
         src_shift = float(overrides.get("source_timeshifts", {}).get(src.spec.key, 0.0))
-        total_shift = timedelta(hours=ch_shift + src_shift)
-
-        parsed = []
-        for el in raw_elements:
-            start_dt = parse_xmltv_datetime(el.attrib.get("start", ""), src.spec.default_offset)
-            stop_dt = parse_xmltv_datetime(el.attrib.get("stop", ""), src.spec.default_offset)
-            if not start_dt: continue
-            start_dt += total_shift
-            if stop_dt: stop_dt += total_shift
-            parsed.append({"start": start_dt, "stop": stop_dt, "el": el})
-        parsed.sort(key=lambda x: x["start"])
+        auto_shift = float(shift_by_source_key.get(src.spec.key, 0))
+        total_shift = timedelta(hours=ch_shift + src_shift + auto_shift)
 
         cleaned_source_progs = []
-        for i, prog in enumerate(parsed):
-            s_dt, sp_dt = prog["start"], prog["stop"]
-            if sp_dt is None or sp_dt <= s_dt:
-                sp_dt = parsed[i + 1]["start"] if i + 1 < len(parsed) else s_dt + timedelta(hours=2)
-            if i + 1 < len(parsed) and sp_dt > parsed[i + 1]["start"]: sp_dt = parsed[i + 1]["start"]
-            if sp_dt < cutoff or s_dt > max_future: continue
-            cleaned_source_progs.append({"start": s_dt, "stop": sp_dt, "el": prog["el"]})
+        for idx, row in enumerate(fixed_rows):
+            if not is_meaningful_programme(row.normalized_title):
+                continue
+            s_dt = row.start + total_shift
+            sp_dt = row.stop + total_shift
+            if sp_dt <= s_dt:
+                continue
+            if idx + 1 < len(fixed_rows):
+                next_s = fixed_rows[idx + 1].start + total_shift
+                if sp_dt > next_s and next_s > s_dt:
+                    sp_dt = next_s
+            if sp_dt <= cutoff or s_dt >= max_future:
+                continue
+            cleaned_source_progs.append({
+                "start": s_dt,
+                "stop": sp_dt,
+                "el": row.element,
+                "norm_title": row.normalized_title,
+            })
+
+        if not cleaned_source_progs:
+            continue
 
         if not merged_timeline:
             merged_timeline = cleaned_source_progs
+            merged_timeline.sort(key=lambda x: x["start"])
             continue
 
+        # Preenche buracos reais na linha do tempo usando programas completos desta fonte secundária
+        added_any = False
         for cand in cleaned_source_progs:
             c_start, c_stop = cand["start"], cand["stop"]
-            
-            valid_segments = [(c_start, c_stop)]
-            for ex in merged_timeline:
-                new_segments = []
-                for seg_start, seg_stop in valid_segments:
-                    if seg_stop <= ex["start"] or seg_start >= ex["stop"]:
-                        new_segments.append((seg_start, seg_stop))
-                    else:
-                        if seg_start < ex["start"]: new_segments.append((seg_start, ex["start"]))
-                        if seg_stop > ex["stop"]: new_segments.append((ex["stop"], seg_stop))
-                valid_segments = new_segments
+            c_dur = (c_stop - c_start).total_seconds()
+            if c_dur < 300:
+                continue
 
-            for seg_start, seg_stop in valid_segments:
-                if (seg_stop - seg_start).total_seconds() >= 180:
+            # Verifica com quais programas já existentes este candidato colide
+            overlapping = [
+                ex for ex in merged_timeline
+                if ex["stop"] > c_start and ex["start"] < c_stop
+            ]
+
+            if not overlapping:
+                # Buraco totalmente livre (ex: 22h às 00h vazio na fonte principal)! Encaixa direto.
+                merged_timeline.append(copy.deepcopy(cand))
+                added_any = True
+                continue
+
+            # Se colidir apenas nas pontinhas (ex: programa anterior acabou 22h05 e o filme da fonte 2 começa 22h00)
+            # calcula o maior espaço livre dentro da janela [c_start, c_stop]
+            overlapping.sort(key=lambda x: x["start"])
+            free_Cursor = c_start
+            best_gap = None
+            for ex in overlapping:
+                if ex["start"] > free_Cursor:
+                    gap_sec = (ex["start"] - free_Cursor).total_seconds()
+                    if gap_sec >= MIN_GAP_SECONDS:
+                        if best_gap is None or gap_sec > (best_gap[1] - best_gap[0]).total_seconds():
+                            best_gap = (free_Cursor, ex["start"])
+                if ex["stop"] > free_Cursor:
+                    free_Cursor = ex["stop"]
+            if c_stop > free_Cursor:
+                gap_sec = (c_stop - free_Cursor).total_seconds()
+                if gap_sec >= MIN_GAP_SECONDS:
+                    if best_gap is None or gap_sec > (best_gap[1] - best_gap[0]).total_seconds():
+                        best_gap = (free_Cursor, c_stop)
+
+            if best_gap is not None:
+                g_start, g_stop = best_gap
+                gap_dur = (g_stop - g_start).total_seconds()
+                left_trim = (g_start - c_start).total_seconds()
+                right_trim = (c_stop - g_stop).total_seconds()
+                # Só encaixa se preservar pelo menos 70% do programa original OU se o corte de borda for <= 15 min
+                if (gap_dur / c_dur) >= 0.70 or (left_trim <= MAX_EDGE_TRIM_SECONDS and right_trim <= MAX_EDGE_TRIM_SECONDS):
                     new_cand = copy.deepcopy(cand)
-                    new_cand["start"] = seg_start
-                    new_cand["stop"] = seg_stop
+                    new_cand["start"] = g_start
+                    new_cand["stop"] = g_stop
                     merged_timeline.append(new_cand)
-                    
+                    added_any = True
+
+        if added_any:
+            merged_timeline.sort(key=lambda x: x["start"])
+
     merged_timeline.sort(key=lambda x: x["start"])
 
     final_elements = []
@@ -788,6 +909,8 @@ def stitch_multi_source_schedule(
         s_dt, sp_dt = prog["start"], prog["stop"]
         if i + 1 < len(merged_timeline) and sp_dt > merged_timeline[i + 1]["start"]:
             sp_dt = merged_timeline[i + 1]["start"]
+        if (sp_dt - s_dt).total_seconds() < 60:
+            continue
             
         el = copy.deepcopy(prog["el"])
         el.attrib["start"] = format_xmltv_datetime(s_dt)
@@ -840,7 +963,7 @@ def write_epg_stream(
                 gz.write(data)
                 if plain is not None: plain.write(data)
 
-            generator = "EPG Universal Otimizado (Ultra Compacto)"
+            generator = "EPG Universal Otimizado (Costura Anti-Buracos)"
             source_name = "Consolidado Inteligente de Múltiplas Fontes"
             emit((f"<?xml version='1.0' encoding='utf-8'?>\n<tv generator-info-name={quoteattr(generator)} source-info-name={quoteattr(source_name)}>\n").encode("utf-8"))
 
@@ -885,7 +1008,7 @@ def write_epg_stream(
     return programme_count, len(xml_id_to_data)
 
 def main() -> None:
-    print("Iniciando geração de EPG (Dicionário + M3U Local + Ultra Compactação)...")
+    print("Iniciando geração de EPG (Costura Inteligente Anti-Buracos + Ultra Compacto)...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -968,7 +1091,6 @@ def main() -> None:
                     count += 1
         return count
 
-    # 1. Carrega Dicionário Persistente (channels.json)
     if CATALOG_PATH.exists():
         try:
             print(f"Lendo Dicionário Persistente ({CATALOG_PATH})...")
@@ -989,7 +1111,6 @@ def main() -> None:
         except Exception as e:
             print(f"Aviso ao ler {CATALOG_PATH}: {e}")
 
-    # 2. Carrega automaticamente QUALQUER arquivo .m3u ou .m3u8 do repositório (sem precisar renomear)
     local_m3us = sorted(set(
         glob.glob("*.m3u") + glob.glob("*.m3u8") +
         glob.glob("learning/*.m3u") + glob.glob("learning/*.m3u8")
@@ -1001,7 +1122,6 @@ def main() -> None:
         except Exception as e:
             print(f"Aviso ao ler M3U local {m3u_file_str}: {e}")
 
-    # 3. Carrega o Espelho de Segurança (espelho.json)
     if ESPELHO_PATH.exists():
         try:
             print("Lendo Espelho de Segurança...")
@@ -1020,7 +1140,6 @@ def main() -> None:
         except Exception as e:
             print(f"Aviso: Não foi possível carregar o espelho: {e}")
     
-    # 4. Complementa com as Listas M3U/Xtream remotas
     for idx, url_raw in enumerate(M3U_URLS):
         url = url_raw.strip()
         if not url.startswith("http"): continue
@@ -1172,7 +1291,7 @@ def main() -> None:
     (OUTPUT_DIR / "validation.json").write_text(json.dumps({"generated_at": now.isoformat(), "active_sources": [s.label for s in active_sources], "summary": counts, "channels": validations}, ensure_ascii=False, indent=2) + "\n", "utf-8")
 
     report_md = [
-        "# Relatório do EPG Universal — Ultra Compacto", "",
+        "# Relatório do EPG Universal — Costura Anti-Buracos", "",
         f"- Emissoras base consolidadas: **{counts['playlist_channels']}**",
         f"- Emissoras com grade encontrada: **{counts['matched']}**",
         f"- Canais XML gerados: **{counts['exported_ids']}**",
