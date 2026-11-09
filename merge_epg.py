@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""EPG Universal Consolidado — Ultra Compacto (<15MB para GitHub)
-Lê Dicionário (channels.json) + Qualquer arquivo .m3u local + Espelho + URLs Secretas.
-Agrupa todas as variantes (SD/HD/FHD/H265) em <display-name> sem duplicar programas!
-Com Costura Inteligente Anti-Buracos (Multi-Source Gap Filler).
+"""EPG Universal Consolidado — Alta Precisão de Horários + Riqueza de Metadados (Séries/Episódios)
+- Remove UrbanTV e adiciona Mais SBT (maissbt.xml).
+- Corrige bug da matriz pairwise que fazia o TV Map (3h de guia) vencer fontes de 72h.
+- Soma metadados de todas as fontes (Temporada, Episódio, Subtítulo, Sinopse, Categorias).
 """
 from __future__ import annotations
 
@@ -52,7 +52,7 @@ FUZZY_MARGIN = float(os.environ.get("FUZZY_MARGIN", "0.03"))
 AGREEMENT_THRESHOLD = float(os.environ.get("AGREEMENT_THRESHOLD", "0.55"))
 MIN_COMPARABLE_PROGRAMMES = int(os.environ.get("MIN_COMPARABLE_PROGRAMMES", "3"))
 
-DOWNLOAD_WORKERS = max(1, min(4, int(os.environ.get("DOWNLOAD_WORKERS", "3"))))
+DOWNLOAD_WORKERS = max(1, min(4, int(os.environ.get("DOWNLOAD_WORKERS", "4"))))
 GZIP_LEVEL = max(1, min(9, int(os.environ.get("GZIP_LEVEL", "9"))))
 OUTPUT_PAST_HOURS = max(0, int(os.environ.get("OUTPUT_PAST_HOURS", "6")))
 OUTPUT_FUTURE_HOURS = max(24, int(os.environ.get("OUTPUT_FUTURE_HOURS", "72")))
@@ -65,26 +65,30 @@ IPTV_USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
 ]
 
+# Balanceamento recalibrado:
+# - Fontes locais e operadoras com horários precisos e metadados ricos ganham peso equilibrado.
+# - TV Map reduzido para 1.0 (excelente validador de horário atual, mas tem grade curta de ~4h).
+# - UrbanTV removido; Mais SBT adicionado.
 EPG_SOURCES_CONFIG = [
-    ("Meu Guia", "epg_meuguia.xml", "meuguia", 3.0),
-    ("GuiaDeTV", "epg_guiadetv.xml", "guiadetv", 3.0),
-    ("TV Plus", "epg_tvplus.xml", "tvplus", 1.5),
-    ("MiTV", "epg_mitv.xml", "mitv", 1.5),
-    ("TV Map", "epg_tvmap.xml", "tvmap", 1.5),
-    ("Genius", os.environ.get("PRIMARY_EPG_URL", "https://github.com/ferteque/Curated-M3U-Repository/raw/refs/heads/main/epg13.xml.gz"), "genius", 1.5),
-    ("Open-EPG BR 4", "https://www.open-epg.com/files/brazil4.xml", "openepg", 1.0),
-    ("Open-EPG BR", "https://www.open-epg.com/files/brazil.xml", "openepg", 1.0),
-    ("EPG pw BR", "https://epg.pw/xmltv/epg_BR.xml", "epgpw", 1.0),
-    ("Claro", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/claro.xml", "git_extra", 1.0),
-    ("Globo", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/globo.xml", "git_extra", 1.0),
-    ("VivoPlay", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/vivoplay.xml", "git_extra", 1.0),
+    ("GuiaDeTV", "epg_guiadetv.xml", "guiadetv", 2.5),
+    ("Meu Guia", "epg_meuguia.xml", "meuguia", 2.5),
+    ("MiTV", "epg_mitv.xml", "mitv", 2.0),
+    ("TV Plus", "epg_tvplus.xml", "tvplus", 1.8),
+    ("Open-EPG BR", "https://www.open-epg.com/files/brazil.xml", "openepg", 1.5),
+    ("Open-EPG BR 4", "https://www.open-epg.com/files/brazil4.xml", "openepg", 1.4),
+    ("Claro", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/claro.xml", "git_operadora", 1.5),
+    ("VivoPlay", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/vivoplay.xml", "git_operadora", 1.4),
+    ("Globo", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/globo.xml", "git_extra", 1.2),
+    ("Mais SBT", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/maissbt.xml", "git_extra", 1.0),
     ("XSports", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/xsports.xml", "git_extra", 1.0),
-    ("EPGShare BR1", "https://epgshare01.online/epgshare01/epg_ripper_BR1.xml.gz", "epgshare", 1.0),
-    ("IPTV-EPG BR", "https://iptv-epg.org/files/epg-br.xml", "iptvepg", 1.0),
-    ("EPGShare BR2", "https://epgshare01.online/epgshare01/epg_ripper_BR2.xml.gz", "epgshare", 1.0),
+    ("EPGShare BR1", "https://epgshare01.online/epgshare01/epg_ripper_BR1.xml.gz", "epgshare", 1.3),
+    ("EPGShare BR2", "https://epgshare01.online/epgshare01/epg_ripper_BR2.xml.gz", "epgshare", 1.3),
+    ("IPTV-EPG BR", "https://iptv-epg.org/files/epg-br.xml", "iptvepg", 1.2),
+    ("TV Map", "epg_tvmap.xml", "tvmap", 1.0),
+    ("Genius", os.environ.get("PRIMARY_EPG_URL", "https://github.com/ferteque/Curated-M3U-Repository/raw/refs/heads/main/epg13.xml.gz"), "genius", 1.0),
+    ("EPG pw BR", "https://epg.pw/xmltv/epg_BR.xml", "epgpw", 0.8),
 ]
 
-# Títulos inválidos/placeholders que NUNCA devem bloquear o preenchimento por outras fontes
 PLACEHOLDER_TITLES = {
     "",
     "SEM PROGRAMACAO",
@@ -132,7 +136,7 @@ class ChannelMatch:
 class CandidateEvaluation:
     match: ChannelMatch; support_votes: int; vote_sources: int; support_weight: float; vote_weight: float
     support_families: int; weighted_ratio: float; avg_support_agreement: float; health_score: float
-    health: dict[str, object]; confidence: int; comparisons: list[dict[str, object]]
+    richness_score: float; health: dict[str, object]; confidence: int; comparisons: list[dict[str, object]]
 
 CHANNEL_SYNONYMS = {
     "UNIVERSAL CHANNEL": ["UNIVERSAL TV", "UNIVERSAL"],
@@ -245,8 +249,7 @@ def is_valid_provider_tvid(channel_name: str, tvid: str) -> bool:
             return True
     return False
 
-def is_meaningful_programme(norm_title: str, channel_norm_name: str = "") -> bool:
-    """Retorna False se o programa for um placeholder vazio ('Sem programação', etc.)."""
+def is_meaningful_programme(norm_title: str) -> bool:
     if not norm_title or len(norm_title) < 2:
         return False
     if norm_title in PLACEHOLDER_TITLES:
@@ -317,6 +320,102 @@ def download_to_temp_file(url: str, attempts: int = 4) -> Path:
     if tmp_path.exists(): tmp_path.unlink()
     raise RuntimeError(f"Falha ao baixar ({last_error})")
 
+# =====================================================================
+# EXTRAÇÃO E ENRIQUECIMENTO DE METADADOS (SÉRIES, TEMPORADAS, EPISÓDIOS)
+# =====================================================================
+_RE_XMLTV_NS = re.compile(r"^\s*(\d+)?\s*\.\s*(\d+)?\s*\.")
+_RE_SE_PATTERNS = [
+    re.compile(r"\bS(\d{1,2})\s*[:\-]?\s*E(?:P)?(\d{1,3})\b", re.IGNORECASE),
+    re.compile(r"\bT(?:EMP(?:ORADA)?)?\s*\.?\s*(\d{1,2})\s*[\-:/, ]*\s*E(?:P(?:IS[OÓ]DIO)?)?\s*\.?\s*(\d{1,3})\b", re.IGNORECASE),
+    re.compile(r"\b(\d{1,2})\s*[ªº]?\s*T(?:EMP(?:ORADA)?)?\s*[\-:/, ]*\s*E(?:P(?:IS[OÓ]DIO)?)?\s*\.?\s*(\d{1,3})\b", re.IGNORECASE),
+]
+_RE_EP_ONLY = re.compile(r"\bE(?:P(?:IS[OÓ]DIO)?)?\s*\.?\s*(\d{1,4})\b", re.IGNORECASE)
+
+def extract_program_metadata(el: ET.Element) -> dict[str, Any]:
+    """Extrai título, subtítulo, descrição, temporada, episódio, categorias e ano de um <programme>."""
+    title = ""
+    sub_title = ""
+    desc = ""
+    date_str = ""
+    categories: list[str] = []
+    season: int | None = None
+    episode: int | None = None
+
+    for child in el:
+        tag = local_tag(child)
+        txt = (child.text or "").strip()
+        if not txt:
+            continue
+        if tag == "title" and not title:
+            title = txt
+        elif tag == "sub-title" and not sub_title:
+            sub_title = txt
+        elif tag == "desc" and len(txt) > len(desc):
+            desc = txt
+        elif tag == "date" and not date_str:
+            date_str = txt[:4]
+        elif tag == "category" and txt not in categories:
+            categories.append(txt)
+        elif tag == "episode-num":
+            sys_attr = (child.attrib.get("system") or "").lower()
+            if sys_attr == "xmltv_ns":
+                m = _RE_XMLTV_NS.match(txt)
+                if m:
+                    if m.group(1) is not None:
+                        season = int(m.group(1)) + 1
+                    if m.group(2) is not None:
+                        episode = int(m.group(2)) + 1
+            else:
+                for pat in _RE_SE_PATTERNS:
+                    m = pat.search(txt)
+                    if m:
+                        season, episode = int(m.group(1)), int(m.group(2))
+                        break
+                if episode is None:
+                    m_ep = _RE_EP_ONLY.search(txt)
+                    if m_ep:
+                        episode = int(m_ep.group(1))
+
+    # Se o título vier com subtítulo acoplado (ex: "Duelo com Bobby Flay : Um Pouco Caipira")
+    if " : " in title and not sub_title:
+        parts = [p.strip() for p in title.split(" : ", 1)]
+        if len(parts) == 2 and parts[0] and parts[1] and parts[0].upper() != parts[1].upper():
+            title, sub_title = parts[0], parts[1]
+
+    # Busca temporada e episódio via Regex no título, subtítulo e descrição caso não tenha tag <episode-num>
+    if season is None and episode is None:
+        search_blob = f"{title} | {sub_title} | {desc}"
+        for pat in _RE_SE_PATTERNS:
+            m = pat.search(search_blob)
+            if m:
+                s_val, e_val = int(m.group(1)), int(m.group(2))
+                if 0 < s_val <= 60 and 0 < e_val <= 999:
+                    season, episode = s_val, e_val
+                    break
+        if episode is None:
+            m_ep = _RE_EP_ONLY.search(f"{sub_title} | {desc}")
+            if m_ep:
+                e_val = int(m_ep.group(1))
+                if 0 < e_val <= 2500:
+                    episode = e_val
+
+    # Limpa códigos S01E02 repetidos do subtítulo
+    if sub_title:
+        for pat in _RE_SE_PATTERNS:
+            sub_title = pat.sub("", sub_title).strip(" -:|")
+        if sub_title.upper() == title.upper():
+            sub_title = ""
+
+    return {
+        "title": title,
+        "sub_title": sub_title,
+        "desc": desc,
+        "season": season,
+        "episode": episode,
+        "categories": categories,
+        "date": date_str,
+    }
+
 def read_source_from_file(spec: SourceSpec, file_path: Path) -> EpgSource:
     channels: dict[str, ET.Element] = {}
     names, normalized_names = {}, {}
@@ -372,10 +471,10 @@ def read_source_from_file(spec: SourceSpec, file_path: Path) -> EpgSource:
                 if next_start and next_start > row.start:
                     stop = min(next_start, row.start + timedelta(hours=3))
                 else:
-                    stop = row.start + timedelta(hours=1, minutes=30)
+                    # Se for o último programa da fonte e não tiver fim (ex: TV Map), dá apenas 45 min para não bloquear a noite
+                    stop = row.start + timedelta(minutes=45)
             elif next_start and stop > next_start:
                 stop = next_start
-            # Ignora programas corrompidos com mais de 8h seguidas
             if (stop - row.start) > timedelta(hours=8):
                 stop = next_start if (next_start and next_start > row.start and (next_start - row.start) <= timedelta(hours=4)) else row.start + timedelta(hours=2)
             fixed_rows.append(ProgrammeRow(start=row.start, stop=stop, title=row.title, normalized_title=row.normalized_title, element=row.element))
@@ -504,9 +603,12 @@ def programme_title(programme: ET.Element | None) -> str:
 def normalize_programme_title(value: str) -> str:
     value = unicodedata.normalize("NFKD", value or "")
     value = "".join(ch for ch in value if not unicodedata.combining(ch)).upper()
-    value = re.sub(r"\b(?:HD|FHD|AO VIVO|LIVE|ESTREIA|INEDITO|INÉDITO)\b", " ", value)
-    value = re.sub(r"\bT\d+\s*E\d+\b", " ", value)
-    value = re.sub(r"\bS\d+\s*E\d+\b", " ", value)
+    # Se tiver subtítulo separado por " : ", compara apenas o título base da série/filme para não penalizar fontes ricas!
+    if " : " in value:
+        value = value.split(" : ", 1)[0]
+    value = re.sub(r"\b(?:HD|FHD|AO VIVO|LIVE|ESTREIA|INEDITO|INÉDITO|VT)\b", " ", value)
+    value = re.sub(r"\bT\d+\s*E(?:P)?\d+\b", " ", value)
+    value = re.sub(r"\bS\d+\s*E(?:P)?\d+\b", " ", value)
     value = re.sub(r"[^A-Z0-9]+", " ", value)
     return re.sub(r"\s+", " ", value).strip()
 
@@ -544,7 +646,10 @@ def _calc_agreement(a_rows: list[ProgrammeRow], b_rows: list[ProgrammeRow], offs
                 time_score = max(overlap_ratio, max(0.0, 1.0 - start_delta / (20 * 60)))
                 title_score = 0.0
                 if a_row.normalized_title and b_row.normalized_title:
-                    title_score = 1.0 if a_row.normalized_title == b_row.normalized_title else SequenceMatcher(None, a_row.normalized_title, b_row.normalized_title).ratio()
+                    if a_row.normalized_title == b_row.normalized_title or a_row.normalized_title in b_row.normalized_title or b_row.normalized_title in a_row.normalized_title:
+                        title_score = 1.0
+                    else:
+                        title_score = SequenceMatcher(None, a_row.normalized_title, b_row.normalized_title).ratio()
                 cand = (time_score, title_score)
                 if best is None or cand > best: best = cand
             idx += 1
@@ -562,7 +667,6 @@ def cross_source_programme_agreement(a_source: EpgSource, a_id: str, b_source: E
     b_rows = [r for r in programme_rows(b_source, b_id) if r.stop >= window_start and r.start <= window_end]
     result = _calc_agreement(a_rows, b_rows, timedelta(0))
     if result["comparable"] >= 3 and (result["agreement"] or 0) < AGREEMENT_THRESHOLD:
-        # Testa se b_rows precisa ser deslocado para alinhar com a_rows
         for offset_h in (-3, 3, -1, 1, -2, 2, -4, 4):
             res_test = _calc_agreement(b_rows, a_rows, timedelta(hours=offset_h))
             if res_test["comparable"] >= MIN_COMPARABLE_PROGRAMMES and (res_test["agreement"] or 0) > (result["agreement"] or 0):
@@ -579,7 +683,6 @@ def schedule_health(source: EpgSource, channel_id: str, now: datetime) -> dict[s
     invalid, overlaps, gaps = 0, 0, 0
     previous_stop = None
     
-    # Avalia buracos especificamente nas próximas 24h (onde o usuário sente falta à noite)
     window_end = now + timedelta(hours=24)
     near_rows = [r for r in rows if r.stop > now and r.start < window_end]
     near_covered_sec = 0.0
@@ -589,6 +692,18 @@ def schedule_health(source: EpgSource, channel_id: str, now: datetime) -> dict[s
         if e > s:
             near_covered_sec += (e - s).total_seconds()
     near_coverage_ratio = min(1.0, near_covered_sec / (24.0 * 3600.0))
+
+    # Calcula a Riqueza de Metadados (Quantos programas têm Temporada/Episódio, Subtítulo e Sinopse detalhada)
+    sample_rows = near_rows[:35] if near_rows else rows[:35]
+    rich_points = 0.0
+    for r in sample_rows:
+        meta = extract_program_metadata(r.element)
+        pts = 0.0
+        if meta["desc"] and len(meta["desc"]) >= 30: pts += 0.45
+        if meta["sub_title"]: pts += 0.25
+        if meta["season"] is not None or meta["episode"] is not None: pts += 0.30
+        rich_points += min(1.0, pts)
+    richness_score = round(rich_points / len(sample_rows), 4) if sample_rows else 0.0
 
     for row in rows:
         start, stop = row.start, row.stop
@@ -608,20 +723,29 @@ def schedule_health(source: EpgSource, channel_id: str, now: datetime) -> dict[s
         + (0.20 * min(future_hours / 36.0, 1.0))
         + (0.10 * min(len(rows) / 12.0, 1.0))
     )
-    score -= min(0.30, invalid * 0.08 + overlaps * 0.02 + gaps * 0.03)
-    result = {"score": round(max(0.0, min(1.0, score)), 4), "rows": len(rows), "current": current, "next": next_item, "future_hours": round(future_hours, 1), "invalid_durations": invalid, "overlaps": overlaps, "gaps": gaps}
+    score -= min(0.35, invalid * 0.08 + overlaps * 0.02 + gaps * 0.03)
+    # Penalidade severa se a fonte tiver menos de 8 horas futuras (ex: TV Map)
+    if future_hours < 8.0:
+        score = min(score, 0.35)
+    result = {
+        "score": round(max(0.0, min(1.0, score)), 4),
+        "richness_score": richness_score,
+        "near_coverage_ratio": round(near_coverage_ratio, 4),
+        "rows": len(rows),
+        "current": current,
+        "next": next_item,
+        "future_hours": round(future_hours, 1),
+        "invalid_durations": invalid,
+        "overlaps": overlaps,
+        "gaps": gaps,
+    }
     _HEALTH_CACHE[cache_key] = result
     return result
 
 def evaluate_candidates(matches: list[ChannelMatch], now: datetime, max_active_vote_weight: float) -> tuple[CandidateEvaluation, list[CandidateEvaluation]]:
     health_by_source = {m.source.spec.key: schedule_health(m.source, m.channel_id, now) for m in matches}
-    sorted_matches = sorted(matches, key=lambda m: (health_by_source[m.source.spec.key]["score"], m.source.spec.vote_weight), reverse=True)
-    leader = sorted_matches[0]
-    pairwise: dict[tuple[str, str], dict[str, object]] = {}
-    for other in sorted_matches[1:]:
-        res = cross_source_programme_agreement(leader.source, leader.channel_id, other.source, other.channel_id, now)
-        pairwise[(leader.source.spec.key, other.source.spec.key)] = res
     evaluations: list[CandidateEvaluation] = []
+
     for match in matches:
         supporters = [match.source]
         support_votes, vote_sources = 1, 1
@@ -629,11 +753,7 @@ def evaluate_candidates(matches: list[ChannelMatch], now: datetime, max_active_v
         support_agreements, comparisons = [], []
         for other in matches:
             if other.source is match.source: continue
-            pair_key = (match.source.spec.key, other.source.spec.key)
-            result = pairwise.get(pair_key)
-            if not result:
-                result = cross_source_programme_agreement(match.source, match.channel_id, other.source, other.channel_id, now)
-                pairwise[pair_key] = result
+            result = cross_source_programme_agreement(match.source, match.channel_id, other.source, other.channel_id, now)
             comparable = int(result.get("comparable") or 0)
             agreement = result.get("agreement")
             vote = "sem_dados"
@@ -661,15 +781,38 @@ def evaluate_candidates(matches: list[ChannelMatch], now: datetime, max_active_v
         support_families = len({src.spec.family for src in supporters})
         weighted_ratio = support_weight / vote_weight if vote_weight else 0.0
         avg_support = mean(support_agreements) if support_agreements else 0.0
-        health_score = float(health_by_source[match.source.spec.key]["score"])
-        quality = 0.50 * weighted_ratio + 0.25 * health_score + 0.10 * match.match_score + 0.15 * avg_support
+        h_info = health_by_source[match.source.spec.key]
+        health_score = float(h_info["score"])
+        richness_score = float(h_info.get("richness_score", 0.0))
+
+        quality = 0.45 * weighted_ratio + 0.30 * health_score + 0.10 * richness_score + 0.15 * avg_support
         evidence_factor = 0.55 + 0.45 * min(vote_weight / max(max_active_vote_weight, 0.5), 1.0)
         confidence = round(100 * max(0.0, min(1.0, quality * evidence_factor)))
-        evaluations.append(CandidateEvaluation(match=match, support_votes=support_votes, vote_sources=vote_sources, support_weight=round(support_weight, 3), vote_weight=round(vote_weight, 3), support_families=support_families, weighted_ratio=round(weighted_ratio, 4), avg_support_agreement=round(avg_support, 4), health_score=round(health_score, 4), health=health_by_source[match.source.spec.key], confidence=confidence, comparisons=comparisons))
+        evaluations.append(CandidateEvaluation(
+            match=match, support_votes=support_votes, vote_sources=vote_sources,
+            support_weight=round(support_weight, 3), vote_weight=round(vote_weight, 3),
+            support_families=support_families, weighted_ratio=round(weighted_ratio, 4),
+            avg_support_agreement=round(avg_support, 4), health_score=round(health_score, 4),
+            richness_score=richness_score, health=h_info, confidence=confidence, comparisons=comparisons
+        ))
 
-    def rank(ev: CandidateEvaluation) -> tuple[int, float, int, float, float, float, float, int]:
+    def rank(ev: CandidateEvaluation) -> tuple:
         has_programmes = int(bool(ev.match.source.rows.get(ev.match.channel_id)))
-        return (has_programmes, ev.support_weight, ev.support_families, ev.weighted_ratio, ev.avg_support_agreement, ev.health_score, ev.match.match_score, -ev.match.source.spec.priority)
+        fut_h = float(ev.health.get("future_hours", 0.0))
+        # REGRA DE OURO: Uma fonte com grade saudável (>= 18h futuras e health >= 0.65) SEMPRE vence fontes curtas (como TV Map de 3h)!
+        is_healthy_full_day = int(fut_h >= 18.0 and ev.health_score >= 0.65)
+        # Agrupa support_weight em faixas de 1.5 para que pequenas diferenças não impeçam uma fonte muito mais rica/completa de vencer
+        consensus_tier = round(ev.support_weight / 1.5)
+        return (
+            has_programmes,
+            is_healthy_full_day,
+            consensus_tier,
+            round(ev.health_score, 2),
+            round(ev.richness_score, 2),
+            ev.support_weight,
+            ev.avg_support_agreement,
+            -ev.match.source.spec.priority,
+        )
 
     evaluations.sort(key=rank, reverse=True)
     return evaluations[0], evaluations
@@ -688,7 +831,7 @@ def make_validation(entry: dict[str, object], chosen: CandidateEvaluation, all_e
 
     first_by_priority = min(all_evaluations, key=lambda ev: ev.match.source.spec.priority) if all_evaluations else chosen
     switched = first_by_priority.match.source is not chosen.match.source
-    if switched: warnings.append(f"fonte base alterada de {first_by_priority.match.source.label} para {chosen.match.source.label} por maior consenso")
+    if switched: warnings.append(f"fonte base alterada de {first_by_priority.match.source.label} para {chosen.match.source.label} por maior consenso/qualidade")
 
     if chosen.support_families >= 3 and chosen.confidence >= 75: status = "ok"
     elif chosen.confidence >= 55 and chosen.support_families >= 2: status = "atencao"
@@ -696,7 +839,16 @@ def make_validation(entry: dict[str, object], chosen: CandidateEvaluation, all_e
     if float(health["score"]) < 0.45: status = "suspeito"
 
     candidates = [
-        {"source": ev.match.source.label, "source_key": ev.match.source.spec.key, "channel_id": ev.match.channel_id, "match_method": ev.match.method, "match_score": round(ev.match.match_score, 4), "confidence": ev.confidence, "health_score": ev.health_score}
+        {
+            "source": ev.match.source.label,
+            "source_key": ev.match.source.spec.key,
+            "channel_id": ev.match.channel_id,
+            "match_method": ev.match.method,
+            "match_score": round(ev.match.match_score, 4),
+            "confidence": ev.confidence,
+            "health_score": ev.health_score,
+            "richness_score": ev.richness_score,
+        }
         for ev in sorted(all_evaluations, key=lambda x: x.match.source.spec.priority)
     ]
     return {
@@ -705,7 +857,7 @@ def make_validation(entry: dict[str, object], chosen: CandidateEvaluation, all_e
         "source_channel_id": chosen.match.channel_id, "status": status, "confidence": chosen.confidence,
         "warnings": warnings, "selection_changed_from_priority": switched,
         "now": serialize_now_next(health["current"]), "next": serialize_now_next(health["next"]),
-        "future_hours": health["future_hours"], "health_score": health["score"],
+        "future_hours": health["future_hours"], "health_score": health["score"], "richness_score": chosen.richness_score,
         "consensus": {"supporting_votes": chosen.support_votes, "vote_sources": chosen.vote_sources, "support_weight": chosen.support_weight, "vote_weight": chosen.vote_weight, "support_families": chosen.support_families, "weighted_ratio": chosen.weighted_ratio, "confidence": chosen.confidence},
         "cross_sources": chosen.comparisons, "candidates": candidates,
     }
@@ -778,38 +930,116 @@ def get_primary_export_ids(entry: dict[str, object]) -> list[str]:
     add_id(clean_base)
     return ids[:2]
 
+def apply_rich_metadata_to_element(el: ET.Element, meta_pool: list[dict[str, Any]]) -> None:
+    """Combina o melhor Título, Subtítulo, Temporada/Episódio e Sinopse de todas as fontes que transmitiram o programa."""
+    if not meta_pool:
+        return
+
+    base_meta = extract_program_metadata(el)
+    all_metas = [base_meta, *meta_pool]
+
+    best_sub = ""
+    best_desc = ""
+    best_season: int | None = None
+    best_episode: int | None = None
+    best_date = ""
+    merged_cats: list[str] = []
+
+    for m in all_metas:
+        if m.get("sub_title") and len(m["sub_title"]) > len(best_sub):
+            best_sub = m["sub_title"]
+        if m.get("desc") and len(m["desc"]) > len(best_desc):
+            best_desc = m["desc"]
+        if best_season is None and m.get("season") is not None:
+            best_season = m["season"]
+        if best_episode is None and m.get("episode") is not None:
+            best_episode = m["episode"]
+        if not best_date and m.get("date"):
+            best_date = m["date"]
+        for c in m.get("categories", []):
+            if c not in merged_cats:
+                merged_cats.append(c)
+
+    # Limpa o título principal caso estivesse sujo com " : Subtítulo"
+    title_node = el.find("title")
+    clean_title = base_meta["title"] or (title_node.text.strip() if title_node is not None and title_node.text else "")
+    if title_node is not None and clean_title:
+        title_node.text = clean_title
+
+    # Formata a etiqueta de Temporada/Episódio (ex: "T02 E05" ou "Ep. 12")
+    se_badge = ""
+    if best_season is not None and best_episode is not None:
+        se_badge = f"T{best_season:02d} E{best_episode:02d}"
+    elif best_episode is not None:
+        se_badge = f"Ep. {best_episode}"
+
+    # Atualiza ou cria <sub-title> (aparece logo abaixo do título em players compatíveis)
+    if best_sub and best_sub.upper() != clean_title.upper():
+        sub_node = el.find("sub-title")
+        if sub_node is None:
+            sub_node = ET.SubElement(el, "sub-title")
+        sub_node.text = f"{se_badge} - {best_sub}" if se_badge and se_badge not in best_sub else best_sub
+    elif se_badge:
+        sub_node = el.find("sub-title")
+        if sub_node is None:
+            sub_node = ET.SubElement(el, "sub-title")
+            sub_node.text = se_badge
+
+    # Constrói uma sinopse (<desc>) rica que mostra [T02 E05] e o nome do episódio direto na barra do TiviMate
+    header_parts = []
+    if se_badge and (not best_desc or se_badge.lower() not in best_desc.lower()):
+        header_parts.append(f"[{se_badge}]")
+    if best_sub and best_sub.upper() != clean_title.upper() and (not best_desc or best_sub.lower() not in best_desc.lower()):
+        header_parts.append(best_sub)
+    if best_date and (not best_desc or best_date not in best_desc):
+        header_parts.append(f"({best_date})")
+
+    prefix_str = " ".join(header_parts).strip()
+    if prefix_str and best_desc:
+        final_desc = f"{prefix_str} — {best_desc}"
+    elif prefix_str:
+        final_desc = prefix_str
+    else:
+        final_desc = best_desc
+
+    if final_desc:
+        desc_node = el.find("desc")
+        if desc_node is None:
+            desc_node = ET.SubElement(el, "desc")
+        desc_node.text = final_desc
+
+    # Adiciona tags <episode-num> nos padrões xmltv_ns e onscreen
+    if best_season is not None or best_episode is not None:
+        for old_ep in list(el.findall("episode-num")):
+            el.remove(old_ep)
+        s_idx = (best_season - 1) if (best_season and best_season > 0) else 0
+        e_idx = (best_episode - 1) if (best_episode and best_episode > 0) else 0
+        ep_ns = ET.SubElement(el, "episode-num", {"system": "xmltv_ns"})
+        ep_ns.text = f"{s_idx}.{e_idx}."
+        if se_badge:
+            ep_on = ET.SubElement(el, "episode-num", {"system": "onscreen"})
+            ep_on.text = se_badge
+
 def stitch_multi_source_schedule(
     all_evaluations: list[CandidateEvaluation], target_channel_id: str, cutoff: datetime, max_future: datetime, overrides: dict[str, object]
 ) -> list[ET.Element]:
-    """Costura programas de múltiplas fontes preenchendo qualquer buraco (>= 10 min) sem retalhar filmes."""
+    """Costura programas de múltiplas fontes preenchendo buracos e fundindo informações de episódios/séries."""
     if not all_evaluations: return []
 
     leader_ev = all_evaluations[0]
     shift_by_source_key: dict[str, int] = {leader_ev.match.source.spec.key: 0}
     for comp in leader_ev.comparisons:
         other_key = str(comp.get("other_source_key", ""))
-        # Se a fonte secundária tiver deslocamento de fuso detectado em relação à líder, corrige!
         if comp.get("agreement") and float(comp["agreement"]) >= 0.50:
             shift_by_source_key[other_key] = int(comp.get("detected_shift") or 0)
 
-    best_descriptions: dict[str, str] = {}
-    for ev in all_evaluations:
-        for prog_row in ev.match.source.rows.get(ev.match.channel_id, []):
-            desc_node = prog_row.element.find("desc")
-            if desc_node is not None and desc_node.text:
-                desc_text = desc_node.text.strip()
-                norm_title = prog_row.normalized_title
-                if norm_title and len(desc_text) > len(best_descriptions.get(norm_title, "")):
-                    best_descriptions[norm_title] = desc_text
-
-    merged_timeline: list[dict[str, Any]] = []
-    MIN_GAP_SECONDS = 10 * 60  # Qualquer buraco de 10+ minutos será preenchido pelas demais fontes
-    MAX_EDGE_TRIM_SECONDS = 15 * 60  # Permite aparar até 15 min de borda para encaixar um programa inteiro num buraco
+    # Coleta todos os programas de todas as fontes já com fuso alinhado e metadados extraídos
+    all_aligned_progs_by_source: list[list[dict[str, Any]]] = []
+    metadata_by_norm_title: dict[str, list[dict[str, Any]]] = defaultdict(list)
 
     for ev in all_evaluations:
         src = ev.match.source
         cid = ev.match.channel_id
-        # IMPORTANTE: Usa `rows` (já validado, ordenado e com `stop` corrigido) em vez de `programs` cru!
         fixed_rows = src.rows.get(cid, [])
         if not fixed_rows: continue
 
@@ -832,22 +1062,32 @@ def stitch_multi_source_schedule(
                     sp_dt = next_s
             if sp_dt <= cutoff or s_dt >= max_future:
                 continue
-            cleaned_source_progs.append({
+
+            meta = extract_program_metadata(row.element)
+            prog_item = {
                 "start": s_dt,
                 "stop": sp_dt,
                 "el": row.element,
                 "norm_title": row.normalized_title,
-            })
+                "meta": meta,
+            }
+            cleaned_source_progs.append(prog_item)
+            if row.normalized_title:
+                metadata_by_norm_title[row.normalized_title].append(meta)
 
-        if not cleaned_source_progs:
-            continue
+        if cleaned_source_progs:
+            all_aligned_progs_by_source.append(cleaned_source_progs)
 
-        if not merged_timeline:
-            merged_timeline = cleaned_source_progs
-            merged_timeline.sort(key=lambda x: x["start"])
-            continue
+    if not all_aligned_progs_by_source:
+        return []
 
-        # Preenche buracos reais na linha do tempo usando programas completos desta fonte secundária
+    merged_timeline: list[dict[str, Any]] = list(all_aligned_progs_by_source[0])
+    merged_timeline.sort(key=lambda x: x["start"])
+
+    MIN_GAP_SECONDS = 10 * 60
+    MAX_EDGE_TRIM_SECONDS = 15 * 60
+
+    for cleaned_source_progs in all_aligned_progs_by_source[1:]:
         added_any = False
         for cand in cleaned_source_progs:
             c_start, c_stop = cand["start"], cand["stop"]
@@ -855,43 +1095,38 @@ def stitch_multi_source_schedule(
             if c_dur < 300:
                 continue
 
-            # Verifica com quais programas já existentes este candidato colide
             overlapping = [
                 ex for ex in merged_timeline
                 if ex["stop"] > c_start and ex["start"] < c_stop
             ]
 
             if not overlapping:
-                # Buraco totalmente livre (ex: 22h às 00h vazio na fonte principal)! Encaixa direto.
                 merged_timeline.append(copy.deepcopy(cand))
                 added_any = True
                 continue
 
-            # Se colidir apenas nas pontinhas (ex: programa anterior acabou 22h05 e o filme da fonte 2 começa 22h00)
-            # calcula o maior espaço livre dentro da janela [c_start, c_stop]
             overlapping.sort(key=lambda x: x["start"])
-            free_Cursor = c_start
+            free_cursor = c_start
             best_gap = None
             for ex in overlapping:
-                if ex["start"] > free_Cursor:
-                    gap_sec = (ex["start"] - free_Cursor).total_seconds()
+                if ex["start"] > free_cursor:
+                    gap_sec = (ex["start"] - free_cursor).total_seconds()
                     if gap_sec >= MIN_GAP_SECONDS:
                         if best_gap is None or gap_sec > (best_gap[1] - best_gap[0]).total_seconds():
-                            best_gap = (free_Cursor, ex["start"])
-                if ex["stop"] > free_Cursor:
-                    free_Cursor = ex["stop"]
-            if c_stop > free_Cursor:
-                gap_sec = (c_stop - free_Cursor).total_seconds()
+                            best_gap = (free_cursor, ex["start"])
+                if ex["stop"] > free_cursor:
+                    free_cursor = ex["stop"]
+            if c_stop > free_cursor:
+                gap_sec = (c_stop - free_cursor).total_seconds()
                 if gap_sec >= MIN_GAP_SECONDS:
                     if best_gap is None or gap_sec > (best_gap[1] - best_gap[0]).total_seconds():
-                        best_gap = (free_Cursor, c_stop)
+                        best_gap = (free_cursor, c_stop)
 
             if best_gap is not None:
                 g_start, g_stop = best_gap
                 gap_dur = (g_stop - g_start).total_seconds()
                 left_trim = (g_start - c_start).total_seconds()
                 right_trim = (c_stop - g_stop).total_seconds()
-                # Só encaixa se preservar pelo menos 70% do programa original OU se o corte de borda for <= 15 min
                 if (gap_dur / c_dur) >= 0.70 or (left_trim <= MAX_EDGE_TRIM_SECONDS and right_trim <= MAX_EDGE_TRIM_SECONDS):
                     new_cand = copy.deepcopy(cand)
                     new_cand["start"] = g_start
@@ -916,15 +1151,22 @@ def stitch_multi_source_schedule(
         el.attrib["start"] = format_xmltv_datetime(s_dt)
         el.attrib["stop"] = format_xmltv_datetime(sp_dt)
         
-        title_node = el.find("title")
-        if title_node is not None and title_node.text:
-            norm_title = normalize_programme_title(title_node.text)
-            best_desc = best_descriptions.get(norm_title)
-            if best_desc:
-                desc_node = el.find("desc")
-                if desc_node is None: desc_node = ET.SubElement(el, "desc")
-                desc_node.text = best_desc
+        norm_title = prog.get("norm_title", "")
+        # Busca programas de outras fontes que passam no MESMO horário (+-25 min) e têm o mesmo título
+        matching_time_metas: list[dict[str, Any]] = []
+        for src_progs in all_aligned_progs_by_source:
+            for other_p in src_progs:
+                if other_p["norm_title"] == norm_title and abs((other_p["start"] - s_dt).total_seconds()) <= 25 * 60:
+                    matching_time_metas.append(other_p["meta"])
 
+        # Se não achou pelo horário exato (ex: reprise), usa descrições gerais do mesmo título
+        if not matching_time_metas and norm_title in metadata_by_norm_title:
+            matching_time_metas = [
+                {"title": m["title"], "sub_title": "", "desc": m["desc"], "season": None, "episode": None, "categories": m["categories"], "date": m["date"]}
+                for m in metadata_by_norm_title[norm_title]
+            ]
+
+        apply_rich_metadata_to_element(el, matching_time_metas)
         final_elements.append(el)
     return final_elements
 
@@ -963,7 +1205,7 @@ def write_epg_stream(
                 gz.write(data)
                 if plain is not None: plain.write(data)
 
-            generator = "EPG Universal Otimizado (Costura Anti-Buracos)"
+            generator = "EPG Universal Otimizado (Séries/Episódios + Anti-Buracos)"
             source_name = "Consolidado Inteligente de Múltiplas Fontes"
             emit((f"<?xml version='1.0' encoding='utf-8'?>\n<tv generator-info-name={quoteattr(generator)} source-info-name={quoteattr(source_name)}>\n").encode("utf-8"))
 
@@ -1008,7 +1250,7 @@ def write_epg_stream(
     return programme_count, len(xml_id_to_data)
 
 def main() -> None:
-    print("Iniciando geração de EPG (Costura Inteligente Anti-Buracos + Ultra Compacto)...")
+    print("Iniciando geração de EPG (Balanceamento Recalibrado + Temporada/Episódio + Anti-Buracos)...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -1127,9 +1369,12 @@ def main() -> None:
             print("Lendo Espelho de Segurança...")
             espelho_data = json.loads(ESPELHO_PATH.read_text("utf-8"))
             for ch in espelho_data.get("channels", []):
+                ch_name = str(ch.get("name", "")).strip()
+                if re.search(r'\bS\d{1,3}\s*E\d{1,3}\b|\bT\d{1,3}\s*EP?\d{1,3}\b|\b24HS?\b|^24\s*H\b', ch_name.upper()):
+                    continue
                 merge_channel_record(
                     ch_id=str(ch.get("id", "")).strip(),
-                    name=str(ch.get("name", "")).strip(),
+                    name=ch_name,
                     aliases=ch.get("aliases", []) or [],
                     tvg_ids=ch.get("tvg_ids_to_export", []) or [],
                     comp_ids=ch.get("compatibility_ids", []) or [],
@@ -1201,9 +1446,6 @@ def main() -> None:
         entries.append(v)
         
     print(f"\nCatálogo unificado pronto: {len(entries)} emissoras base únicas.")
-        
-    espelho_to_save = {"updated_at": datetime.now(timezone.utc).isoformat(), "channels": entries}
-    (OUTPUT_DIR / "espelho.json").write_text(json.dumps(espelho_to_save, ensure_ascii=False, indent=2), "utf-8")
 
     try: overrides = json.loads(OVERRIDES_PATH.read_text("utf-8")) if OVERRIDES_PATH.exists() else {}
     except Exception: overrides = {}
@@ -1271,6 +1513,12 @@ def main() -> None:
         report_rows.append({"target_id": target_id, "name": visible_name, "status": "matched", "source": chosen.match.source.label, "source_key": chosen.match.source.spec.key, "source_channel_id": chosen.match.channel_id, "method": chosen.match.method, "confidence": chosen.confidence, "changed_from_first_available": changed, "matched_sources_count": len(evaluations)})
         validations.append(make_validation(entry, chosen, evaluations, now))
 
+    # Salva no espelho APENAS os canais válidos ou que deram match (limpa os 3400 VODs antigos do espelho!)
+    matched_ids = {str(e.get("id", "")) for e, _, _, _ in selected}
+    clean_espelho_entries = [e for e in entries if str(e.get("id", "")) in matched_ids or len(entries) <= 1200]
+    espelho_to_save = {"updated_at": datetime.now(timezone.utc).isoformat(), "channels": clean_espelho_entries}
+    (OUTPUT_DIR / "espelho.json").write_text(json.dumps(espelho_to_save, ensure_ascii=False, indent=2), "utf-8")
+
     timings["matching_consenso_validacao"] = round(time.perf_counter() - stage_start, 3)
 
     stage_start = time.perf_counter()
@@ -1291,7 +1539,7 @@ def main() -> None:
     (OUTPUT_DIR / "validation.json").write_text(json.dumps({"generated_at": now.isoformat(), "active_sources": [s.label for s in active_sources], "summary": counts, "channels": validations}, ensure_ascii=False, indent=2) + "\n", "utf-8")
 
     report_md = [
-        "# Relatório do EPG Universal — Costura Anti-Buracos", "",
+        "# Relatório do EPG Universal — Alta Precisão e Metadados de Séries", "",
         f"- Emissoras base consolidadas: **{counts['playlist_channels']}**",
         f"- Emissoras com grade encontrada: **{counts['matched']}**",
         f"- Canais XML gerados: **{counts['exported_ids']}**",
@@ -1310,7 +1558,7 @@ def main() -> None:
         val_md.append(f"- **{v['name']}** ({v['source']}): Agora **{now_title}** - Confiança **{v['confidence']}%**")
     (OUTPUT_DIR / "validation.md").write_text("\n".join(val_md) + "\n", "utf-8")
 
-    print(f"Sucesso! EPG gerado com {programme_count} programas em {ids_count} canais base.")
+    print(f"Sucesso! EPG gerado com {programme_count} programas enriquecidos em {ids_count} canais base.")
 
 if __name__ == "__main__":
     main()
