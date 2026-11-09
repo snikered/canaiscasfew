@@ -1,12 +1,4 @@
 #!/usr/bin/env python3
-"""EPG Universal Consolidado — Blindado contra TVG-IDs errados nas listas M3U
-- Bloqueia TVG-IDs envenenados nos servidores M3U (ex: Cartoonito com tvg-id="AandE.br" ou "agromais.br",
-  HBO com "HBO2.br", RedeTV com "SBT.br", Jovem Pan com "globonews.br"), forçando o player a casar pelo nome exato!
-- Gera todas as variações de nomes das listas M3U (incluindo sufixos [1], [2], [3], ², [H265]) para casamento 100% automático.
-- Valida dígitos nos source_ids do dicionário (impede ESPN 2 de puxar Espn.br ou HBO de puxar HBO2.br).
-- Formato Filmes: "2015 Livre Comédia/Família. Sinopse..."
-- Formato Séries: "2019 14 Anos Drama/Crime. T02 E05 - Subtítulo. Sinopse..."
-"""
 from __future__ import annotations
 
 import copy
