@@ -18,6 +18,7 @@ jobs:
       OUTPUT_PAST_HOURS: "6"
       OUTPUT_FUTURE_HOURS: "72"
       CHANNELS_FILE: "channels.json"
+      MAX_WEB_LOOKUPS_PER_RUN: "200"
 
     steps:
       - name: Baixar o repositório
@@ -36,7 +37,7 @@ jobs:
       - name: Rodar Extratores (Em Paralelo)
         run: |
           set -e
-          for script in guiadetv.py meuguia.py tvmap.py tvplus.py mitv.py urbantv.py; do
+          for script in guiadetv.py meuguia.py tvmap.py tvplus.py mitv.py; do
             if [ -f "$script" ]; then
               python3 "$script" &
             fi
@@ -50,21 +51,27 @@ jobs:
             python3 compile_dictionary.py
           fi
 
-      - name: Recuperar Espelho (Cache de Segurança)
+      - name: Recuperar Espelho e Cache de Metadados (da branch epg)
         run: |
           git fetch origin epg:epg 2>/dev/null || true
           git checkout epg -- espelho.json 2>/dev/null || true
+          git checkout epg -- metadata_cache.json 2>/dev/null || true
 
       - name: Gerar EPG Costurado e Consolidado
         run: |
           python3 merge_epg.py
 
-      - name: Publicar EPG e Espelho na branch epg
+      - name: Publicar EPG, Espelho e Cache de Metadados na branch epg
         run: |
           set -e
           if [ ! -f "output/epg.xml.gz" ]; then
             echo "Erro: output/epg.xml.gz não foi gerado!"
             exit 1
+          fi
+          
+          # Copia o metadata_cache.json gerado para a pasta output antes de limpar a árvore
+          if [ -f "metadata_cache.json" ]; then
+            cp metadata_cache.json output/metadata_cache.json
           fi
           
           git config user.name "github-actions[bot]"
@@ -79,10 +86,16 @@ jobs:
           cp output/report.md report.md
           cp output/validation.json validation.json
           cp output/validation.md validation.md
+          if [ -f "output/metadata_cache.json" ]; then
+            cp output/metadata_cache.json metadata_cache.json
+          fi
           
           echo "# EPG Consolidado" > README.md
           echo "Atualizado automaticamente via GitHub Actions." >> README.md
           
           git add epg.xml.gz espelho.json report.json report.md validation.json validation.md README.md
-          git commit -m "Atualiza EPG multi-fonte e Espelho"
+          if [ -f "metadata_cache.json" ]; then
+            git add metadata_cache.json
+          fi
+          git commit -m "Atualiza EPG multi-fonte, Espelho e Cache de Metadados"
           git push --force origin HEAD:epg
