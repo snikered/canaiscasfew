@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""EPG Universal Consolidado — Alta Precisão de Horários + Riqueza de Metadados (Séries/Episódios)
-- Remove UrbanTV e adiciona Mais SBT (maissbt.xml).
-- Corrige bug da matriz pairwise que fazia o TV Map (3h de guia) vencer fontes de 72h.
-- Soma metadados de todas as fontes (Temporada, Episódio, Subtítulo, Sinopse, Categorias).
+"""EPG Universal Consolidado — Alta Precisão de Horários + Metadados Estritos para Séries
+- Remove "E1" falso de Filmes, Esportes e Jornalismo.
+- Limpa tags <episode-num> indevidas que fazem o TiviMate exibir E1 em filmes.
+- Mantém Temporada e Episódio (Txx Exx) exclusivamente quando for Série/Episódio real.
 """
 from __future__ import annotations
 
@@ -65,10 +65,6 @@ IPTV_USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
 ]
 
-# Balanceamento recalibrado:
-# - Fontes locais e operadoras com horários precisos e metadados ricos ganham peso equilibrado.
-# - TV Map reduzido para 1.0 (excelente validador de horário atual, mas tem grade curta de ~4h).
-# - UrbanTV removido; Mais SBT adicionado.
 EPG_SOURCES_CONFIG = [
     ("GuiaDeTV", "epg_guiadetv.xml", "guiadetv", 2.5),
     ("Meu Guia", "epg_meuguia.xml", "meuguia", 2.5),
@@ -104,6 +100,91 @@ PLACEHOLDER_TITLES = {
     "OFF AIR",
     "ENCERRAMENTO",
 }
+
+# Palavras-chave de canais que NUNCA devem receber numeração de Temporada/Episódio (Filmes Puros, Esportes e Notícias)
+NON_SERIES_CHANNEL_KEYWORDS = (
+    "TELECINE",
+    "MEGAPIX",
+    "CINEMAX",
+    "PARAMOUNT",
+    "STUDIO UNIVERSAL",
+    "UNIVERSAL STUDIO",
+    "PRIME BOX",
+    "CINEBRASIL",
+    "CURTA",
+    "SPORTV",
+    "ESPN",
+    "PREMIERE",
+    "COMBATE",
+    "BANDSPORTS",
+    "BAND SPORTS",
+    "FOX SPORTS",
+    "TNT SPORTS",
+    "CAZETV",
+    "XSPORTS",
+    "GLOBO NEWS",
+    "GLOBONEWS",
+    "CNN",
+    "JOVEM PAN",
+    "JP NEWS",
+    "RECORD NEWS",
+    "BAND NEWS",
+    "BANDNEWS",
+    "SBT NEWS",
+    "BM&C",
+    "TV SENADO",
+    "TV CAMARA",
+    "TV JUSTICA",
+    "AGROMAIS",
+    "CANAL RURAL",
+    "CANAL DO BOI",
+    "TERRA VIVA",
+)
+
+# Categorias XMLTV que identificam Filmes, Esportes ou Telejornais (onde temporada/episódio nunca deve ser exibido)
+NON_SERIES_CATEGORY_KEYWORDS = (
+    "FILME",
+    "MOVIE",
+    "CINEMA",
+    "LONGA",
+    "FEATURE FILM",
+    "ACAO",
+    "AÇÃO",
+    "COMEDIA",
+    "COMÉDIA",
+    "DRAMA",
+    "SUSPENSE",
+    "TERROR",
+    "FICCAO",
+    "FICÇÃO",
+    "ROMANCE",
+    "AVENTURA",
+    "FAROESTE",
+    "ESPORTE",
+    "SPORT",
+    "FUTEBOL",
+    "SOCCER",
+    "JORNALISMO",
+    "NOTICIAS",
+    "NOTÍCIAS",
+    "NEWS",
+    "TELEJORNAL",
+)
+
+SERIES_CATEGORY_KEYWORDS = (
+    "SERIE",
+    "SÉRIE",
+    "SERIES",
+    "SITCOM",
+    "NOVELA",
+    "TELENOVELA",
+    "MINISSERIE",
+    "MINISSÉRIE",
+    " EPISODIO",
+    " EPISÓDIO",
+    "ANIME",
+    "DESENHO",
+)
 
 @dataclass(frozen=True)
 class SourceSpec:
@@ -321,18 +402,52 @@ def download_to_temp_file(url: str, attempts: int = 4) -> Path:
     raise RuntimeError(f"Falha ao baixar ({last_error})")
 
 # =====================================================================
-# EXTRAÇÃO E ENRIQUECIMENTO DE METADADOS (SÉRIES, TEMPORADAS, EPISÓDIOS)
+# EXTRAÇÃO E ENRIQUECIMENTO DE METADADOS (ESTRITO PARA SÉRIES REAIS)
 # =====================================================================
-_RE_XMLTV_NS = re.compile(r"^\s*(\d+)?\s*\.\s*(\d+)?\s*\.")
+_RE_XMLTV_NS = re.compile(r"^\s*(\d+)\s*\.\s*(\d+)\s*\.")
+# Exige SEMPRE Temporada + Episódio explícitos (nunca aceita "E1" solto sem temporada ou sem "Ep.")
 _RE_SE_PATTERNS = [
     re.compile(r"\bS(\d{1,2})\s*[:\-]?\s*E(?:P)?(\d{1,3})\b", re.IGNORECASE),
-    re.compile(r"\bT(?:EMP(?:ORADA)?)?\s*\.?\s*(\d{1,2})\s*[\-:/, ]*\s*E(?:P(?:IS[OÓ]DIO)?)?\s*\.?\s*(\d{1,3})\b", re.IGNORECASE),
-    re.compile(r"\b(\d{1,2})\s*[ªº]?\s*T(?:EMP(?:ORADA)?)?\s*[\-:/, ]*\s*E(?:P(?:IS[OÓ]DIO)?)?\s*\.?\s*(\d{1,3})\b", re.IGNORECASE),
+    re.compile(r"\bT(?:EMP(?:ORADA)?)?\s*\.?\s*(\d{1,2})\s*[\-:/, ]+\s*E(?:P(?:IS[OÓ]DIO)?)?\s*\.?\s*(\d{1,3})\b", re.IGNORECASE),
+    re.compile(r"\b(\d{1,2})\s*[ªº]\s*T(?:EMP(?:ORADA)?)?\s*[\-:/, ]*\s*E(?:P(?:IS[OÓ]DIO)?)?\s*\.?\s*(\d{1,3})\b", re.IGNORECASE),
 ]
-_RE_EP_ONLY = re.compile(r"\bE(?:P(?:IS[OÓ]DIO)?)?\s*\.?\s*(\d{1,4})\b", re.IGNORECASE)
+# Episódio sem temporada só é aceito se estiver escrito explicitamente "Ep." ou "Episódio" (nunca apenas a letra "E")
+_RE_EXPLICIT_EPISODE = re.compile(r"\b(?:EPIS[OÓ]DIO|EP\.)\s*(\d{1,3})\b", re.IGNORECASE)
+# Remove sufixos indevidos como " - E1", "(E1)", "[E1]" que algumas fontes colocam em títulos de filmes
+_RE_TRAILING_FAKE_EP = re.compile(r"(?:\s*[\-\|:]\s*|\s+)(?:\[|\()?E(?:P)?\.?\s*0*1(?:\]|\))?\s*$", re.IGNORECASE)
 
-def extract_program_metadata(el: ET.Element) -> dict[str, Any]:
-    """Extrai título, subtítulo, descrição, temporada, episódio, categorias e ano de um <programme>."""
+def is_non_series_channel(channel_name: str) -> bool:
+    norm_ch = normalizar_canal(channel_name)
+    return any(kw in norm_ch for kw in NON_SERIES_CHANNEL_KEYWORDS)
+
+def is_likely_movie_or_sport(categories: Iterable[str], desc: str, duration_minutes: float, channel_name: str) -> bool:
+    """Identifica se o programa é Filme, Esporte ou Jornalismo para bloquear qualquer tag de episódio."""
+    if is_non_series_channel(channel_name):
+        return True
+
+    cats_upper = " | ".join(c.upper() for c in categories if c)
+    desc_upper = (desc or "").upper()
+
+    # Se a categoria disser explicitamente que é Série/Novela/Sitcom/Desenho, permite episódio
+    if any(skw in cats_upper for skw in SERIES_CATEGORY_KEYWORDS):
+        return False
+
+    # Se a categoria disser que é Filme, Cinema, Longa, Esporte ou Notícias -> Bloqueia episódio!
+    if any(mkw in cats_upper for mkw in NON_SERIES_CATEGORY_KEYWORDS):
+        return True
+
+    # Se a sinopse começa com ficha técnica de filme ou menciona direção/elenco de longa-metragem e dura >= 80 min
+    if duration_minutes >= 85:
+        if any(w in desc_upper for w in ("DIREÇÃO:", "DIRECAO:", "SINOPSE:", "LONGA-METRAGEM", "FILME DE ")):
+            return True
+        # Programas com mais de 85 minutos sem menção a "série/temporada/episódio/capítulo" na categoria ou descrição são filmes/eventos
+        if not any(w in desc_upper for w in ("TEMPORADA", "EPISÓDIO", "EPISODIO", "SÉRIE", "SERIE", "CAPÍTULO", "CAPITULO")):
+            return True
+
+    return False
+
+def extract_program_metadata(el: ET.Element, channel_name: str = "", duration_minutes: float = 0.0) -> dict[str, Any]:
+    """Extrai metadados garantindo que Filmes nunca recebam Temporada/Episódio falsos."""
     title = ""
     sub_title = ""
     desc = ""
@@ -361,28 +476,31 @@ def extract_program_metadata(el: ET.Element) -> dict[str, Any]:
             if sys_attr == "xmltv_ns":
                 m = _RE_XMLTV_NS.match(txt)
                 if m:
-                    if m.group(1) is not None:
-                        season = int(m.group(1)) + 1
-                    if m.group(2) is not None:
-                        episode = int(m.group(2)) + 1
+                    s_val = int(m.group(1)) + 1
+                    e_val = int(m.group(2)) + 1
+                    # Ignora "0.0." (S1E1 genérico que fontes colocam em filmes) a menos que a categoria confirme Série
+                    if not (s_val == 1 and e_val == 1 and "0.0." in txt):
+                        season, episode = s_val, e_val
             else:
                 for pat in _RE_SE_PATTERNS:
                     m = pat.search(txt)
                     if m:
                         season, episode = int(m.group(1)), int(m.group(2))
                         break
-                if episode is None:
-                    m_ep = _RE_EP_ONLY.search(txt)
-                    if m_ep:
-                        episode = int(m_ep.group(1))
 
     # Se o título vier com subtítulo acoplado (ex: "Duelo com Bobby Flay : Um Pouco Caipira")
     if " : " in title and not sub_title:
         parts = [p.strip() for p in title.split(" : ", 1)]
-        if len(parts) == 2 and parts[0] and parts[1] and parts[0].upper() != parts[1].upper():
-            title, sub_title = parts[0], parts[1]
+        if len(parts) == 2 and parts[0] and parts[1]:
+            if parts[0].upper() == parts[1].upper():
+                title = parts[0]
+            else:
+                title, sub_title = parts[0], parts[1]
 
-    # Busca temporada e episódio via Regex no título, subtítulo e descrição caso não tenha tag <episode-num>
+    # Limpa "E1" falso no final do título se houver
+    title = _RE_TRAILING_FAKE_EP.sub("", title).strip()
+
+    # Busca temporada e episódio via Regex estrita (SxxExx ou Txx Exx)
     if season is None and episode is None:
         search_blob = f"{title} | {sub_title} | {desc}"
         for pat in _RE_SE_PATTERNS:
@@ -393,18 +511,25 @@ def extract_program_metadata(el: ET.Element) -> dict[str, Any]:
                     season, episode = s_val, e_val
                     break
         if episode is None:
-            m_ep = _RE_EP_ONLY.search(f"{sub_title} | {desc}")
+            m_ep = _RE_EXPLICIT_EPISODE.search(f"{sub_title} | {desc}")
             if m_ep:
                 e_val = int(m_ep.group(1))
-                if 0 < e_val <= 2500:
+                if 0 < e_val <= 1500:
                     episode = e_val
 
-    # Limpa códigos S01E02 repetidos do subtítulo
-    if sub_title:
-        for pat in _RE_SE_PATTERNS:
+    # Verifica se é Filme, Esporte ou Jornalismo: se for, ZERA temporada e episódio!
+    if is_likely_movie_or_sport(categories, desc, duration_minutes, channel_name):
+        season = None
+        episode = None
+
+    # Limpa códigos S01E02 repetidos do título e do subtítulo
+    for pat in _RE_SE_PATTERNS:
+        title = pat.sub("", title).strip(" -:|")
+        if sub_title:
             sub_title = pat.sub("", sub_title).strip(" -:|")
-        if sub_title.upper() == title.upper():
-            sub_title = ""
+
+    if sub_title and (sub_title.upper() == title.upper() or _RE_TRAILING_FAKE_EP.fullmatch(sub_title)):
+        sub_title = ""
 
     return {
         "title": title,
@@ -471,7 +596,6 @@ def read_source_from_file(spec: SourceSpec, file_path: Path) -> EpgSource:
                 if next_start and next_start > row.start:
                     stop = min(next_start, row.start + timedelta(hours=3))
                 else:
-                    # Se for o último programa da fonte e não tiver fim (ex: TV Map), dá apenas 45 min para não bloquear a noite
                     stop = row.start + timedelta(minutes=45)
             elif next_start and stop > next_start:
                 stop = next_start
@@ -603,7 +727,6 @@ def programme_title(programme: ET.Element | None) -> str:
 def normalize_programme_title(value: str) -> str:
     value = unicodedata.normalize("NFKD", value or "")
     value = "".join(ch for ch in value if not unicodedata.combining(ch)).upper()
-    # Se tiver subtítulo separado por " : ", compara apenas o título base da série/filme para não penalizar fontes ricas!
     if " : " in value:
         value = value.split(" : ", 1)[0]
     value = re.sub(r"\b(?:HD|FHD|AO VIVO|LIVE|ESTREIA|INEDITO|INÉDITO|VT)\b", " ", value)
@@ -693,15 +816,15 @@ def schedule_health(source: EpgSource, channel_id: str, now: datetime) -> dict[s
             near_covered_sec += (e - s).total_seconds()
     near_coverage_ratio = min(1.0, near_covered_sec / (24.0 * 3600.0))
 
-    # Calcula a Riqueza de Metadados (Quantos programas têm Temporada/Episódio, Subtítulo e Sinopse detalhada)
     sample_rows = near_rows[:35] if near_rows else rows[:35]
     rich_points = 0.0
     for r in sample_rows:
-        meta = extract_program_metadata(r.element)
+        dur_m = (r.stop - r.start).total_seconds() / 60.0
+        meta = extract_program_metadata(r.element, channel_id, dur_m)
         pts = 0.0
-        if meta["desc"] and len(meta["desc"]) >= 30: pts += 0.45
+        if meta["desc"] and len(meta["desc"]) >= 30: pts += 0.55
         if meta["sub_title"]: pts += 0.25
-        if meta["season"] is not None or meta["episode"] is not None: pts += 0.30
+        if meta["season"] is not None or meta["episode"] is not None: pts += 0.20
         rich_points += min(1.0, pts)
     richness_score = round(rich_points / len(sample_rows), 4) if sample_rows else 0.0
 
@@ -724,7 +847,6 @@ def schedule_health(source: EpgSource, channel_id: str, now: datetime) -> dict[s
         + (0.10 * min(len(rows) / 12.0, 1.0))
     )
     score -= min(0.35, invalid * 0.08 + overlaps * 0.02 + gaps * 0.03)
-    # Penalidade severa se a fonte tiver menos de 8 horas futuras (ex: TV Map)
     if future_hours < 8.0:
         score = min(score, 0.35)
     result = {
@@ -799,9 +921,7 @@ def evaluate_candidates(matches: list[ChannelMatch], now: datetime, max_active_v
     def rank(ev: CandidateEvaluation) -> tuple:
         has_programmes = int(bool(ev.match.source.rows.get(ev.match.channel_id)))
         fut_h = float(ev.health.get("future_hours", 0.0))
-        # REGRA DE OURO: Uma fonte com grade saudável (>= 18h futuras e health >= 0.65) SEMPRE vence fontes curtas (como TV Map de 3h)!
         is_healthy_full_day = int(fut_h >= 18.0 and ev.health_score >= 0.65)
-        # Agrupa support_weight em faixas de 1.5 para que pequenas diferenças não impeçam uma fonte muito mais rica/completa de vencer
         consensus_tier = round(ev.support_weight / 1.5)
         return (
             has_programmes,
@@ -930,13 +1050,12 @@ def get_primary_export_ids(entry: dict[str, object]) -> list[str]:
     add_id(clean_base)
     return ids[:2]
 
-def apply_rich_metadata_to_element(el: ET.Element, meta_pool: list[dict[str, Any]]) -> None:
-    """Combina o melhor Título, Subtítulo, Temporada/Episódio e Sinopse de todas as fontes que transmitiram o programa."""
-    if not meta_pool:
-        return
-
-    base_meta = extract_program_metadata(el)
-    all_metas = [base_meta, *meta_pool]
+def apply_rich_metadata_to_element(
+    el: ET.Element, meta_pool: list[dict[str, Any]], channel_name: str, duration_minutes: float
+) -> None:
+    """Aplica metadados mantendo Filmes 100% limpos (sem E1) e enriquecendo apenas Séries reais."""
+    base_meta = extract_program_metadata(el, channel_name, duration_minutes)
+    all_metas = [base_meta, *(meta_pool or [])]
 
     best_sub = ""
     best_desc = ""
@@ -960,32 +1079,51 @@ def apply_rich_metadata_to_element(el: ET.Element, meta_pool: list[dict[str, Any
             if c not in merged_cats:
                 merged_cats.append(c)
 
-    # Limpa o título principal caso estivesse sujo com " : Subtítulo"
+    # Verifica com o conjunto completo de categorias e descrição se é Filme/Esporte/Jornalismo
+    is_movie_or_sport = is_likely_movie_or_sport(merged_cats, best_desc, duration_minutes, channel_name)
+    if is_movie_or_sport:
+        best_season = None
+        best_episode = None
+
+    # SEMPRE remove tags <episode-num> originais (pois fontes como Open-EPG colocam 0.0. em filmes, fazendo o TiviMate mostrar "E1")
+    for old_ep in list(el.findall("episode-num")):
+        el.remove(old_ep)
+
+    # Limpa o título principal
     title_node = el.find("title")
     clean_title = base_meta["title"] or (title_node.text.strip() if title_node is not None and title_node.text else "")
+    clean_title = _RE_TRAILING_FAKE_EP.sub("", clean_title).strip()
     if title_node is not None and clean_title:
         title_node.text = clean_title
 
-    # Formata a etiqueta de Temporada/Episódio (ex: "T02 E05" ou "Ep. 12")
+    # Só cria etiqueta de Temporada/Episódio se NÃO for filme/esporte e tiver temporada + episódio válidos
     se_badge = ""
-    if best_season is not None and best_episode is not None:
-        se_badge = f"T{best_season:02d} E{best_episode:02d}"
-    elif best_episode is not None:
-        se_badge = f"Ep. {best_episode}"
+    if not is_movie_or_sport:
+        if best_season is not None and best_episode is not None:
+            se_badge = f"T{best_season:02d} E{best_episode:02d}"
+        elif best_episode is not None and best_episode > 1:
+            se_badge = f"Ep. {best_episode}"
 
-    # Atualiza ou cria <sub-title> (aparece logo abaixo do título em players compatíveis)
-    if best_sub and best_sub.upper() != clean_title.upper():
-        sub_node = el.find("sub-title")
-        if sub_node is None:
-            sub_node = ET.SubElement(el, "sub-title")
-        sub_node.text = f"{se_badge} - {best_sub}" if se_badge and se_badge not in best_sub else best_sub
-    elif se_badge:
-        sub_node = el.find("sub-title")
-        if sub_node is None:
-            sub_node = ET.SubElement(el, "sub-title")
+    # Atualiza ou remove <sub-title> redundante
+    sub_node = el.find("sub-title")
+    if is_movie_or_sport:
+        # Em filmes, remove subtítulos que sejam apenas repetição do título ou tags falsas
+        if sub_node is not None:
+            el.remove(sub_node)
+        best_sub = ""
+    else:
+        if best_sub and best_sub.upper() != clean_title.upper():
+            if sub_node is None:
+                sub_node = ET.SubElement(el, "sub-title")
+            sub_node.text = f"{se_badge} - {best_sub}" if se_badge and se_badge not in best_sub else best_sub
+        elif se_badge:
+            if sub_node is None:
+                sub_node = ET.SubElement(el, "sub-title")
             sub_node.text = se_badge
+        elif sub_node is not None:
+            el.remove(sub_node)
 
-    # Constrói uma sinopse (<desc>) rica que mostra [T02 E05] e o nome do episódio direto na barra do TiviMate
+    # Constrói a descrição (<desc>)
     header_parts = []
     if se_badge and (not best_desc or se_badge.lower() not in best_desc.lower()):
         header_parts.append(f"[{se_badge}]")
@@ -1008,22 +1146,16 @@ def apply_rich_metadata_to_element(el: ET.Element, meta_pool: list[dict[str, Any
             desc_node = ET.SubElement(el, "desc")
         desc_node.text = final_desc
 
-    # Adiciona tags <episode-num> nos padrões xmltv_ns e onscreen
-    if best_season is not None or best_episode is not None:
-        for old_ep in list(el.findall("episode-num")):
-            el.remove(old_ep)
-        s_idx = (best_season - 1) if (best_season and best_season > 0) else 0
-        e_idx = (best_episode - 1) if (best_episode and best_episode > 0) else 0
+    # Só grava a tag <episode-num> no XML se tiver CERTEZA que é uma Série com Temporada e Episódio reais!
+    if not is_movie_or_sport and best_season is not None and best_episode is not None:
+        s_idx = max(0, best_season - 1)
+        e_idx = max(0, best_episode - 1)
         ep_ns = ET.SubElement(el, "episode-num", {"system": "xmltv_ns"})
         ep_ns.text = f"{s_idx}.{e_idx}."
-        if se_badge:
-            ep_on = ET.SubElement(el, "episode-num", {"system": "onscreen"})
-            ep_on.text = se_badge
 
 def stitch_multi_source_schedule(
-    all_evaluations: list[CandidateEvaluation], target_channel_id: str, cutoff: datetime, max_future: datetime, overrides: dict[str, object]
+    all_evaluations: list[CandidateEvaluation], target_channel_id: str, channel_name: str, cutoff: datetime, max_future: datetime, overrides: dict[str, object]
 ) -> list[ET.Element]:
-    """Costura programas de múltiplas fontes preenchendo buracos e fundindo informações de episódios/séries."""
     if not all_evaluations: return []
 
     leader_ev = all_evaluations[0]
@@ -1033,7 +1165,6 @@ def stitch_multi_source_schedule(
         if comp.get("agreement") and float(comp["agreement"]) >= 0.50:
             shift_by_source_key[other_key] = int(comp.get("detected_shift") or 0)
 
-    # Coleta todos os programas de todas as fontes já com fuso alinhado e metadados extraídos
     all_aligned_progs_by_source: list[list[dict[str, Any]]] = []
     metadata_by_norm_title: dict[str, list[dict[str, Any]]] = defaultdict(list)
 
@@ -1063,7 +1194,8 @@ def stitch_multi_source_schedule(
             if sp_dt <= cutoff or s_dt >= max_future:
                 continue
 
-            meta = extract_program_metadata(row.element)
+            dur_m = (sp_dt - s_dt).total_seconds() / 60.0
+            meta = extract_program_metadata(row.element, channel_name, dur_m)
             prog_item = {
                 "start": s_dt,
                 "stop": sp_dt,
@@ -1144,29 +1276,29 @@ def stitch_multi_source_schedule(
         s_dt, sp_dt = prog["start"], prog["stop"]
         if i + 1 < len(merged_timeline) and sp_dt > merged_timeline[i + 1]["start"]:
             sp_dt = merged_timeline[i + 1]["start"]
-        if (sp_dt - s_dt).total_seconds() < 60:
+        dur_sec = (sp_dt - s_dt).total_seconds()
+        if dur_sec < 60:
             continue
+        dur_min = dur_sec / 60.0
             
         el = copy.deepcopy(prog["el"])
         el.attrib["start"] = format_xmltv_datetime(s_dt)
         el.attrib["stop"] = format_xmltv_datetime(sp_dt)
         
         norm_title = prog.get("norm_title", "")
-        # Busca programas de outras fontes que passam no MESMO horário (+-25 min) e têm o mesmo título
         matching_time_metas: list[dict[str, Any]] = []
         for src_progs in all_aligned_progs_by_source:
             for other_p in src_progs:
                 if other_p["norm_title"] == norm_title and abs((other_p["start"] - s_dt).total_seconds()) <= 25 * 60:
                     matching_time_metas.append(other_p["meta"])
 
-        # Se não achou pelo horário exato (ex: reprise), usa descrições gerais do mesmo título
         if not matching_time_metas and norm_title in metadata_by_norm_title:
             matching_time_metas = [
                 {"title": m["title"], "sub_title": "", "desc": m["desc"], "season": None, "episode": None, "categories": m["categories"], "date": m["date"]}
                 for m in metadata_by_norm_title[norm_title]
             ]
 
-        apply_rich_metadata_to_element(el, matching_time_metas)
+        apply_rich_metadata_to_element(el, matching_time_metas, channel_name, dur_min)
         final_elements.append(el)
     return final_elements
 
@@ -1186,7 +1318,8 @@ def write_epg_stream(
     
     for entry, chosen, all_evaluations, _forced in selected:
         target_id = str(entry.get("id", ""))
-        stitched = stitch_multi_source_schedule(all_evaluations, target_id, cutoff, max_future, overrides)
+        channel_name = str(entry.get("name", target_id))
+        stitched = stitch_multi_source_schedule(all_evaluations, target_id, channel_name, cutoff, max_future, overrides)
         all_names = get_clean_aliases(entry)
         export_ids = get_primary_export_ids(entry)
         
@@ -1205,7 +1338,7 @@ def write_epg_stream(
                 gz.write(data)
                 if plain is not None: plain.write(data)
 
-            generator = "EPG Universal Otimizado (Séries/Episódios + Anti-Buracos)"
+            generator = "EPG Universal Otimizado (Filmes Limpos + Séries com TxxExx)"
             source_name = "Consolidado Inteligente de Múltiplas Fontes"
             emit((f"<?xml version='1.0' encoding='utf-8'?>\n<tv generator-info-name={quoteattr(generator)} source-info-name={quoteattr(source_name)}>\n").encode("utf-8"))
 
@@ -1250,7 +1383,7 @@ def write_epg_stream(
     return programme_count, len(xml_id_to_data)
 
 def main() -> None:
-    print("Iniciando geração de EPG (Balanceamento Recalibrado + Temporada/Episódio + Anti-Buracos)...")
+    print("Iniciando geração de EPG (Filmes Limpos sem E1 + Séries com TxxExx)...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -1513,7 +1646,6 @@ def main() -> None:
         report_rows.append({"target_id": target_id, "name": visible_name, "status": "matched", "source": chosen.match.source.label, "source_key": chosen.match.source.spec.key, "source_channel_id": chosen.match.channel_id, "method": chosen.match.method, "confidence": chosen.confidence, "changed_from_first_available": changed, "matched_sources_count": len(evaluations)})
         validations.append(make_validation(entry, chosen, evaluations, now))
 
-    # Salva no espelho APENAS os canais válidos ou que deram match (limpa os 3400 VODs antigos do espelho!)
     matched_ids = {str(e.get("id", "")) for e, _, _, _ in selected}
     clean_espelho_entries = [e for e in entries if str(e.get("id", "")) in matched_ids or len(entries) <= 1200]
     espelho_to_save = {"updated_at": datetime.now(timezone.utc).isoformat(), "channels": clean_espelho_entries}
@@ -1539,7 +1671,7 @@ def main() -> None:
     (OUTPUT_DIR / "validation.json").write_text(json.dumps({"generated_at": now.isoformat(), "active_sources": [s.label for s in active_sources], "summary": counts, "channels": validations}, ensure_ascii=False, indent=2) + "\n", "utf-8")
 
     report_md = [
-        "# Relatório do EPG Universal — Alta Precisão e Metadados de Séries", "",
+        "# Relatório do EPG Universal — Filmes Limpos & Séries Detalhadas", "",
         f"- Emissoras base consolidadas: **{counts['playlist_channels']}**",
         f"- Emissoras com grade encontrada: **{counts['matched']}**",
         f"- Canais XML gerados: **{counts['exported_ids']}**",
@@ -1558,7 +1690,7 @@ def main() -> None:
         val_md.append(f"- **{v['name']}** ({v['source']}): Agora **{now_title}** - Confiança **{v['confidence']}%**")
     (OUTPUT_DIR / "validation.md").write_text("\n".join(val_md) + "\n", "utf-8")
 
-    print(f"Sucesso! EPG gerado com {programme_count} programas enriquecidos em {ids_count} canais base.")
+    print(f"Sucesso! EPG gerado com {programme_count} programas em {ids_count} canais base.")
 
 if __name__ == "__main__":
     main()
