@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+"""EPG Universal Consolidado — Modo 100% Nome do Canal (Zero TVG-ID)
+- Ignora TOTALMENTE tvg-id, source_ids e compatibility_ids (tanto na leitura das M3U/channels.json quanto na exportação do XML).
+- O casamento entre fontes e a geração do epg.xml são feitos EXCLUSIVAMENTE pelo nome do canal.
+- Como nenhum ID ".br" ou código de provedor existe no XML, qualquer player de IPTV é forçado a casar 100% pelo nome do canal!
+- Formato Filmes: "2015 Livre Comédia/Família. Sinopse..."
+- Formato Séries: "2019 14 Anos Drama/Crime. T02 E05 - Subtítulo. Sinopse..."
+"""
 from __future__ import annotations
 
 import copy
@@ -44,8 +51,8 @@ for i in range(1, 6):
     if url and url.startswith("http"):
         M3U_URLS.append(url.strip())
 
-FUZZY_THRESHOLD = float(os.environ.get("FUZZY_THRESHOLD", "0.82"))
-FUZZY_MARGIN = float(os.environ.get("FUZZY_MARGIN", "0.03"))
+FUZZY_THRESHOLD = float(os.environ.get("FUZZY_THRESHOLD", "0.84"))
+FUZZY_MARGIN = float(os.environ.get("FUZZY_MARGIN", "0.04"))
 AGREEMENT_THRESHOLD = float(os.environ.get("AGREEMENT_THRESHOLD", "0.55"))
 MIN_COMPARABLE_PROGRAMMES = int(os.environ.get("MIN_COMPARABLE_PROGRAMMES", "3"))
 
@@ -82,21 +89,6 @@ EPG_SOURCES_CONFIG = [
     ("Genius", os.environ.get("PRIMARY_EPG_URL", "https://github.com/ferteque/Curated-M3U-Repository/raw/refs/heads/main/epg13.xml.gz"), "genius", 1.0),
     ("EPG pw BR", "https://epg.pw/xmltv/epg_BR.xml", "epgpw", 0.8),
 ]
-
-# TVG-IDs que os servidores IPTV colocaram em canais errados nas listas M3U!
-# Ao NÃO exportar esses IDs como <channel id="..."> no XML, o player ignora o tvg-id errado da M3U
-# e faz o casamento automático pelo tvg-name / nome do canal (ex: "Cartoonito HD [1]", "CARTOONITO FHD").
-POISONED_PROVIDER_TVIDS = {
-    "aande.br",        # Usado erroneamente em Cartoonito HD [1], Tooncast, TV Brasil, Record News, Music Box
-    "agromais.br",     # Usado erroneamente em CARTOONITO FHD/HD/SD, Travel Box Brazil, SBT TV Jornal Recife
-    "hbo2.br",         # Usado erroneamente em HBO HD [2]
-    "sbt.br",          # Usado erroneamente em RedeTV! HD [3]
-    "globonews.br",    # Usado erroneamente em JOVEM PAN HD/FHD e Globo Inter TV dos Vales
-    "espn.br",         # Usado erroneamente em ESPN 2 HD/SD
-    "espn2.br",        # Usado erroneamente em ESPN 3 FHD/HD/SD
-    "globorj.br",      # Usado erroneamente em dezenas de afiliadas Globo SP/Sul/Nordeste
-    "globosp.br",      # Usado erroneamente em dezenas de afiliadas Globo de outros estados
-}
 
 PLACEHOLDER_TITLES = {
     "",
@@ -384,6 +376,7 @@ CHANNEL_SYNONYMS = {
     "MUSIC BOX BRAZIL": ["MUSIC BOX BRASIL"],
     "MUSIC BOX BRASIL": ["MUSIC BOX BRAZIL"],
     "CARTOONITO": ["CARTOONITO", "BOOMERANG"],
+    "CARTOONITOS": ["CARTOONITO", "BOOMERANG"],
     "SPORTTV": ["SPORTV", "SPORTV 1", "SPORTV1"],
     "SPORTV": ["SPORTTV", "SPORTV 1", "SPORTV1"],
     "SPORTV 1": ["SPORTV", "SPORTTV", "SPORTV1"],
@@ -397,10 +390,15 @@ CHANNEL_SYNONYMS = {
     "ESPN 5": ["FOX SPORTS 2"],
     "GLOBOPLAY NOVELAS": ["VIVA", "CANAL VIVA", "GLOBO NOVELAS"],
     "VIVA": ["GLOBOPLAY NOVELAS", "CANAL VIVA", "GLOBO NOVELAS"],
-    "PREMIERE CLUBES": ["PREMIERE 1", "PREMIERE"],
-    "PREMIERE 1": ["PREMIERE CLUBES", "PREMIERE"],
+    "PREMIERE CLUBES": ["PREMIERE 1", "PREMIERE", "PREMIERE FC"],
+    "PREMIERE 1": ["PREMIERE CLUBES", "PREMIERE", "PREMIERE FC"],
+    "HISTORY": ["HISTORY CHANNEL", "THE HISTORY CHANNEL"],
     "HISTORY 2": ["H2"],
     "H2": ["HISTORY 2"],
+    "TV CULTURA": ["CULTURA"],
+    "CULTURA": ["TV CULTURA"],
+    "CANAL OFF": ["OFF"],
+    "OFF": ["CANAL OFF"],
     "INVESTIGACAO DISCOVERY": ["ID - INVESTIGACAO DISCOVERY", "ID INVESTIGACAO DISCOVERY"],
     "DISCOVERY HOME & HEALTH": ["DISCOVERY H&H", "DISCOVERY HOME AND HEALTH"],
     "TLC": ["DISCOVERY TLC"],
@@ -422,6 +420,8 @@ def normalizar_canal(nome: str) -> str:
     original_nome = html.unescape(nome)
     nome = strip_qualities_keep_case(original_nome)
     
+    nome = re.sub(r'\bCARTOONITOS\b', 'CARTOONITO', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bBOOMERANG\b', 'CARTOONITO', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bJP NEWS\b', 'JOVEM PAN NEWS', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bJOVEN PAN\b', 'JOVEM PAN', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bJOVEM PAN\b(?! NEWS)', 'JOVEM PAN NEWS', nome, flags=re.IGNORECASE)
@@ -433,7 +433,6 @@ def normalizar_canal(nome: str) -> str:
     nome = re.sub(r'\bSPORTV\s*2\b', 'SPORTV 2', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bSPORTV\s*3\b', 'SPORTV 3', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bPREMIERE\s*1\b', 'PREMIERE CLUBES', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bBOOMERANG\b', 'CARTOONITO', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bMAX PRIME\b', 'HBO POP', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bHBO\s*\+\b', 'HBO PLUS', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bH2\b', 'HISTORY 2', nome, flags=re.IGNORECASE)
@@ -474,33 +473,6 @@ def inferir_emissora_pelo_grupo(nome_normalizado: str, nome_grupo: str) -> str:
     if "BAND" in grupo and not nome_normalizado.startswith("BAND"): return f"BAND {nome_normalizado}"
     if "PREMIERE" in grupo and not nome_normalizado.startswith("PREMIERE") and len(nome_normalizado) <= 4: return f"PREMIERE {nome_normalizado}"
     return nome_normalizado
-
-def is_valid_provider_tvid(channel_name: str, tvid: str) -> bool:
-    """Valida estritamente se um tvg-id pertence mesmo ao canal e não está na lista de IDs envenenados."""
-    if not tvid or len(tvid) < 2: return False
-    if tvid.strip().lower() in POISONED_PROVIDER_TVIDS:
-        return False
-
-    tvid_clean = re.sub(r'\.(br|us|uk|pt|ar|mx|cl|co|pe|latam|int|bt)$', '', tvid.lower())
-    tvid_clean = re.sub(r'^(auto\.|yt\.|br\.|canais\.)', '', tvid_clean)
-    tvid_clean = re.sub(r'[^a-z0-9]', '', tvid_clean)
-    if not tvid_clean: return False
-
-    base_clean = normalizar_canal(channel_name)
-    candidates = [base_clean] + CHANNEL_SYNONYMS.get(base_clean, [])
-    
-    for cand in candidates:
-        cand_alnum = re.sub(r'[^a-z0-9]', '', normalize_name(cand).lower())
-        if not cand_alnum: continue
-        cand_digits = re.findall(r'\d+', cand_alnum)
-        tvid_digits = re.findall(r'\d+', tvid_clean)
-        if cand_digits != tvid_digits:
-            continue
-        if tvid_clean in cand_alnum or cand_alnum in tvid_clean:
-            return True
-        if SequenceMatcher(None, tvid_clean, cand_alnum).ratio() >= 0.72:
-            return True
-    return False
 
 def is_meaningful_programme(norm_title: str) -> bool:
     if not norm_title or len(norm_title) < 2:
@@ -894,15 +866,20 @@ def read_source_from_file(spec: SourceSpec, file_path: Path) -> EpgSource:
             display_names = [(node.text or "").strip() for node in child if local_tag(node) == "display-name" and (node.text or "").strip()]
             names[channel_id] = display_names
             norm_candidates: list[str] = []
-            for candidate in [*display_names, channel_id, normalize_source_id(channel_id)]:
+            # Indexa os nomes reais da fonte (e o ID da fonte apenas se não for numérico puro)
+            raw_candidates = list(display_names)
+            if not channel_id.isdigit():
+                clean_cid = re.sub(r'\.(br|us|uk|pt|ar|mx|cl|co|pe|latam|int|bt)$', '', channel_id, flags=re.IGNORECASE)
+                clean_cid = re.sub(r'^.*?\.\.', '', clean_cid)
+                clean_cid = clean_cid.replace('.', ' ')
+                raw_candidates.append(clean_cid)
+            for candidate in raw_candidates:
                 normalized = normalize_name(candidate)
                 if not normalized or normalized in norm_candidates: continue
                 norm_candidates.append(normalized)
                 exact_index[normalized].add(channel_id)
                 fuzzy_index[digit_signature(normalized)][normalized].add(channel_id)
             normalized_names[channel_id] = norm_candidates
-            normalized_id = normalize_source_id(channel_id)
-            if normalized_id: normalized_id_index[normalized_id].add(channel_id)
 
         elif tag == "programme":
             channel_id = child.attrib.get("channel", "").strip()
@@ -1007,7 +984,7 @@ def best_fuzzy(source: EpgSource, aliases: list[str]) -> tuple[str | None, float
     relevant_floor = FUZZY_THRESHOLD - FUZZY_MARGIN
     best_by_channel: dict[str, tuple[float, str, str]] = {}
     for alias in aliases:
-        if len(alias) < 2: continue 
+        if len(alias) < 3: continue 
         alias_counter = Counter(alias)
         bucket = source.fuzzy_index.get(digit_signature(alias), {})
         for normalized_candidate, channel_ids in bucket.items():
@@ -1021,30 +998,18 @@ def best_fuzzy(source: EpgSource, aliases: list[str]) -> tuple[str | None, float
     scored = sorted(((score, cid, a, cand) for cid, (score, a, cand) in best_by_channel.items()), reverse=True)
     best = scored[0]
     second_score = scored[1][0] if len(scored) > 1 else 0.0
-    return best[1], best[0], second_score, f"aproximação {best[0]:.3f}: {best[2]} ~ {best[3]}"
+    return best[1], best[0], second_score, f"nome aproximado {best[0]:.3f}: {best[2]} ~ {best[3]}"
 
 _RE_SPORADIC_PPV = re.compile(
     r'(\b(?:DAZN|GOAT|SPORTYNET|DISNEY\s*PLUS|DISNEY\+|PARAMOUNT\+|MAX|CONMEBOL\s*TV|PAULIST[AÃ]O|NOSSO\s*FUTEBOL)\s*[\(\[]?\s*\d+\s*[\)\]]?\b|\bPPV\s*\d+\b)',
     re.IGNORECASE
 )
 
-def find_match(source: EpgSource, aliases: list[str], source_ids: list[str] = None, channel_name: str = "") -> ChannelMatch | None:
-    allowed_digit_sigs = {digit_signature(a) for a in aliases if a}
-    for raw_sid in (source_ids or []):
-        if channel_name and not is_valid_provider_tvid(channel_name, raw_sid):
-            continue
-        norm_sid = normalize_source_id(raw_sid)
-        if not norm_sid:
-            continue
-        if allowed_digit_sigs and digit_signature(norm_sid) not in allowed_digit_sigs:
-            continue
-        if norm_sid in source.normalized_id_index:
-            cands = source.normalized_id_index[norm_sid]
-            best_cid = max(cands, key=lambda cid: len(source.rows.get(cid, [])))
-            return ChannelMatch(source, best_cid, f"id do dicionário: {raw_sid}", 1.0)
-
+def find_match(source: EpgSource, aliases: list[str]) -> ChannelMatch | None:
+    """Casa EXCLUSIVAMENTE pelo nome do canal (ignora 100% tvg-ids / source_ids)."""
     exact_id, reason = choose_exact(source, aliases)
-    if exact_id: return ChannelMatch(source, exact_id, reason, 1.0)
+    if exact_id:
+        return ChannelMatch(source, exact_id, reason, 1.0)
     
     if aliases and _RE_SPORADIC_PPV.search(aliases[0]):
         return None
@@ -1331,7 +1296,7 @@ def make_validation(entry: dict[str, object], chosen: CandidateEvaluation, all_e
     }
 
 def generate_quality_variants(base_names: Iterable[str]) -> list[str]:
-    """Gera variações de qualidade + sufixos de listas M3U ([1], [2], [3], [H265], ²)."""
+    """Gera variações de nomes que existem nas listas M3U ([1], [2], [3], [H265], ², FHD/HD/SD)."""
     suffixes = [
         "",
         " SD",
@@ -1380,12 +1345,12 @@ def get_clean_aliases(entry: dict[str, object]) -> list[str]:
     raw_name = str(entry.get("name", "")).strip()
     if raw_name:
         values.append(raw_name)
-    if entry.get("tvg_names"):
-        values.extend(str(x).strip() for x in entry.get("tvg_names", []) if x)
     if entry.get("aliases"):
         values.extend(str(x).strip() for x in entry.get("aliases", []) if x)
         
     norm_clean = normalizar_canal(raw_name)
+    if norm_clean == "CARTOONITO":
+        values.extend(["Cartoonito", "CARTOONITO", "Cartoonitos", "CARTOONITOS"])
     for syn in CHANNEL_SYNONYMS.get(norm_clean, []):
         values.append(syn)
         values.append(syn.title())
@@ -1393,48 +1358,21 @@ def get_clean_aliases(entry: dict[str, object]) -> list[str]:
     return generate_quality_variants(values)
 
 def get_primary_export_ids(entry: dict[str, object]) -> list[str]:
-    """Exporta IDs seguros (bloqueando qualquer TVG-ID envenenado como AandE.br ou agromais.br)."""
+    """Exporta APENAS o nome limpo do canal como <channel id="...">.
+    NENHUM tvg-id (.br) é exportado para impedir 100% que tvg-ids errados da M3U puxem outros canais!
+    """
+    raw_name = str(entry.get("name", "")).strip()
+    clean_base = strip_qualities_keep_case(raw_name) or raw_name
+    norm_up = normalizar_canal(clean_base)
+
     ids = []
     seen = set()
-    raw_name = str(entry.get("name", "")).strip()
-    target_id = str(entry.get("id", "")).strip()
-    clean_base = strip_qualities_keep_case(raw_name) or target_id
-
-    def add_id(val: str):
-        v = val.strip()
-        if not v or len(v) > 180:
-            return
-        if v.lower() in POISONED_PROVIDER_TVIDS:
-            return
-        if v.lower() not in seen:
-            ids.append(v)
-            seen.add(v.lower())
-
-    for cid in entry.get("compatibility_ids", []) or []:
-        if is_valid_provider_tvid(raw_name, str(cid)):
-            add_id(str(cid))
-    for t_id in entry.get("tvg_ids_to_export", []) or []:
-        if is_valid_provider_tvid(raw_name, str(t_id)):
-            add_id(str(t_id))
-
-    add_id(clean_base)
-
-    norm_up = normalizar_canal(clean_base)
-    if norm_up == "CARTOONITO":
-        add_id("cartoonito.br")
-        add_id("Boomerang.br")
-    elif norm_up == "GLOBOPLAY NOVELAS":
-        add_id("viva.br")
-    elif norm_up == "ESPN 4":
-        add_id("foxsports.br")
-        add_id("espn4.br")
-    elif norm_up == "ESPN 5":
-        add_id("foxsports2.br")
-        add_id("espn5.br")
-    elif norm_up == "ESPN":
-        add_id("espnbrasil.br")
-
-    return ids[:3]
+    for candidate in (clean_base, clean_base.upper(), clean_base.title(), norm_up):
+        c = candidate.strip()
+        if c and c not in seen:
+            ids.append(c)
+            seen.add(c)
+    return ids[:2]
 
 def apply_rich_metadata_to_element(
     el: ET.Element, meta_pool: list[dict[str, Any]], channel_name: str, duration_minutes: float
@@ -1777,8 +1715,8 @@ def write_epg_stream(
                 gz.write(data)
                 if plain is not None: plain.write(data)
 
-            generator = "EPG Universal Otimizado (Ano/Classificação/Gênero + Séries TxxExx)"
-            source_name = "Consolidado Inteligente de Múltiplas Fontes"
+            generator = "EPG Universal — Modo 100% Nome do Canal (Zero TVG-ID)"
+            source_name = "Consolidado Inteligente por Nome"
             emit((f"<?xml version='1.0' encoding='utf-8'?>\n<tv generator-info-name={quoteattr(generator)} source-info-name={quoteattr(source_name)}>\n").encode("utf-8"))
 
             for out_id, (chosen, _, display_names) in xml_id_to_data.items():
@@ -1822,7 +1760,7 @@ def write_epg_stream(
     return programme_count, len(xml_id_to_data)
 
 def main() -> None:
-    print("Iniciando geração de EPG (Blindado contra TVG-IDs envenenados nas listas M3U)...")
+    print("Iniciando geração de EPG (Modo 100% Nome do Canal — Zero TVG-ID)...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -1833,36 +1771,26 @@ def main() -> None:
     grouped_by_norm: dict[str, dict[str, Any]] = {}
     VOD_BLACKLIST = {"VOD", "PLAYBACK", "XXX", "ADULTO", "EVENTO", "LANCAMENTO", "LANÇAMENTO", "FILMES", "SERIES", "SÉRIES"}
 
-    def merge_channel_record(ch_id: str, name: str, aliases: Iterable[str] = (), tvg_ids: Iterable[str] = (), comp_ids: Iterable[str] = (), source_ids: Iterable[str] = (), group: str = "") -> None:
+    def merge_channel_record(ch_id: str, name: str, aliases: Iterable[str] = (), group: str = "") -> None:
         base_name = html.unescape(name or ch_id).strip()
         if not base_name: return
+        # Ignora completamente se o base_name parecer um tvg-id (ex: "cartoonito.br")
+        if re.search(r'\.(br|us|uk|pt|ar|mx|cl|co|pe|latam|int|bt)$', base_name, re.IGNORECASE):
+            return
         norm_key = normalize_name(base_name) or base_name.strip().upper()
         if norm_key not in grouped_by_norm:
             grouped_by_norm[norm_key] = {
-                "id": ch_id or base_name,
+                "id": strip_qualities_keep_case(base_name) or base_name,
                 "name": strip_qualities_keep_case(base_name) or base_name,
                 "aliases": set(),
-                "tvg_ids_to_export": set(),
-                "compatibility_ids": set(),
-                "source_ids": set(),
                 "group": group or "",
             }
         rec = grouped_by_norm[norm_key]
         if base_name: rec["aliases"].add(base_name)
         for a in aliases:
-            if a: rec["aliases"].add(html.unescape(str(a)).strip())
-        for t in tvg_ids:
-            if t and is_valid_provider_tvid(base_name, str(t)):
-                rec["tvg_ids_to_export"].add(str(t).strip())
-            elif t and not is_valid_provider_tvid(base_name, str(t)):
-                # Detectou um tvg-id colocado em canal errado pelo provedor! Bloqueia globalmente!
-                POISONED_PROVIDER_TVIDS.add(str(t).strip().lower())
-        for c in comp_ids:
-            if c and is_valid_provider_tvid(base_name, str(c)):
-                rec["compatibility_ids"].add(str(c).strip())
-        for s in source_ids:
-            if s and is_valid_provider_tvid(base_name, str(s)):
-                rec["source_ids"].add(str(s).strip())
+            a_str = html.unescape(str(a)).strip()
+            if a_str and not re.search(r'\.(br|us|uk|pt|ar|mx|cl|co|pe|latam|int|bt)$', a_str, re.IGNORECASE):
+                rec["aliases"].add(a_str)
         if group and not rec["group"]:
             rec["group"] = group
 
@@ -1875,28 +1803,25 @@ def main() -> None:
                 if not line: continue
                 if line.startswith("#EXTINF:"):
                     current_extinf = line
-                    tvg_id_match = re.search(r'tvg-id="(.*?)"', current_extinf, re.IGNORECASE)
                     tvg_name_match = re.search(r'tvg-name="(.*?)"', current_extinf, re.IGNORECASE)
                     group_match = re.search(r'group-title="(.*?)"', current_extinf, re.IGNORECASE)
                     name_match = re.search(r',([^,]*?)$', current_extinf)
                     
-                    tvg_id = tvg_id_match.group(1).strip() if tvg_id_match else ""
                     tvg_name = html.unescape(tvg_name_match.group(1).strip()) if tvg_name_match else ""
                     group = group_match.group(1).strip() if group_match else ""
                     name = html.unescape(name_match.group(1).strip()) if name_match else ""
                     
                     if any(blacklisted in group.upper() for blacklisted in VOD_BLACKLIST):
                         continue
-                    target_id = tvg_name or name
-                    if not target_id: continue
-                    name_upper = target_id.upper()
+                    target_name = name or tvg_name
+                    if not target_name: continue
+                    name_upper = target_name.upper()
                     if re.search(r'\bS\d{1,3}\s*E\d{1,3}\b|\bT\d{1,3}\s*EP?\d{1,3}\b|\b24HS?\b|^24\s*H\b', name_upper):
                         continue
                     merge_channel_record(
-                        ch_id=target_id,
-                        name=name or tvg_name,
+                        ch_id=target_name,
+                        name=target_name,
                         aliases=[x for x in (tvg_name, name) if x],
-                        tvg_ids=[tvg_id] if tvg_id else [],
                         group=group,
                     )
                     count += 1
@@ -1904,7 +1829,7 @@ def main() -> None:
 
     if CATALOG_PATH.exists():
         try:
-            print(f"Lendo Dicionário Persistente ({CATALOG_PATH})...")
+            print(f"Lendo nomes de canais do Dicionário ({CATALOG_PATH})...")
             cat_data = json.loads(CATALOG_PATH.read_text("utf-8"))
             cat_list = cat_data.get("channels", []) if isinstance(cat_data, dict) else (cat_data if isinstance(cat_data, list) else [])
             for ch in cat_list:
@@ -1918,20 +1843,15 @@ def main() -> None:
                     *(ch.get("blank_tvg_id_names", []) or []),
                     *(ch.get("blank_tvg_id_tvg_names", []) or []),
                 ]
-                all_ch_tvg_ids = [
-                    *(ch.get("tvg_ids_to_export", []) or []),
-                    *(ch.get("old_tvg_ids", []) or []),
-                ]
+                ch_name = str(ch.get("name", "")).strip()
+                if not ch_name: continue
                 merge_channel_record(
-                    ch_id=str(ch.get("id", ch.get("name", ""))).strip(),
-                    name=str(ch.get("name", ch.get("id", ""))).strip(),
+                    ch_id=ch_name,
+                    name=ch_name,
                     aliases=all_ch_aliases,
-                    tvg_ids=all_ch_tvg_ids,
-                    comp_ids=ch.get("compatibility_ids", []) or [],
-                    source_ids=[*(ch.get("source_ids", []) or []), *(ch.get("old_tvg_ids", []) or [])],
                     group=grp_str,
                 )
-            print(f"  -> {len(grouped_by_norm)} emissoras base carregadas do dicionário.")
+            print(f"  -> {len(grouped_by_norm)} emissoras base carregadas por nome.")
         except Exception as e:
             print(f"Aviso ao ler {CATALOG_PATH}: {e}")
 
@@ -1942,7 +1862,7 @@ def main() -> None:
     for m3u_file_str in local_m3us:
         try:
             c = parse_m3u_file_into_records(Path(m3u_file_str))
-            print(f"Lido arquivo M3U local [{m3u_file_str}]: {c} canais extraídos.")
+            print(f"Lido arquivo M3U local [{m3u_file_str}]: {c} canais extraídos por nome.")
         except Exception as e:
             print(f"Aviso ao ler M3U local {m3u_file_str}: {e}")
 
@@ -1952,15 +1872,12 @@ def main() -> None:
             espelho_data = json.loads(ESPELHO_PATH.read_text("utf-8"))
             for ch in espelho_data.get("channels", []):
                 ch_name = str(ch.get("name", "")).strip()
-                if re.search(r'\bS\d{1,3}\s*E\d{1,3}\b|\bT\d{1,3}\s*EP?\d{1,3}\b|\b24HS?\b|^24\s*H\b', ch_name.upper()):
+                if not ch_name or re.search(r'\bS\d{1,3}\s*E\d{1,3}\b|\bT\d{1,3}\s*EP?\d{1,3}\b|\b24HS?\b|^24\s*H\b', ch_name.upper()):
                     continue
                 merge_channel_record(
-                    ch_id=str(ch.get("id", "")).strip(),
+                    ch_id=ch_name,
                     name=ch_name,
                     aliases=ch.get("aliases", []) or [],
-                    tvg_ids=[*(ch.get("tvg_ids_to_export", []) or []), *(ch.get("old_tvg_ids", []) or [])],
-                    comp_ids=ch.get("compatibility_ids", []) or [],
-                    source_ids=ch.get("source_ids", []) or [],
                     group=str(ch.get("group", "")),
                 )
             print(f"  -> Total após mesclar espelho: {len(grouped_by_norm)} emissoras base.")
@@ -1990,7 +1907,6 @@ def main() -> None:
                     print(f"  -> Sucesso! {len(data)} canais ao vivo obtidos via API.")
                     for ch in data:
                         name = str(ch.get("name", "")).strip()
-                        epg_id = str(ch.get("epg_channel_id", "")).strip()
                         cat_id = str(ch.get("category_id", ""))
                         if not name: continue
                         
@@ -2002,7 +1918,6 @@ def main() -> None:
                             ch_id=name,
                             name=name,
                             aliases=[name],
-                            tvg_ids=[epg_id] if epg_id else [],
                             group=cat_id,
                         )
                     success_json = True
@@ -2022,13 +1937,9 @@ def main() -> None:
 
     for v in grouped_by_norm.values():
         v["aliases"] = sorted(v["aliases"])
-        v["tvg_ids_to_export"] = sorted(t for t in v["tvg_ids_to_export"] if t.lower() not in POISONED_PROVIDER_TVIDS)
-        v["compatibility_ids"] = sorted(c for c in v["compatibility_ids"] if c.lower() not in POISONED_PROVIDER_TVIDS)
-        v["source_ids"] = sorted(v["source_ids"])
         entries.append(v)
         
-    print(f"\nCatálogo unificado pronto: {len(entries)} emissoras base únicas.")
-    print(f"TVG-IDs envenenados bloqueados automaticamente: {sorted(POISONED_PROVIDER_TVIDS)}")
+    print(f"\nCatálogo unificado pronto (100% baseado em nomes): {len(entries)} emissoras base únicas.")
 
     try: overrides = json.loads(OVERRIDES_PATH.read_text("utf-8")) if OVERRIDES_PATH.exists() else {}
     except Exception: overrides = {}
@@ -2069,8 +1980,7 @@ def main() -> None:
         target_id = str(entry.get("id", ""))
         visible_name = str(entry.get("name", ""))
         aliases = aliases_for(entry)
-        source_ids = [str(x) for x in entry.get("source_ids", []) or []]
-        matches = [m for source in active_sources if (m := find_match(source, aliases, source_ids, visible_name)) is not None]
+        matches = [m for source in active_sources if (m := find_match(source, aliases)) is not None]
 
         override_source_key, override_id = manual_override(overrides, target_id)
         forced = False
@@ -2123,7 +2033,7 @@ def main() -> None:
     (OUTPUT_DIR / "validation.json").write_text(json.dumps({"generated_at": now.isoformat(), "active_sources": [s.label for s in active_sources], "summary": counts, "channels": validations}, ensure_ascii=False, indent=2) + "\n", "utf-8")
 
     report_md = [
-        "# Relatório do EPG Universal — Filmes Limpos & Séries Detalhadas", "",
+        "# Relatório do EPG Universal — 100% Nome do Canal (Zero TVG-ID)", "",
         f"- Emissoras base consolidadas: **{counts['playlist_channels']}**",
         f"- Emissoras com grade encontrada: **{counts['matched']}**",
         f"- Canais XML gerados: **{counts['exported_ids']}**",
@@ -2143,7 +2053,7 @@ def main() -> None:
         val_md.append(f"- **{v['name']}** ({v['source']}): Agora **{now_title}** - Confiança **{v['confidence']}%**")
     (OUTPUT_DIR / "validation.md").write_text("\n".join(val_md) + "\n", "utf-8")
 
-    print(f"Sucesso! EPG gerado com {programme_count} programas em {ids_count} canais base.")
+    print(f"Sucesso! EPG gerado com {programme_count} programas em {ids_count} canais base (Zero TVG-ID).")
 
 if __name__ == "__main__":
     main()
