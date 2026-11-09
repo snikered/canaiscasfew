@@ -4,6 +4,7 @@
 - Formato Séries: "2019 14 Anos Drama/Crime. T02 E05 - Subtítulo. Sinopse..."
 - Consulta automática na Wikipedia PT / iTunes BR API com cache persistente (metadata_cache.json).
 - Compatibilidade com canais esporádicos de Esportes e PPV (Sem perda de eventos e com busca ultrarrápida).
+- Filtro estrito de consenso na costura (bloqueia fontes com 'vote': 'diverge').
 """
 from __future__ import annotations
 
@@ -368,14 +369,14 @@ CHANNEL_SYNONYMS = {
     "JOVEM PAN NEWS": ["JOVEM PAN", "JP NEWS", "JOVEN PAN NEWS"],
     "JOVEN PAN NEWS": ["JOVEM PAN NEWS", "JOVEM PAN", "JP NEWS"],
     "PRIME BOX BRAZIL": ["PRIME BOX BRASIL"],
-    "PRIME BOX BRAZIL": ["PRIME BOX BRAZIL"],
+    "PRIME BOX BRASIL": ["PRIME BOX BRAZIL"],
     "CARTOONITO": ["CARTOONITO", "BOOMERANG"],
     "SPORTTV": ["SPORTV"],
     "SPORTV": ["SPORTTV"],
     "SPORTTV 2": ["SPORTV 2"],
-    "SPORTV 2": ["SPORTV 2"],
+    "SPORTV 2": ["SPORTTV 2"],
     "SPORTTV 3": ["SPORTV 3"],
-    "SPORTV 3": ["SPORTV 3"],
+    "SPORTV 3": ["SPORTTV 3"],
     "GLOBOPLAY NOVELAS": ["VIVA", "CANAL VIVA"],
     "VIVA": ["GLOBOPLAY NOVELAS", "CANAL VIVA"],
 }
@@ -1322,6 +1323,7 @@ def get_clean_aliases(entry: dict[str, object]) -> list[str]:
     return generate_quality_variants(values)
 
 def get_primary_export_ids(entry: dict[str, object]) -> list[str]:
+    """Exporta o TVID oficial (.br) + o Nome Limpo Exato (e antigo, se renomeado) para evitar conflito no player."""
     ids = []
     seen = set()
     raw_name = str(entry.get("name", "")).strip()
@@ -1330,9 +1332,9 @@ def get_primary_export_ids(entry: dict[str, object]) -> list[str]:
 
     def add_id(val: str):
         v = val.strip()
-        if v and v not in seen and len(v) <= 180:
+        if v and v.lower() not in seen and len(v) <= 180:
             ids.append(v)
-            seen.add(v)
+            seen.add(v.lower())
 
     for cid in entry.get("compatibility_ids", []) or []:
         if is_valid_provider_tvid(raw_name, str(cid)):
@@ -1341,8 +1343,18 @@ def get_primary_export_ids(entry: dict[str, object]) -> list[str]:
         if is_valid_provider_tvid(raw_name, str(t_id)):
             add_id(str(t_id))
 
+    # Garante sempre o nome limpo como ID direto para listas sem tvg-id
     add_id(clean_base)
-    return ids[:2]
+
+    # Casos especiais de canais que mudaram de nome recentemente nas listas M3U
+    norm_up = clean_base.upper()
+    if norm_up == "CARTOONITO":
+        add_id("cartoonito.br")
+        add_id("Boomerang.br")
+    elif norm_up == "GLOBOPLAY NOVELAS":
+        add_id("viva.br")
+
+    return ids[:3]
 
 def apply_rich_metadata_to_element(
     el: ET.Element, meta_pool: list[dict[str, Any]], channel_name: str, duration_minutes: float
@@ -1485,23 +1497,40 @@ def apply_rich_metadata_to_element(
 def stitch_multi_source_schedule(
     all_evaluations: list[CandidateEvaluation], target_channel_id: str, channel_name: str, cutoff: datetime, max_future: datetime, overrides: dict[str, object]
 ) -> list[ET.Element]:
-    if not all_evaluations: return []
+    if not all_evaluations:
+        return []
 
     leader_ev = all_evaluations[0]
-    shift_by_source_key: dict[str, int] = {leader_ev.match.source.spec.key: 0}
+    leader_key = leader_ev.match.source.spec.key
+    shift_by_source_key: dict[str, int] = {leader_key: 0}
+    trusted_source_keys: set[str] = {leader_key}
+
+    # CRÍTICO: Só aceita costurar ou puxar metadados de fontes que CONCORDAM com a fonte líder!
+    # Fontes com 'vote': 'diverge' (ex: Genius com grade de outro país no Cartoonito/HBO) são bloqueadas!
     for comp in leader_ev.comparisons:
         other_key = str(comp.get("other_source_key", ""))
-        if comp.get("agreement") and float(comp["agreement"]) >= 0.50:
+        vote = str(comp.get("vote", ""))
+        agr = comp.get("agreement")
+        if vote == "concorda" or (agr is not None and float(agr) >= 0.55):
+            trusted_source_keys.add(other_key)
             shift_by_source_key[other_key] = int(comp.get("detected_shift") or 0)
+        elif vote == "sem_dados" and len(all_evaluations) <= 2:
+            # Só usa fonte sem_dados se quase não houver fontes para o canal
+            trusted_source_keys.add(other_key)
+            shift_by_source_key[other_key] = 0
 
     all_aligned_progs_by_source: list[list[dict[str, Any]]] = []
     metadata_by_norm_title: dict[str, list[dict[str, Any]]] = defaultdict(list)
 
     for ev in all_evaluations:
         src = ev.match.source
+        if src.spec.key not in trusted_source_keys:
+            continue  # Ignora completamente fontes que divergiram da grade verdadeira!
+
         cid = ev.match.channel_id
         fixed_rows = src.rows.get(cid, [])
-        if not fixed_rows: continue
+        if not fixed_rows:
+            continue
 
         ch_shift = float(overrides.get("channel_timeshifts", {}).get(target_channel_id, 0.0))
         src_shift = float(overrides.get("source_timeshifts", {}).get(src.spec.key, 0.0))
