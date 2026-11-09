@@ -1,17 +1,14 @@
 #!/usr/bin/env python3
-"""EPG Universal Consolidado — Modo 100% Nome do Canal (Zero TVG-ID)
-- Ignora TOTALMENTE tvg-id, source_ids e compatibility_ids (tanto na leitura das M3U/channels.json quanto na exportação do XML).
-- O casamento entre fontes e a geração do epg.xml são feitos EXCLUSIVAMENTE pelo nome do canal.
-- Como nenhum ID ".br" ou código de provedor existe no XML, qualquer player de IPTV é forçado a casar 100% pelo nome do canal!
-- Formato Filmes: "2015 Livre Comédia/Família. Sinopse..."
-- Formato Séries: "2019 14 Anos Drama/Crime. T02 E05 - Subtítulo. Sinopse..."
+"""EPG Universal Consolidado — Alta Precisão de Horários + Metadados Estritos para Séries
+- Remove "E1" falso de Filmes, Esportes e Jornalismo.
+- Limpa tags <episode-num> indevidas que fazem o TiviMate exibir E1 em filmes.
+- Mantém Temporada e Episódio (Txx Exx) exclusivamente quando for Série/Episódio real.
 """
 from __future__ import annotations
 
 import copy
 import glob
 import gzip
-import html
 import json
 import os
 import re
@@ -43,7 +40,6 @@ CATALOG_PATH = Path(os.environ.get("CHANNELS_FILE", "channels.json"))
 OVERRIDES_PATH = Path(os.environ.get("OVERRIDES_FILE", "overrides.json"))
 OUTPUT_DIR = Path(os.environ.get("OUTPUT_DIR", "output"))
 ESPELHO_PATH = Path("espelho.json")
-METADATA_CACHE_PATH = Path("metadata_cache.json")
 
 M3U_URLS = []
 for i in range(1, 6):
@@ -51,8 +47,8 @@ for i in range(1, 6):
     if url and url.startswith("http"):
         M3U_URLS.append(url.strip())
 
-FUZZY_THRESHOLD = float(os.environ.get("FUZZY_THRESHOLD", "0.84"))
-FUZZY_MARGIN = float(os.environ.get("FUZZY_MARGIN", "0.04"))
+FUZZY_THRESHOLD = float(os.environ.get("FUZZY_THRESHOLD", "0.82"))
+FUZZY_MARGIN = float(os.environ.get("FUZZY_MARGIN", "0.03"))
 AGREEMENT_THRESHOLD = float(os.environ.get("AGREEMENT_THRESHOLD", "0.55"))
 MIN_COMPARABLE_PROGRAMMES = int(os.environ.get("MIN_COMPARABLE_PROGRAMMES", "3"))
 
@@ -61,7 +57,6 @@ GZIP_LEVEL = max(1, min(9, int(os.environ.get("GZIP_LEVEL", "9"))))
 OUTPUT_PAST_HOURS = max(0, int(os.environ.get("OUTPUT_PAST_HOURS", "6")))
 OUTPUT_FUTURE_HOURS = max(24, int(os.environ.get("OUTPUT_FUTURE_HOURS", "72")))
 WRITE_PLAIN_XML = os.environ.get("WRITE_PLAIN_XML", "0").strip().lower() in {"1", "true", "yes"}
-MAX_WEB_LOOKUPS_PER_RUN = int(os.environ.get("MAX_WEB_LOOKUPS_PER_RUN", "200"))
 
 IPTV_USER_AGENTS = [
     "TiviMate/4.7.0 (Android 12)",
@@ -106,14 +101,9 @@ PLACEHOLDER_TITLES = {
     "ENCERRAMENTO",
 }
 
+# Palavras-chave de canais que NUNCA devem receber numeração de Temporada/Episódio (Filmes Puros, Esportes e Notícias)
 NON_SERIES_CHANNEL_KEYWORDS = (
     "TELECINE",
-    "TC ACTION",
-    "TC PREMIUM",
-    "TC PIPOCA",
-    "TC TOUCH",
-    "TC FUN",
-    "TC CULT",
     "MEGAPIX",
     "CINEMAX",
     "PARAMOUNT",
@@ -134,17 +124,13 @@ NON_SERIES_CHANNEL_KEYWORDS = (
     "XSPORTS",
     "GLOBO NEWS",
     "GLOBONEWS",
-    "GB NEWS",
     "CNN",
     "JOVEM PAN",
-    "JOVEN PAN",
     "JP NEWS",
     "RECORD NEWS",
     "BAND NEWS",
     "BANDNEWS",
     "SBT NEWS",
-    "CNBC",
-    "BLOOMBERG",
     "BM&C",
     "TV SENADO",
     "TV CAMARA",
@@ -155,54 +141,29 @@ NON_SERIES_CHANNEL_KEYWORDS = (
     "TERRA VIVA",
 )
 
-SPORT_OR_NEWS_CHANNEL_KEYWORDS = (
-    "SPORTV",
-    "ESPN",
-    "PREMIERE",
-    "COMBATE",
-    "BANDSPORTS",
-    "BAND SPORTS",
-    "FOX SPORTS",
-    "TNT SPORTS",
-    "CAZETV",
-    "XSPORTS",
-    "DAZN",
-    "GOAT",
-    "SPORTYNET",
-    "UFC",
-    "CONMEBOL",
-    "GLOBO NEWS",
-    "GLOBONEWS",
-    "GB NEWS",
-    "CNN",
-    "JOVEM PAN",
-    "JOVEN PAN",
-    "JP NEWS",
-    "RECORD NEWS",
-    "BAND NEWS",
-    "BANDNEWS",
-    "SBT NEWS",
-    "CNBC",
-    "BLOOMBERG",
-    "TV SENADO",
-    "TV CAMARA",
-    "AGROMAIS",
-    "CANAL RURAL",
-    "CANAL DO BOI",
-)
-
+# Categorias XMLTV que identificam Filmes, Esportes ou Telejornais (onde temporada/episódio nunca deve ser exibido)
 NON_SERIES_CATEGORY_KEYWORDS = (
     "FILME",
     "MOVIE",
     "CINEMA",
     "LONGA",
     "FEATURE FILM",
+    "ACAO",
+    "AÇÃO",
+    "COMEDIA",
+    "COMÉDIA",
+    "DRAMA",
+    "SUSPENSE",
+    "TERROR",
+    "FICCAO",
+    "FICÇÃO",
+    "ROMANCE",
+    "AVENTURA",
+    "FAROESTE",
     "ESPORTE",
     "SPORT",
     "FUTEBOL",
     "SOCCER",
-    "LUTAS",
-    "BOXE",
     "JORNALISMO",
     "NOTICIAS",
     "NOTÍCIAS",
@@ -219,95 +180,11 @@ SERIES_CATEGORY_KEYWORDS = (
     "TELENOVELA",
     "MINISSERIE",
     "MINISSÉRIE",
-    "EPISODIO",
-    "EPISÓDIO",
+    " EPISODIO",
+    " EPISÓDIO",
     "ANIME",
     "DESENHO",
-    "ANIMACAO",
-    "ANIMAÇÃO",
-    "INFANTIL",
 )
-
-GENRE_TRANSLATION = {
-    "ACTION": "Ação",
-    "ACAO": "Ação",
-    "AÇÃO": "Ação",
-    "ADVENTURE": "Aventura",
-    "AVENTURA": "Aventura",
-    "ANIMATION": "Animação",
-    "ANIMACAO": "Animação",
-    "ANIMAÇÃO": "Animação",
-    "COMEDY": "Comédia",
-    "COMEDIA": "Comédia",
-    "COMÉDIA": "Comédia",
-    "CRIME": "Crime",
-    "POLICIAL": "Policial",
-    "DOCUMENTARY": "Documentário",
-    "DOCUMENTARIO": "Documentário",
-    "DOCUMENTÁRIO": "Documentário",
-    "DRAMA": "Drama",
-    "FAMILY": "Família",
-    "FAMILIA": "Família",
-    "FAMÍLIA": "Família",
-    "FANTASY": "Fantasia",
-    "FANTASIA": "Fantasia",
-    "HISTORY": "História",
-    "HISTORIA": "História",
-    "HISTÓRIA": "História",
-    "HORROR": "Terror",
-    "TERROR": "Terror",
-    "MUSIC": "Música",
-    "MUSICA": "Música",
-    "MÚSICA": "Música",
-    "MUSICAL": "Musical",
-    "MYSTERY": "Mistério",
-    "MISTERIO": "Mistério",
-    "MISTÉRIO": "Mistério",
-    "ROMANCE": "Romance",
-    "SCI-FI": "Ficção Científica",
-    "SCIENCE FICTION": "Ficção Científica",
-    "FICCAO CIENTIFICA": "Ficção Científica",
-    "FICÇÃO CIENTÍFICA": "Ficção Científica",
-    "FICCAO": "Ficção",
-    "FICÇÃO": "Ficção",
-    "THRILLER": "Suspense",
-    "SUSPENSE": "Suspense",
-    "WAR": "Guerra",
-    "GUERRA": "Guerra",
-    "WESTERN": "Faroeste",
-    "FAROESTE": "Faroeste",
-    "KIDS": "Infantil",
-    "CHILDREN": "Infantil",
-    "INFANTIL": "Infantil",
-    "REALITY": "Reality",
-    "REALITY-TV": "Reality",
-    "REALITY SHOW": "Reality",
-    "CULINARIA": "Culinária",
-    "CULINÁRIA": "Culinária",
-    "GASTRONOMIA": "Culinária",
-    "BIOGRAPHY": "Biografia",
-    "BIOGRAFIA": "Biografia",
-    "SPORTS": "Esporte",
-    "SPORT": "Esporte",
-    "ESPORTE": "Esporte",
-    "ESPORTES": "Esporte",
-    "FUTEBOL": "Futebol",
-    "NEWS": "Jornalismo",
-    "JORNALISMO": "Jornalismo",
-    "NOTICIAS": "Jornalismo",
-    "NOTÍCIAS": "Jornalismo",
-    "VARIETY": "Variedades",
-    "VARIEDADES": "Variedades",
-    "TALK SHOW": "Talk Show",
-    "NOVELA": "Novela",
-    "TELENOVELA": "Novela",
-}
-
-IGNORED_GENERIC_CATEGORIES = {
-    "FILME", "FILMES", "MOVIE", "MOVIES", "SERIE", "SÉRIE", "SERIES", "SÉRIES",
-    "TV SHOW", "SHOW", "PROGRAMA", "OUTROS", "OTHER", "GENERAL", "GERAL", "HD", "FHD",
-    "2024", "2025", "2026", "CANAL", "AO VIVO", "LIVE",
-}
 
 @dataclass(frozen=True)
 class SourceSpec:
@@ -366,82 +243,38 @@ CHANNEL_SYNONYMS = {
     "TV PAMPA": ["TV PAMPA RS", "PAMPA"],
     "CNN INTERNACIONAL": ["CNN INTERNATIONAL"],
     "CNN INTERNATIONAL": ["CNN INTERNACIONAL"],
-    "JOVEM PAN": ["JOVEM PAN NEWS", "JP NEWS", "JOVEN PAN NEWS"],
-    "JOVEM PAN NEWS": ["JOVEM PAN", "JP NEWS", "JOVEN PAN NEWS"],
-    "JOVEN PAN NEWS": ["JOVEM PAN NEWS", "JOVEM PAN", "JP NEWS"],
+    "JOVEM PAN": ["JOVEM PAN NEWS", "JP NEWS"],
+    "JOVEM PAN NEWS": ["JOVEM PAN", "JP NEWS"],
     "PRIME BOX BRAZIL": ["PRIME BOX BRASIL"],
     "PRIME BOX BRASIL": ["PRIME BOX BRAZIL"],
-    "TRAVEL BOX BRAZIL": ["TRAVEL BOX BRASIL"],
-    "TRAVEL BOX BRASIL": ["TRAVEL BOX BRAZIL"],
-    "MUSIC BOX BRAZIL": ["MUSIC BOX BRASIL"],
-    "MUSIC BOX BRASIL": ["MUSIC BOX BRAZIL"],
     "CARTOONITO": ["CARTOONITO", "BOOMERANG"],
-    "CARTOONITOS": ["CARTOONITO", "BOOMERANG"],
-    "SPORTTV": ["SPORTV", "SPORTV 1", "SPORTV1"],
-    "SPORTV": ["SPORTTV", "SPORTV 1", "SPORTV1"],
-    "SPORTV 1": ["SPORTV", "SPORTTV", "SPORTV1"],
-    "SPORTTV 2": ["SPORTV 2", "SPORTV2"],
-    "SPORTV 2": ["SPORTTV 2", "SPORTV2"],
-    "SPORTTV 3": ["SPORTV 3", "SPORTV3"],
-    "SPORTV 3": ["SPORTTV 3", "SPORTV3"],
-    "ESPN": ["ESPN 1", "ESPN BRASIL"],
-    "ESPN 1": ["ESPN", "ESPN BRASIL"],
-    "ESPN 4": ["FOX SPORTS"],
-    "ESPN 5": ["FOX SPORTS 2"],
-    "GLOBOPLAY NOVELAS": ["VIVA", "CANAL VIVA", "GLOBO NOVELAS"],
-    "VIVA": ["GLOBOPLAY NOVELAS", "CANAL VIVA", "GLOBO NOVELAS"],
-    "PREMIERE CLUBES": ["PREMIERE 1", "PREMIERE", "PREMIERE FC"],
-    "PREMIERE 1": ["PREMIERE CLUBES", "PREMIERE", "PREMIERE FC"],
-    "HISTORY": ["HISTORY CHANNEL", "THE HISTORY CHANNEL"],
-    "HISTORY 2": ["H2"],
-    "H2": ["HISTORY 2"],
-    "TV CULTURA": ["CULTURA"],
-    "CULTURA": ["TV CULTURA"],
-    "CANAL OFF": ["OFF"],
-    "OFF": ["CANAL OFF"],
-    "INVESTIGACAO DISCOVERY": ["ID - INVESTIGACAO DISCOVERY", "ID INVESTIGACAO DISCOVERY"],
-    "DISCOVERY HOME & HEALTH": ["DISCOVERY H&H", "DISCOVERY HOME AND HEALTH"],
-    "TLC": ["DISCOVERY TLC"],
+    "SPORTTV": ["SPORTV"],
+    "SPORTV": ["SPORTTV"],
+    "SPORTTV 2": ["SPORTV 2"],
+    "SPORTV 2": ["SPORTTV 2"],
+    "SPORTTV 3": ["SPORTV 3"],
+    "SPORTV 3": ["SPORTTV 3"],
 }
 
 def strip_qualities_keep_case(name: str) -> str:
     if not name: return ""
-    s = html.unescape(name)
-    s = re.sub(r'\[.*?\]|\(.*?\)|\|.*?\|', ' ', s)
-    s = re.sub(r'[\¹\²\³\⁴\~]', ' ', s)
-    tags = r'\b(SD|HD|FHD|UHD|4K|8K|H\.?264|H\.?265|HEVC|HDR\+?|LEG|LEGENDADO|DUB|DUBLADO|HQ|VIP|VOD|24H[S]?|24/7|1080P|720P|60FPS|PPV|EVENTOS?|ALTERNATIVO|BACKUP|ALT)\b[\*\²\³\¹\⁴\+]*'
+    s = re.sub(r'\[.*?\]|\(.*?\)|\|.*?\|', ' ', name)
+    s = re.sub(r'[\¹\²\³\⁴]', '', s)
+    tags = r'\b(SD|HD|FHD|UHD|4K|8K|H\.?264|H\.?265|HEVC|HDR\+?|LEG|LEGENDADO|DUB|DUBLADO|HQ|VIP|VOD|24H[S]?|24/7|1080P|720P|60FPS|PPV|EVENTOS?|ALTERNATIVO|BACKUP)\b[\*\²\³\¹\⁴\+]*'
     s = re.sub(tags, ' ', s, flags=re.IGNORECASE)
     s = re.sub(r'[*=_\-]', ' ', s)
-    s = re.sub(r'\.\s*$', '', s)
     return ' '.join(s.split()).strip()
 
 def normalizar_canal(nome: str) -> str:
     if not nome: return ""
-    original_nome = html.unescape(nome)
-    nome = strip_qualities_keep_case(original_nome)
+    original_nome = nome
+    nome = strip_qualities_keep_case(nome)
     
-    nome = re.sub(r'\bCARTOONITOS\b', 'CARTOONITO', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bBOOMERANG\b', 'CARTOONITO', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bJP NEWS\b', 'JOVEM PAN NEWS', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bJOVEN PAN\b', 'JOVEM PAN', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bJOVEM PAN\b(?! NEWS)', 'JOVEM PAN NEWS', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bFOX SPORTS 2\b', 'ESPN 5', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bFOX SPORTS\b', 'ESPN 4', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bESPN EXTRA\b', 'ESPN 6', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bESPN\s*1\b', 'ESPN', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bSPORTV\s*1\b', 'SPORTV 1', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bSPORTV\s*2\b', 'SPORTV 2', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bSPORTV\s*3\b', 'SPORTV 3', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bPREMIERE\s*1\b', 'PREMIERE CLUBES', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bBOOMERANG\b', 'CARTOONITO', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bMAX PRIME\b', 'HBO POP', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bHBO\s*\+\b', 'HBO PLUS', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bH2\b', 'HISTORY 2', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bDISCOVERY H&H\b', 'DISCOVERY HOME & HEALTH', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bDISCOVERY TLC\b', 'TLC', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bID\s+INVESTIGA[CÇ][AÃ]O DISCOVERY\b', 'INVESTIGACAO DISCOVERY', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bGLOBO NOVELAS\b', 'GLOBOPLAY NOVELAS', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bMUSIC BOX BRASIL\b', 'MUSIC BOX BRAZIL', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bZOOMOOO\b', 'ZOOMOO', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bFOX PREMIUM\b', 'STAR PREMIUM', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bFOX CHANNEL\b', 'STAR CHANNEL', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bFOX LIFE\b', 'STAR LIFE', nome, flags=re.IGNORECASE)
@@ -473,6 +306,29 @@ def inferir_emissora_pelo_grupo(nome_normalizado: str, nome_grupo: str) -> str:
     if "BAND" in grupo and not nome_normalizado.startswith("BAND"): return f"BAND {nome_normalizado}"
     if "PREMIERE" in grupo and not nome_normalizado.startswith("PREMIERE") and len(nome_normalizado) <= 4: return f"PREMIERE {nome_normalizado}"
     return nome_normalizado
+
+def is_valid_provider_tvid(channel_name: str, tvid: str) -> bool:
+    if not tvid or len(tvid) < 2: return False
+    tvid_clean = re.sub(r'\.(br|us|uk|pt|ar|mx|cl|co|pe|latam|int)$', '', tvid.lower())
+    tvid_clean = re.sub(r'^(auto\.|yt\.|br\.|canais\.)', '', tvid_clean)
+    tvid_clean = re.sub(r'[^a-z0-9]', '', tvid_clean)
+    if not tvid_clean: return False
+
+    base_clean = normalizar_canal(channel_name)
+    candidates = [base_clean] + CHANNEL_SYNONYMS.get(base_clean, [])
+    
+    for cand in candidates:
+        cand_alnum = re.sub(r'[^a-z0-9]', '', normalize_name(cand).lower())
+        if not cand_alnum: continue
+        cand_digits = re.findall(r'\d+', cand_alnum)
+        tvid_digits = re.findall(r'\d+', tvid_clean)
+        if cand_digits != tvid_digits:
+            continue
+        if tvid_clean in cand_alnum or cand_alnum in tvid_clean:
+            return True
+        if SequenceMatcher(None, tvid_clean, cand_alnum).ratio() >= 0.65:
+            return True
+    return False
 
 def is_meaningful_programme(norm_title: str) -> bool:
     if not norm_title or len(norm_title) < 2:
@@ -546,207 +402,56 @@ def download_to_temp_file(url: str, attempts: int = 4) -> Path:
     raise RuntimeError(f"Falha ao baixar ({last_error})")
 
 # =====================================================================
-# METADADOS WEB (WIKIPEDIA PT & ITUNES BR) + CACHE
+# EXTRAÇÃO E ENRIQUECIMENTO DE METADADOS (ESTRITO PARA SÉRIES REAIS)
 # =====================================================================
-_METADATA_CACHE: dict[str, dict[str, str]] = {}
-_WEB_LOOKUPS_COUNT = 0
-
-def load_metadata_cache() -> None:
-    global _METADATA_CACHE
-    if METADATA_CACHE_PATH.exists():
-        try:
-            _METADATA_CACHE = json.loads(METADATA_CACHE_PATH.read_text("utf-8"))
-        except Exception:
-            _METADATA_CACHE = {}
-
-def save_metadata_cache() -> None:
-    try:
-        METADATA_CACHE_PATH.write_text(json.dumps(_METADATA_CACHE, ensure_ascii=False, indent=2) + "\n", "utf-8")
-    except Exception:
-        pass
-
 _RE_XMLTV_NS = re.compile(r"^\s*(\d+)\s*\.\s*(\d+)\s*\.")
+# Exige SEMPRE Temporada + Episódio explícitos (nunca aceita "E1" solto sem temporada ou sem "Ep.")
 _RE_SE_PATTERNS = [
     re.compile(r"\bS(\d{1,2})\s*[:\-]?\s*E(?:P)?(\d{1,3})\b", re.IGNORECASE),
     re.compile(r"\bT(?:EMP(?:ORADA)?)?\s*\.?\s*(\d{1,2})\s*[\-:/, ]+\s*E(?:P(?:IS[OÓ]DIO)?)?\s*\.?\s*(\d{1,3})\b", re.IGNORECASE),
     re.compile(r"\b(\d{1,2})\s*[ªº]\s*T(?:EMP(?:ORADA)?)?\s*[\-:/, ]*\s*E(?:P(?:IS[OÓ]DIO)?)?\s*\.?\s*(\d{1,3})\b", re.IGNORECASE),
 ]
+# Episódio sem temporada só é aceito se estiver escrito explicitamente "Ep." ou "Episódio" (nunca apenas a letra "E")
 _RE_EXPLICIT_EPISODE = re.compile(r"\b(?:EPIS[OÓ]DIO|EP\.)\s*(\d{1,3})\b", re.IGNORECASE)
+# Remove sufixos indevidos como " - E1", "(E1)", "[E1]" que algumas fontes colocam em títulos de filmes
 _RE_TRAILING_FAKE_EP = re.compile(r"(?:\s*[\-\|:]\s*|\s+)(?:\[|\()?E(?:P)?\.?\s*0*1(?:\]|\))?\s*$", re.IGNORECASE)
-_RE_YEAR_IN_TEXT = re.compile(r"(?:[\(\[\-\|]\s*|\b(?:ANO|LANCAMENTO|LANÇAMENTO)\s*[:\-]?\s*)((?:19[3-9]\d|20[0-2]\d))(?:\s*[\)\]\-\|]|\b)", re.IGNORECASE)
-_RE_RATING_IN_TEXT = re.compile(
-    r"(?:\bCLASSIFICA[CÇ][AÃ]O(?:\s+INDICATIVA)?\s*[:\-]?\s*|\[\s*|\(\s*)(LIVRE|L|10|12|14|16|18|A10|A12|A14|A16|A18)(?:\s*ANOS?)?(?:\s*\]|\s*\)|\b)",
-    re.IGNORECASE,
-)
-
-def normalize_rating_label(raw_rating: str) -> str:
-    if not raw_rating:
-        return ""
-    r = raw_rating.strip().upper()
-    if r in {"L", "LIVRE", "AL", "ALL", "G", "TV-G", "TV-Y", "TV-Y7", "0", "PARA TODOS"} or "LIVRE" in r:
-        return "Livre"
-    if r in {"PG", "10", "A10", "+10", "10 ANOS"} or re.search(r"\b10\b", r):
-        return "10 Anos"
-    if r in {"PG-13", "TV-PG", "12", "A12", "+12", "12 ANOS"} or re.search(r"\b12\b", r):
-        return "12 Anos"
-    if r in {"TV-14", "14", "A14", "+14", "14 ANOS"} or re.search(r"\b14\b", r):
-        return "14 Anos"
-    if r in {"R", "16", "A16", "+16", "16 ANOS"} or re.search(r"\b16\b", r):
-        return "16 Anos"
-    if r in {"NC-17", "TV-MA", "18", "A18", "+18", "18 ANOS"} or re.search(r"\b18\b", r):
-        return "18 Anos"
-    return ""
-
-def normalize_genres_list(raw_categories: Iterable[str]) -> str:
-    cleaned: list[str] = []
-    for raw in raw_categories:
-        if not raw:
-            continue
-        for part in re.split(r"[/,|•\-]+", str(raw)):
-            p = part.strip()
-            if not p:
-                continue
-            p_up = p.upper()
-            if p_up in IGNORED_GENERIC_CATEGORIES or len(p_up) <= 2:
-                continue
-            mapped = GENRE_TRANSLATION.get(p_up)
-            if not mapped:
-                p_no_acc = "".join(c for c in unicodedata.normalize("NFKD", p_up) if not unicodedata.combining(c))
-                mapped = GENRE_TRANSLATION.get(p_no_acc, p.title())
-            if mapped and mapped.upper() not in IGNORED_GENERIC_CATEGORIES and mapped not in cleaned:
-                cleaned.append(mapped)
-            if len(cleaned) >= 2:
-                break
-        if len(cleaned) >= 2:
-            break
-    return "/".join(cleaned[:2])
 
 def is_non_series_channel(channel_name: str) -> bool:
     norm_ch = normalizar_canal(channel_name)
     return any(kw in norm_ch for kw in NON_SERIES_CHANNEL_KEYWORDS)
 
-def is_sport_or_news_channel(channel_name: str) -> bool:
-    norm_ch = normalizar_canal(channel_name)
-    return any(kw in norm_ch for kw in SPORT_OR_NEWS_CHANNEL_KEYWORDS)
-
 def is_likely_movie_or_sport(categories: Iterable[str], desc: str, duration_minutes: float, channel_name: str) -> bool:
+    """Identifica se o programa é Filme, Esporte ou Jornalismo para bloquear qualquer tag de episódio."""
     if is_non_series_channel(channel_name):
         return True
 
     cats_upper = " | ".join(c.upper() for c in categories if c)
     desc_upper = (desc or "").upper()
 
+    # Se a categoria disser explicitamente que é Série/Novela/Sitcom/Desenho, permite episódio
     if any(skw in cats_upper for skw in SERIES_CATEGORY_KEYWORDS):
         return False
 
+    # Se a categoria disser que é Filme, Cinema, Longa, Esporte ou Notícias -> Bloqueia episódio!
     if any(mkw in cats_upper for mkw in NON_SERIES_CATEGORY_KEYWORDS):
         return True
 
+    # Se a sinopse começa com ficha técnica de filme ou menciona direção/elenco de longa-metragem e dura >= 80 min
     if duration_minutes >= 85:
         if any(w in desc_upper for w in ("DIREÇÃO:", "DIRECAO:", "SINOPSE:", "LONGA-METRAGEM", "FILME DE ")):
             return True
+        # Programas com mais de 85 minutos sem menção a "série/temporada/episódio/capítulo" na categoria ou descrição são filmes/eventos
         if not any(w in desc_upper for w in ("TEMPORADA", "EPISÓDIO", "EPISODIO", "SÉRIE", "SERIE", "CAPÍTULO", "CAPITULO")):
             return True
 
     return False
 
-def query_web_metadata(clean_title: str, is_movie: bool) -> dict[str, str]:
-    global _WEB_LOOKUPS_COUNT
-    cache_key = f"{'M' if is_movie else 'S'}:{normalize_programme_title(clean_title)}"
-    if not clean_title or len(clean_title) < 2:
-        return {}
-    if cache_key in _METADATA_CACHE:
-        return _METADATA_CACHE[cache_key]
-    if _WEB_LOOKUPS_COUNT >= MAX_WEB_LOOKUPS_PER_RUN:
-        return {}
-
-    _WEB_LOOKUPS_COUNT += 1
-    found = {"year": "", "rating": "", "genre": "", "desc": ""}
-
-    try:
-        entity = "movie" if is_movie else "tvSeason"
-        q = urllib.parse.quote(clean_title)
-        itunes_url = f"https://itunes.apple.com/search?term={q}&country=BR&language=pt_br&entity={entity}&limit=3"
-        req = urllib.request.Request(itunes_url, headers={"User-Agent": IPTV_USER_AGENTS[-1]})
-        with urllib.request.urlopen(req, timeout=3.5) as resp:
-            data = json.loads(resp.read().decode("utf-8", errors="ignore"))
-            results = data.get("results", [])
-            norm_target = normalize_programme_title(clean_title)
-            for item in results:
-                cand_name = item.get("trackName") or item.get("collectionName") or ""
-                norm_cand = normalize_programme_title(cand_name)
-                if not norm_cand:
-                    continue
-                if norm_target == norm_cand or norm_target in norm_cand or SequenceMatcher(None, norm_target, norm_cand).ratio() >= 0.78:
-                    rel_date = str(item.get("releaseDate", ""))
-                    if len(rel_date) >= 4 and rel_date[:4].isdigit():
-                        found["year"] = rel_date[:4]
-                    rating_raw = str(item.get("contentAdvisoryRating", ""))
-                    if rating_raw:
-                        found["rating"] = normalize_rating_label(rating_raw)
-                    genre_raw = str(item.get("primaryGenreName", ""))
-                    if genre_raw:
-                        found["genre"] = normalize_genres_list([genre_raw])
-                    long_desc = str(item.get("longDescription") or item.get("shortDescription") or "").strip()
-                    if long_desc and len(long_desc) > 25:
-                        found["desc"] = long_desc
-                    break
-    except Exception:
-        pass
-
-    if not found["year"] or not found["genre"]:
-        try:
-            q_wiki = urllib.parse.quote(f"{clean_title} {'filme' if is_movie else 'série'}")
-            wiki_url = f"https://pt.wikipedia.org/w/api.php?action=query&list=search&srsearch={q_wiki}&utf8=&format=json&srlimit=2"
-            req = urllib.request.Request(wiki_url, headers={"User-Agent": "EPGUniversalBot/1.0"})
-            with urllib.request.urlopen(req, timeout=3.5) as resp:
-                wdata = json.loads(resp.read().decode("utf-8", errors="ignore"))
-                search_hits = wdata.get("query", {}).get("search", [])
-                if search_hits:
-                    snippet = re.sub(r"<.*?>", " ", search_hits[0].get("snippet", ""))
-                    if not found["year"]:
-                        ym = re.search(r"\b(19[5-9]\d|20[0-2]\d)\b", snippet)
-                        if ym:
-                            found["year"] = ym.group(1)
-                    if not found["genre"]:
-                        found_genres = []
-                        for kw, pt_g in GENRE_TRANSLATION.items():
-                            if len(kw) >= 5 and re.search(rf"\b{re.escape(kw)}\b", snippet, re.IGNORECASE):
-                                if pt_g not in found_genres:
-                                    found_genres.append(pt_g)
-                            if len(found_genres) >= 2:
-                                break
-                        if found_genres:
-                            found["genre"] = "/".join(found_genres[:2])
-        except Exception:
-            pass
-
-    _METADATA_CACHE[cache_key] = found
-    return found
-
-def clean_redundant_title_subtitle(title: str, sub_title: str) -> tuple[str, str]:
-    t = title.strip()
-    s = sub_title.strip()
-    if " : " in t and not s:
-        parts = [p.strip() for p in t.split(" : ", 1)]
-        if len(parts) == 2 and parts[0] and parts[1]:
-            t, s = parts[0], parts[1]
-
-    if s:
-        norm_t = normalize_programme_title(t)
-        norm_s = normalize_programme_title(s)
-        if not norm_s or norm_s == norm_t or norm_s in norm_t:
-            s = ""
-        elif norm_t in norm_s and len(s) > len(t):
-            s = ""
-    return t, s
-
 def extract_program_metadata(el: ET.Element, channel_name: str = "", duration_minutes: float = 0.0) -> dict[str, Any]:
+    """Extrai metadados garantindo que Filmes nunca recebam Temporada/Episódio falsos."""
     title = ""
     sub_title = ""
     desc = ""
     date_str = ""
-    rating_str = ""
     categories: list[str] = []
     season: int | None = None
     episode: int | None = None
@@ -754,12 +459,6 @@ def extract_program_metadata(el: ET.Element, channel_name: str = "", duration_mi
     for child in el:
         tag = local_tag(child)
         txt = (child.text or "").strip()
-        if tag == "rating":
-            val_node = child.find("value")
-            r_val = (val_node.text or "").strip() if val_node is not None else txt
-            if r_val and not rating_str:
-                rating_str = normalize_rating_label(r_val)
-            continue
         if not txt:
             continue
         if tag == "title" and not title:
@@ -769,9 +468,7 @@ def extract_program_metadata(el: ET.Element, channel_name: str = "", duration_mi
         elif tag == "desc" and len(txt) > len(desc):
             desc = txt
         elif tag == "date" and not date_str:
-            m_yr = re.search(r"\b(19\d\d|20\d\d)\b", txt)
-            if m_yr:
-                date_str = m_yr.group(1)
+            date_str = txt[:4]
         elif tag == "category" and txt not in categories:
             categories.append(txt)
         elif tag == "episode-num":
@@ -781,6 +478,7 @@ def extract_program_metadata(el: ET.Element, channel_name: str = "", duration_mi
                 if m:
                     s_val = int(m.group(1)) + 1
                     e_val = int(m.group(2)) + 1
+                    # Ignora "0.0." (S1E1 genérico que fontes colocam em filmes) a menos que a categoria confirme Série
                     if not (s_val == 1 and e_val == 1 and "0.0." in txt):
                         season, episode = s_val, e_val
             else:
@@ -790,25 +488,23 @@ def extract_program_metadata(el: ET.Element, channel_name: str = "", duration_mi
                         season, episode = int(m.group(1)), int(m.group(2))
                         break
 
-    title, sub_title = clean_redundant_title_subtitle(title, sub_title)
+    # Se o título vier com subtítulo acoplado (ex: "Duelo com Bobby Flay : Um Pouco Caipira")
+    if " : " in title and not sub_title:
+        parts = [p.strip() for p in title.split(" : ", 1)]
+        if len(parts) == 2 and parts[0] and parts[1]:
+            if parts[0].upper() == parts[1].upper():
+                title = parts[0]
+            else:
+                title, sub_title = parts[0], parts[1]
+
+    # Limpa "E1" falso no final do título se houver
     title = _RE_TRAILING_FAKE_EP.sub("", title).strip()
 
-    blob = f"{title} | {sub_title} | {desc}"
-
-    if not date_str:
-        m_y = _RE_YEAR_IN_TEXT.search(blob)
-        if m_y:
-            date_str = m_y.group(1)
-            title = re.sub(r"\s*[\(\[]\s*(?:19\d\d|20\d\d)\s*[\)\]]\s*$", "", title).strip()
-
-    if not rating_str:
-        m_r = _RE_RATING_IN_TEXT.search(blob)
-        if m_r:
-            rating_str = normalize_rating_label(m_r.group(1))
-
+    # Busca temporada e episódio via Regex estrita (SxxExx ou Txx Exx)
     if season is None and episode is None:
+        search_blob = f"{title} | {sub_title} | {desc}"
         for pat in _RE_SE_PATTERNS:
-            m = pat.search(blob)
+            m = pat.search(search_blob)
             if m:
                 s_val, e_val = int(m.group(1)), int(m.group(2))
                 if 0 < s_val <= 60 and 0 < e_val <= 999:
@@ -821,10 +517,12 @@ def extract_program_metadata(el: ET.Element, channel_name: str = "", duration_mi
                 if 0 < e_val <= 1500:
                     episode = e_val
 
+    # Verifica se é Filme, Esporte ou Jornalismo: se for, ZERA temporada e episódio!
     if is_likely_movie_or_sport(categories, desc, duration_minutes, channel_name):
         season = None
         episode = None
 
+    # Limpa códigos S01E02 repetidos do título e do subtítulo
     for pat in _RE_SE_PATTERNS:
         title = pat.sub("", title).strip(" -:|")
         if sub_title:
@@ -841,7 +539,6 @@ def extract_program_metadata(el: ET.Element, channel_name: str = "", duration_mi
         "episode": episode,
         "categories": categories,
         "date": date_str,
-        "rating": rating_str,
     }
 
 def read_source_from_file(spec: SourceSpec, file_path: Path) -> EpgSource:
@@ -866,20 +563,15 @@ def read_source_from_file(spec: SourceSpec, file_path: Path) -> EpgSource:
             display_names = [(node.text or "").strip() for node in child if local_tag(node) == "display-name" and (node.text or "").strip()]
             names[channel_id] = display_names
             norm_candidates: list[str] = []
-            # Indexa os nomes reais da fonte (e o ID da fonte apenas se não for numérico puro)
-            raw_candidates = list(display_names)
-            if not channel_id.isdigit():
-                clean_cid = re.sub(r'\.(br|us|uk|pt|ar|mx|cl|co|pe|latam|int|bt)$', '', channel_id, flags=re.IGNORECASE)
-                clean_cid = re.sub(r'^.*?\.\.', '', clean_cid)
-                clean_cid = clean_cid.replace('.', ' ')
-                raw_candidates.append(clean_cid)
-            for candidate in raw_candidates:
+            for candidate in [*display_names, channel_id, normalize_source_id(channel_id)]:
                 normalized = normalize_name(candidate)
                 if not normalized or normalized in norm_candidates: continue
                 norm_candidates.append(normalized)
                 exact_index[normalized].add(channel_id)
                 fuzzy_index[digit_signature(normalized)][normalized].add(channel_id)
             normalized_names[channel_id] = norm_candidates
+            normalized_id = normalize_source_id(channel_id)
+            if normalized_id: normalized_id_index[normalized_id].add(channel_id)
 
         elif tag == "programme":
             channel_id = child.attrib.get("channel", "").strip()
@@ -984,7 +676,7 @@ def best_fuzzy(source: EpgSource, aliases: list[str]) -> tuple[str | None, float
     relevant_floor = FUZZY_THRESHOLD - FUZZY_MARGIN
     best_by_channel: dict[str, tuple[float, str, str]] = {}
     for alias in aliases:
-        if len(alias) < 3: continue 
+        if len(alias) < 2: continue 
         alias_counter = Counter(alias)
         bucket = source.fuzzy_index.get(digit_signature(alias), {})
         for normalized_candidate, channel_ids in bucket.items():
@@ -998,22 +690,19 @@ def best_fuzzy(source: EpgSource, aliases: list[str]) -> tuple[str | None, float
     scored = sorted(((score, cid, a, cand) for cid, (score, a, cand) in best_by_channel.items()), reverse=True)
     best = scored[0]
     second_score = scored[1][0] if len(scored) > 1 else 0.0
-    return best[1], best[0], second_score, f"nome aproximado {best[0]:.3f}: {best[2]} ~ {best[3]}"
+    return best[1], best[0], second_score, f"aproximação {best[0]:.3f}: {best[2]} ~ {best[3]}"
 
-_RE_SPORADIC_PPV = re.compile(
-    r'(\b(?:DAZN|GOAT|SPORTYNET|DISNEY\s*PLUS|DISNEY\+|PARAMOUNT\+|MAX|CONMEBOL\s*TV|PAULIST[AÃ]O|NOSSO\s*FUTEBOL)\s*[\(\[]?\s*\d+\s*[\)\]]?\b|\bPPV\s*\d+\b)',
-    re.IGNORECASE
-)
+def find_match(source: EpgSource, aliases: list[str], source_ids: list[str] = None) -> ChannelMatch | None:
+    for raw_sid in (source_ids or []):
+        norm_sid = normalize_source_id(raw_sid)
+        if norm_sid and norm_sid in source.normalized_id_index:
+            cands = source.normalized_id_index[norm_sid]
+            best_cid = max(cands, key=lambda cid: len(source.rows.get(cid, [])))
+            return ChannelMatch(source, best_cid, f"id do dicionário: {raw_sid}", 1.0)
 
-def find_match(source: EpgSource, aliases: list[str]) -> ChannelMatch | None:
-    """Casa EXCLUSIVAMENTE pelo nome do canal (ignora 100% tvg-ids / source_ids)."""
     exact_id, reason = choose_exact(source, aliases)
-    if exact_id:
-        return ChannelMatch(source, exact_id, reason, 1.0)
+    if exact_id: return ChannelMatch(source, exact_id, reason, 1.0)
     
-    if aliases and _RE_SPORADIC_PPV.search(aliases[0]):
-        return None
-
     fuzzy_id, best_score, second_score, fuzzy_reason = best_fuzzy(source, aliases)
     if fuzzy_id and best_score >= FUZZY_THRESHOLD and (best_score - second_score) >= FUZZY_MARGIN:
         return ChannelMatch(source, fuzzy_id, fuzzy_reason, best_score)
@@ -1051,10 +740,9 @@ def programme_rows(source: EpgSource, channel_id: str) -> list[ProgrammeRow]: re
 def now_next_for(source: EpgSource, channel_id: str, now: datetime) -> tuple[dict | None, dict | None]:
     current, next_item = None, None
     for row in programme_rows(source, channel_id):
-        clean_t, _ = clean_redundant_title_subtitle(row.title, "")
-        if row.start <= now < row.stop: current = {"start": row.start, "stop": row.stop, "title": clean_t}
+        if row.start <= now < row.stop: current = {"start": row.start, "stop": row.stop, "title": row.title}
         elif row.start > now and next_item is None:
-            next_item = {"start": row.start, "stop": row.stop, "title": clean_t}
+            next_item = {"start": row.start, "stop": row.stop, "title": row.title}
             if current is not None: break
     return current, next_item
 
@@ -1134,10 +822,9 @@ def schedule_health(source: EpgSource, channel_id: str, now: datetime) -> dict[s
         dur_m = (r.stop - r.start).total_seconds() / 60.0
         meta = extract_program_metadata(r.element, channel_id, dur_m)
         pts = 0.0
-        if meta["desc"] and len(meta["desc"]) >= 30: pts += 0.45
-        if meta["categories"]: pts += 0.20
-        if meta["date"] or meta["rating"]: pts += 0.20
-        if meta["sub_title"] or meta["season"] is not None or meta["episode"] is not None: pts += 0.15
+        if meta["desc"] and len(meta["desc"]) >= 30: pts += 0.55
+        if meta["sub_title"]: pts += 0.25
+        if meta["season"] is not None or meta["episode"] is not None: pts += 0.20
         rich_points += min(1.0, pts)
     richness_score = round(rich_points / len(sample_rows), 4) if sample_rows else 0.0
 
@@ -1296,48 +983,31 @@ def make_validation(entry: dict[str, object], chosen: CandidateEvaluation, all_e
     }
 
 def generate_quality_variants(base_names: Iterable[str]) -> list[str]:
-    """Gera variações de nomes que existem nas listas M3U ([1], [2], [3], [H265], ², FHD/HD/SD)."""
     suffixes = [
         "",
         " SD",
         " HD",
         " FHD",
-        " 4K",
         " FHD [H265]",
         " FHD H265",
         " HD [H265]",
         " HD H265",
         " [H265]",
         " H265",
-        " HD [1]",
-        " HD [2]",
-        " HD [3]",
-        " FHD [1]",
-        " FHD [2]",
-        " FHD [3]",
-        " SD [1]",
-        " SD [2]",
-        " SD [3]",
-        " [1]",
-        " [2]",
-        " [3]",
-        " FHD ²",
-        " HD ²",
-        " SD ²",
+        " 4K",
     ]
     result = []
     seen = set()
     for base in base_names:
-        b_unesc = html.unescape(str(base)).strip()
-        clean_base = strip_qualities_keep_case(b_unesc)
-        for root in (b_unesc, clean_base, clean_base.upper(), clean_base.title()):
+        clean_base = strip_qualities_keep_case(base)
+        for root in (base.strip(), clean_base):
             if not root or len(root) > 160:
                 continue
             for suf in suffixes:
                 cand = f"{root}{suf}".strip()
-                if cand and cand not in seen:
+                if cand and cand.upper() not in seen:
                     result.append(cand)
-                    seen.add(cand)
+                    seen.add(cand.upper())
     return result
 
 def get_clean_aliases(entry: dict[str, object]) -> list[str]:
@@ -1345,12 +1015,12 @@ def get_clean_aliases(entry: dict[str, object]) -> list[str]:
     raw_name = str(entry.get("name", "")).strip()
     if raw_name:
         values.append(raw_name)
+    if entry.get("tvg_names"):
+        values.extend(str(x).strip() for x in entry.get("tvg_names", []) if x)
     if entry.get("aliases"):
         values.extend(str(x).strip() for x in entry.get("aliases", []) if x)
         
     norm_clean = normalizar_canal(raw_name)
-    if norm_clean == "CARTOONITO":
-        values.extend(["Cartoonito", "CARTOONITO", "Cartoonitos", "CARTOONITOS"])
     for syn in CHANNEL_SYNONYMS.get(norm_clean, []):
         values.append(syn)
         values.append(syn.title())
@@ -1358,25 +1028,32 @@ def get_clean_aliases(entry: dict[str, object]) -> list[str]:
     return generate_quality_variants(values)
 
 def get_primary_export_ids(entry: dict[str, object]) -> list[str]:
-    """Exporta APENAS o nome limpo do canal como <channel id="...">.
-    NENHUM tvg-id (.br) é exportado para impedir 100% que tvg-ids errados da M3U puxem outros canais!
-    """
-    raw_name = str(entry.get("name", "")).strip()
-    clean_base = strip_qualities_keep_case(raw_name) or raw_name
-    norm_up = normalizar_canal(clean_base)
-
     ids = []
     seen = set()
-    for candidate in (clean_base, clean_base.upper(), clean_base.title(), norm_up):
-        c = candidate.strip()
-        if c and c not in seen:
-            ids.append(c)
-            seen.add(c)
+    raw_name = str(entry.get("name", "")).strip()
+    target_id = str(entry.get("id", "")).strip()
+    clean_base = strip_qualities_keep_case(raw_name) or target_id
+
+    def add_id(val: str):
+        v = val.strip()
+        if v and v not in seen and len(v) <= 180:
+            ids.append(v)
+            seen.add(v)
+
+    for cid in entry.get("compatibility_ids", []) or []:
+        if is_valid_provider_tvid(raw_name, str(cid)):
+            add_id(str(cid))
+    for t_id in entry.get("tvg_ids_to_export", []) or []:
+        if is_valid_provider_tvid(raw_name, str(t_id)):
+            add_id(str(t_id))
+
+    add_id(clean_base)
     return ids[:2]
 
 def apply_rich_metadata_to_element(
     el: ET.Element, meta_pool: list[dict[str, Any]], channel_name: str, duration_minutes: float
 ) -> None:
+    """Aplica metadados mantendo Filmes 100% limpos (sem E1) e enriquecendo apenas Séries reais."""
     base_meta = extract_program_metadata(el, channel_name, duration_minutes)
     all_metas = [base_meta, *(meta_pool or [])]
 
@@ -1385,7 +1062,6 @@ def apply_rich_metadata_to_element(
     best_season: int | None = None
     best_episode: int | None = None
     best_date = ""
-    best_rating = ""
     merged_cats: list[str] = []
 
     for m in all_metas:
@@ -1399,42 +1075,28 @@ def apply_rich_metadata_to_element(
             best_episode = m["episode"]
         if not best_date and m.get("date"):
             best_date = m["date"]
-        if not best_rating and m.get("rating"):
-            best_rating = m["rating"]
         for c in m.get("categories", []):
             if c not in merged_cats:
                 merged_cats.append(c)
 
+    # Verifica com o conjunto completo de categorias e descrição se é Filme/Esporte/Jornalismo
     is_movie_or_sport = is_likely_movie_or_sport(merged_cats, best_desc, duration_minutes, channel_name)
     if is_movie_or_sport:
         best_season = None
         best_episode = None
 
+    # SEMPRE remove tags <episode-num> originais (pois fontes como Open-EPG colocam 0.0. em filmes, fazendo o TiviMate mostrar "E1")
     for old_ep in list(el.findall("episode-num")):
         el.remove(old_ep)
 
+    # Limpa o título principal
     title_node = el.find("title")
-    raw_title = base_meta["title"] or (title_node.text.strip() if title_node is not None and title_node.text else "")
-    clean_title, best_sub = clean_redundant_title_subtitle(raw_title, best_sub)
+    clean_title = base_meta["title"] or (title_node.text.strip() if title_node is not None and title_node.text else "")
     clean_title = _RE_TRAILING_FAKE_EP.sub("", clean_title).strip()
     if title_node is not None and clean_title:
         title_node.text = clean_title
 
-    genre_str = normalize_genres_list(merged_cats)
-
-    is_live_match = " X " in clean_title.upper() or clean_title.upper().startswith(("AO VIVO", "VT -", "TELEJORNAL", "JORNAL "))
-    if not is_sport_or_news_channel(channel_name) and not is_live_match and (not best_date or not genre_str or not best_rating):
-        web_info = query_web_metadata(clean_title, is_movie=is_movie_or_sport)
-        if web_info:
-            if not best_date and web_info.get("year"):
-                best_date = web_info["year"]
-            if not best_rating and web_info.get("rating"):
-                best_rating = web_info["rating"]
-            if not genre_str and web_info.get("genre"):
-                genre_str = web_info["genre"]
-            if not best_desc and web_info.get("desc"):
-                best_desc = web_info["desc"]
-
+    # Só cria etiqueta de Temporada/Episódio se NÃO for filme/esporte e tiver temporada + episódio válidos
     se_badge = ""
     if not is_movie_or_sport:
         if best_season is not None and best_episode is not None:
@@ -1442,8 +1104,10 @@ def apply_rich_metadata_to_element(
         elif best_episode is not None and best_episode > 1:
             se_badge = f"Ep. {best_episode}"
 
+    # Atualiza ou remove <sub-title> redundante
     sub_node = el.find("sub-title")
     if is_movie_or_sport:
+        # Em filmes, remove subtítulos que sejam apenas repetição do título ou tags falsas
         if sub_node is not None:
             el.remove(sub_node)
         best_sub = ""
@@ -1459,41 +1123,22 @@ def apply_rich_metadata_to_element(
         elif sub_node is not None:
             el.remove(sub_node)
 
-    meta_tokens = []
-    if best_date:
-        meta_tokens.append(best_date)
-    if best_rating:
-        meta_tokens.append(best_rating)
-    if genre_str:
-        meta_tokens.append(genre_str)
+    # Constrói a descrição (<desc>)
+    header_parts = []
+    if se_badge and (not best_desc or se_badge.lower() not in best_desc.lower()):
+        header_parts.append(f"[{se_badge}]")
+    if best_sub and best_sub.upper() != clean_title.upper() and (not best_desc or best_sub.lower() not in best_desc.lower()):
+        header_parts.append(best_sub)
+    if best_date and (not best_desc or best_date not in best_desc):
+        header_parts.append(f"({best_date})")
 
-    lead_info = " ".join(meta_tokens).strip()
-
-    series_info = ""
-    if se_badge and best_sub:
-        series_info = f"{se_badge} - {best_sub}"
-    elif se_badge:
-        series_info = se_badge
-    elif best_sub and not is_movie_or_sport:
-        series_info = best_sub
-
-    clean_desc = (best_desc or "").strip()
-    if best_date and clean_desc.startswith(f"({best_date})"):
-        clean_desc = clean_desc[len(f"({best_date})"):].strip(" -•.")
-
-    prefix_blocks = []
-    if lead_info:
-        prefix_blocks.append(f"{lead_info}.")
-    if series_info and (not clean_desc or series_info.lower() not in clean_desc.lower()):
-        prefix_blocks.append(f"{series_info}.")
-
-    prefix_text = " ".join(prefix_blocks).strip()
-    if prefix_text and clean_desc:
-        final_desc = f"{prefix_text} {clean_desc}"
-    elif prefix_text:
-        final_desc = prefix_text
+    prefix_str = " ".join(header_parts).strip()
+    if prefix_str and best_desc:
+        final_desc = f"{prefix_str} — {best_desc}"
+    elif prefix_str:
+        final_desc = prefix_str
     else:
-        final_desc = clean_desc
+        final_desc = best_desc
 
     if final_desc:
         desc_node = el.find("desc")
@@ -1501,6 +1146,7 @@ def apply_rich_metadata_to_element(
             desc_node = ET.SubElement(el, "desc")
         desc_node.text = final_desc
 
+    # Só grava a tag <episode-num> no XML se tiver CERTEZA que é uma Série com Temporada e Episódio reais!
     if not is_movie_or_sport and best_season is not None and best_episode is not None:
         s_idx = max(0, best_season - 1)
         e_idx = max(0, best_episode - 1)
@@ -1510,37 +1156,23 @@ def apply_rich_metadata_to_element(
 def stitch_multi_source_schedule(
     all_evaluations: list[CandidateEvaluation], target_channel_id: str, channel_name: str, cutoff: datetime, max_future: datetime, overrides: dict[str, object]
 ) -> list[ET.Element]:
-    if not all_evaluations:
-        return []
+    if not all_evaluations: return []
 
     leader_ev = all_evaluations[0]
-    leader_key = leader_ev.match.source.spec.key
-    shift_by_source_key: dict[str, int] = {leader_key: 0}
-    trusted_source_keys: set[str] = {leader_key}
-
+    shift_by_source_key: dict[str, int] = {leader_ev.match.source.spec.key: 0}
     for comp in leader_ev.comparisons:
         other_key = str(comp.get("other_source_key", ""))
-        vote = str(comp.get("vote", ""))
-        agr = comp.get("agreement")
-        if vote == "concorda" or (agr is not None and float(agr) >= 0.55):
-            trusted_source_keys.add(other_key)
+        if comp.get("agreement") and float(comp["agreement"]) >= 0.50:
             shift_by_source_key[other_key] = int(comp.get("detected_shift") or 0)
-        elif vote == "sem_dados" and len(all_evaluations) <= 2:
-            trusted_source_keys.add(other_key)
-            shift_by_source_key[other_key] = 0
 
     all_aligned_progs_by_source: list[list[dict[str, Any]]] = []
     metadata_by_norm_title: dict[str, list[dict[str, Any]]] = defaultdict(list)
 
     for ev in all_evaluations:
         src = ev.match.source
-        if src.spec.key not in trusted_source_keys:
-            continue
-
         cid = ev.match.channel_id
         fixed_rows = src.rows.get(cid, [])
-        if not fixed_rows:
-            continue
+        if not fixed_rows: continue
 
         ch_shift = float(overrides.get("channel_timeshifts", {}).get(target_channel_id, 0.0))
         src_shift = float(overrides.get("source_timeshifts", {}).get(src.spec.key, 0.0))
@@ -1662,16 +1294,7 @@ def stitch_multi_source_schedule(
 
         if not matching_time_metas and norm_title in metadata_by_norm_title:
             matching_time_metas = [
-                {
-                    "title": m["title"],
-                    "sub_title": "",
-                    "desc": m["desc"],
-                    "season": None,
-                    "episode": None,
-                    "categories": m["categories"],
-                    "date": m["date"],
-                    "rating": m.get("rating", ""),
-                }
+                {"title": m["title"], "sub_title": "", "desc": m["desc"], "season": None, "episode": None, "categories": m["categories"], "date": m["date"]}
                 for m in metadata_by_norm_title[norm_title]
             ]
 
@@ -1715,8 +1338,8 @@ def write_epg_stream(
                 gz.write(data)
                 if plain is not None: plain.write(data)
 
-            generator = "EPG Universal — Modo 100% Nome do Canal (Zero TVG-ID)"
-            source_name = "Consolidado Inteligente por Nome"
+            generator = "EPG Universal Otimizado (Filmes Limpos + Séries com TxxExx)"
+            source_name = "Consolidado Inteligente de Múltiplas Fontes"
             emit((f"<?xml version='1.0' encoding='utf-8'?>\n<tv generator-info-name={quoteattr(generator)} source-info-name={quoteattr(source_name)}>\n").encode("utf-8"))
 
             for out_id, (chosen, _, display_names) in xml_id_to_data.items():
@@ -1760,37 +1383,40 @@ def write_epg_stream(
     return programme_count, len(xml_id_to_data)
 
 def main() -> None:
-    print("Iniciando geração de EPG (Modo 100% Nome do Canal — Zero TVG-ID)...")
+    print("Iniciando geração de EPG (Filmes Limpos sem E1 + Séries com TxxExx)...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    load_metadata_cache()
     stage_start = time.perf_counter()
     
     entries = []
     grouped_by_norm: dict[str, dict[str, Any]] = {}
     VOD_BLACKLIST = {"VOD", "PLAYBACK", "XXX", "ADULTO", "EVENTO", "LANCAMENTO", "LANÇAMENTO", "FILMES", "SERIES", "SÉRIES"}
 
-    def merge_channel_record(ch_id: str, name: str, aliases: Iterable[str] = (), group: str = "") -> None:
-        base_name = html.unescape(name or ch_id).strip()
+    def merge_channel_record(ch_id: str, name: str, aliases: Iterable[str] = (), tvg_ids: Iterable[str] = (), comp_ids: Iterable[str] = (), source_ids: Iterable[str] = (), group: str = "") -> None:
+        base_name = name or ch_id
         if not base_name: return
-        # Ignora completamente se o base_name parecer um tvg-id (ex: "cartoonito.br")
-        if re.search(r'\.(br|us|uk|pt|ar|mx|cl|co|pe|latam|int|bt)$', base_name, re.IGNORECASE):
-            return
         norm_key = normalize_name(base_name) or base_name.strip().upper()
         if norm_key not in grouped_by_norm:
             grouped_by_norm[norm_key] = {
-                "id": strip_qualities_keep_case(base_name) or base_name,
+                "id": ch_id or base_name,
                 "name": strip_qualities_keep_case(base_name) or base_name,
                 "aliases": set(),
+                "tvg_ids_to_export": set(),
+                "compatibility_ids": set(),
+                "source_ids": set(),
                 "group": group or "",
             }
         rec = grouped_by_norm[norm_key]
         if base_name: rec["aliases"].add(base_name)
         for a in aliases:
-            a_str = html.unescape(str(a)).strip()
-            if a_str and not re.search(r'\.(br|us|uk|pt|ar|mx|cl|co|pe|latam|int|bt)$', a_str, re.IGNORECASE):
-                rec["aliases"].add(a_str)
+            if a: rec["aliases"].add(str(a).strip())
+        for t in tvg_ids:
+            if t: rec["tvg_ids_to_export"].add(str(t).strip())
+        for c in comp_ids:
+            if c: rec["compatibility_ids"].add(str(c).strip())
+        for s in source_ids:
+            if s: rec["source_ids"].add(str(s).strip())
         if group and not rec["group"]:
             rec["group"] = group
 
@@ -1803,25 +1429,38 @@ def main() -> None:
                 if not line: continue
                 if line.startswith("#EXTINF:"):
                     current_extinf = line
+                elif (line.startswith("http") or line.startswith("rtmp")) and current_extinf:
+                    lower_url = line.split("?")[0].lower()
+                    if lower_url.endswith(('.mp4', '.mkv', '.avi', '.mov', '.wmv', '.flv', '.webm')):
+                        current_extinf = None
+                        continue
+
+                    tvg_id_match = re.search(r'tvg-id="(.*?)"', current_extinf, re.IGNORECASE)
                     tvg_name_match = re.search(r'tvg-name="(.*?)"', current_extinf, re.IGNORECASE)
                     group_match = re.search(r'group-title="(.*?)"', current_extinf, re.IGNORECASE)
                     name_match = re.search(r',([^,]*?)$', current_extinf)
                     
-                    tvg_name = html.unescape(tvg_name_match.group(1).strip()) if tvg_name_match else ""
+                    tvg_id = tvg_id_match.group(1).strip() if tvg_id_match else ""
+                    tvg_name = tvg_name_match.group(1).strip() if tvg_name_match else ""
                     group = group_match.group(1).strip() if group_match else ""
-                    name = html.unescape(name_match.group(1).strip()) if name_match else ""
+                    name = name_match.group(1).strip() if name_match else ""
+                    current_extinf = None
                     
                     if any(blacklisted in group.upper() for blacklisted in VOD_BLACKLIST):
                         continue
-                    target_name = name or tvg_name
-                    if not target_name: continue
-                    name_upper = target_name.upper()
+                        
+                    target_id = tvg_name or name
+                    if not target_id: continue
+                    
+                    name_upper = target_id.upper()
                     if re.search(r'\bS\d{1,3}\s*E\d{1,3}\b|\bT\d{1,3}\s*EP?\d{1,3}\b|\b24HS?\b|^24\s*H\b', name_upper):
                         continue
+                    
                     merge_channel_record(
-                        ch_id=target_name,
-                        name=target_name,
+                        ch_id=target_id,
+                        name=name or tvg_name,
                         aliases=[x for x in (tvg_name, name) if x],
+                        tvg_ids=[tvg_id] if tvg_id else [],
                         group=group,
                     )
                     count += 1
@@ -1829,29 +1468,21 @@ def main() -> None:
 
     if CATALOG_PATH.exists():
         try:
-            print(f"Lendo nomes de canais do Dicionário ({CATALOG_PATH})...")
+            print(f"Lendo Dicionário Persistente ({CATALOG_PATH})...")
             cat_data = json.loads(CATALOG_PATH.read_text("utf-8"))
             cat_list = cat_data.get("channels", []) if isinstance(cat_data, dict) else (cat_data if isinstance(cat_data, list) else [])
             for ch in cat_list:
                 if not isinstance(ch, dict): continue
-                ch_groups = ch.get("groups", []) or []
-                grp_str = " | ".join(str(g) for g in ch_groups) if isinstance(ch_groups, list) else str(ch.get("group", ch.get("group-title", "")))
-                all_ch_aliases = [
-                    *(ch.get("aliases", []) or []),
-                    *(ch.get("tvg_names", []) or []),
-                    *(ch.get("original_names", []) or []),
-                    *(ch.get("blank_tvg_id_names", []) or []),
-                    *(ch.get("blank_tvg_id_tvg_names", []) or []),
-                ]
-                ch_name = str(ch.get("name", "")).strip()
-                if not ch_name: continue
                 merge_channel_record(
-                    ch_id=ch_name,
-                    name=ch_name,
-                    aliases=all_ch_aliases,
-                    group=grp_str,
+                    ch_id=str(ch.get("id", ch.get("name", ""))).strip(),
+                    name=str(ch.get("name", ch.get("id", ""))).strip(),
+                    aliases=[*(ch.get("aliases", []) or []), *(ch.get("tvg_names", []) or [])],
+                    tvg_ids=ch.get("tvg_ids_to_export", []) or [],
+                    comp_ids=ch.get("compatibility_ids", []) or [],
+                    source_ids=ch.get("source_ids", []) or [],
+                    group=str(ch.get("group", ch.get("group-title", ""))),
                 )
-            print(f"  -> {len(grouped_by_norm)} emissoras base carregadas por nome.")
+            print(f"  -> {len(grouped_by_norm)} emissoras base carregadas do dicionário.")
         except Exception as e:
             print(f"Aviso ao ler {CATALOG_PATH}: {e}")
 
@@ -1862,7 +1493,7 @@ def main() -> None:
     for m3u_file_str in local_m3us:
         try:
             c = parse_m3u_file_into_records(Path(m3u_file_str))
-            print(f"Lido arquivo M3U local [{m3u_file_str}]: {c} canais extraídos por nome.")
+            print(f"Lido arquivo M3U local [{m3u_file_str}]: {c} canais extraídos.")
         except Exception as e:
             print(f"Aviso ao ler M3U local {m3u_file_str}: {e}")
 
@@ -1872,12 +1503,15 @@ def main() -> None:
             espelho_data = json.loads(ESPELHO_PATH.read_text("utf-8"))
             for ch in espelho_data.get("channels", []):
                 ch_name = str(ch.get("name", "")).strip()
-                if not ch_name or re.search(r'\bS\d{1,3}\s*E\d{1,3}\b|\bT\d{1,3}\s*EP?\d{1,3}\b|\b24HS?\b|^24\s*H\b', ch_name.upper()):
+                if re.search(r'\bS\d{1,3}\s*E\d{1,3}\b|\bT\d{1,3}\s*EP?\d{1,3}\b|\b24HS?\b|^24\s*H\b', ch_name.upper()):
                     continue
                 merge_channel_record(
-                    ch_id=ch_name,
+                    ch_id=str(ch.get("id", "")).strip(),
                     name=ch_name,
                     aliases=ch.get("aliases", []) or [],
+                    tvg_ids=ch.get("tvg_ids_to_export", []) or [],
+                    comp_ids=ch.get("compatibility_ids", []) or [],
+                    source_ids=ch.get("source_ids", []) or [],
                     group=str(ch.get("group", "")),
                 )
             print(f"  -> Total após mesclar espelho: {len(grouped_by_norm)} emissoras base.")
@@ -1907,6 +1541,7 @@ def main() -> None:
                     print(f"  -> Sucesso! {len(data)} canais ao vivo obtidos via API.")
                     for ch in data:
                         name = str(ch.get("name", "")).strip()
+                        epg_id = str(ch.get("epg_channel_id", "")).strip()
                         cat_id = str(ch.get("category_id", ""))
                         if not name: continue
                         
@@ -1918,6 +1553,7 @@ def main() -> None:
                             ch_id=name,
                             name=name,
                             aliases=[name],
+                            tvg_ids=[epg_id] if epg_id else [],
                             group=cat_id,
                         )
                     success_json = True
@@ -1937,9 +1573,12 @@ def main() -> None:
 
     for v in grouped_by_norm.values():
         v["aliases"] = sorted(v["aliases"])
+        v["tvg_ids_to_export"] = sorted(v["tvg_ids_to_export"])
+        v["compatibility_ids"] = sorted(v["compatibility_ids"])
+        v["source_ids"] = sorted(v["source_ids"])
         entries.append(v)
         
-    print(f"\nCatálogo unificado pronto (100% baseado em nomes): {len(entries)} emissoras base únicas.")
+    print(f"\nCatálogo unificado pronto: {len(entries)} emissoras base únicas.")
 
     try: overrides = json.loads(OVERRIDES_PATH.read_text("utf-8")) if OVERRIDES_PATH.exists() else {}
     except Exception: overrides = {}
@@ -1980,7 +1619,8 @@ def main() -> None:
         target_id = str(entry.get("id", ""))
         visible_name = str(entry.get("name", ""))
         aliases = aliases_for(entry)
-        matches = [m for source in active_sources if (m := find_match(source, aliases)) is not None]
+        source_ids = [str(x) for x in entry.get("source_ids", []) or []]
+        matches = [m for source in active_sources if (m := find_match(source, aliases, source_ids)) is not None]
 
         override_source_key, override_id = manual_override(overrides, target_id)
         forced = False
@@ -2007,7 +1647,7 @@ def main() -> None:
         validations.append(make_validation(entry, chosen, evaluations, now))
 
     matched_ids = {str(e.get("id", "")) for e, _, _, _ in selected}
-    clean_espelho_entries = [e for e in entries if str(e.get("id", "")) in matched_ids]
+    clean_espelho_entries = [e for e in entries if str(e.get("id", "")) in matched_ids or len(entries) <= 1200]
     espelho_to_save = {"updated_at": datetime.now(timezone.utc).isoformat(), "channels": clean_espelho_entries}
     (OUTPUT_DIR / "espelho.json").write_text(json.dumps(espelho_to_save, ensure_ascii=False, indent=2), "utf-8")
 
@@ -2015,7 +1655,6 @@ def main() -> None:
 
     stage_start = time.perf_counter()
     programme_count, ids_count = write_epg_stream(selected, now, overrides)
-    save_metadata_cache()
     timings["serializacao_e_gzip"] = round(time.perf_counter() - stage_start, 3)
 
     source_counts = {source.label: sum(1 for row in report_rows if row.get("source") == source.label) for source in active_sources}
@@ -2025,7 +1664,6 @@ def main() -> None:
         "missing": sum(1 for row in report_rows if row["status"] == "missing"),
         "programmes": programme_count,
         "exported_ids": ids_count,
-        "web_metadata_cached": len(_METADATA_CACHE),
         "timing_seconds": timings, "selected_by_source": source_counts,
     }
 
@@ -2033,12 +1671,11 @@ def main() -> None:
     (OUTPUT_DIR / "validation.json").write_text(json.dumps({"generated_at": now.isoformat(), "active_sources": [s.label for s in active_sources], "summary": counts, "channels": validations}, ensure_ascii=False, indent=2) + "\n", "utf-8")
 
     report_md = [
-        "# Relatório do EPG Universal — 100% Nome do Canal (Zero TVG-ID)", "",
+        "# Relatório do EPG Universal — Filmes Limpos & Séries Detalhadas", "",
         f"- Emissoras base consolidadas: **{counts['playlist_channels']}**",
         f"- Emissoras com grade encontrada: **{counts['matched']}**",
         f"- Canais XML gerados: **{counts['exported_ids']}**",
         f"- Total de programas gravados: **{counts['programmes']}**",
-        f"- Títulos no Cache Web (Wikipedia/iTunes BR): **{counts['web_metadata_cached']}**",
         "", "## Fonte base utilizada por canal", ""
     ]
     for source in active_sources: report_md.append(f"- **{source.label}:** {source_counts[source.label]} canal(is)")
@@ -2053,7 +1690,7 @@ def main() -> None:
         val_md.append(f"- **{v['name']}** ({v['source']}): Agora **{now_title}** - Confiança **{v['confidence']}%**")
     (OUTPUT_DIR / "validation.md").write_text("\n".join(val_md) + "\n", "utf-8")
 
-    print(f"Sucesso! EPG gerado com {programme_count} programas em {ids_count} canais base (Zero TVG-ID).")
+    print(f"Sucesso! EPG gerado com {programme_count} programas em {ids_count} canais base.")
 
 if __name__ == "__main__":
     main()
