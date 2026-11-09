@@ -45,11 +45,66 @@ jobs:
           wait
           echo "Todos os extratores locais foram finalizados."
 
-      - name: Compilar dicionário persistente
+      - name: Compilar e Higienizar Dicionário (Preservando Esportes/PPV)
         run: |
           if [ -f "compile_dictionary.py" ]; then
             python3 compile_dictionary.py
           fi
+          python3 - << 'EOF'
+          import json, re
+          from pathlib import Path
+
+          p = Path("channels.json")
+          if p.exists():
+              data = json.loads(p.read_text("utf-8"))
+              channels = data.get("channels", []) if isinstance(data, dict) else data
+              
+              # Lixo real que nunca tem guia de TV (VOD, 24h, Rádios, Adultos, Câmeras avulsas)
+              JUNK_GROUPS = {"VOD", "FILMES", "SERIES", "SÉRIES", "LANCAMENTO", "LANÇAMENTO", "24H", "24HS", "24 HORAS", "ADULTO", "XXX", "RADIOS", "RÁDIOS"}
+              JUNK_NAME_RE = re.compile(
+                  r'(\b24\s*H(?:S|ORAS)?\b|\bS\d{1,2}\s*E\d{1,3}\b|\bT\d{1,2}\s*EP?\d{1,3}\b|\bCAM\s*\d+\b|\bMOSAICO\b|\bTESTE\b|\bR[AÁ]DIO\b|\bFM\b|\bAM\b|^[0-9\W_]+$)',
+                  re.IGNORECASE
+              )
+              # Palavras que garantem proteção total (Nunca são removidas, mesmo que tenham números ou parênteses)
+              PROTECTED_SPORTS_RE = re.compile(
+                  r'(PREMIERE|SPORTV|ESPN|COMBATE|BAND\s*SPORTS|FOX\s*SPORTS|TNT\s*SPORTS|CAZ[EÉ]|GOAT|DAZN|PARAMOUNT|DISNEY|MAX|HBO|TELECINE|UFC|FIGHT|CONMEBOL|LIBERTADORES|SULAMERICANA|PAULIST[AÃ]O|CARIOCA|COPA|FUTEBOL|NOS+O\s*FUTEBOL|SPORTYNET|X\s*SPORTS|NBA|NFL|MLB|F1|MOTOR)',
+                  re.IGNORECASE
+              )
+
+              cleaned = []
+              removed = 0
+              for ch in channels:
+                  if not isinstance(ch, dict): continue
+                  name = str(ch.get("name", "")).strip()
+                  groups = " | ".join(str(g) for g in (ch.get("groups", []) or [ch.get("group", "")])).upper()
+                  
+                  # Se for canal de Esporte/PPV/Filme conhecido, mantém SEMPRE!
+                  if PROTECTED_SPORTS_RE.search(name) or PROTECTED_SPORTS_RE.search(groups):
+                      cleaned.append(ch)
+                      continue
+                      
+                  # Remove se for grupo de VOD/24h/Adulto ou nome de canal 24h/Série
+                  if any(jg in groups for jg in JUNK_GROUPS) or JUNK_NAME_RE.search(name):
+                      removed += 1
+                      continue
+                      
+                  # Remove canais unitários sem TVID que apareceram só 1 vez com cara de VOD/Filme avulso
+                  entries_cnt = int(ch.get("playlist_entries", 2))
+                  old_ids = ch.get("old_tvg_ids", []) or ch.get("tvg_ids_to_export", [])
+                  if entries_cnt <= 1 and not old_ids and len(name) > 28:
+                      removed += 1
+                      continue
+
+                  cleaned.append(ch)
+
+              if isinstance(data, dict):
+                  data["channels"] = cleaned
+                  data["channel_count"] = len(cleaned)
+              else:
+                  data = {"channels": cleaned}
+              p.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", "utf-8")
+              print(f"Limpeza concluída: {removed} lixos/VODs removidos. {len(cleaned)} canais reais e esportivos mantidos!")
+          EOF
 
       - name: Recuperar Espelho e Cache de Metadados (da branch epg)
         run: |
@@ -69,7 +124,6 @@ jobs:
             exit 1
           fi
           
-          # Copia o metadata_cache.json gerado para a pasta output antes de limpar a árvore
           if [ -f "metadata_cache.json" ]; then
             cp metadata_cache.json output/metadata_cache.json
           fi
