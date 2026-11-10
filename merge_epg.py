@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""EPG Universal Consolidado — Busca em Camadas (Prioridade Local Estrita para Afiliadas)
+"""EPG Universal Consolidado — Busca em Camadas + Blindagem Anti-Gloob/Estrangeiros + Leitura .safe.m3u
 - Camada 1 (Local): Busca estritamente a afiliada/cidade (ex: Globo Asa Branca, TV Gazeta Alagoas, RBS, RPC).
 - Camada 2 (Estadual): Se não houver guia da cidade do interior, usa a cabeça de rede do Estado (ex: Globo PE/Recife, Globo AM/Manaus).
 - Camada 3 (Nacional): Último recurso (Globo SP/RJ) apenas se não houver match nas Camadas 1 e 2.
-- Limpa IDs compostos do EPGShare BR1 com travessão (ex: "Caruaru/PE..Globo.–.TV.Asa.Branca.br").
-- Suporta fonte local "epg_afiliadas.xml" (gerada pelo pull_afiliadas_locais.py) com prioridade máxima.
+- Bloqueia colisões entre Globo Aberta e Gloob/Gloobinho (infantil), Globo News, Globo Novelas e Globo Internacional/Portugal/ON.
+- Lê arquivos .m3u e .safe.m3u locais mesmo quando não possuem linha http:// abaixo do #EXTINF.
 """
 from __future__ import annotations
 
@@ -390,7 +390,7 @@ def normalize_name(value: str) -> str:
 def inferir_emissora_pelo_grupo(nome_normalizado: str, nome_grupo: str) -> str:
     if not nome_grupo: return nome_normalizado
     grupo = nome_grupo.upper()
-    if "GLOBO" in grupo and not nome_normalizado.startswith("GLOBO") and " NEWS" not in nome_normalizado:
+    if "GLOBO" in grupo and not nome_normalizado.startswith("GLOBO") and " NEWS" not in nome_normalizado and "GLOOB" not in nome_normalizado:
         return f"GLOBO {nome_normalizado}"
     if "SBT" in grupo and not nome_normalizado.startswith("SBT") and not any(k in nome_normalizado for k in ("REDETV", "CULTURA", "BRASIL", "APARECIDA", "GAZETA")):
         return f"SBT {nome_normalizado}"
@@ -635,13 +635,11 @@ def extract_epgshare_compound_candidates(channel_id: str) -> list[str]:
     right_clean = re.sub(r'[.\-–—_]+', ' ', right_clean).strip()
     if right_clean:
         extras.append(right_clean)
-        # Se tiver "Globo TV Asa Branca", adiciona também "TV Asa Branca"
         for net in ("Globo", "SBT", "Record", "Band"):
             if right_clean.lower().startswith(net.lower() + " "):
                 sub = right_clean[len(net):].strip()
                 if sub:
                     extras.append(sub)
-                # Combina também com a cidade à esquerda (ex: "Caruaru/PE" -> "Globo Caruaru", "Globo Caruaru PE")
                 city_uf = loc_part.replace(".", " ").replace("/", " ").strip()
                 city_only = loc_part.split("/")[0].replace(".", " ").strip()
                 if city_uf:
@@ -669,6 +667,9 @@ def read_source_from_file(spec: SourceSpec, file_path: Path) -> EpgSource:
         if tag == "channel":
             channel_id = child.attrib.get("id", "").strip()
             if not channel_id: continue
+            # Ignora canais explicitamente estrangeiros (.pt, .us, .ar, .mx, .uk)
+            if re.search(r'\.(pt|us|uk|ar|mx|cl|co|pe|es|fr|de|it)$', channel_id, flags=re.IGNORECASE):
+                continue
             channels[channel_id] = child
             display_names = [(node.text or "").strip() for node in child if local_tag(node) == "display-name" and (node.text or "").strip()]
             names[channel_id] = display_names
@@ -754,8 +755,7 @@ _AFFILIATE_PATTERNS = (
     r'TV\s+TAROBA|TV\s+MANAIRA)\b'
 )
 
-
-# --- Guardas de rede/UF (evita SBT/Record/Band herdarem grade da Globo e UF errada) ---
+# --- Guardas de rede/UF e Blindagem Anti-Gloob/Estrangeiros ---
 _NETWORK_PREFIXES = {
     "GLOBO": ("GLOBO", "TV GLOBO", "REDE GLOBO"),
     "SBT": ("SBT",),
@@ -782,18 +782,38 @@ def _alias_belongs_to_network(alias: str, network: str) -> bool:
     return True
 
 def _network_of_normalized(value: str) -> str:
+    # Nunca classificar GLOOB, GLOBONEWS ou GLOBOPLAYNOVELAS como rede aberta GLOBO!
+    if "GLOOB" in value or "GLOBONEWS" in value or "NOVELA" in value:
+        return ""
     for net in ("GLOBO", "SBT", "RECORD", "BAND"):
-        if value.startswith(net):
+        if value.startswith(net) or value.startswith(f"TV{net}") or value.startswith(f"REDE{net}"):
             return net
     return ""
 
 def _fuzzy_incompatible(alias: str, candidate: str) -> bool:
-    """True quando a aproximação cruzaria emissoras ou UFs diferentes (GLOBOPE ~ GLOBOSP)."""
+    """True quando a aproximação cruzaria Globo Aberta com Gloob (infantil), Globo Internacional/ON/News ou UFs diferentes."""
+    # 1. Bloqueio absoluto entre GLOOB (infantil) e qualquer canal que não seja GLOOB
+    if ("GLOOB" in alias) != ("GLOOB" in candidate):
+        return True
+    # 2. Bloqueio absoluto entre canais NEWS (GloboNews, RecordNews, BandNews, SBTNews) e canais abertos
+    if ("NEWS" in alias) != ("NEWS" in candidate):
+        return True
+    # 3. Bloqueio absoluto entre canais de NOVELAS (Globoplay Novelas / Viva) e Globo aberta
+    if ("NOVELA" in alias) != ("NOVELA" in candidate):
+        return True
+    # 4. Bloqueio de canais internacionais/estrangeiros da Globo/Record/PFC para canais locais brasileiros
+    foreign_markers = ("INTERNACIONAL", "PORTUGAL", "AFRICA", "EUROPA", "GLOBOON", "GLOBONOW", "AMERICAS", "CABOVERDE", "MOZAMBIQUE")
+    if any(fm in candidate for fm in foreign_markers) and not any(fm in alias for fm in foreign_markers):
+        return True
+
     na, nc = _network_of_normalized(alias), _network_of_normalized(candidate)
     if na and nc:
         if na != nc:
             return True
-        ra = re.sub(r"^TV", "", alias[len(na):]); rc = re.sub(r"^TV", "", candidate[len(nc):])
+        ra = re.sub(r"^(TV|REDE)", "", alias)
+        ra = re.sub(rf"^{na}", "", ra)
+        rc = re.sub(r"^(TV|REDE)", "", candidate)
+        rc = re.sub(rf"^{nc}", "", rc)
         if ra != rc and ra in _UF_CODES and rc in _UF_CODES:
             return True
     return False
@@ -821,7 +841,6 @@ def expand_open_tv_tiers(nome_limpo: str, grupo: str) -> tuple[list[str], list[s
     if not network:
         return tier1_local, tier2_state, tier3_national
 
-    # Desmembra nome específico da afiliada (Tier 1)
     without_net = re.sub(rf'^{network}(?:\s+TV)?\s+', '', nome_limpo).strip()
     if without_net and without_net != nome_limpo:
         tier1_local.append(without_net)
@@ -837,7 +856,6 @@ def expand_open_tv_tiers(nome_limpo: str, grupo: str) -> tuple[list[str], list[s
         if city_no_uf and city_no_uf != city_only:
             tier1_local.append(f"{network} {city_no_uf}")
 
-    # Mapeamentos diretos de afiliadas locais (Tier 1) e cabeças de rede estaduais (Tier 2)
     if "ASA BRANCA" in nome_limpo or "CARUARU" in nome_limpo:
         tier1_local.extend(["TV ASA BRANCA", "GLOBO TV ASA BRANCA", "GLOBO ASA BRANCA", "GLOBO CARUARU"])
         tier2_state.extend(["GLOBO NORDESTE", "GLOBO RECIFE", "GLOBO PERNAMBUCO", "GLOBO PE"])
@@ -939,7 +957,6 @@ def expand_open_tv_tiers(nome_limpo: str, grupo: str) -> tuple[list[str], list[s
     if "TV JORNAL" in nome_limpo or (network == "SBT" and re.search(r"\bJORNAL\b", nome_limpo)):
         tier1_local.extend(["TV JORNAL", "SBT RECIFE", "SBT PERNAMBUCO", "SBT PE"])
 
-    # Tier 2: Cabeça de rede do Estado pela UF
     uf_match = re.search(r'\b(SP|RJ|RS|MG|BA|PR|PE|CE|PA|MA|SC|GO|PB|ES|AM|RN|AL|PI|MT|DF|MS|SE|RO|TO|AC|AP|RR)\b', nome_limpo)
     if uf_match:
         uf = uf_match.group(1)
@@ -951,9 +968,8 @@ def expand_open_tv_tiers(nome_limpo: str, grupo: str) -> tuple[list[str], list[s
             if network == "RECORD":
                 tier2_state.append(f"RECORD TV {state_alias}")
 
-    # Tier 3: Fallback Nacional (Só usado se nenhuma fonte tiver nem Tier 1 nem Tier 2!)
     if network == "GLOBO":
-        tier3_national.extend(["GLOBO SP", "GLOBO SAO PAULO", "TV GLOBO", "REDE GLOBO", "GLOBO RJ", "GLOBO RIO", "GLOBO"])
+        tier3_national.extend(["GLOBO SP", "GLOBO SAO PAULO", "TV GLOBO", "REDE GLOBO", "GLOBO RJ", "GLOBO RIO"])
     elif network == "SBT":
         tier3_national.extend(["SBT SP", "SBT SAO PAULO", "SBT", "SBT NACIONAL"])
     elif network == "RECORD":
@@ -1070,21 +1086,31 @@ def find_match_in_tier(source: EpgSource, tier_aliases: list[str], source_ids: l
 
 def find_tiered_matches_across_sources(active_sources: list[EpgSource], alias_tiers: list[list[str]], source_ids: list[str]) -> list[ChannelMatch]:
     """Procura primeiro na Camada 1 (específica local) em todas as fontes ativas.
-    Se encontrar pelo menos uma fonte com programação válida na Camada 1, USA APENAS A CAMADA 1!
-    Só desce para a Camada 2 (estadual) ou Camada 3 (nacional) se nenhuma fonte tiver programas na camada anterior."""
+    Trava na Camada 1 se houver pelo menos 1 match exato (1.0) ou da fonte Afiliadas Locais, ou >=2 matches com programas.
+    Se a Camada 1 tiver apenas 1 match fuzzy isolado e duvidoso, combina com a Camada 2 para evitar falso positivo."""
+    collected_valid: list[ChannelMatch] = []
     fallback_matches: list[ChannelMatch] = []
+
     for tier_idx, tier_aliases in enumerate(alias_tiers, start=1):
+        already_matched_sources = {m.source.spec.key for m in collected_valid}
         tier_matches = [
             m for source in active_sources
-            if (m := find_match_in_tier(source, tier_aliases, source_ids if tier_idx == 1 else None, tier_num=tier_idx)) is not None
+            if source.spec.key not in already_matched_sources
+            and (m := find_match_in_tier(source, tier_aliases, source_ids if tier_idx == 1 else None, tier_num=tier_idx)) is not None
         ]
-        # Verifica se há pelo menos uma fonte com programação real nesta camada
         valid_with_rows = [m for m in tier_matches if m.source.rows.get(m.channel_id)]
         if valid_with_rows:
-            return valid_with_rows
+            collected_valid.extend(valid_with_rows)
+            has_strong_match = any(
+                m.match_score >= 0.999 or m.source.spec.family == "afiliadas_locais" or m.match_score >= 0.90
+                for m in collected_valid
+            )
+            if has_strong_match or len(collected_valid) >= 2:
+                return collected_valid
         if tier_matches and not fallback_matches:
             fallback_matches = tier_matches
-    return fallback_matches
+
+    return collected_valid if collected_valid else fallback_matches
 
 def manual_override(overrides: dict[str, object], target_id: str) -> tuple[str | None, str | None]:
     item = (overrides.get("by_target_id", {}) or {}).get(target_id)
@@ -1719,8 +1745,6 @@ def write_epg_stream(
                     if n not in existing_names:
                         existing_names.append(n)
 
-    # Cada nome (display-name) passa a pertencer a um único canal: o player que casa
-    # por tvg-name nunca encontra o mesmo nome em duas grades diferentes.
     _deduped = dedupe_display_names({oid: [oid, *v[2]] for oid, v in xml_id_to_data.items()})
     for oid, (chosen_, stitched_, _) in list(xml_id_to_data.items()):
         xml_id_to_data[oid] = (chosen_, stitched_, [n for n in _deduped[oid] if n != oid])
@@ -1731,7 +1755,7 @@ def write_epg_stream(
                 gz.write(data)
                 if plain is not None: plain.write(data)
 
-            generator = "EPG Universal Otimizado (Afiliadas Locais Camada 1 + Filmes Limpos)"
+            generator = "EPG Universal Otimizado (Afiliadas Locais Camada 1 + Blindagem Anti-Gloob)"
             source_name = "Consolidado Inteligente de Múltiplas Fontes"
             emit((f"<?xml version='1.0' encoding='utf-8'?>\n<tv generator-info-name={quoteattr(generator)} source-info-name={quoteattr(source_name)}>\n").encode("utf-8"))
 
@@ -1776,7 +1800,7 @@ def write_epg_stream(
     return programme_count, len(xml_id_to_data)
 
 def main() -> None:
-    print("Iniciando geração de EPG (Prioridade Estrita para Grade Local de Afiliadas)...")
+    print("Iniciando geração de EPG (Prioridade Estrita para Grade Local + Blindagem Anti-Gloob)...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -1814,49 +1838,55 @@ def main() -> None:
             rec["group"] = group
 
     def parse_m3u_file_into_records(m3u_file: Path) -> int:
+        """Lê tanto arquivos .m3u completos (com URL) quanto arquivos .safe.m3u higienizados (apenas #EXTINF)."""
         count = 0
-        with m3u_file.open("r", encoding="utf-8", errors="ignore") as f:
-            current_extinf = None
-            for line in f:
-                line = line.strip()
-                if not line: continue
-                if line.startswith("#EXTINF:"):
-                    current_extinf = line
-                elif (line.startswith("http") or line.startswith("rtmp")) and current_extinf:
-                    lower_url = line.split("?")[0].lower()
-                    if lower_url.endswith(('.mp4', '.mkv', '.avi', '.mov', '.wmv', '.flv', '.webm')):
-                        current_extinf = None
-                        continue
+        raw_lines = m3u_file.read_text("utf-8", errors="ignore").splitlines()
+        idx = 0
+        while idx < len(raw_lines):
+            line = raw_lines[idx].strip()
+            if not line.startswith("#EXTINF:"):
+                idx += 1
+                continue
 
-                    tvg_id_match = re.search(r'tvg-id="(.*?)"', current_extinf, re.IGNORECASE)
-                    tvg_name_match = re.search(r'tvg-name="(.*?)"', current_extinf, re.IGNORECASE)
-                    group_match = re.search(r'group-title="(.*?)"', current_extinf, re.IGNORECASE)
-                    name_match = re.search(r',([^,]*?)$', current_extinf)
-                    
-                    tvg_id = tvg_id_match.group(1).strip() if tvg_id_match else ""
-                    tvg_name = html.unescape(tvg_name_match.group(1).strip()) if tvg_name_match else ""
-                    group = group_match.group(1).strip() if group_match else ""
-                    name = html.unescape(name_match.group(1).strip()) if name_match else ""
-                    current_extinf = None
-                    
-                    if any(blacklisted in group.upper() for blacklisted in VOD_BLACKLIST):
-                        continue
-                        
-                    target_id = tvg_name or name
-                    if not target_id: continue
-                    
-                    name_upper = target_id.upper()
-                    if re.search(r'\bS\d{1,3}\s*E\d{1,3}\b|\bT\d{1,3}\s*EP?\d{1,3}\b|\b24HS?\b|^24\s*H\b', name_upper):
-                        continue
-                    
-                    merge_channel_record(
-                        ch_id=target_id,
-                        name=name or tvg_name,
-                        aliases=[x for x in (tvg_name, name) if x],
-                        tvg_ids=[tvg_id] if tvg_id else [],
-                        group=group,
-                    )
-                    count += 1
+            current_extinf = line
+            next_line = raw_lines[idx + 1].strip() if (idx + 1) < len(raw_lines) else ""
+            if next_line.startswith(("http://", "https://", "rtmp://")):
+                idx += 2
+                lower_url = next_line.split("?")[0].lower()
+                if lower_url.endswith(('.mp4', '.mkv', '.avi', '.mov', '.wmv', '.flv', '.webm')):
+                    continue
+            else:
+                idx += 1
+
+            tvg_id_match = re.search(r'tvg-id="(.*?)"', current_extinf, re.IGNORECASE)
+            tvg_name_match = re.search(r'tvg-name="(.*?)"', current_extinf, re.IGNORECASE)
+            group_match = re.search(r'group-title="(.*?)"', current_extinf, re.IGNORECASE)
+            name_match = re.search(r',([^,]*?)$', current_extinf)
+            
+            tvg_id = tvg_id_match.group(1).strip() if tvg_id_match else ""
+            tvg_name = html.unescape(tvg_name_match.group(1).strip()) if tvg_name_match else ""
+            group = html.unescape(group_match.group(1).strip()) if group_match else ""
+            name = html.unescape(name_match.group(1).strip()) if name_match else ""
+            
+            if any(blacklisted in group.upper() for blacklisted in VOD_BLACKLIST):
+                continue
+                
+            target_id = tvg_name or name
+            if not target_id:
+                continue
+            
+            name_upper = target_id.upper()
+            if re.search(r'\bS\d{1,3}\s*E\d{1,3}\b|\bT\d{1,3}\s*EP?\d{1,3}\b|\b24HS?\b|^24\s*H\b', name_upper):
+                continue
+            
+            merge_channel_record(
+                ch_id=target_id,
+                name=name or tvg_name,
+                aliases=[x for x in (tvg_name, name) if x],
+                tvg_ids=[tvg_id] if tvg_id else [],
+                group=group,
+            )
+            count += 1
         return count
 
     if CATALOG_PATH.exists():
