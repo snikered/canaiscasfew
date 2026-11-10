@@ -122,5 +122,91 @@ class BrasiliaECampinas(unittest.TestCase):
         self.assertFalse(c("GLOBO EPTV CAMPINAS", "EPTVCampinas.br"))  # Globo pode usar EPTV
 
 
+# ---------------------------------------------------------------- fusão de fontes
+import gzip
+import tempfile
+import xml.etree.ElementTree as ET
+from datetime import datetime, timedelta, timezone
+from types import SimpleNamespace
+
+
+def _xmltv(channels: dict, programmes: dict) -> Path:
+    root = ET.Element("tv")
+    for cid, dn in channels.items():
+        ch = ET.SubElement(root, "channel", id=cid)
+        ET.SubElement(ch, "display-name").text = dn
+    for cid, rows in programmes.items():
+        for start, stop, title in rows:
+            pr = ET.SubElement(root, "programme", start=start.strftime("%Y%m%d%H%M%S +0000"),
+                               stop=stop.strftime("%Y%m%d%H%M%S +0000"), channel=cid)
+            ET.SubElement(pr, "title").text = title
+    f = tempfile.NamedTemporaryFile(suffix=".xml.gz", delete=False)
+    f.write(gzip.compress(ET.tostring(root))); f.close()
+    return Path(f.name)
+
+
+def _spec(key="s1"):
+    return m.SourceSpec(key=key, label=key, url="", priority=1, family="f", vote_weight=1.0)
+
+
+T0 = datetime(2026, 11, 10, 12, 0, tzinfo=timezone.utc)
+
+
+class PlaceholdersEFusao(unittest.TestCase):
+    def test_no_data_nao_e_programa(self):
+        self.assertFalse(m.is_meaningful_programme(m.normalize_programme_title("No Data")))
+        self.assertFalse(m.is_meaningful_programme(m.normalize_programme_title("NO DATA")))
+        self.assertTrue(m.is_meaningful_programme(m.normalize_programme_title("Jornal da Band")))
+
+    def test_canal_so_com_no_data_fica_sem_grade(self):
+        rows = [(T0 + timedelta(minutes=20 * i), T0 + timedelta(minutes=20 * (i + 1)), "No Data") for i in range(73)]
+        real = [(T0 + timedelta(hours=i), T0 + timedelta(hours=i + 1), f"Programa {i}") for i in range(6)]
+        path = _xmltv({"BandCampinas.br": "BAND CAMPINAS", "BandSP.br": "BAND SP"},
+                      {"BandCampinas.br": rows, "BandSP.br": real})
+        src = m.read_source_from_file(_spec(), path)
+        self.assertNotIn("BandCampinas.br", src.rows)
+        self.assertEqual(len(src.rows["BandSP.br"]), 6)
+
+    def test_canal_preenchido_com_o_proprio_nome_fica_sem_grade(self):
+        rows = [(T0 + timedelta(hours=i), T0 + timedelta(hours=i + 1), "BAND CAMPINAS") for i in range(8)]
+        path = _xmltv({"BandCampinas.br": "BAND CAMPINAS"}, {"BandCampinas.br": rows})
+        self.assertNotIn("BandCampinas.br", m.read_source_from_file(_spec(), path).rows)
+
+    def _ev(self, key, rows, comparisons=()):
+        els = []
+        for start, stop, title in rows:
+            el = ET.Element("programme", start=start.strftime("%Y%m%d%H%M%S +0000"),
+                            stop=stop.strftime("%Y%m%d%H%M%S +0000"), channel="x")
+            ET.SubElement(el, "title").text = title
+            els.append(m.ProgrammeRow(start=start, stop=stop, title=title,
+                                      normalized_title=m.normalize_programme_title(title), element=el))
+        src = SimpleNamespace(spec=SimpleNamespace(key=key), rows={"c": els})
+        return SimpleNamespace(match=SimpleNamespace(source=src, channel_id="c"), comparisons=list(comparisons))
+
+    def _stitch(self, evs):
+        return m.stitch_multi_source_schedule(evs, "BAND CAMPINAS", "BAND CAMPINAS",
+                                              T0 - timedelta(hours=1), T0 + timedelta(hours=12), {})
+
+    def test_candidata_nao_verificada_nao_preenche_lacuna(self):
+        lider = self._ev("lider", [(T0, T0 + timedelta(hours=1), "Jornal"),
+                                   (T0 + timedelta(hours=2), T0 + timedelta(hours=3), "Novela")],
+                         comparisons=[{"other_source_key": "intrusa", "agreement": 0.05, "comparable": 20, "detected_shift": 0}])
+        intrusa = self._ev("intrusa", [(T0 + timedelta(hours=1), T0 + timedelta(hours=2), "Resenha ESPN")])
+        titulos = [e.findtext("title") for e in self._stitch([lider, intrusa])]
+        self.assertEqual(titulos, ["Jornal", "Novela"])
+
+    def test_candidata_sem_dados_comparaveis_tambem_fica_de_fora(self):
+        lider = self._ev("lider", [(T0, T0 + timedelta(hours=1), "Jornal")], comparisons=[])
+        outra = self._ev("outra", [(T0 + timedelta(hours=1), T0 + timedelta(hours=2), "Qualquer coisa")])
+        self.assertEqual([e.findtext("title") for e in self._stitch([lider, outra])], ["Jornal"])
+
+    def test_candidata_verificada_preenche_lacuna(self):
+        lider = self._ev("lider", [(T0, T0 + timedelta(hours=1), "Jornal"),
+                                   (T0 + timedelta(hours=2), T0 + timedelta(hours=3), "Novela")],
+                         comparisons=[{"other_source_key": "amiga", "agreement": 0.9, "comparable": 20, "detected_shift": 0}])
+        amiga = self._ev("amiga", [(T0 + timedelta(hours=1), T0 + timedelta(hours=2), "Boletim")])
+        self.assertEqual([e.findtext("title") for e in self._stitch([lider, amiga])], ["Jornal", "Boletim", "Novela"])
+
+
 if __name__ == "__main__":
     unittest.main()

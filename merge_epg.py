@@ -178,6 +178,11 @@ PLACEHOLDER_TITLES = {
     "NO INFORMATION",
     "OFF AIR",
     "ENCERRAMENTO",
+    # placeholders de fontes (ex.: IPTV-EPG BR publica 73 blocos "No Data" por dia)
+    "NO DATA", "NODATA", "NO DATA AVAILABLE", "NO EPG", "NO EPG AVAILABLE", "EPG NOT AVAILABLE",
+    "NOT AVAILABLE", "UNAVAILABLE", "UNKNOWN", "TBD", "N A", "NA",
+    "SEM DADOS", "SEM INFORMACAO", "SEM INFORMACOES", "INFORMACAO INDISPONIVEL",
+    "PROGRAMA INDISPONIVEL", "DADOS INDISPONIVEIS", "FORA DO AR", "FORA DE AR",
 }
 
 NON_SERIES_CHANNEL_KEYWORDS = (
@@ -580,7 +585,7 @@ def is_meaningful_programme(norm_title: str) -> bool:
         return False
     if norm_title in PLACEHOLDER_TITLES:
         return False
-    for bad in ("SEM PROGRAMACAO", "NAO DISPONIVEL", "PROGRAMACAO INDISPONIVEL"):
+    for bad in ("SEM PROGRAMACAO", "NAO DISPONIVEL", "PROGRAMACAO INDISPONIVEL", "NO DATA AVAILABLE", "NO EPG DATA"):
         if bad in norm_title:
             return False
     return True
@@ -847,6 +852,16 @@ def read_source_from_file(spec: SourceSpec, file_path: Path) -> EpgSource:
                 continue
             programs[channel_id].append(child)
             rows[channel_id].append(ProgrammeRow(start=start, stop=stop or start, title=title, normalized_title=norm_title, element=child))
+
+    for channel_id in list(rows):
+        # fonte que preenche a grade com o NOME DO PRÓPRIO CANAL (>=80% dos blocos) não tem programação real
+        own_names = {normalize_programme_title(n) for n in [*names.get(channel_id, []), channel_id]}
+        own_names.discard("")
+        ch_rows = rows[channel_id]
+        if len(ch_rows) >= 5 and sum(1 for r in ch_rows if r.normalized_title in own_names) / len(ch_rows) >= 0.8:
+            del rows[channel_id]; programs.pop(channel_id, None)
+        elif len(ch_rows) < 2:
+            del rows[channel_id]; programs.pop(channel_id, None)
 
     for channel_id, channel_rows in rows.items():
         channel_rows.sort(key=lambda item: item.start)
@@ -1308,31 +1323,6 @@ def now_next_for(source: EpgSource, channel_id: str, now: datetime) -> tuple[dic
             if current is not None: break
     return current, next_item
 
-def get_clean_aliases(entry: dict[str, object]) -> list[str]:
-    values = []
-    raw_name = str(entry.get("name", "")).strip()
-    if raw_name:
-        values.append(raw_name)
-        values.append(raw_name.upper())
-        values.append(raw_name.title())
-    if entry.get("tvg_names"):
-        values.extend(str(x).strip() for x in entry.get("tvg_names", []) if x)
-    if entry.get("aliases"):
-        values.extend(str(x).strip() for x in entry.get("aliases", []) if x)
-        
-    norm_clean = normalizar_canal(raw_name)
-    if norm_clean:
-        values.append(norm_clean)
-        values.append(norm_clean.title())
-    for syn in CHANNEL_SYNONYMS.get(norm_clean, []):
-        values.append(syn)
-        values.append(syn.title())
-
-    return generate_quality_variants(values)
-
-_AGREEMENT_CACHE: dict[tuple[str, str, str, str], dict[str, object]] = {}
-_HEALTH_CACHE: dict[tuple[str, str], dict[str, object]] = {}
-
 def _calc_agreement(a_rows: list[ProgrammeRow], b_rows: list[ProgrammeRow], offset: timedelta) -> dict[str, object]:
     similarities = []
     b_floor = 0
@@ -1759,7 +1749,11 @@ def stitch_multi_source_schedule(
     shift_by_source_key: dict[str, int] = {leader_ev.match.source.spec.key: 0}
     for comp in leader_ev.comparisons:
         other_key = str(comp.get("other_source_key", ""))
-        if comp.get("agreement") and float(comp["agreement"]) >= 0.50:
+        agreement = comp.get("agreement")
+        # só entra no preenchimento de lacunas quem CONCORDA com a líder em programação comparável;
+        # candidata sem dados comparáveis ou divergente (outro canal, placeholder, aproximação errada) fica de fora
+        if isinstance(agreement, float) and agreement >= AGREEMENT_THRESHOLD \
+                and int(comp.get("comparable") or 0) >= MIN_COMPARABLE_PROGRAMMES:
             shift_by_source_key[other_key] = int(comp.get("detected_shift") or 0)
 
     all_aligned_progs_by_source: list[list[dict[str, Any]]] = []
@@ -1768,6 +1762,7 @@ def stitch_multi_source_schedule(
     for ev in all_evaluations:
         src = ev.match.source
         cid = ev.match.channel_id
+        if src.spec.key not in shift_by_source_key: continue
         fixed_rows = src.rows.get(cid, [])
         if not fixed_rows: continue
 
@@ -1924,6 +1919,11 @@ def write_epg_stream(
             if out_id not in xml_id_to_data:
                 xml_id_to_data[out_id] = (chosen, stitched, list(all_names))
             else:
+                prev_chosen = xml_id_to_data[out_id][0]
+                same_channel = (prev_chosen.match.source.spec.key, prev_chosen.match.channel_id) == (chosen.match.source.spec.key, chosen.match.channel_id)
+                if not same_channel and name_key(channel_name) != name_key(out_id):
+                    print(f"Aviso: id exportado '{out_id}' disputado por canais diferentes ('{channel_name}'); nomes não mesclados.")
+                    continue
                 existing_names = xml_id_to_data[out_id][2]
                 for n in all_names:
                     if n not in existing_names:
@@ -2259,6 +2259,7 @@ def main() -> None:
             if forced_ev := next((ev for ev in evaluations if ev.match.source.spec.key == override_source_key and ev.match.channel_id == override_id), None):
                 chosen = forced_ev
 
+        evaluations = [chosen, *[ev for ev in evaluations if ev is not chosen]]
         selected.append((entry, chosen, evaluations, forced))
         first_match = min(evaluations, key=lambda ev: ev.match.source.spec.priority) if evaluations else chosen
         changed = first_match.match.source is not chosen.match.source
