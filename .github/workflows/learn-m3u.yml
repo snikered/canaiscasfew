@@ -27,11 +27,28 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Extrair canais de todos os .m3u (incluindo .safe.m3u sem URL) e proteger credenciais
+      - name: Extrair canais de todos os .m3u e proteger credenciais
         run: |
           python3 - << 'EOF'
           import glob, html, json, re, subprocess
           from pathlib import Path
+
+          # Se algum arquivo em learning/ foi esvaziado por engano no commit anterior do bot,
+          # tenta restaurar a versão original do histórico do git antes de processar!
+          for p_str in glob.glob("learning/*.m3u") + glob.glob("learning/*.m3u8") + glob.glob("*.m3u"):
+              p = Path(p_str)
+              if p.exists() and p.stat().st_size < 50:
+                  print(f"Arquivo {p_str} está vazio ({p.stat().st_size} bytes). Buscando versão original no histórico do Git...")
+                  try:
+                      commits = subprocess.check_output(["git", "log", "--format=%H", "--", p_str], text=True).splitlines()
+                      for c_sha in commits:
+                          content = subprocess.check_output(["git", "show", f"{c_sha}:{p_str}"], text=True, errors="ignore")
+                          if len(content.strip()) > 100:
+                              p.write_text(content, "utf-8")
+                              print(f"  -> Restaurado com sucesso do commit {c_sha[:7]} ({len(content)} bytes)!")
+                              break
+                  except Exception as e:
+                      print(f"  -> Não foi possível restaurar via git log: {e}")
 
           m3u_files = sorted(set(
               glob.glob("*.m3u") + glob.glob("*.m3u8") +
@@ -39,7 +56,7 @@ jobs:
               glob.glob("**/*.m3u", recursive=True)
           ))
 
-          print(f"Arquivos M3U encontrados ({len(m3u_files)}): {m3u_files}")
+          print(f"Arquivos M3U encontrados ({len(m3u_files)}): {m3u_files}", flush=True)
           if not m3u_files:
               print("Nenhum arquivo .m3u encontrado.")
               exit(0)
@@ -74,11 +91,15 @@ jobs:
                                   "name": strip_qualities(raw_n) or raw_n,
                                   "aliases": set(c.get("aliases", []) or []),
                                   "tvg_ids_to_export": set(c.get("tvg_ids_to_export", []) or []),
+                                  "compatibility_ids": set(c.get("compatibility_ids", []) or []),
+                                  "source_ids": set(c.get("source_ids", []) or []),
                                   "group": str(c.get("group", c.get("group-title", ""))).strip()
                               }
                           else:
                               out[base_key]["aliases"].update(c.get("aliases", []) or [])
                               out[base_key]["tvg_ids_to_export"].update(c.get("tvg_ids_to_export", []) or [])
+                              out[base_key]["compatibility_ids"].update(c.get("compatibility_ids", []) or [])
+                              out[base_key]["source_ids"].update(c.get("source_ids", []) or [])
                   return out
               except Exception as e:
                   print(f"Aviso ao ler {path_str}: {e}")
@@ -88,69 +109,81 @@ jobs:
           total_learned = 0
 
           for m3u_path in m3u_files:
-              print(f"Processando e higienizando: {m3u_path}")
+              p_obj = Path(m3u_path)
+              raw_text = p_obj.read_text("utf-8", errors="ignore")
+              raw_lines = [ln.strip() for ln in raw_text.splitlines() if ln.strip()]
+              print(f"Processando e higienizando: {m3u_path} ({len(raw_lines)} linhas não-vazias)", flush=True)
+              
               sanitized_lines = ["#EXTM3U"]
-              raw_lines = Path(m3u_path).read_text("utf-8", errors="ignore").splitlines()
+              file_learned = 0
               
               idx = 0
               while idx < len(raw_lines):
-                  line = raw_lines[idx].strip()
-                  if not line.startswith("#EXTINF:"):
-                      idx += 1
-                      continue
+                  line = raw_lines[idx]
+                  # Aceita tanto #EXTINF: quanto linhas de listas .safe.m3u que tenham tvg-name/group-title
+                  if line.upper().startswith("#EXTINF") or ('tvg-' in line.lower() and ',' in line):
+                      extinf_line = line if line.upper().startswith("#EXTINF") else f"#EXTINF:-1 {line}"
+                      next_line = raw_lines[idx + 1] if (idx + 1) < len(raw_lines) else ""
+                      has_stream_url = next_line.lower().startswith(("http://", "https://", "rtmp://", "rtsp://"))
+                      if has_stream_url:
+                          idx += 2
+                          lower_url = next_line.split("?")[0].lower()
+                          if lower_url.endswith(('.mp4', '.mkv', '.avi', '.mov', '.wmv', '.flv', '.webm')):
+                              continue
+                      else:
+                          idx += 1
 
-                  extinf_line = line
-                  next_line = raw_lines[idx + 1].strip() if (idx + 1) < len(raw_lines) else ""
-                  has_stream_url = next_line.startswith(("http://", "https://", "rtmp://"))
-                  if has_stream_url:
-                      idx += 2
-                      lower_url = next_line.split("?")[0].lower()
-                      if lower_url.endswith(('.mp4', '.mkv', '.avi', '.mov', '.wmv', '.flv', '.webm')):
+                      tvg_id_m = re.search(r'tvg-id="(.*?)"', extinf_line, re.I)
+                      tvg_name_m = re.search(r'tvg-name="(.*?)"', extinf_line, re.I)
+                      group_m = re.search(r'group-title="(.*?)"', extinf_line, re.I)
+                      name_m = re.search(r',([^,]*?)$', extinf_line)
+
+                      tvg_id = tvg_id_m.group(1).strip() if tvg_id_m else ""
+                      tvg_name = html.unescape(tvg_name_m.group(1).strip()) if tvg_name_m else ""
+                      group = html.unescape(group_m.group(1).strip()) if group_m else ""
+                      name = html.unescape(name_m.group(1).strip()) if name_m else ""
+
+                      if any(b in group.upper() for b in VOD_BLACKLIST):
                           continue
+
+                      target = name or tvg_name
+                      if not target:
+                          continue
+                      if re.search(r'\bS\d{1,3}\s*E\d{1,3}\b|\bT\d{1,3}\s*EP?\d{1,3}\b|\b24HS?\b|^24\s*H\b', target.upper()):
+                          continue
+
+                      base_clean = strip_qualities(target) or target
+                      base_key = base_clean.upper()
+
+                      if base_key not in merged:
+                          merged[base_key] = {
+                              "id": base_clean,
+                              "name": base_clean,
+                              "aliases": set(),
+                              "tvg_ids_to_export": set(),
+                              "compatibility_ids": set(),
+                              "source_ids": set(),
+                              "group": group
+                          }
+                      if name: merged[base_key]["aliases"].add(name)
+                      if tvg_name: merged[base_key]["aliases"].add(tvg_name)
+                      if tvg_id: merged[base_key]["tvg_ids_to_export"].add(tvg_id)
+                      if group and not merged[base_key]["group"]:
+                          merged[base_key]["group"] = group
+
+                      sanitized_lines.append(extinf_line)
+                      sanitized_lines.append("http://stream.local/live.ts")
+                      file_learned += 1
+                      total_learned += 1
                   else:
                       idx += 1
 
-                  tvg_id_m = re.search(r'tvg-id="(.*?)"', extinf_line, re.I)
-                  tvg_name_m = re.search(r'tvg-name="(.*?)"', extinf_line, re.I)
-                  group_m = re.search(r'group-title="(.*?)"', extinf_line, re.I)
-                  name_m = re.search(r',([^,]*?)$', extinf_line)
-
-                  tvg_id = tvg_id_m.group(1).strip() if tvg_id_m else ""
-                  tvg_name = html.unescape(tvg_name_m.group(1).strip()) if tvg_name_m else ""
-                  group = html.unescape(group_m.group(1).strip()) if group_m else ""
-                  name = html.unescape(name_m.group(1).strip()) if name_m else ""
-
-                  if any(b in group.upper() for b in VOD_BLACKLIST):
-                      continue
-
-                  target = name or tvg_name
-                  if not target:
-                      continue
-                  if re.search(r'\bS\d{1,3}\s*E\d{1,3}\b|\bT\d{1,3}\s*EP?\d{1,3}\b|\b24HS?\b|^24\s*H\b', target.upper()):
-                      continue
-
-                  base_clean = strip_qualities(target) or target
-                  base_key = base_clean.upper()
-
-                  if base_key not in merged:
-                      merged[base_key] = {
-                          "id": base_clean,
-                          "name": base_clean,
-                          "aliases": set(),
-                          "tvg_ids_to_export": set(),
-                          "group": group
-                      }
-                  if name: merged[base_key]["aliases"].add(name)
-                  if tvg_name: merged[base_key]["aliases"].add(tvg_name)
-                  if tvg_id: merged[base_key]["tvg_ids_to_export"].add(tvg_id)
-                  if group and not merged[base_key]["group"]:
-                      merged[base_key]["group"] = group
-
-                  sanitized_lines.append(extinf_line)
-                  sanitized_lines.append("http://stream.local/live.ts")
-                  total_learned += 1
-
-              Path(m3u_path).write_text("\n".join(sanitized_lines) + "\n", "utf-8")
+              # TRAVA DE SEGURANÇA: Só sobrescreve o arquivo se realmente extraiu canais dele!
+              if file_learned > 0:
+                  p_obj.write_text("\n".join(sanitized_lines) + "\n", "utf-8")
+                  print(f"  -> {file_learned} canais extraídos e higienizados de {m3u_path}.", flush=True)
+              else:
+                  print(f"  -> AVISO: 0 canais extraídos de {m3u_path}. Primeiras 3 linhas do arquivo: {raw_lines[:3]}", flush=True)
 
           final_list = []
           for k in sorted(merged.keys()):
@@ -160,12 +193,14 @@ jobs:
                   "name": v["name"],
                   "aliases": sorted(v["aliases"]),
                   "tvg_ids_to_export": sorted(v["tvg_ids_to_export"]),
+                  "compatibility_ids": sorted(v.get("compatibility_ids", [])),
+                  "source_ids": sorted(v.get("source_ids", [])),
                   "group": v["group"]
               })
 
           Path("channels.json").write_text(json.dumps({"channels": final_list}, ensure_ascii=False, indent=2) + "\n", "utf-8")
           Path("espelho.json").write_text(json.dumps({"channels": final_list}, ensure_ascii=False, indent=2) + "\n", "utf-8")
-          print(f"Concluído! {total_learned} entradas M3U lidas -> {len(final_list)} emissoras únicas salvas no channels.json.")
+          print(f"Concluído! {total_learned} entradas M3U lidas -> {len(final_list)} emissoras únicas salvas.", flush=True)
 
           if Path("compile_dictionary.py").exists():
               subprocess.run(["python3", "compile_dictionary.py"], check=False)
