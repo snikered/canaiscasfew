@@ -935,26 +935,51 @@ def _network_of_normalized(value: str) -> str:
             return net
     return ""
 
-def _fuzzy_incompatible(alias: str, candidate: str) -> bool:
-    if ("GLOOB" in alias) != ("GLOOB" in candidate):
-        return True
-    if ("NEWS" in alias) != ("NEWS" in candidate):
-        return True
-    if ("NOVELA" in alias) != ("NOVELA" in candidate):
-        return True
-    foreign_markers = ("INTERNACIONAL", "PORTUGAL", "AFRICA", "EUROPA", "GLOBOON", "GLOBONOW", "AMERICAS", "CABOVERDE", "MOZAMBIQUE")
-    if any(fm in candidate for fm in foreign_markers) and not any(fm in alias for fm in foreign_markers):
-        return True
+_GLOBO_BRAND_COMPACT = tuple(b.replace(" ", "") for b in _GLOBO_ONLY_BRANDS) + ("NSCTV",)
 
+def _fuzzy_incompatible(alias: str, candidate: str) -> bool:
+    """True quando a aproximação cruzaria emissoras, UFs, cidades ou 'BRASIL' x 'BRASÍLIA'."""
+    if alias == candidate:
+        return False
+    # TVBRASILIA ~ TVBRASIL: capital do DF não é a TV Brasil (EBC)
+    if alias.replace("BRASILIA", "BRASIL") == candidate.replace("BRASILIA", "BRASIL"):
+        return True
+    # o fuzzy não pode "inventar" marca de afiliada da Globo (TVCAMPINAS ~ EPTVCAMPINAS)
+    if candidate.startswith(_GLOBO_BRAND_COMPACT) and not alias.startswith(_GLOBO_BRAND_COMPACT) \
+            and not (alias.startswith("EP") and candidate.startswith("EPTV")):  # "EP CAMPINAS" = EPTV
+        return True
     na, nc = _network_of_normalized(alias), _network_of_normalized(candidate)
     if na and nc:
         if na != nc:
             return True
-        ra = re.sub(r"^(TV|REDE)", "", alias)
-        ra = re.sub(rf"^{na}", "", ra)
-        rc = re.sub(r"^(TV|REDE)", "", candidate)
-        rc = re.sub(rf"^{nc}", "", rc)
+        ra = re.sub(r"^TV", "", alias[len(na):]); rc = re.sub(r"^TV", "", candidate[len(nc):])
         if ra != rc and ra in _UF_CODES and rc in _UF_CODES:
+            return True
+        # mesma emissora, cidades diferentes (SBTCAMPINAS ~ SBTMINAS)
+        if ra and rc and ra != rc and ra not in rc and rc not in ra and ra[:4] != rc[:4] \
+                and SequenceMatcher(None, ra, rc).ratio() < 0.8:
+            return True
+    return False
+
+def _compact_upper(value: str) -> str:
+    v = unicodedata.normalize("NFKD", html.unescape(str(value or "")))
+    return re.sub(r"[^A-Z0-9 ]", " ", "".join(c for c in v if not unicodedata.combining(c)).upper())
+
+def match_conflicts_network(entry_name: str, source: "EpgSource", channel_id: str) -> bool:
+    """SBT/Record/Band não podem receber canal da fonte que é de outra emissora, da TV Brasil,
+    da Rede TV ou afiliada exclusiva da Globo (EPTV, NSC, TV Sergipe...)."""
+    compact = re.sub(r"[^A-Z]", "", _compact_upper(entry_name))
+    net = next((n for n in ("SBT", "RECORD", "BAND") if compact.startswith(n)), "")
+    if not net:
+        return False
+    labels = [channel_id] + list(source.names.get(channel_id, [])[:1])
+    for lab in labels:
+        n = " ".join(_compact_upper(lab).split())
+        for other, prefixes in _NETWORK_PREFIXES.items():
+            if other != net and n.startswith(prefixes):
+                return True
+        if n.startswith(("TV BRASIL", "REDE TV", "REDETV")) or n.startswith(_GLOBO_ONLY_BRANDS) \
+                or n.replace(" ", "").startswith(_GLOBO_BRAND_COMPACT):
             return True
     return False
 
@@ -1199,7 +1224,7 @@ def best_fuzzy(source: EpgSource, aliases: list[str]) -> tuple[str | None, float
     second_score = scored[1][0] if len(scored) > 1 else 0.0
     return best[1], best[0], second_score, f"aproximação {best[0]:.3f}: {best[2]} ~ {best[3]}"
 
-def find_match_in_tier(source: EpgSource, tier_aliases: list[str], source_ids: list[str] | None = None, tier_num: int = 1) -> ChannelMatch | None:
+def find_match_in_tier(source: EpgSource, tier_aliases: list[str], source_ids: list[str] | None = None, tier_num: int = 1, entry_name: str = "") -> ChannelMatch | None:
     if tier_num == 1:
         for raw_sid in (source_ids or []):
             norm_sid = normalize_source_id(raw_sid)
@@ -1209,16 +1234,19 @@ def find_match_in_tier(source: EpgSource, tier_aliases: list[str], source_ids: l
                 return ChannelMatch(source, best_cid, f"id do dicionário: {raw_sid}", 1.0, tier=1)
 
     exact_id, reason = choose_exact(source, tier_aliases)
+    if exact_id and match_conflicts_network(entry_name, source, exact_id):
+        exact_id = None
     if exact_id:
         return ChannelMatch(source, exact_id, reason if tier_num == 1 else f"{reason} (camada {tier_num})", 1.0, tier=tier_num)
     
     fuzzy_id, best_score, second_score, fuzzy_reason = best_fuzzy(source, tier_aliases)
-    if fuzzy_id and best_score >= FUZZY_THRESHOLD and (best_score - second_score) >= FUZZY_MARGIN:
+    if fuzzy_id and best_score >= FUZZY_THRESHOLD and (best_score - second_score) >= FUZZY_MARGIN \
+            and not match_conflicts_network(entry_name, source, fuzzy_id):
         return ChannelMatch(source, fuzzy_id, fuzzy_reason if tier_num == 1 else f"{fuzzy_reason} (camada {tier_num})", best_score, tier=tier_num)
         
     return None
 
-def find_tiered_matches_across_sources(active_sources: list[EpgSource], alias_tiers: list[list[str]], source_ids: list[str]) -> list[ChannelMatch]:
+def find_tiered_matches_across_sources(active_sources: list[EpgSource], alias_tiers: list[list[str]], source_ids: list[str], entry_name: str = "") -> list[ChannelMatch]:
     collected_valid: list[ChannelMatch] = []
     fallback_matches: list[ChannelMatch] = []
 
@@ -1227,7 +1255,7 @@ def find_tiered_matches_across_sources(active_sources: list[EpgSource], alias_ti
         tier_matches = [
             m for source in active_sources
             if source.spec.key not in already_matched_sources
-            and (m := find_match_in_tier(source, tier_aliases, source_ids if tier_idx == 1 else None, tier_num=tier_idx)) is not None
+            and (m := find_match_in_tier(source, tier_aliases, source_ids if tier_idx == 1 else None, tier_num=tier_idx, entry_name=entry_name)) is not None
         ]
         valid_with_rows = [m for m in tier_matches if m.source.rows.get(m.channel_id)]
         if valid_with_rows:
@@ -1483,6 +1511,7 @@ def evaluate_candidates(matches: list[ChannelMatch], now: datetime, max_active_v
             has_programmes,
             -ev.match.tier,
             is_healthy_full_day,
+            int(ev.match.match_score >= 0.999),  # nome exato vence um consenso de aproximações
             consensus_tier,
             round(ev.health_score, 2),
             round(ev.richness_score, 2),
@@ -2211,7 +2240,7 @@ def main() -> None:
         visible_name = str(entry.get("name", ""))
         alias_tiers = aliases_tiers_for(entry)
         source_ids = [str(x) for x in entry.get("source_ids", []) or []]
-        matches = find_tiered_matches_across_sources(active_sources, alias_tiers, source_ids)
+        matches = find_tiered_matches_across_sources(active_sources, alias_tiers, source_ids, visible_name)
 
         override_source_key, override_id = manual_override(overrides, target_id)
         forced = False

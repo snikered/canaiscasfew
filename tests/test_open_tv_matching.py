@@ -93,5 +93,34 @@ class CartoonitoRegressao(unittest.TestCase):
         self.assertFalse([n for n in out["TV BRASIL"] if "Cartoonito" in n])
 
 
+class BrasiliaECampinas(unittest.TestCase):
+    class _Src:
+        names = {}
+
+    def test_brasilia_nao_vira_tv_brasil(self):
+        self.assertTrue(m._fuzzy_incompatible("TVBRASILIA", "TVBRASIL"))
+        self.assertTrue(m._fuzzy_incompatible("RECORDTVBRASILIA", "RECORDTVBRASIL"))
+
+    def test_fuzzy_nao_inventa_marca_da_globo(self):
+        self.assertTrue(m._fuzzy_incompatible("TVCAMPINAS", "EPTVCAMPINAS"))
+        self.assertFalse(m._fuzzy_incompatible("EPCAMPINAS", "EPTVCAMPINAS"))  # abreviação legítima
+
+    def test_mesma_emissora_cidade_diferente(self):
+        self.assertTrue(m._fuzzy_incompatible("SBTCAMPINAS", "SBTMINAS"))
+        self.assertTrue(m._fuzzy_incompatible("RECORDTVMANAUS", "RECORDTVMINAS"))
+        self.assertFalse(m._fuzzy_incompatible("GLOBOTVVANGSJCAMPOS", "GLOBOTVVANGUARDASJDOSCAMPOS"))
+
+    def test_sbt_record_band_nao_recebem_outra_emissora(self):
+        c = lambda nome, cid: m.match_conflicts_network(nome, self._Src, cid)
+        self.assertTrue(c("BAND CAMPINAS", "EPTVCampinas.br"))
+        self.assertTrue(c("RECORD BRASILIA", "TV Brasil"))
+        self.assertTrue(c("SBT SP", "Rede TV"))
+        self.assertTrue(c("BAND TV GOIANIA", "sbt-goiania-tv-serra-dourada"))
+        self.assertTrue(c("RECORDTV FLORIANOPOLIS", "nsc-tv-florianopolis-hd"))
+        self.assertFalse(c("SBT TV ALTEROSA", "TV Alterosa HD"))
+        self.assertFalse(c("BAND BRASILIA", "Band Brasília HD"))
+        self.assertFalse(c("GLOBO EPTV CAMPINAS", "EPTVCampinas.br"))  # Globo pode usar EPTV
+
+
 if __name__ == "__main__":
     unittest.main()
