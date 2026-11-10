@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""EPG Universal Consolidado — Busca em Camadas + Blindagem Anti-Gloob/Estrangeiros + Leitura .safe.m3u
-- Camada 1 (Local): Busca estritamente a afiliada/cidade (ex: Globo Asa Branca, TV Gazeta Alagoas, RBS, RPC).
-- Camada 2 (Estadual): Se não houver guia da cidade do interior, usa a cabeça de rede do Estado (ex: Globo PE/Recife, Globo AM/Manaus).
-- Camada 3 (Nacional): Último recurso (Globo SP/RJ) apenas se não houver match nas Camadas 1 e 2.
-- Bloqueia colisões entre Globo Aberta e Gloob/Gloobinho (infantil), Globo News, Globo Novelas e Globo Internacional/Portugal/ON.
+"""EPG Universal Consolidado — Busca em Camadas + Bloqueio de tvg-id Coringa em Rede Aberta
+- Força o player IPTV a casar todos os canais abertos (Globo, Record, SBT, Band, RedeTV, Cultura)
+  estritamente pelo NOME DO CANAL (<display-name>), impedindo que globosp.br / RecordTV.br
+  joguem a grade de SP em cima das afiliadas da Bahia, Nordeste, Minas, Manaus, etc.
+- Mantém todos os tvg-ids normais dos canais fechados (HBO, SporTV, ESPN, Telecine, Discovery, etc.).
+- Preserva nomes de afiliadas entre parênteses como "GLOBO PE (ASA BRANCA) HD".
+- Bloqueia colisões entre Globo Aberta e Gloob/Gloobinho (infantil) ou Globo Internacional/Portugal/ON.
 - Lê arquivos .m3u e .safe.m3u locais mesmo quando não possuem linha http:// abaixo do #EXTINF.
 """
 from __future__ import annotations
@@ -227,6 +229,21 @@ class CandidateEvaluation:
     richness_score: float; health: dict[str, object]; confidence: int; comparisons: list[dict[str, object]]
 
 CHANNEL_SYNONYMS = {
+    "GLOBO SP": ["GLOBO SAO PAULO", "GLOBO SÃO PAULO", "TV GLOBO SP", "TV GLOBO SAO PAULO"],
+    "GLOBO SAO PAULO": ["GLOBO SP", "GLOBO SÃO PAULO", "TV GLOBO SP"],
+    "GLOBO RJ": ["GLOBO RIO DE JANEIRO", "GLOBO RIO", "TV GLOBO RJ", "TV GLOBO RIO"],
+    "GLOBO RIO DE JANEIRO": ["GLOBO RJ", "GLOBO RIO", "TV GLOBO RJ"],
+    "GLOBO RIO": ["GLOBO RJ", "GLOBO RIO DE JANEIRO"],
+    "GLOBO NORDESTE": ["GLOBO RECIFE", "GLOBO PERNAMBUCO", "GLOBO PE"],
+    "GLOBO RECIFE": ["GLOBO NORDESTE", "GLOBO PERNAMBUCO", "GLOBO PE"],
+    "GLOBO REDE BAHIA": ["TV BAHIA", "GLOBO BAHIA", "GLOBO SALVADOR", "REDE BAHIA"],
+    "TV BAHIA": ["GLOBO REDE BAHIA", "GLOBO BAHIA", "GLOBO SALVADOR", "REDE BAHIA"],
+    "GLOBO BAHIA": ["GLOBO REDE BAHIA", "TV BAHIA", "GLOBO SALVADOR"],
+    "GLOBO MARANHAO": ["TV MIRANTE", "GLOBO TV MIRANTE", "GLOBO SAO LUIS", "GLOBO MA"],
+    "TV MIRANTE": ["GLOBO MARANHAO", "GLOBO MARANHÃO", "GLOBO SAO LUIS"],
+    "GLOBO PE ASA BRANCA": ["TV ASA BRANCA", "GLOBO ASA BRANCA", "GLOBO TV ASA BRANCA", "GLOBO CARUARU"],
+    "GLOBO ASA BRANCA": ["TV ASA BRANCA", "GLOBO PE ASA BRANCA", "GLOBO TV ASA BRANCA", "GLOBO CARUARU"],
+    "TV ASA BRANCA": ["GLOBO ASA BRANCA", "GLOBO PE ASA BRANCA", "GLOBO TV ASA BRANCA"],
     "UNIVERSAL CHANNEL": ["UNIVERSAL TV", "UNIVERSAL"],
     "UNIVERSAL TV": ["UNIVERSAL CHANNEL", "UNIVERSAL"],
     "UNIVERSAL STUDIO": ["STUDIO UNIVERSAL"],
@@ -333,9 +350,13 @@ UF_TO_STATE_AND_CAPITAL = {
 }
 
 def strip_qualities_keep_case(name: str) -> str:
+    """Limpa tags de qualidade (SD/HD/FHD/4K/H265/[1]/(BR2)) MAS preserva nomes de afiliadas
+    ou cidades dentro de parênteses como 'GLOBO PE (ASA BRANCA)'."""
     if not name: return ""
     s = html.unescape(name)
-    s = re.sub(r'\[.*?\]|\(.*?\)|\|.*?\|', ' ', s)
+    s = re.sub(r'\[.*?\]|\|.*?\|', ' ', s)
+    s = re.sub(r'\(\s*(?:SD|HD|FHD|UHD|4K|8K|H\.?264|H\.?265|HEVC|HDR\+?|BR\d*|BACKUP|ALT|ALTERNATIVO|1080P|720P|\d+)\s*\)', ' ', s, flags=re.IGNORECASE)
+    s = re.sub(r'[()]', ' ', s)
     s = re.sub(r'[\¹\²\³\⁴\~]', ' ', s)
     tags = r'\b(SD|HD|FHD|UHD|4K|8K|H\.?264|H\.?265|HEVC|HDR\+?|LEG|LEGENDADO|DUB|DUBLADO|HQ|VIP|VOD|24H[S]?|24/7|1080P|720P|60FPS|PPV|EVENTOS?|ALTERNATIVO|BACKUP|BR2)\b[\*\²\³\¹\⁴\+]*'
     s = re.sub(tags, ' ', s, flags=re.IGNORECASE)
@@ -399,6 +420,19 @@ def inferir_emissora_pelo_grupo(nome_normalizado: str, nome_grupo: str) -> str:
     if "PREMIERE" in grupo and not nome_normalizado.startswith("PREMIERE") and len(nome_normalizado) <= 4: return f"PREMIERE {nome_normalizado}"
     return nome_normalizado
 
+# IDs genéricos ("coringas") que os servidores IPTV repetem em todas as afiliadas abertas do Brasil.
+# Ao NÃO exportar esses IDs no <channel id="..."> do XML, o player IPTV não encontra o ID coringa
+# e é forçado a casar cada afiliada (e também SP/RJ) pelo seu NOME (<display-name>)!
+POISONED_OPEN_TV_IDS = {
+    "globo", "tvglobo", "redeglobo", "globosp", "globorj", "globonacional", "globohd", "globofhd",
+    "record", "recordtv", "rederecord", "recordsp", "recordtvsp", "recordrj", "recordtvrj",
+    "recordtvbrasilia", "recordbrasilia", "recordnacional", "recordhd", "recordtvminas", "recordminas",
+    "recordtvrs", "recordrs", "recordtvba", "recordbahia", "recordtvgoias", "recordgoias",
+    "sbt", "sbtsp", "sbtrj", "sbtnacional", "tvsbt", "sbthd",
+    "band", "bandtv", "tvband", "bandeirantes", "redebandeirantes", "bandsp", "bandrj", "bandhd",
+    "redetv", "redetvsp", "tvbrasil", "tvcultura", "cultura",
+}
+
 def is_valid_provider_tvid(channel_name: str, tvid: str) -> bool:
     if not tvid or len(tvid) < 2: return False
     tvid_clean = re.sub(r'\.(br|us|uk|pt|ar|mx|cl|co|pe|latam|int|bt)$', '', tvid.lower())
@@ -406,11 +440,15 @@ def is_valid_provider_tvid(channel_name: str, tvid: str) -> bool:
     tvid_clean = re.sub(r'[^a-z0-9]', '', tvid_clean)
     if not tvid_clean: return False
 
+    if tvid_clean in POISONED_OPEN_TV_IDS:
+        return False
+
     base_clean = normalizar_canal(channel_name)
-    if base_clean.startswith(("GLOBO ", "RECORD ", "BAND ", "SBT ")):
-        if base_clean not in {"GLOBO SP", "GLOBO SAO PAULO", "GLOBO RJ", "GLOBO RIO", "GLOBO NEWS", "RECORD SP", "BAND SP", "SBT SP", "SBT"}:
-            if tvid_clean in {"globorj", "globosp", "recordtv", "recordtvbrasilia", "band", "sbt"}:
-                return False
+    # Para qualquer canal das 4 grandes redes abertas (Globo, Record, SBT, Band),
+    # NUNCA exporta tvg-id do provedor para obrigar o player a casar 100% pelo nome regional exato!
+    if base_clean.startswith(("GLOBO ", "TV GLOBO", "RECORD ", "SBT ", "BAND ", "TV BAHIA", "TV ASA BRANCA", "TV VERDES MARES", "TV GAZETA", "TV ANHANGUERA", "TV LIBERAL", "TV MIRANTE", "RBS ", "RPC ", "NSC ", "EPTV")):
+        if "NEWS" not in base_clean and "SPORTS" not in base_clean and "NOVELAS" not in base_clean:
+            return False
 
     candidates = [base_clean] + CHANNEL_SYNONYMS.get(base_clean, [])
     
@@ -667,7 +705,6 @@ def read_source_from_file(spec: SourceSpec, file_path: Path) -> EpgSource:
         if tag == "channel":
             channel_id = child.attrib.get("id", "").strip()
             if not channel_id: continue
-            # Ignora canais explicitamente estrangeiros (.pt, .us, .ar, .mx, .uk)
             if re.search(r'\.(pt|us|uk|ar|mx|cl|co|pe|es|fr|de|it)$', channel_id, flags=re.IGNORECASE):
                 continue
             channels[channel_id] = child
@@ -755,7 +792,6 @@ _AFFILIATE_PATTERNS = (
     r'TV\s+TAROBA|TV\s+MANAIRA)\b'
 )
 
-# --- Guardas de rede/UF e Blindagem Anti-Gloob/Estrangeiros ---
 _NETWORK_PREFIXES = {
     "GLOBO": ("GLOBO", "TV GLOBO", "REDE GLOBO"),
     "SBT": ("SBT",),
@@ -782,7 +818,6 @@ def _alias_belongs_to_network(alias: str, network: str) -> bool:
     return True
 
 def _network_of_normalized(value: str) -> str:
-    # Nunca classificar GLOOB, GLOBONEWS ou GLOBOPLAYNOVELAS como rede aberta GLOBO!
     if "GLOOB" in value or "GLOBONEWS" in value or "NOVELA" in value:
         return ""
     for net in ("GLOBO", "SBT", "RECORD", "BAND"):
@@ -791,17 +826,12 @@ def _network_of_normalized(value: str) -> str:
     return ""
 
 def _fuzzy_incompatible(alias: str, candidate: str) -> bool:
-    """True quando a aproximação cruzaria Globo Aberta com Gloob (infantil), Globo Internacional/ON/News ou UFs diferentes."""
-    # 1. Bloqueio absoluto entre GLOOB (infantil) e qualquer canal que não seja GLOOB
     if ("GLOOB" in alias) != ("GLOOB" in candidate):
         return True
-    # 2. Bloqueio absoluto entre canais NEWS (GloboNews, RecordNews, BandNews, SBTNews) e canais abertos
     if ("NEWS" in alias) != ("NEWS" in candidate):
         return True
-    # 3. Bloqueio absoluto entre canais de NOVELAS (Globoplay Novelas / Viva) e Globo aberta
     if ("NOVELA" in alias) != ("NOVELA" in candidate):
         return True
-    # 4. Bloqueio de canais internacionais/estrangeiros da Globo/Record/PFC para canais locais brasileiros
     foreign_markers = ("INTERNACIONAL", "PORTUGAL", "AFRICA", "EUROPA", "GLOBOON", "GLOBONOW", "AMERICAS", "CABOVERDE", "MOZAMBIQUE")
     if any(fm in candidate for fm in foreign_markers) and not any(fm in alias for fm in foreign_markers):
         return True
@@ -819,11 +849,6 @@ def _fuzzy_incompatible(alias: str, candidate: str) -> bool:
     return False
 
 def expand_open_tv_tiers(nome_limpo: str, grupo: str) -> tuple[list[str], list[str], list[str]]:
-    """Separa os aliases em 3 camadas estritas:
-    - Tier 1: Nome específico da Afiliada / Cidade local (Ex: TV Asa Branca, Globo Caruaru, TV Gazeta de Alagoas)
-    - Tier 2: Cabeça de rede Estadual/Regional (Ex: Globo Nordeste / Recife PE, Globo Manaus AM)
-    - Tier 3: Fallback Nacional (Ex: Globo SP, Globo RJ, SBT SP, Record SP, Band SP)
-    """
     tier1_local: list[str] = []
     tier2_state: list[str] = []
     tier3_national: list[str] = []
@@ -983,7 +1008,6 @@ def expand_open_tv_tiers(nome_limpo: str, grupo: str) -> tuple[list[str], list[s
     return tier1_local, tier2_state, tier3_national
 
 def aliases_tiers_for(entry: dict[str, object]) -> list[list[str]]:
-    """Retorna uma lista de camadas [tier1_specific, tier2_state, tier3_national]."""
     values: list[str] = [str(entry.get("name", ""))]
     values.extend(str(x) for x in entry.get("aliases", []) or [])
     grupo = str(entry.get("group", entry.get("group-title", entry.get("group_title", ""))))
@@ -1085,9 +1109,6 @@ def find_match_in_tier(source: EpgSource, tier_aliases: list[str], source_ids: l
     return None
 
 def find_tiered_matches_across_sources(active_sources: list[EpgSource], alias_tiers: list[list[str]], source_ids: list[str]) -> list[ChannelMatch]:
-    """Procura primeiro na Camada 1 (específica local) em todas as fontes ativas.
-    Trava na Camada 1 se houver pelo menos 1 match exato (1.0) ou da fonte Afiliadas Locais, ou >=2 matches com programas.
-    Se a Camada 1 tiver apenas 1 match fuzzy isolado e duvidoso, combina com a Camada 2 para evitar falso positivo."""
     collected_valid: list[ChannelMatch] = []
     fallback_matches: list[ChannelMatch] = []
 
@@ -1421,8 +1442,10 @@ def generate_quality_variants(base_names: Iterable[str]) -> list[str]:
     seen = set()
     for base in base_names:
         b_unesc = html.unescape(str(base)).strip()
+        # Mantém também a variante com parênteses originais (ex: "GLOBO PE (ASA BRANCA)")
+        b_keep_parens = re.sub(r'\s+\b(SD|HD|FHD|UHD|4K|H265|HEVC)\b.*$', '', b_unesc, flags=re.IGNORECASE).strip()
         clean_base = strip_qualities_keep_case(b_unesc)
-        for root in (b_unesc, clean_base):
+        for root in (b_unesc, b_keep_parens, clean_base):
             if not root or len(root) > 160:
                 continue
             for suf in suffixes:
@@ -1755,7 +1778,7 @@ def write_epg_stream(
                 gz.write(data)
                 if plain is not None: plain.write(data)
 
-            generator = "EPG Universal Otimizado (Afiliadas Locais Camada 1 + Blindagem Anti-Gloob)"
+            generator = "EPG Universal Otimizado (Afiliadas Locais por Nome + Blindagem Anti-Gloob)"
             source_name = "Consolidado Inteligente de Múltiplas Fontes"
             emit((f"<?xml version='1.0' encoding='utf-8'?>\n<tv generator-info-name={quoteattr(generator)} source-info-name={quoteattr(source_name)}>\n").encode("utf-8"))
 
@@ -1800,7 +1823,7 @@ def write_epg_stream(
     return programme_count, len(xml_id_to_data)
 
 def main() -> None:
-    print("Iniciando geração de EPG (Prioridade Estrita para Grade Local + Blindagem Anti-Gloob)...")
+    print("Iniciando geração de EPG (Afiliadas e Abertos Casados por Nome + Blindagem Anti-Gloob)...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
