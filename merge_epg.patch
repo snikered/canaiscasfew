@@ -1,0 +1,105 @@
+--- orig/merge_epg.py	2026-11-10 12:12:53.680686961 +0000
++++ a/canaiscasfew-main/merge_epg.py	2026-11-10 12:14:21.508115763 +0000
+@@ -39,6 +39,11 @@
+     urllib.request.urlretrieve("https://raw.githubusercontent.com/Limaalef/M3uEpg/main/epg_utils.py", "epg_utils.py")
+     from epg_utils import digit_signature, normalize_name as original_normalize_name, normalize_source_id
+ 
++try:
++    from name_dedupe import dedupe_display_names
++except ImportError:  # pragma: no cover
++    def dedupe_display_names(names_by_id): return names_by_id
++
+ CATALOG_PATH = Path(os.environ.get("CHANNELS_FILE", "channels.json"))
+ OVERRIDES_PATH = Path(os.environ.get("OVERRIDES_FILE", "overrides.json"))
+ OUTPUT_DIR = Path(os.environ.get("OUTPUT_DIR", "output"))
+@@ -749,6 +754,50 @@
+     r'TV\s+TAROBA|TV\s+MANAIRA)\b'
+ )
+ 
++
++# --- Guardas de rede/UF (evita SBT/Record/Band herdarem grade da Globo e UF errada) ---
++_NETWORK_PREFIXES = {
++    "GLOBO": ("GLOBO", "TV GLOBO", "REDE GLOBO"),
++    "SBT": ("SBT",),
++    "RECORD": ("RECORD", "REDE RECORD"),
++    "BAND": ("BAND", "TV BAND", "BANDEIRANTES", "REDE BANDEIRANTES"),
++}
++_GLOBO_ONLY_BRANDS = (
++    "TV LIBERAL", "TV ASA BRANCA", "TV GRANDE RIO", "TV VERDES MARES", "TV MIRANTE",
++    "TV CLUBE", "TV CABO BRANCO", "TV SERGIPE", "TV MORENA", "TV BAHIA", "REDE BAHIA",
++    "REDE AMAZONICA", "TV AMAZONAS", "RBS TV", "RPC", "NSC TV", "EPTV", "TV TEM",
++    "TV VANGUARDA", "REDE VANGUARDA", "TV INTEGRACAO", "INTER TV", "TV ANHANGUERA",
++    "TV TAPAJOS", "TV CENTRO AMERICA", "TV GAZETA", "TV PARAIBA",
++)
++_UF_CODES = {"SP","RJ","RS","MG","BA","PR","PE","CE","PA","MA","SC","GO","PB","ES","AM","RN",
++             "AL","PI","MT","DF","MS","SE","RO","TO","AC","AP","RR"}
++
++def _alias_belongs_to_network(alias: str, network: str) -> bool:
++    a = alias.upper().strip()
++    for net, prefixes in _NETWORK_PREFIXES.items():
++        if net != network and a.startswith(prefixes):
++            return False
++    if network != "GLOBO" and a.startswith(_GLOBO_ONLY_BRANDS):
++        return False
++    return True
++
++def _network_of_normalized(value: str) -> str:
++    for net in ("GLOBO", "SBT", "RECORD", "BAND"):
++        if value.startswith(net):
++            return net
++    return ""
++
++def _fuzzy_incompatible(alias: str, candidate: str) -> bool:
++    """True quando a aproximação cruzaria emissoras ou UFs diferentes (GLOBOPE ~ GLOBOSP)."""
++    na, nc = _network_of_normalized(alias), _network_of_normalized(candidate)
++    if na and nc:
++        if na != nc:
++            return True
++        ra = re.sub(r"^TV", "", alias[len(na):]); rc = re.sub(r"^TV", "", candidate[len(nc):])
++        if ra != rc and ra in _UF_CODES and rc in _UF_CODES:
++            return True
++    return False
++
+ def expand_open_tv_tiers(nome_limpo: str, grupo: str) -> tuple[list[str], list[str], list[str]]:
+     """Separa os aliases em 3 camadas estritas:
+     - Tier 1: Nome específico da Afiliada / Cidade local (Ex: TV Asa Branca, Globo Caruaru, TV Gazeta de Alagoas)
+@@ -887,7 +936,7 @@
+         tier1_local.extend(["TV ALTEROSA", "SBT MINAS", "SBT BELO HORIZONTE", "SBT MG"])
+     if "REDE MASSA" in nome_limpo:
+         tier1_local.extend(["REDE MASSA", "SBT CURITIBA", "SBT PARANA", "SBT PR"])
+-    if "TV JORNAL" in nome_limpo:
++    if "TV JORNAL" in nome_limpo or (network == "SBT" and re.search(r"\bJORNAL\b", nome_limpo)):
+         tier1_local.extend(["TV JORNAL", "SBT RECIFE", "SBT PERNAMBUCO", "SBT PE"])
+ 
+     # Tier 2: Cabeça de rede do Estado pela UF
+@@ -912,6 +961,9 @@
+     elif network == "BAND":
+         tier3_national.extend(["BAND SP", "BAND SAO PAULO", "BAND", "TV BAND", "BANDEIRANTES", "REDE BANDEIRANTES"])
+ 
++    tier1_local = [a for a in tier1_local if _alias_belongs_to_network(a, network)]
++    tier2_state = [a for a in tier2_state if _alias_belongs_to_network(a, network)]
++    tier3_national = [a for a in tier3_national if _alias_belongs_to_network(a, network)]
+     return tier1_local, tier2_state, tier3_national
+ 
+ def aliases_tiers_for(entry: dict[str, object]) -> list[list[str]]:
+@@ -984,6 +1036,7 @@
+         alias_counter = Counter(alias)
+         bucket = source.fuzzy_index.get(digit_signature(alias), {})
+         for normalized_candidate, channel_ids in bucket.items():
++            if _fuzzy_incompatible(alias, normalized_candidate): continue
+             if _sequence_ratio_upper_bound(alias, normalized_candidate, alias_counter) < relevant_floor: continue
+             ratio = SequenceMatcher(None, alias, normalized_candidate).ratio()
+             if ratio < relevant_floor: continue
+@@ -1666,6 +1719,12 @@
+                     if n not in existing_names:
+                         existing_names.append(n)
+ 
++    # Cada nome (display-name) passa a pertencer a um único canal: o player que casa
++    # por tvg-name nunca encontra o mesmo nome em duas grades diferentes.
++    _deduped = dedupe_display_names({oid: [oid, *v[2]] for oid, v in xml_id_to_data.items()})
++    for oid, (chosen_, stitched_, _) in list(xml_id_to_data.items()):
++        xml_id_to_data[oid] = (chosen_, stitched_, [n for n in _deduped[oid] if n != oid])
++
+     with gzip_path.open("wb") as raw_gzip:
+         with gzip.GzipFile(filename="epg.xml", mode="wb", fileobj=raw_gzip, mtime=0, compresslevel=GZIP_LEVEL) as gz:
+             def emit(data: bytes) -> None:
