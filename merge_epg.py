@@ -349,6 +349,21 @@ UF_TO_STATE_AND_CAPITAL = {
     "RR": ["RORAIMA", "BOA VISTA", "REDE AMAZONICA BOA VISTA", "RR"],
 }
 
+# IDs que o painel IPTV atribui de forma errada a outros canais (ex: TVBrasil.br / AandE.br / agromais.br no Cartoonito).
+# Ao bloquear esses IDs como <channel id="..."> primário e exportar apenas o nome limpo do canal,
+# o TiviMate é obrigado a casar pelo <display-name> exato (igual ao Televizo)!
+POISONED_OPEN_TV_IDS = {
+    "globo", "tvglobo", "redeglobo", "globosp", "globorj", "globonacional", "globohd", "globofhd",
+    "record", "recordtv", "rederecord", "recordsp", "recordtvsp", "recordrj", "recordtvrj",
+    "recordtvbrasilia", "recordbrasilia", "recordnacional", "recordhd", "recordtvminas", "recordminas",
+    "recordtvrs", "recordrs", "recordtvba", "recordbahia", "recordtvgoias", "recordgoias",
+    "sbt", "sbtsp", "sbtrj", "sbtnacional", "tvsbt", "sbthd",
+    "band", "bandtv", "tvband", "bandeirantes", "redebandeirantes", "bandsp", "bandrj", "bandhd",
+    "redetv", "redetvsp", "tvbrasil", "tvcultura", "cultura",
+    # IDs corrompidos no servidor que sequestram o Cartoonito / Tooncast no TiviMate:
+    "aande", "ae", "agromais", "terraviva", "canalrural", "canaldoboi", "boomerang",
+}
+
 def strip_qualities_keep_case(name: str) -> str:
     """Limpa tags de qualidade (SD/HD/FHD/4K/H265/[1]/(BR2)) MAS preserva nomes de afiliadas
     ou cidades dentro de parênteses como 'GLOBO PE (ASA BRANCA)'."""
@@ -1169,6 +1184,28 @@ def now_next_for(source: EpgSource, channel_id: str, now: datetime) -> tuple[dic
             next_item = {"start": row.start, "stop": row.stop, "title": row.title}
             if current is not None: break
     return current, next_item
+  
+  def get_clean_aliases(entry: dict[str, object]) -> list[str]:
+    values = []
+    raw_name = str(entry.get("name", "")).strip()
+    if raw_name:
+        values.append(raw_name)
+        values.append(raw_name.upper())
+        values.append(raw_name.title())
+    if entry.get("tvg_names"):
+        values.extend(str(x).strip() for x in entry.get("tvg_names", []) if x)
+    if entry.get("aliases"):
+        values.extend(str(x).strip() for x in entry.get("aliases", []) if x)
+        
+    norm_clean = normalizar_canal(raw_name)
+    if norm_clean:
+        values.append(norm_clean)
+        values.append(norm_clean.title())
+    for syn in CHANNEL_SYNONYMS.get(norm_clean, []):
+        values.append(syn)
+        values.append(syn.title())
+
+    return generate_quality_variants(values)
 
 _AGREEMENT_CACHE: dict[tuple[str, str, str, str], dict[str, object]] = {}
 _HEALTH_CACHE: dict[tuple[str, str], dict[str, object]] = {}
