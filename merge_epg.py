@@ -902,6 +902,9 @@ def read_optional_source(spec: SourceSpec) -> tuple[EpgSource | None, str | None
         if tmp_path and tmp_path.exists() and str(tmp_path).endswith(".tmp"):
             try: tmp_path.unlink()
             except Exception: pass
+              
+_AGREEMENT_CACHE: dict[tuple[str, str, str, str], dict[str, object]] = {}
+_HEALTH_CACHE: dict[tuple[str, str], dict[str, object]] = {}
 
 _AFFILIATE_PATTERNS = (
     r'\b(EPTV|RBS(?:\s+TV)?|RPC(?:\s+TV)?|NSC(?:\s+TV)?|REDE\s+AMAZONICA|AMAZONICA|'
