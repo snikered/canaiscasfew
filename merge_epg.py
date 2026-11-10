@@ -843,7 +843,7 @@ def aliases_for(entry: dict[str, object]) -> list[str]:
             seen.add(n)
 
     # Primeiro: adiciona todos os nomes exatos e sinônimos diretos do canal
-    cleaned_ pairs: list[str] = []
+    cleaned_pairs: list[str] = []
     for value in values:
         nome_limpo = normalizar_canal(value)
         nome_com_grupo = inferir_emissora_pelo_grupo(nome_limpo, grupo)
