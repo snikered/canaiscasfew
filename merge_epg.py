@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
-"""EPG Universal Consolidado — Base Estável (merge_epg_2) + Reconhecimento Total de Afiliadas e Canais Abertos
-- Mantém 100% a lógica de IDs e proteção contra tvg-id errado do merge_epg_2.py que funcionou.
-- Reconhece todas as afiliadas regionais (Globo EPTV, RBS, RPC, NSC, Rede Amazônica, TV Anhanguera, TV Liberal,
-  TV Gazeta Alagoas/ES, TV Verdes Mares, TV Mirante, Inter TV, TV TEM, Vanguarda, TV Tribuna, TV Integração,
-  SBT Rede Massa/Jangadeiro/Jornal/Alterosa/Aratu, Record Itapoan/Guaíba/RICTV/Tropical, Band Tarobá/Manaíra)
-  e aplica fallback automático para a rede principal quando a cidade não tiver guia próprio.
-- Gera sufixos [1], [2], [3], (BR2) e ² nos <display-name> para casar canais com tvg-id vazio.
-- Remove "E1" falso de Filmes, Esportes e Jornalismo e mantém Txx Exx em Séries.
+"""EPG Universal Consolidado — Busca em Camadas (Prioridade Local Estrita para Afiliadas)
+- Camada 1 (Local): Busca estritamente a afiliada/cidade (ex: Globo Asa Branca, TV Gazeta Alagoas, RBS, RPC).
+- Camada 2 (Estadual): Se não houver guia da cidade do interior, usa a cabeça de rede do Estado (ex: Globo PE/Recife, Globo AM/Manaus).
+- Camada 3 (Nacional): Último recurso (Globo SP/RJ) apenas se não houver match nas Camadas 1 e 2.
+- Limpa IDs compostos do EPGShare BR1 com travessão (ex: "Caruaru/PE..Globo.–.TV.Asa.Branca.br").
+- Suporta fonte local "epg_afiliadas.xml" (gerada pelo pull_afiliadas_locais.py) com prioridade máxima.
 """
 from __future__ import annotations
 
@@ -71,6 +69,7 @@ IPTV_USER_AGENTS = [
 ]
 
 EPG_SOURCES_CONFIG = [
+    ("Afiliadas Locais", "epg_afiliadas.xml", "afiliadas_locais", 3.0),
     ("GuiaDeTV", "epg_guiadetv.xml", "guiadetv", 2.5),
     ("Meu Guia", "epg_meuguia.xml", "meuguia", 2.5),
     ("MiTV", "epg_mitv.xml", "mitv", 2.0),
@@ -82,7 +81,7 @@ EPG_SOURCES_CONFIG = [
     ("Globo", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/globo.xml", "git_extra", 1.2),
     ("Mais SBT", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/maissbt.xml", "git_extra", 1.0),
     ("XSports", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/xsports.xml", "git_extra", 1.0),
-    ("EPGShare BR1", "https://epgshare01.online/epgshare01/epg_ripper_BR1.xml.gz", "epgshare", 1.3),
+    ("EPGShare BR1", "https://epgshare01.online/epgshare01/epg_ripper_BR1.xml.gz", "epgshare", 1.5),
     ("EPGShare BR2", "https://epgshare01.online/epgshare01/epg_ripper_BR2.xml.gz", "epgshare", 1.3),
     ("IPTV-EPG BR", "https://iptv-epg.org/files/epg-br.xml", "iptvepg", 1.2),
     ("TV Map", "epg_tvmap.xml", "tvmap", 1.0),
@@ -214,7 +213,7 @@ class EpgSource:
 
 @dataclass
 class ChannelMatch:
-    source: EpgSource; channel_id: str; method: str; match_score: float
+    source: EpgSource; channel_id: str; method: str; match_score: float; tier: int = 1
 
 @dataclass
 class CandidateEvaluation:
@@ -298,35 +297,34 @@ CHANNEL_SYNONYMS = {
     "ADULT SWIN": ["ADULT SWIM"],
 }
 
-# Mapa de siglas e nomes de Estados/Cidades para ajudar no casamento de afiliadas locais
 UF_TO_STATE_AND_CAPITAL = {
     "SP": ["SAO PAULO", "SP"],
     "RJ": ["RIO DE JANEIRO", "RIO", "RJ"],
     "MG": ["MINAS", "MINAS GERAIS", "BELO HORIZONTE", "BH", "MG"],
-    "RS": ["RIO GRANDE DO SUL", "PORTO ALEGRE", "RS"],
+    "RS": ["RIO GRANDE DO SUL", "PORTO ALEGRE", "POA", "RS"],
     "PR": ["PARANA", "CURITIBA", "PR"],
     "SC": ["SANTA CATARINA", "FLORIANOPOLIS", "SC"],
-    "BA": ["BAHIA", "SALVADOR", "BA"],
-    "PE": ["PERNAMBUCO", "RECIFE", "PE"],
-    "CE": ["CEARA", "FORTALEZA", "CE"],
-    "PA": ["PARA", "BELEM", "PA"],
-    "MA": ["MARANHAO", "SAO LUIS", "MA"],
-    "GO": ["GOIAS", "GOIANIA", "GO"],
+    "BA": ["BAHIA", "SALVADOR", "TV BAHIA", "REDE BAHIA", "BA"],
+    "PE": ["PERNAMBUCO", "RECIFE", "GLOBO NORDESTE", "PE"],
+    "CE": ["CEARA", "FORTALEZA", "TV VERDES MARES", "VERDES MARES", "CE"],
+    "PA": ["PARA", "BELEM", "TV LIBERAL", "PA"],
+    "MA": ["MARANHAO", "SAO LUIS", "TV MIRANTE", "MA"],
+    "GO": ["GOIAS", "GOIANIA", "TV ANHANGUERA", "ANHANGUERA", "GO"],
     "DF": ["BRASILIA", "DISTRITO FEDERAL", "DF"],
-    "AM": ["AMAZONAS", "MANAUS", "AM"],
-    "ES": ["ESPIRITO SANTO", "VITORIA", "ES"],
-    "PB": ["PARAIBA", "JOAO PESSOA", "CAMPINA GRANDE", "PB"],
-    "RN": ["RIO GRANDE DO NORTE", "NATAL", "RN"],
-    "AL": ["ALAGOAS", "MACEIO", "AL"],
-    "SE": ["SERGIPE", "ARACAJU", "SE"],
-    "PI": ["PIAUI", "TERESINA", "PI"],
-    "MT": ["MATO GROSSO", "CUIABA", "MT"],
-    "MS": ["MATO GROSSO DO SUL", "CAMPO GRANDE", "MS"],
-    "TO": ["TOCANTINS", "PALMAS", "TO"],
-    "RO": ["RONDONIA", "PORTO VELHO", "RO"],
-    "AC": ["ACRE", "RIO BRANCO", "AC"],
-    "AP": ["AMAPA", "MACAPA", "AP"],
-    "RR": ["RORAIMA", "BOA VISTA", "RR"],
+    "AM": ["AMAZONAS", "MANAUS", "REDE AMAZONICA", "TV AMAZONAS", "AM"],
+    "ES": ["ESPIRITO SANTO", "VITORIA", "TV GAZETA ES", "TV GAZETA VITORIA", "ES"],
+    "PB": ["PARAIBA", "JOAO PESSOA", "TV CABO BRANCO", "TV PARAIBA", "PB"],
+    "RN": ["RIO GRANDE DO NORTE", "NATAL", "INTER TV CABUGI", "RN"],
+    "AL": ["ALAGOAS", "MACEIO", "TV GAZETA DE ALAGOAS", "TV GAZETA ALAGOAS", "AL"],
+    "SE": ["SERGIPE", "ARACAJU", "TV SERGIPE", "SE"],
+    "PI": ["PIAUI", "TERESINA", "TV CLUBE", "PI"],
+    "MT": ["MATO GROSSO", "CUIABA", "TV CENTRO AMERICA", "MT"],
+    "MS": ["MATO GROSSO DO SUL", "CAMPO GRANDE", "TV MORENA", "MS"],
+    "TO": ["TOCANTINS", "PALMAS", "TV ANHANGUERA", "TO"],
+    "RO": ["RONDONIA", "PORTO VELHO", "REDE AMAZONICA PORTO VELHO", "RO"],
+    "AC": ["ACRE", "RIO BRANCO", "REDE AMAZONICA RIO BRANCO", "AC"],
+    "AP": ["AMAPA", "MACAPA", "REDE AMAZONICA MACAPA", "AP"],
+    "RR": ["RORAIMA", "BOA VISTA", "REDE AMAZONICA BOA VISTA", "RR"],
 }
 
 def strip_qualities_keep_case(name: str) -> str:
@@ -337,7 +335,7 @@ def strip_qualities_keep_case(name: str) -> str:
     tags = r'\b(SD|HD|FHD|UHD|4K|8K|H\.?264|H\.?265|HEVC|HDR\+?|LEG|LEGENDADO|DUB|DUBLADO|HQ|VIP|VOD|24H[S]?|24/7|1080P|720P|60FPS|PPV|EVENTOS?|ALTERNATIVO|BACKUP|BR2)\b[\*\²\³\¹\⁴\+]*'
     s = re.sub(tags, ' ', s, flags=re.IGNORECASE)
     s = re.sub(r'\bH\s+D\b', ' ', s, flags=re.IGNORECASE)
-    s = re.sub(r'[*=_\-]', ' ', s)
+    s = re.sub(r'[*=_\-–—]', ' ', s)
     s = re.sub(r'\.\s*$', '', s)
     return ' '.join(s.split()).strip()
 
@@ -404,8 +402,6 @@ def is_valid_provider_tvid(channel_name: str, tvid: str) -> bool:
     if not tvid_clean: return False
 
     base_clean = normalizar_canal(channel_name)
-    # Bloqueia compartilhamento de um mesmo tvg-id genérico (ex: GloboRJ.br, globosp.br, RecordTV.br, Band.br, SBT.br)
-    # entre dezenas de afiliadas regionais diferentes para não sobrescrever os <channel id="..."> no XML!
     if base_clean.startswith(("GLOBO ", "RECORD ", "BAND ", "SBT ")):
         if base_clean not in {"GLOBO SP", "GLOBO SAO PAULO", "GLOBO RJ", "GLOBO RIO", "GLOBO NEWS", "RECORD SP", "BAND SP", "SBT SP", "SBT"}:
             if tvid_clean in {"globorj", "globosp", "recordtv", "recordtvbrasilia", "band", "sbt"}:
@@ -622,6 +618,34 @@ def extract_program_metadata(el: ET.Element, channel_name: str = "", duration_mi
         "date": date_str,
     }
 
+def extract_epgshare_compound_candidates(channel_id: str) -> list[str]:
+    """Desmembra IDs compostos do EPGShare BR1 como:
+    'Caruaru/PE..Globo.–.TV.Asa.Branca.br' -> ['Globo TV Asa Branca', 'TV Asa Branca', 'Globo Caruaru', 'Globo Caruaru PE']
+    """
+    extras = []
+    if ".." not in channel_id:
+        return extras
+    loc_part, right_part = channel_id.split("..", 1)
+    right_clean = re.sub(r'\.(br|us|uk|pt|ar|mx|cl|co|pe|latam|int)$', '', right_part, flags=re.IGNORECASE)
+    right_clean = re.sub(r'[.\-–—_]+', ' ', right_clean).strip()
+    if right_clean:
+        extras.append(right_clean)
+        # Se tiver "Globo TV Asa Branca", adiciona também "TV Asa Branca"
+        for net in ("Globo", "SBT", "Record", "Band"):
+            if right_clean.lower().startswith(net.lower() + " "):
+                sub = right_clean[len(net):].strip()
+                if sub:
+                    extras.append(sub)
+                # Combina também com a cidade à esquerda (ex: "Caruaru/PE" -> "Globo Caruaru", "Globo Caruaru PE")
+                city_uf = loc_part.replace(".", " ").replace("/", " ").strip()
+                city_only = loc_part.split("/")[0].replace(".", " ").strip()
+                if city_uf:
+                    extras.append(f"{net} {city_uf}")
+                    extras.append(f"{sub} {city_only}")
+                if city_only:
+                    extras.append(f"{net} {city_only}")
+    return extras
+
 def read_source_from_file(spec: SourceSpec, file_path: Path) -> EpgSource:
     channels: dict[str, ET.Element] = {}
     names, normalized_names = {}, {}
@@ -644,10 +668,11 @@ def read_source_from_file(spec: SourceSpec, file_path: Path) -> EpgSource:
             display_names = [(node.text or "").strip() for node in child if local_tag(node) == "display-name" and (node.text or "").strip()]
             names[channel_id] = display_names
             norm_candidates: list[str] = []
-            # Também extrai o nome limpo de IDs compostos do EPGShare (ex: "São.Paulo/SP..Globo.SP.br")
             clean_id_part = re.sub(r'^.*?\.\.', '', channel_id)
-            clean_id_part = re.sub(r'\.(br|us|uk|pt|ar|mx|cl|co|pe|latam|int)$', '', clean_id_part, flags=re.IGNORECASE).replace('.', ' ')
-            for candidate in [*display_names, channel_id, normalize_source_id(channel_id), clean_id_part]:
+            clean_id_part = re.sub(r'\.(br|us|uk|pt|ar|mx|cl|co|pe|latam|int)$', '', clean_id_part, flags=re.IGNORECASE)
+            clean_id_part = re.sub(r'[.\-–—_]+', ' ', clean_id_part)
+            compound_extras = extract_epgshare_compound_candidates(channel_id)
+            for candidate in [*display_names, channel_id, normalize_source_id(channel_id), clean_id_part, *compound_extras]:
                 normalized = normalize_name(candidate)
                 if not normalized or normalized in norm_candidates: continue
                 norm_candidates.append(normalized)
@@ -710,7 +735,6 @@ def read_optional_source(spec: SourceSpec) -> tuple[EpgSource | None, str | None
             try: tmp_path.unlink()
             except Exception: pass
 
-# Padrões de afiliadas estaduais/regionais para desmembramento inteligente
 _AFFILIATE_PATTERNS = (
     r'\b(EPTV|RBS(?:\s+TV)?|RPC(?:\s+TV)?|NSC(?:\s+TV)?|REDE\s+AMAZONICA|AMAZONICA|'
     r'TV\s+ANHANGUERA|ANHANGUERA|TV\s+LIBERAL|TV\s+MIRANTE|TV\s+VERDES\s+MARES|VERDES\s+MARES|'
@@ -725,13 +749,16 @@ _AFFILIATE_PATTERNS = (
     r'TV\s+TAROBA|TV\s+MANAIRA)\b'
 )
 
-def expand_open_tv_and_affiliate_aliases(nome_limpo: str, grupo: str) -> list[str]:
-    """Desmembra nomes compostos de afiliadas da Globo, SBT, Record e Band para encontrar
-    o guia regional exato na fonte ou, se não existir na fonte, usar a grade da rede principal."""
-    extras: list[str] = []
-    up = f"{nome_limpo} {grupo}".upper()
+def expand_open_tv_tiers(nome_limpo: str, grupo: str) -> tuple[list[str], list[str], list[str]]:
+    """Separa os aliases em 3 camadas estritas:
+    - Tier 1: Nome específico da Afiliada / Cidade local (Ex: TV Asa Branca, Globo Caruaru, TV Gazeta de Alagoas)
+    - Tier 2: Cabeça de rede Estadual/Regional (Ex: Globo Nordeste / Recife PE, Globo Manaus AM)
+    - Tier 3: Fallback Nacional (Ex: Globo SP, Globo RJ, SBT SP, Record SP, Band SP)
+    """
+    tier1_local: list[str] = []
+    tier2_state: list[str] = []
+    tier3_national: list[str] = []
 
-    # Identifica a rede principal (Globo, SBT, Record, Band)
     network = ""
     if (nome_limpo.startswith("GLOBO") or "GLOBO" in grupo.upper()) and "NEWS" not in nome_limpo and "NOVELAS" not in nome_limpo and "GLOOB" not in nome_limpo:
         network = "GLOBO"
@@ -743,106 +770,165 @@ def expand_open_tv_and_affiliate_aliases(nome_limpo: str, grupo: str) -> list[st
         network = "BAND"
 
     if not network:
-        return extras
+        return tier1_local, tier2_state, tier3_national
 
-    # 1. Se tiver nome de afiliada (ex: "GLOBO EPTV CAMPINAS", "GLOBO TV GAZETA ALAGOAS", "SBT TV JORNAL RECIFE")
+    # Desmembra nome específico da afiliada (Tier 1)
     without_net = re.sub(rf'^{network}(?:\s+TV)?\s+', '', nome_limpo).strip()
     if without_net and without_net != nome_limpo:
-        extras.append(without_net)
-        if not without_net.startswith("TV "):
-            extras.append(f"TV {without_net}")
+        tier1_local.append(without_net)
+        if not without_net.startswith("TV ") and not without_net.startswith("REDE "):
+            tier1_local.append(f"TV {without_net}")
+            tier1_local.append(f"{network} TV {without_net}")
 
-    # 2. Remove o nome intermediário da afiliada para testar "GLOBO <CIDADE/UF>" (ex: "GLOBO CAMPINAS", "GLOBO ALAGOAS", "GLOBO CURITIBA")
     city_only = re.sub(_AFFILIATE_PATTERNS, ' ', without_net, flags=re.IGNORECASE)
     city_only = ' '.join(city_only.split()).strip()
     if city_only and city_only != without_net:
-        extras.append(f"{network} {city_only}")
-        extras.append(city_only)
-        # Se tiver UF no final da cidade, testa também sem a UF (ex: "GLOBO MANAUS AM" -> "GLOBO MANAUS")
+        tier1_local.append(f"{network} {city_only}")
         city_no_uf = re.sub(r'\s+(SP|RJ|RS|MG|BA|PR|PE|CE|PA|MA|SC|GO|PB|ES|AM|RN|AL|PI|MT|DF|MS|SE|RO|TO|AC|AP|RR)$', '', city_only)
         if city_no_uf and city_no_uf != city_only:
-            extras.append(f"{network} {city_no_uf}")
-            extras.append(city_no_uf)
+            tier1_local.append(f"{network} {city_no_uf}")
 
-    # 3. Identifica Estado/UF no nome para testar a cabeça de rede estadual (ex: "GLOBO BA", "GLOBO BAHIA", "GLOBO SALVADOR")
+    # Mapeamentos diretos de afiliadas locais (Tier 1) e cabeças de rede estaduais (Tier 2)
+    if "ASA BRANCA" in nome_limpo or "CARUARU" in nome_limpo:
+        tier1_local.extend(["TV ASA BRANCA", "GLOBO TV ASA BRANCA", "GLOBO ASA BRANCA", "GLOBO CARUARU"])
+        tier2_state.extend(["GLOBO NORDESTE", "GLOBO RECIFE", "GLOBO PERNAMBUCO", "GLOBO PE"])
+    elif "GRANDE RIO" in nome_limpo or "PETROLINA" in nome_limpo:
+        tier1_local.extend(["TV GRANDE RIO", "GLOBO TV GRANDE RIO", "GLOBO PETROLINA"])
+        tier2_state.extend(["GLOBO NORDESTE", "GLOBO RECIFE", "GLOBO PE"])
+    elif "PERNAMBUCO" in nome_limpo or "RECIFE" in nome_limpo or "GLOBO NORDESTE" in nome_limpo:
+        tier1_local.extend(["GLOBO NORDESTE", "GLOBO RECIFE", "GLOBO PERNAMBUCO", "GLOBO PE"])
+
+    if "GAZETA ALAGOAS" in nome_limpo or "ALAGOAS" in nome_limpo or "MACEIO" in nome_limpo:
+        if network == "GLOBO":
+            tier1_local.extend(["TV GAZETA DE ALAGOAS", "TV GAZETA ALAGOAS", "GLOBO TV GAZETA", "GLOBO ALAGOAS", "GLOBO MACEIO", "GLOBO AL"])
+        elif network == "RECORD":
+            tier1_local.extend(["REDE RECORD MACEIO", "RECORD MACEIO", "TV PAJUCARA", "RECORD ALAGOAS"])
+        elif network == "SBT":
+            tier1_local.extend(["SBT ALAGOAS", "TV PONTA VERDE", "SBT MACEIO"])
+
+    if "GAZETA VITORIA" in nome_limpo or "GAZETA SUL" in nome_limpo or "GAZETA NORTE" in nome_limpo or "ESPIRITO SANTO" in nome_limpo or "VITORIA" in nome_limpo:
+        tier1_local.extend(["TV GAZETA ES", "TV GAZETA VITORIA", "GLOBO VITORIA", "GLOBO ESPIRITO SANTO", "GLOBO ES"])
+    if "VERDES MARES" in nome_limpo or "FORTALEZA" in nome_limpo or "CEARA" in nome_limpo:
+        tier1_local.extend(["TV VERDES MARES", "GLOBO TV VERDES MARES", "GLOBO FORTALEZA", "GLOBO CEARA", "GLOBO CE"])
+    if "REDE AMAZONICA" in nome_limpo or "AMAZONICA" in nome_limpo or "MANAUS" in nome_limpo:
+        if "RIO BRANCO" in nome_limpo or "ACRE" in nome_limpo or " AC" in nome_limpo:
+            tier1_local.extend(["REDE AMAZONICA RIO BRANCO", "GLOBO RIO BRANCO", "GLOBO ACRE", "GLOBO AC"])
+        elif "PORTO VELHO" in nome_limpo or "RONDONIA" in nome_limpo or " RO" in nome_limpo:
+            tier1_local.extend(["REDE AMAZONICA PORTO VELHO", "GLOBO PORTO VELHO", "GLOBO RONDONIA", "GLOBO RO"])
+        elif "MACAPA" in nome_limpo or "AMAPA" in nome_limpo or " AP" in nome_limpo:
+            tier1_local.extend(["REDE AMAZONICA MACAPA", "GLOBO MACAPA", "GLOBO AMAPA", "GLOBO AP"])
+        elif "BOA VISTA" in nome_limpo or "RORAIMA" in nome_limpo or " RR" in nome_limpo:
+            tier1_local.extend(["REDE AMAZONICA BOA VISTA", "GLOBO BOA VISTA", "GLOBO RORAIMA", "GLOBO RR"])
+        tier2_state.extend(["REDE AMAZONICA MANAUS", "REDE AMAZONICA", "TV AMAZONAS", "GLOBO MANAUS", "GLOBO AMAZONAS", "GLOBO AM"])
+    if "TV LIBERAL" in nome_limpo or "BELEM" in nome_limpo:
+        tier1_local.extend(["TV LIBERAL", "GLOBO TV LIBERAL", "GLOBO BELEM", "GLOBO PARA", "GLOBO PA"])
+    if "TAPAJOS" in nome_limpo or "SANTAREM" in nome_limpo:
+        tier1_local.extend(["TV TAPAJOS", "GLOBO SANTAREM"])
+        tier2_state.extend(["TV LIBERAL", "GLOBO BELEM", "GLOBO PA"])
+    if "TV MIRANTE" in nome_limpo or "SAO LUIS" in nome_limpo or "MARANHAO" in nome_limpo:
+        tier1_local.extend(["TV MIRANTE SAO LUIS", "TV MIRANTE", "GLOBO SAO LUIS", "GLOBO MARANHAO", "GLOBO MA"])
+    if "ANHANGUERA" in nome_limpo or "GOIANIA" in nome_limpo or "GOIAS" in nome_limpo:
+        tier1_local.extend(["TV ANHANGUERA", "GLOBO ANHANGUERA", "GLOBO GOIANIA", "GLOBO GOIAS", "GLOBO GO"])
+    if "RBS" in nome_limpo or "PORTO ALEGRE" in nome_limpo:
+        tier1_local.extend(["GLOBO RBS TV POA", "RBS TV POA", "RBS TV", "GLOBO RBS", "GLOBO PORTO ALEGRE", "GLOBO RS"])
+    if "RPC" in nome_limpo or "CURITIBA" in nome_limpo:
+        tier1_local.extend(["RPC CURITIBA", "RPC TV", "RPC", "GLOBO RPC", "GLOBO CURITIBA", "GLOBO PARANA", "GLOBO PR"])
+    if "NSC" in nome_limpo or "FLORIANOPOLIS" in nome_limpo:
+        tier1_local.extend(["NSC TV FLORIANOPOLIS", "NSC TV", "GLOBO NSC", "GLOBO FLORIANOPOLIS", "GLOBO SANTA CATARINA", "GLOBO SC"])
+    if "EPTV" in nome_limpo:
+        if "SUL DE MINAS" in nome_limpo or "VARGINHA" in nome_limpo:
+            tier1_local.extend(["EPTV SUL DE MINAS", "GLOBO SUL DE MINAS", "GLOBO VARGINHA"])
+        elif "CAMPINAS" in nome_limpo:
+            tier1_local.extend(["EPTV CAMPINAS", "GLOBO CAMPINAS"])
+        elif "RIBEIRAO" in nome_limpo:
+            tier1_local.extend(["EPTV RIBEIRAO", "GLOBO RIBEIRAO PRETO"])
+        elif "CENTRAL" in nome_limpo or "SAO CARLOS" in nome_limpo:
+            tier1_local.extend(["EPTV CENTRAL", "GLOBO SAO CARLOS"])
+        tier2_state.extend(["EPTV CAMPINAS", "EPTV SUL DE MINAS", "EPTV"])
+    if "TV TEM" in nome_limpo:
+        tier1_local.extend(["TV TEM", "GLOBO BAURU", "GLOBO SOROCABA", "GLOBO SAO JOSE DO RIO PRETO", "GLOBO ITAPETININGA"])
+    if "VANGUARDA" in nome_limpo:
+        tier1_local.extend(["TV VANGUARDA", "REDE VANGUARDA", "GLOBO SAO JOSE DOS CAMPOS", "GLOBO TAUBATE"])
+    if "INTEGRACAO" in nome_limpo:
+        tier1_local.extend(["TV INTEGRACAO", "GLOBO UBERLANDIA", "GLOBO JUIZ DE FORA", "GLOBO DIVINOPOLIS", "GLOBO ARAXA"])
+        tier2_state.extend(["GLOBO MINAS", "GLOBO BELO HORIZONTE", "GLOBO MG"])
+    if "INTER TV" in nome_limpo or "INTERTV" in nome_limpo or "INTER VALE" in nome_limpo:
+        if "CABUGI" in nome_limpo or "RN" in nome_limpo or "NATAL" in nome_limpo:
+            tier1_local.extend(["INTER TV CABUGI", "GLOBO NATAL", "GLOBO RN"])
+        elif "MG" in nome_limpo or "MINAS" in nome_limpo or "VALES" in nome_limpo or "MONTES CLAROS" in nome_limpo:
+            tier1_local.extend(["INTER TV GRANDE MINAS", "INTER TV DOS VALES"])
+            tier2_state.extend(["GLOBO MINAS", "GLOBO MG"])
+        else:
+            tier1_local.extend(["INTER TV ALTO LITORAL", "INTER TV SERRA MAR", "INTER TV PLANICIE", "INTER TV"])
+    if "CABO BRANCO" in nome_limpo or "PARAIBA" in nome_limpo or "JOAO PESSOA" in nome_limpo:
+        tier1_local.extend(["TV CABO BRANCO", "TV PARAIBA", "GLOBO JOAO PESSOA", "GLOBO CAMPINA GRANDE", "GLOBO PB"])
+    if "SERGIPE" in nome_limpo or "ARACAJU" in nome_limpo:
+        tier1_local.extend(["TV SERGIPE", "GLOBO ARACAJU", "GLOBO SERGIPE", "GLOBO SE"])
+    if "CLUBE" in nome_limpo or "PIAUI" in nome_limpo or "TERESINA" in nome_limpo:
+        tier1_local.extend(["TV CLUBE", "GLOBO TERESINA", "GLOBO PIAUI", "GLOBO PI"])
+    if "MORENA" in nome_limpo or "CAMPO GRANDE" in nome_limpo:
+        tier1_local.extend(["TV MORENA", "GLOBO CAMPO GRANDE", "GLOBO MATO GROSSO DO SUL", "GLOBO MS"])
+    if "CENTRO AMERICA" in nome_limpo or "CUIABA" in nome_limpo:
+        tier1_local.extend(["TV CENTRO AMERICA", "GLOBO CUIABA", "GLOBO MATO GROSSO", "GLOBO MT"])
+    if "BAHIA" in nome_limpo or "SALVADOR" in nome_limpo or "SANTA CRUZ" in nome_limpo or "SUBAE" in nome_limpo or "SUDOESTE" in nome_limpo:
+        if network == "GLOBO":
+            tier1_local.extend(["TV BAHIA", "REDE BAHIA", "GLOBO SALVADOR", "GLOBO BAHIA", "GLOBO BA"])
+        elif network == "SBT":
+            tier1_local.extend(["TV ARATU", "SBT BAHIA", "SBT SALVADOR"])
+        elif network == "RECORD":
+            tier1_local.extend(["RECORD ITAPOAN", "TV ITAPOAN", "RECORD BAHIA", "RECORD SALVADOR"])
+    if "ARATU" in nome_limpo:
+        tier1_local.extend(["TV ARATU", "SBT BAHIA", "SBT SALVADOR"])
+    if "SERRA DOURADA" in nome_limpo:
+        tier1_local.extend(["SBT GOIANIA TV SERRA DOURADA", "TV SERRA DOURADA", "SBT GOIANIA", "SBT GOIAS"])
+    if "JANGADEIRO" in nome_limpo:
+        tier1_local.extend(["TV JANGADEIRO", "SBT FORTALEZA", "SBT CEARA"])
+    if "ALTEROSA" in nome_limpo:
+        tier1_local.extend(["TV ALTEROSA", "SBT MINAS", "SBT BELO HORIZONTE", "SBT MG"])
+    if "REDE MASSA" in nome_limpo:
+        tier1_local.extend(["REDE MASSA", "SBT CURITIBA", "SBT PARANA", "SBT PR"])
+    if "TV JORNAL" in nome_limpo:
+        tier1_local.extend(["TV JORNAL", "SBT RECIFE", "SBT PERNAMBUCO", "SBT PE"])
+
+    # Tier 2: Cabeça de rede do Estado pela UF
     uf_match = re.search(r'\b(SP|RJ|RS|MG|BA|PR|PE|CE|PA|MA|SC|GO|PB|ES|AM|RN|AL|PI|MT|DF|MS|SE|RO|TO|AC|AP|RR)\b', nome_limpo)
     if uf_match:
         uf = uf_match.group(1)
         for state_alias in UF_TO_STATE_AND_CAPITAL.get(uf, []):
-            extras.append(f"{network} {state_alias}")
+            if state_alias.startswith(("TV ", "REDE ", "GLOBO ", "INTER ")):
+                tier2_state.append(state_alias)
+            else:
+                tier2_state.append(f"{network} {state_alias}")
             if network == "RECORD":
-                extras.append(f"RECORD TV {state_alias}")
+                tier2_state.append(f"RECORD TV {state_alias}")
 
-    # Casos específicos muito comuns nas listas M3U brasileiras
-    if "GAZETA ALAGOAS" in nome_limpo or "ALAGOAS" in nome_limpo:
-        extras.extend(["TV GAZETA ALAGOAS", "TV GAZETA DE ALAGOAS", f"{network} ALAGOAS", f"{network} MACEIO"])
-    if "GAZETA VITORIA" in nome_limpo or "GAZETA SUL" in nome_limpo:
-        extras.extend(["TV GAZETA ES", "TV GAZETA VITORIA", "GLOBO VITORIA", "GLOBO ES"])
-    if "VERDES MARES" in nome_limpo:
-        extras.extend(["TV VERDES MARES", "GLOBO FORTALEZA", "GLOBO CEARA", "GLOBO CE"])
-    if "REDE AMAZONICA" in nome_limpo or "AMAZONICA" in nome_limpo:
-        extras.extend(["REDE AMAZONICA", "TV AMAZONAS", "GLOBO MANAUS", "GLOBO AMAZONAS", "GLOBO AM"])
-    if "TV LIBERAL" in nome_limpo:
-        extras.extend(["TV LIBERAL", "GLOBO BELEM", "GLOBO PARA", "GLOBO PA"])
-    if "TV MIRANTE" in nome_limpo:
-        extras.extend(["TV MIRANTE", "GLOBO SAO LUIS", "GLOBO MARANHAO", "GLOBO MA"])
-    if "ANHANGUERA" in nome_limpo:
-        extras.extend(["TV ANHANGUERA", "GLOBO GOIANIA", "GLOBO GOIAS", "GLOBO GO"])
-    if "RBS" in nome_limpo:
-        extras.extend(["RBS TV", "GLOBO RBS", "GLOBO PORTO ALEGRE", "GLOBO RS"])
-    if "RPC" in nome_limpo:
-        extras.extend(["RPC", "RPC TV", "GLOBO CURITIBA", "GLOBO PARANA", "GLOBO PR"])
-    if "NSC" in nome_limpo:
-        extras.extend(["NSC TV", "GLOBO FLORIANOPOLIS", "GLOBO SANTA CATARINA", "GLOBO SC"])
-    if "EPTV" in nome_limpo:
-        extras.extend(["EPTV", "EPTV CAMPINAS", "GLOBO CAMPINAS", "GLOBO RIBEIRAO PRETO"])
-    if "TV TEM" in nome_limpo:
-        extras.extend(["TV TEM", "GLOBO BAURU", "GLOBO SOROCABA", "GLOBO SP"])
-    if "VANGUARDA" in nome_limpo:
-        extras.extend(["TV VANGUARDA", "REDE VANGUARDA", "GLOBO SAO JOSE DOS CAMPOS", "GLOBO SP"])
-    if "INTEGRACAO" in nome_limpo:
-        extras.extend(["TV INTEGRACAO", "GLOBO UBERLANDIA", "GLOBO JUIZ DE FORA", "GLOBO MINAS", "GLOBO MG"])
-    if "INTER TV" in nome_limpo or "INTERTV" in nome_limpo or "INTER VALE" in nome_limpo:
-        if "CABUGI" in nome_limpo or "RN" in nome_limpo:
-            extras.extend(["INTER TV CABUGI", "GLOBO NATAL", "GLOBO RN"])
-        elif "MG" in nome_limpo or "MINAS" in nome_limpo or "VALES" in nome_limpo:
-            extras.extend(["INTER TV GRANDE MINAS", "INTER TV DOS VALES", "GLOBO MINAS", "GLOBO MG"])
-        else:
-            extras.extend(["INTER TV", "GLOBO RJ", "GLOBO RIO"])
-    if "ASA BRANCA" in nome_limpo or "PERNAMBUCO" in nome_limpo or "RECIFE" in nome_limpo:
-        extras.extend([f"{network} RECIFE", f"{network} PERNAMBUCO", f"{network} PE", f"{network} NORDESTE"])
-    if "CABO BRANCO" in nome_limpo or "PARAIBA" in nome_limpo:
-        extras.extend(["TV CABO BRANCO", "TV PARAIBA", "GLOBO JOAO PESSOA", "GLOBO PB"])
-    if "MORENA" in nome_limpo:
-        extras.extend(["TV MORENA", "GLOBO CAMPO GRANDE", "GLOBO MS"])
-    if "CENTRO AMERICA" in nome_limpo:
-        extras.extend(["TV CENTRO AMERICA", "GLOBO CUIABA", "GLOBO MT"])
-
-    # 4. Fallback seguro de Rede Nacional (garante que toda afiliada tenha a grade da rede se a cidade não existir na fonte)
+    # Tier 3: Fallback Nacional (Só usado se nenhuma fonte tiver nem Tier 1 nem Tier 2!)
     if network == "GLOBO":
-        extras.extend(["GLOBO SP", "GLOBO SAO PAULO", "TV GLOBO", "GLOBO RJ", "GLOBO RIO", "GLOBO"])
+        tier3_national.extend(["GLOBO SP", "GLOBO SAO PAULO", "TV GLOBO", "REDE GLOBO", "GLOBO RJ", "GLOBO RIO", "GLOBO"])
     elif network == "SBT":
-        extras.extend(["SBT SP", "SBT SAO PAULO", "SBT", "SBT NACIONAL"])
+        tier3_national.extend(["SBT SP", "SBT SAO PAULO", "SBT", "SBT NACIONAL"])
     elif network == "RECORD":
-        extras.extend(["RECORD SP", "RECORD TV SP", "RECORD", "RECORD TV", "RECORD NACIONAL"])
+        tier3_national.extend(["RECORD SP", "RECORD TV SP", "RECORD", "RECORD TV", "RECORD NACIONAL"])
     elif network == "BAND":
-        extras.extend(["BAND SP", "BAND", "TV BAND", "BANDEIRANTES", "REDE BANDEIRANTES"])
+        tier3_national.extend(["BAND SP", "BAND SAO PAULO", "BAND", "TV BAND", "BANDEIRANTES", "REDE BANDEIRANTES"])
 
-    return extras
+    return tier1_local, tier2_state, tier3_national
 
-def aliases_for(entry: dict[str, object]) -> list[str]:
+def aliases_tiers_for(entry: dict[str, object]) -> list[list[str]]:
+    """Retorna uma lista de camadas [tier1_specific, tier2_state, tier3_national]."""
     values: list[str] = [str(entry.get("name", ""))]
     values.extend(str(x) for x in entry.get("aliases", []) or [])
     grupo = str(entry.get("group", entry.get("group-title", entry.get("group_title", ""))))
-    output, seen = [], set()
-    
-    def add_norm(val: str):
+
+    tier1, tier2, tier3 = [], [], []
+    seen = set()
+
+    def add_to(target_list: list[str], val: str):
         n = original_normalize_name(val)
         if n and n not in seen:
-            output.append(n)
+            target_list.append(n)
             seen.add(n)
 
-    # Primeiro: adiciona todos os nomes exatos e sinônimos diretos do canal
     cleaned_pairs: list[str] = []
     for value in values:
         nome_limpo = normalizar_canal(value)
@@ -851,24 +937,28 @@ def aliases_for(entry: dict[str, object]) -> list[str]:
         if nome_limpo != nome_com_grupo:
             cleaned_pairs.append(nome_limpo)
 
-        add_norm(nome_com_grupo)
-        add_norm(nome_limpo)
-        
+        add_to(tier1, nome_com_grupo)
+        add_to(tier1, nome_limpo)
+
         for syn in CHANNEL_SYNONYMS.get(nome_limpo, []):
-            add_norm(syn)
-            
+            add_to(tier1, syn)
+
         sem_uf = re.sub(r'\s+(SP|RJ|RS|MG|BA|PR|PE|CE|PA|MA|SC|GO|PB|ES|AM|RN|AL|PI|MT|DF|MS|SE|RO|TO|AC|AP|RR)$', '', nome_limpo)
-        if sem_uf != nome_limpo:
-            add_norm(sem_uf)
+        if sem_uf != nome_limpo and sem_uf not in {"GLOBO", "SBT", "RECORD", "BAND"}:
+            add_to(tier1, sem_uf)
             for syn in CHANNEL_SYNONYMS.get(sem_uf, []):
-                add_norm(syn)
+                add_to(tier1, syn)
 
-    # Segundo: adiciona variações desmembradas de afiliadas e fallback de rede aberta (em ordem de especificidade)
     for base_cl in cleaned_pairs:
-        for aff_alias in expand_open_tv_and_affiliate_aliases(base_cl, grupo):
-            add_norm(aff_alias)
+        t1_ext, t2_ext, t3_ext = expand_open_tv_tiers(base_cl, grupo)
+        for a in t1_ext:
+            add_to(tier1, a)
+        for a in t2_ext:
+            add_to(tier2, a)
+        for a in t3_ext:
+            add_to(tier3, a)
 
-    return output
+    return [t for t in (tier1, tier2, tier3) if t]
 
 def choose_exact(source: EpgSource, aliases: Iterable[str]) -> tuple[str | None, str]:
     for alias in aliases:
@@ -906,22 +996,42 @@ def best_fuzzy(source: EpgSource, aliases: list[str]) -> tuple[str | None, float
     second_score = scored[1][0] if len(scored) > 1 else 0.0
     return best[1], best[0], second_score, f"aproximação {best[0]:.3f}: {best[2]} ~ {best[3]}"
 
-def find_match(source: EpgSource, aliases: list[str], source_ids: list[str] = None) -> ChannelMatch | None:
-    for raw_sid in (source_ids or []):
-        norm_sid = normalize_source_id(raw_sid)
-        if norm_sid and norm_sid in source.normalized_id_index:
-            cands = source.normalized_id_index[norm_sid]
-            best_cid = max(cands, key=lambda cid: len(source.rows.get(cid, [])))
-            return ChannelMatch(source, best_cid, f"id do dicionário: {raw_sid}", 1.0)
+def find_match_in_tier(source: EpgSource, tier_aliases: list[str], source_ids: list[str] | None = None, tier_num: int = 1) -> ChannelMatch | None:
+    if tier_num == 1:
+        for raw_sid in (source_ids or []):
+            norm_sid = normalize_source_id(raw_sid)
+            if norm_sid and norm_sid in source.normalized_id_index:
+                cands = source.normalized_id_index[norm_sid]
+                best_cid = max(cands, key=lambda cid: len(source.rows.get(cid, [])))
+                return ChannelMatch(source, best_cid, f"id do dicionário: {raw_sid}", 1.0, tier=1)
 
-    exact_id, reason = choose_exact(source, aliases)
-    if exact_id: return ChannelMatch(source, exact_id, reason, 1.0)
+    exact_id, reason = choose_exact(source, tier_aliases)
+    if exact_id:
+        return ChannelMatch(source, exact_id, reason if tier_num == 1 else f"{reason} (camada {tier_num})", 1.0, tier=tier_num)
     
-    fuzzy_id, best_score, second_score, fuzzy_reason = best_fuzzy(source, aliases)
+    fuzzy_id, best_score, second_score, fuzzy_reason = best_fuzzy(source, tier_aliases)
     if fuzzy_id and best_score >= FUZZY_THRESHOLD and (best_score - second_score) >= FUZZY_MARGIN:
-        return ChannelMatch(source, fuzzy_id, fuzzy_reason, best_score)
+        return ChannelMatch(source, fuzzy_id, fuzzy_reason if tier_num == 1 else f"{fuzzy_reason} (camada {tier_num})", best_score, tier=tier_num)
         
     return None
+
+def find_tiered_matches_across_sources(active_sources: list[EpgSource], alias_tiers: list[list[str]], source_ids: list[str]) -> list[ChannelMatch]:
+    """Procura primeiro na Camada 1 (específica local) em todas as fontes ativas.
+    Se encontrar pelo menos uma fonte com programação válida na Camada 1, USA APENAS A CAMADA 1!
+    Só desce para a Camada 2 (estadual) ou Camada 3 (nacional) se nenhuma fonte tiver programas na camada anterior."""
+    fallback_matches: list[ChannelMatch] = []
+    for tier_idx, tier_aliases in enumerate(alias_tiers, start=1):
+        tier_matches = [
+            m for source in active_sources
+            if (m := find_match_in_tier(source, tier_aliases, source_ids if tier_idx == 1 else None, tier_num=tier_idx)) is not None
+        ]
+        # Verifica se há pelo menos uma fonte com programação real nesta camada
+        valid_with_rows = [m for m in tier_matches if m.source.rows.get(m.channel_id)]
+        if valid_with_rows:
+            return valid_with_rows
+        if tier_matches and not fallback_matches:
+            fallback_matches = tier_matches
+    return fallback_matches
 
 def manual_override(overrides: dict[str, object], target_id: str) -> tuple[str | None, str | None]:
     item = (overrides.get("by_target_id", {}) or {}).get(target_id)
@@ -1139,6 +1249,7 @@ def evaluate_candidates(matches: list[ChannelMatch], now: datetime, max_active_v
         consensus_tier = round(ev.support_weight / 1.5)
         return (
             has_programmes,
+            -ev.match.tier,
             is_healthy_full_day,
             consensus_tier,
             round(ev.health_score, 2),
@@ -1197,7 +1308,6 @@ def make_validation(entry: dict[str, object], chosen: CandidateEvaluation, all_e
     }
 
 def generate_quality_variants(base_names: Iterable[str]) -> list[str]:
-    """Gera variações incluindo [1], [2], [3], (BR2) e ² para casar 100% dos canais das Listas 1 e 2."""
     suffixes = [
         "",
         " SD",
@@ -1562,7 +1672,7 @@ def write_epg_stream(
                 gz.write(data)
                 if plain is not None: plain.write(data)
 
-            generator = "EPG Universal Otimizado (Afiliadas + Filmes Limpos + Séries TxxExx)"
+            generator = "EPG Universal Otimizado (Afiliadas Locais Camada 1 + Filmes Limpos)"
             source_name = "Consolidado Inteligente de Múltiplas Fontes"
             emit((f"<?xml version='1.0' encoding='utf-8'?>\n<tv generator-info-name={quoteattr(generator)} source-info-name={quoteattr(source_name)}>\n").encode("utf-8"))
 
@@ -1607,7 +1717,7 @@ def write_epg_stream(
     return programme_count, len(xml_id_to_data)
 
 def main() -> None:
-    print("Iniciando geração de EPG (Base Estável + Afiliadas Globo/Abertos + Filmes Limpos)...")
+    print("Iniciando geração de EPG (Prioridade Estrita para Grade Local de Afiliadas)...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -1849,14 +1959,14 @@ def main() -> None:
     for entry in entries:
         target_id = str(entry.get("id", ""))
         visible_name = str(entry.get("name", ""))
-        aliases = aliases_for(entry)
+        alias_tiers = aliases_tiers_for(entry)
         source_ids = [str(x) for x in entry.get("source_ids", []) or []]
-        matches = [m for source in active_sources if (m := find_match(source, aliases, source_ids)) is not None]
+        matches = find_tiered_matches_across_sources(active_sources, alias_tiers, source_ids)
 
         override_source_key, override_id = manual_override(overrides, target_id)
         forced = False
         if override_source_key and override_id and (src := source_by_key.get(override_source_key)) and override_id in src.channels:
-            override_match = ChannelMatch(src, override_id, "override manual", 1.0)
+            override_match = ChannelMatch(src, override_id, "override manual", 1.0, tier=1)
             matches = [m for m in matches if m.source is not src]
             matches.append(override_match)
             forced = True
