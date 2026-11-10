@@ -41,10 +41,78 @@ except ImportError:
     urllib.request.urlretrieve("https://raw.githubusercontent.com/Limaalef/M3uEpg/main/epg_utils.py", "epg_utils.py")
     from epg_utils import digit_signature, normalize_name as original_normalize_name, normalize_source_id
 
-try:
-    from name_dedupe import dedupe_display_names
-except ImportError:  # pragma: no cover
-    def dedupe_display_names(names_by_id): return names_by_id
+# --- Deduplicação de nomes (embutida: não depende de arquivo extra) ---
+import unicodedata as _ud
+_QUALITY = re.compile(
+    r"\b(SD|HD|FHD|UHD|4K|8K|H\.?264|H\.?265|HEVC|BR2|P)\b[\*\+]*", re.IGNORECASE
+)
+
+
+def name_key(value: str) -> str:
+    """Chave de comparação: sem acento, sem qualidade/tags, mantém o conteúdo de ( ).
+
+    Diferente de strip_qualities_keep_case(), NÃO apaga o texto entre parênteses:
+    "GLOBO PE (ASA BRANCA) HD" -> "GLOBO PE ASA BRANCA" (e não "GLOBO PE").
+    """
+    s = html.unescape(str(value or ""))
+    s = re.sub(r"[¹²³⁴]+", " ", s)  # sobrescritos de variantes (ex.: "HD ²") antes do NFKD
+    s = unicodedata.normalize("NFKD", s)
+    s = "".join(c for c in s if not unicodedata.combining(c)).upper()
+    s = re.sub(r"\[[^\]]*\]", " ", s)          # [H265], [1], [P] ...
+    s = re.sub(r"[¹²³⁴*]+", " ", s)
+    s = s.replace("&", " AND ")
+    s = re.sub(r"[()\-–—_./|,:;]", " ", s)
+    s = _QUALITY.sub(" ", s)
+    s = re.sub(r"[^A-Z0-9+ ]", " ", s)
+    return " ".join(s.split())
+
+
+def dedupe_display_names(
+    names_by_id: dict[str, list[str]],
+) -> dict[str, list[str]]:
+    """Devolve novo dict {id: [nomes]} em que cada name_key tem um único dono."""
+    owners: dict[str, list[str]] = {}
+    bases_per_id: dict[str, set[str]] = {}
+    for cid, names in names_by_id.items():
+        bases = {name_key(n) for n in names if name_key(n)}
+        bases_per_id[cid] = bases
+        for b in bases:
+            owners.setdefault(b, []).append(cid)
+
+    winner: dict[str, str] = {}
+    for base, ids in owners.items():
+        if len(ids) == 1:
+            winner[base] = ids[0]
+            continue
+        exact = sorted(i for i in ids if name_key(i) == base)
+        if exact:
+            winner[base] = exact[0]
+            continue
+        winner[base] = sorted(ids, key=lambda i: (len(bases_per_id[i]), i))[0]
+
+    out: dict[str, list[str]] = {}
+    for cid, names in names_by_id.items():
+        kept, seen = [], set()
+        for n in names:
+            b = name_key(n)
+            if not b or winner.get(b) == cid:
+                if n not in seen:
+                    kept.append(n)
+                    seen.add(n)
+        out[cid] = kept
+    return out
+
+
+def name_collisions(names_by_id: dict[str, Iterable[str]]) -> dict[str, list[str]]:
+    """Diagnóstico: {name_key: [ids que o reivindicam]} só para os conflitantes."""
+    owners: dict[str, set[str]] = {}
+    for cid, names in names_by_id.items():
+        for n in names:
+            b = name_key(n)
+            if b:
+                owners.setdefault(b, set()).add(cid)
+    return {b: sorted(v) for b, v in owners.items() if len(v) > 1}
+
 
 CATALOG_PATH = Path(os.environ.get("CHANNELS_FILE", "channels.json"))
 OVERRIDES_PATH = Path(os.environ.get("OVERRIDES_FILE", "overrides.json"))
@@ -438,7 +506,7 @@ def inferir_emissora_pelo_grupo(nome_normalizado: str, nome_grupo: str) -> str:
 # IDs genéricos ("coringas") que os servidores IPTV repetem em todas as afiliadas abertas do Brasil.
 # Ao NÃO exportar esses IDs no <channel id="..."> do XML, o player IPTV não encontra o ID coringa
 # e é forçado a casar cada afiliada (e também SP/RJ) pelo seu NOME (<display-name>)!
-POISONED_OPEN_TV_IDS = {
+POISONED_OPEN_TV_IDS |= {
     "globo", "tvglobo", "redeglobo", "globosp", "globorj", "globonacional", "globohd", "globofhd",
     "record", "recordtv", "rederecord", "recordsp", "recordtvsp", "recordrj", "recordtvrj",
     "recordtvbrasilia", "recordbrasilia", "recordnacional", "recordhd", "recordtvminas", "recordminas",
@@ -448,6 +516,33 @@ POISONED_OPEN_TV_IDS = {
     "redetv", "redetvsp", "tvbrasil", "tvcultura", "cultura",
 }
 
+
+# IDs que, NAS LISTAS DO USUÁRIO, aparecem em canais diferentes entre si (ex.: AandE.br em
+# TV Brasil + Cartoonito + Tooncast + Music Box + Record News). Detectado a cada execução.
+AUTO_POISONED_IDS: set[str] = set()
+
+def clean_tvid_key(tvid: str) -> str:
+    t = re.sub(r'\.(br|us|uk|pt|ar|mx|cl|co|pe|latam|int|bt)$', '', str(tvid).lower())
+    t = re.sub(r'^(auto\.|yt\.|br\.|canais\.)', '', t)
+    return re.sub(r'[^a-z0-9]', '', t)
+
+def detect_poisoned_ids(pairs: Iterable[tuple[str, str]]) -> set[str]:
+    """pairs = (tvg-id, nome do canal) lidos das listas. Devolve ids usados por >=2 canais
+    realmente distintos (nomes que não são subconjunto um do outro; SD/HD/FHD/[H265] não contam)."""
+    bases: dict[str, set[frozenset]] = {}
+    for tid, nm in pairs:
+        k = clean_tvid_key(tid)
+        toks = frozenset(t for t in name_key(nm).split() if t not in {"TV", "DE", "DO", "DA", "E"})
+        if k and toks:
+            bases.setdefault(k, set()).add(toks)
+    out = set()
+    for k, sets in bases.items():
+        lst = list(sets)
+        independent = [a for a in lst if not any(a < b for b in lst)]  # descarta quem é subconjunto de outro
+        if len(independent) >= 2:
+            out.add(k)
+    return out
+
 def is_valid_provider_tvid(channel_name: str, tvid: str) -> bool:
     if not tvid or len(tvid) < 2: return False
     tvid_clean = re.sub(r'\.(br|us|uk|pt|ar|mx|cl|co|pe|latam|int|bt)$', '', tvid.lower())
@@ -455,7 +550,7 @@ def is_valid_provider_tvid(channel_name: str, tvid: str) -> bool:
     tvid_clean = re.sub(r'[^a-z0-9]', '', tvid_clean)
     if not tvid_clean: return False
 
-    if tvid_clean in POISONED_OPEN_TV_IDS:
+    if tvid_clean in POISONED_OPEN_TV_IDS or tvid_clean in AUTO_POISONED_IDS:
         return False
 
     base_clean = normalizar_canal(channel_name)
@@ -1184,8 +1279,8 @@ def now_next_for(source: EpgSource, channel_id: str, now: datetime) -> tuple[dic
             next_item = {"start": row.start, "stop": row.stop, "title": row.title}
             if current is not None: break
     return current, next_item
-  
-  def get_clean_aliases(entry: dict[str, object]) -> list[str]:
+
+def get_clean_aliases(entry: dict[str, object]) -> list[str]:
     values = []
     raw_name = str(entry.get("name", "")).strip()
     if raw_name:
@@ -1867,6 +1962,7 @@ def main() -> None:
     stage_start = time.perf_counter()
     
     entries = []
+    id_observations: list[tuple[str, str]] = []
     grouped_by_norm: dict[str, dict[str, Any]] = {}
     VOD_BLACKLIST = {"VOD", "PLAYBACK", "XXX", "ADULTO", "EVENTO", "LANCAMENTO", "LANÇAMENTO", "FILMES", "SERIES", "SÉRIES", "24H", "24HS"}
 
@@ -1931,6 +2027,7 @@ def main() -> None:
             if any(blacklisted in group.upper() for blacklisted in VOD_BLACKLIST):
                 continue
                 
+            if tvg_id: id_observations.append((tvg_id, tvg_name or name))
             target_id = tvg_name or name
             if not target_id:
                 continue
@@ -1986,6 +2083,10 @@ def main() -> None:
             print(f"Lido arquivo M3U local [{m3u_file_str}]: {c} canais extraídos.")
         except Exception as e:
             print(f"Aviso ao ler M3U local {m3u_file_str}: {e}")
+
+    AUTO_POISONED_IDS.clear()
+    AUTO_POISONED_IDS.update(detect_poisoned_ids(id_observations))
+    print(f"IDs de lista não confiáveis (usados por canais diferentes): {len(AUTO_POISONED_IDS)} -> serão ignorados; o casamento passa a ser só pelo nome.")
 
     if ESPELHO_PATH.exists():
         try:
