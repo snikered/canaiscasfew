@@ -111,7 +111,9 @@ jobs:
           git fetch origin epg:epg 2>/dev/null || true
           git checkout epg -- espelho.json 2>/dev/null || true
           git checkout epg -- metadata_cache.json 2>/dev/null || true
-
+          
+          python3 pull_afiliadas_locais.py
+         
       - name: Gerar EPG Costurado e Consolidado
         run: |
           python3 merge_epg.py
