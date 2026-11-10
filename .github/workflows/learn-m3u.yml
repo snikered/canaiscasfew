@@ -27,10 +27,10 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Extrair canais de todos os .m3u e proteger credenciais
+      - name: Extrair canais de todos os .m3u (incluindo .safe.m3u sem URL) e proteger credenciais
         run: |
           python3 - << 'EOF'
-          import glob, json, re, subprocess
+          import glob, html, json, re, subprocess
           from pathlib import Path
 
           m3u_files = sorted(set(
@@ -44,14 +44,17 @@ jobs:
               print("Nenhum arquivo .m3u encontrado.")
               exit(0)
 
-          VOD_BLACKLIST = {"VOD", "PLAYBACK", "XXX", "ADULTO", "EVENTO", "LANCAMENTO", "LANÇAMENTO", "FILMES", "SERIES", "SÉRIES"}
+          VOD_BLACKLIST = {"VOD", "PLAYBACK", "XXX", "ADULTO", "EVENTO", "LANCAMENTO", "LANÇAMENTO", "FILMES", "SERIES", "SÉRIES", "24H", "24HS"}
           
           def strip_qualities(name):
-              s = re.sub(r'\[.*?\]|\(.*?\)|\|.*?\|', ' ', name or "")
-              s = re.sub(r'[\¹\²\³\⁴]', '', s)
-              tags = r'\b(SD|HD|FHD|UHD|4K|8K|H\.?264|H\.?265|HEVC|HDR\+?|LEG|LEGENDADO|DUB|DUBLADO|HQ|VIP|VOD|24H[S]?|24/7|1080P|720P|60FPS|PPV|EVENTOS?|ALTERNATIVO|BACKUP)\b[\*\²\³\¹\⁴\+]*'
+              s = html.unescape(name or "")
+              s = re.sub(r'\[.*?\]|\(.*?\)|\|.*?\|', ' ', s)
+              s = re.sub(r'[\¹\²\³\⁴\~]', ' ', s)
+              tags = r'\b(SD|HD|FHD|UHD|4K|8K|H\.?264|H\.?265|HEVC|HDR\+?|LEG|LEGENDADO|DUB|DUBLADO|HQ|VIP|VOD|24H[S]?|24/7|1080P|720P|60FPS|PPV|EVENTOS?|ALTERNATIVO|BACKUP|BR2)\b[\*\²\³\¹\⁴\+]*'
               s = re.sub(tags, ' ', s, flags=re.I)
-              s = re.sub(r'[*=_\-]', ' ', s)
+              s = re.sub(r'\bH\s+D\b', ' ', s, flags=re.I)
+              s = re.sub(r'[*=_\-–—]', ' ', s)
+              s = re.sub(r'\.\s*$', '', s)
               return ' '.join(s.split()).strip()
 
           def load_existing(path_str):
@@ -63,7 +66,7 @@ jobs:
                   out = {}
                   for c in ch_list:
                       if isinstance(c, dict) and (c.get("id") or c.get("name")):
-                          raw_n = str(c.get("name", c.get("id"))).strip()
+                          raw_n = html.unescape(str(c.get("name", c.get("id"))).strip())
                           base_key = strip_qualities(raw_n).upper() or raw_n.upper()
                           if base_key not in out:
                               out[base_key] = {
@@ -87,61 +90,66 @@ jobs:
           for m3u_path in m3u_files:
               print(f"Processando e higienizando: {m3u_path}")
               sanitized_lines = ["#EXTM3U"]
-              with open(m3u_path, "r", encoding="utf-8", errors="ignore") as f:
-                  current_extinf = None
-                  for line in f:
-                      line = line.strip()
-                      if not line: continue
-                      if line.startswith("#EXTINF:"):
-                          current_extinf = line
-                      elif (line.startswith("http") or line.startswith("rtmp")) and current_extinf:
-                          lower_url = line.split("?")[0].lower()
-                          if lower_url.endswith(('.mp4', '.mkv', '.avi', '.mov', '.wmv', '.flv', '.webm')):
-                              current_extinf = None
-                              continue
-                          
-                          tvg_id_m = re.search(r'tvg-id="(.*?)"', current_extinf, re.I)
-                          tvg_name_m = re.search(r'tvg-name="(.*?)"', current_extinf, re.I)
-                          group_m = re.search(r'group-title="(.*?)"', current_extinf, re.I)
-                          name_m = re.search(r',([^,]*?)$', current_extinf)
+              raw_lines = Path(m3u_path).read_text("utf-8", errors="ignore").splitlines()
+              
+              idx = 0
+              while idx < len(raw_lines):
+                  line = raw_lines[idx].strip()
+                  if not line.startswith("#EXTINF:"):
+                      idx += 1
+                      continue
 
-                          tvg_id = tvg_id_m.group(1).strip() if tvg_id_m else ""
-                          tvg_name = tvg_name_m.group(1).strip() if tvg_name_m else ""
-                          group = group_m.group(1).strip() if group_m else ""
-                          name = name_m.group(1).strip() if name_m else ""
-                          
-                          extinf_saved = current_extinf
-                          current_extinf = None
+                  extinf_line = line
+                  next_line = raw_lines[idx + 1].strip() if (idx + 1) < len(raw_lines) else ""
+                  has_stream_url = next_line.startswith(("http://", "https://", "rtmp://"))
+                  if has_stream_url:
+                      idx += 2
+                      lower_url = next_line.split("?")[0].lower()
+                      if lower_url.endswith(('.mp4', '.mkv', '.avi', '.mov', '.wmv', '.flv', '.webm')):
+                          continue
+                  else:
+                      idx += 1
 
-                          if any(b in group.upper() for b in VOD_BLACKLIST):
-                              continue
+                  tvg_id_m = re.search(r'tvg-id="(.*?)"', extinf_line, re.I)
+                  tvg_name_m = re.search(r'tvg-name="(.*?)"', extinf_line, re.I)
+                  group_m = re.search(r'group-title="(.*?)"', extinf_line, re.I)
+                  name_m = re.search(r',([^,]*?)$', extinf_line)
 
-                          target = name or tvg_name
-                          if not target: continue
-                          if re.search(r'\bS\d{1,3}\s*E\d{1,3}\b|\bT\d{1,3}\s*EP?\d{1,3}\b|\b24HS?\b|^24\s*H\b', target.upper()):
-                              continue
+                  tvg_id = tvg_id_m.group(1).strip() if tvg_id_m else ""
+                  tvg_name = html.unescape(tvg_name_m.group(1).strip()) if tvg_name_m else ""
+                  group = html.unescape(group_m.group(1).strip()) if group_m else ""
+                  name = html.unescape(name_m.group(1).strip()) if name_m else ""
 
-                          base_clean = strip_qualities(target) or target
-                          base_key = base_clean.upper()
+                  if any(b in group.upper() for b in VOD_BLACKLIST):
+                      continue
 
-                          if base_key not in merged:
-                              merged[base_key] = {
-                                  "id": base_clean,
-                                  "name": base_clean,
-                                  "aliases": set(),
-                                  "tvg_ids_to_export": set(),
-                                  "group": group
-                              }
-                          if name: merged[base_key]["aliases"].add(name)
-                          if tvg_name: merged[base_key]["aliases"].add(tvg_name)
-                          if tvg_id: merged[base_key]["tvg_ids_to_export"].add(tvg_id)
-                          
-                          # Salva apenas a linha EXTINF e uma URL fictícia (remove sua senha do arquivo!)
-                          sanitized_lines.append(extinf_saved)
-                          sanitized_lines.append("http://stream.local/live.ts")
-                          total_learned += 1
+                  target = name or tvg_name
+                  if not target:
+                      continue
+                  if re.search(r'\bS\d{1,3}\s*E\d{1,3}\b|\bT\d{1,3}\s*EP?\d{1,3}\b|\b24HS?\b|^24\s*H\b', target.upper()):
+                      continue
 
-              # Sobrescreve o arquivo .m3u removendo VODs e credenciais privadas
+                  base_clean = strip_qualities(target) or target
+                  base_key = base_clean.upper()
+
+                  if base_key not in merged:
+                      merged[base_key] = {
+                          "id": base_clean,
+                          "name": base_clean,
+                          "aliases": set(),
+                          "tvg_ids_to_export": set(),
+                          "group": group
+                      }
+                  if name: merged[base_key]["aliases"].add(name)
+                  if tvg_name: merged[base_key]["aliases"].add(tvg_name)
+                  if tvg_id: merged[base_key]["tvg_ids_to_export"].add(tvg_id)
+                  if group and not merged[base_key]["group"]:
+                      merged[base_key]["group"] = group
+
+                  sanitized_lines.append(extinf_line)
+                  sanitized_lines.append("http://stream.local/live.ts")
+                  total_learned += 1
+
               Path(m3u_path).write_text("\n".join(sanitized_lines) + "\n", "utf-8")
 
           final_list = []
@@ -157,7 +165,7 @@ jobs:
 
           Path("channels.json").write_text(json.dumps({"channels": final_list}, ensure_ascii=False, indent=2) + "\n", "utf-8")
           Path("espelho.json").write_text(json.dumps({"channels": final_list}, ensure_ascii=False, indent=2) + "\n", "utf-8")
-          print(f"Concluído! {total_learned} canais processados -> {len(final_list)} emissoras base salvas no channels.json.")
+          print(f"Concluído! {total_learned} entradas M3U lidas -> {len(final_list)} emissoras únicas salvas no channels.json.")
 
           if Path("compile_dictionary.py").exists():
               subprocess.run(["python3", "compile_dictionary.py"], check=False)
