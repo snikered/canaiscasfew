@@ -1,14 +1,19 @@
 #!/usr/bin/env python3
-"""EPG Universal Consolidado — Alta Precisão de Horários + Metadados Estritos para Séries
-- Remove "E1" falso de Filmes, Esportes e Jornalismo.
-- Limpa tags <episode-num> indevidas que fazem o TiviMate exibir E1 em filmes.
-- Mantém Temporada e Episódio (Txx Exx) exclusivamente quando for Série/Episódio real.
+"""EPG Universal Consolidado — Base Estável (merge_epg_2) + Reconhecimento Total de Afiliadas e Canais Abertos
+- Mantém 100% a lógica de IDs e proteção contra tvg-id errado do merge_epg_2.py que funcionou.
+- Reconhece todas as afiliadas regionais (Globo EPTV, RBS, RPC, NSC, Rede Amazônica, TV Anhanguera, TV Liberal,
+  TV Gazeta Alagoas/ES, TV Verdes Mares, TV Mirante, Inter TV, TV TEM, Vanguarda, TV Tribuna, TV Integração,
+  SBT Rede Massa/Jangadeiro/Jornal/Alterosa/Aratu, Record Itapoan/Guaíba/RICTV/Tropical, Band Tarobá/Manaíra)
+  e aplica fallback automático para a rede principal quando a cidade não tiver guia próprio.
+- Gera sufixos [1], [2], [3], (BR2) e ² nos <display-name> para casar canais com tvg-id vazio.
+- Remove "E1" falso de Filmes, Esportes e Jornalismo e mantém Txx Exx em Séries.
 """
 from __future__ import annotations
 
 import copy
 import glob
 import gzip
+import html
 import json
 import os
 import re
@@ -101,7 +106,6 @@ PLACEHOLDER_TITLES = {
     "ENCERRAMENTO",
 }
 
-# Palavras-chave de canais que NUNCA devem receber numeração de Temporada/Episódio (Filmes Puros, Esportes e Notícias)
 NON_SERIES_CHANNEL_KEYWORDS = (
     "TELECINE",
     "MEGAPIX",
@@ -141,7 +145,6 @@ NON_SERIES_CHANNEL_KEYWORDS = (
     "TERRA VIVA",
 )
 
-# Categorias XMLTV que identificam Filmes, Esportes ou Telejornais (onde temporada/episódio nunca deve ser exibido)
 NON_SERIES_CATEGORY_KEYWORDS = (
     "FILME",
     "MOVIE",
@@ -235,46 +238,128 @@ CHANNEL_SYNONYMS = {
     "TNT SERIES": ["TNT SERIES", "TNT SÉRIES", "TNT SERIE"],
     "AGROMAIS": ["AGRO+", "AGRO MAIS"],
     "AGRO+": ["AGROMAIS", "AGRO MAIS"],
-    "REDE TV": ["REDETV!", "REDETV"],
-    "REDETV": ["REDE TV", "REDETV!"],
-    "TV GAZETA SP": ["TV GAZETA", "GAZETA"],
+    "REDE TV": ["REDETV!", "REDETV", "REDE TV!"],
+    "REDETV": ["REDE TV", "REDETV!", "REDE TV!"],
+    "TV GAZETA SP": ["TV GAZETA", "GAZETA", "REDE GAZETA"],
     "TV GAZETA": ["TV GAZETA SP", "GAZETA"],
-    "TV PAMPA RS": ["TV PAMPA", "PAMPA"],
-    "TV PAMPA": ["TV PAMPA RS", "PAMPA"],
+    "TV PAMPA RS": ["TV PAMPA", "PAMPA", "REDE PAMPA"],
+    "TV PAMPA": ["TV PAMPA RS", "PAMPA", "REDE PAMPA"],
     "CNN INTERNACIONAL": ["CNN INTERNATIONAL"],
     "CNN INTERNATIONAL": ["CNN INTERNACIONAL"],
     "JOVEM PAN": ["JOVEM PAN NEWS", "JP NEWS"],
     "JOVEM PAN NEWS": ["JOVEM PAN", "JP NEWS"],
     "PRIME BOX BRAZIL": ["PRIME BOX BRASIL"],
     "PRIME BOX BRASIL": ["PRIME BOX BRAZIL"],
+    "TRAVEL BOX BRAZIL": ["TRAVEL BOX BRASIL"],
+    "TRAVEL BOX BRASIL": ["TRAVEL BOX BRAZIL"],
+    "MUSIC BOX BRAZIL": ["MUSIC BOX BRASIL"],
+    "MUSIC BOX BRASIL": ["MUSIC BOX BRAZIL"],
     "CARTOONITO": ["CARTOONITO", "BOOMERANG"],
-    "SPORTTV": ["SPORTV"],
-    "SPORTV": ["SPORTTV"],
+    "SPORTTV": ["SPORTV", "SPORTV 1"],
+    "SPORTV": ["SPORTTV", "SPORTV 1"],
+    "SPORTV 1": ["SPORTV", "SPORTTV"],
     "SPORTTV 2": ["SPORTV 2"],
     "SPORTV 2": ["SPORTTV 2"],
     "SPORTTV 3": ["SPORTV 3"],
     "SPORTV 3": ["SPORTTV 3"],
+    "ESPN": ["ESPN 1", "ESPN BRASIL"],
+    "ESPN 1": ["ESPN", "ESPN BRASIL"],
+    "ESPN 4": ["FOX SPORTS"],
+    "ESPN 5": ["FOX SPORTS 2"],
+    "ESPN 6": ["ESPN EXTRA"],
+    "PREMIERE 1": ["PREMIERE CLUBES", "PREMIERE"],
+    "PREMIERE CLUBES": ["PREMIERE 1", "PREMIERE"],
+    "GLOBOPLAY NOVELAS": ["VIVA", "CANAL VIVA", "GLOBO NOVELAS"],
+    "GLOBO NOVELAS": ["VIVA", "CANAL VIVA", "GLOBOPLAY NOVELAS"],
+    "VIVA": ["CANAL VIVA", "GLOBOPLAY NOVELAS"],
+    "CANAL OFF": ["OFF"],
+    "OFF": ["CANAL OFF"],
+    "CANAL FUTURA": ["FUTURA"],
+    "FUTURA": ["CANAL FUTURA"],
+    "TV CULTURA": ["CULTURA"],
+    "CULTURA": ["TV CULTURA"],
+    "TV BRASIL": ["TV BRASIL", "EBC", "TVE BRASIL"],
+    "TV APARECIDA": ["APARECIDA", "REDE APARECIDA"],
+    "CANCAO NOVA": ["TV CANCAO NOVA"],
+    "REDE VIDA": ["REDEVIDA", "TV VIDA"],
+    "REDE GOSPEL": ["TV GOSPEL"],
+    "TV PAI ETERNO": ["PAI ETERNO"],
+    "TV NOVO TEMPO": ["NOVO TEMPO"],
+    "NOVO TEMPO": ["TV NOVO TEMPO"],
+    "TV EVANGELIZAR": ["EVANGELIZAR", "REDE EVANGELIZAR"],
+    "TV DIARIO": ["TV DIARIO FORTALEZA", "TV DIARIO CE"],
+    "REDE CNT": ["CNT", "TV CNT"],
+    "REDE BRASIL": ["RBTV", "REDE BRASIL DE TELEVISAO"],
+    "REDE SUPER": ["TV SUPER"],
+    "TVE": ["TVE RS", "TVE BAHIA", "TV CULTURA"],
+    "TIMES BRASIL": ["TIMES BRASIL CNBC", "CNBC", "CNBC BRASIL"],
+    "TIMES BRASIL CNBC": ["TIMES BRASIL", "CNBC", "CNBC BRASIL"],
+    "ADULT SWIM": ["ADULT SWIN"],
+    "ADULT SWIN": ["ADULT SWIM"],
+}
+
+# Mapa de siglas e nomes de Estados/Cidades para ajudar no casamento de afiliadas locais
+UF_TO_STATE_AND_CAPITAL = {
+    "SP": ["SAO PAULO", "SP"],
+    "RJ": ["RIO DE JANEIRO", "RIO", "RJ"],
+    "MG": ["MINAS", "MINAS GERAIS", "BELO HORIZONTE", "BH", "MG"],
+    "RS": ["RIO GRANDE DO SUL", "PORTO ALEGRE", "RS"],
+    "PR": ["PARANA", "CURITIBA", "PR"],
+    "SC": ["SANTA CATARINA", "FLORIANOPOLIS", "SC"],
+    "BA": ["BAHIA", "SALVADOR", "BA"],
+    "PE": ["PERNAMBUCO", "RECIFE", "PE"],
+    "CE": ["CEARA", "FORTALEZA", "CE"],
+    "PA": ["PARA", "BELEM", "PA"],
+    "MA": ["MARANHAO", "SAO LUIS", "MA"],
+    "GO": ["GOIAS", "GOIANIA", "GO"],
+    "DF": ["BRASILIA", "DISTRITO FEDERAL", "DF"],
+    "AM": ["AMAZONAS", "MANAUS", "AM"],
+    "ES": ["ESPIRITO SANTO", "VITORIA", "ES"],
+    "PB": ["PARAIBA", "JOAO PESSOA", "CAMPINA GRANDE", "PB"],
+    "RN": ["RIO GRANDE DO NORTE", "NATAL", "RN"],
+    "AL": ["ALAGOAS", "MACEIO", "AL"],
+    "SE": ["SERGIPE", "ARACAJU", "SE"],
+    "PI": ["PIAUI", "TERESINA", "PI"],
+    "MT": ["MATO GROSSO", "CUIABA", "MT"],
+    "MS": ["MATO GROSSO DO SUL", "CAMPO GRANDE", "MS"],
+    "TO": ["TOCANTINS", "PALMAS", "TO"],
+    "RO": ["RONDONIA", "PORTO VELHO", "RO"],
+    "AC": ["ACRE", "RIO BRANCO", "AC"],
+    "AP": ["AMAPA", "MACAPA", "AP"],
+    "RR": ["RORAIMA", "BOA VISTA", "RR"],
 }
 
 def strip_qualities_keep_case(name: str) -> str:
     if not name: return ""
-    s = re.sub(r'\[.*?\]|\(.*?\)|\|.*?\|', ' ', name)
-    s = re.sub(r'[\¹\²\³\⁴]', '', s)
-    tags = r'\b(SD|HD|FHD|UHD|4K|8K|H\.?264|H\.?265|HEVC|HDR\+?|LEG|LEGENDADO|DUB|DUBLADO|HQ|VIP|VOD|24H[S]?|24/7|1080P|720P|60FPS|PPV|EVENTOS?|ALTERNATIVO|BACKUP)\b[\*\²\³\¹\⁴\+]*'
+    s = html.unescape(name)
+    s = re.sub(r'\[.*?\]|\(.*?\)|\|.*?\|', ' ', s)
+    s = re.sub(r'[\¹\²\³\⁴\~]', ' ', s)
+    tags = r'\b(SD|HD|FHD|UHD|4K|8K|H\.?264|H\.?265|HEVC|HDR\+?|LEG|LEGENDADO|DUB|DUBLADO|HQ|VIP|VOD|24H[S]?|24/7|1080P|720P|60FPS|PPV|EVENTOS?|ALTERNATIVO|BACKUP|BR2)\b[\*\²\³\¹\⁴\+]*'
     s = re.sub(tags, ' ', s, flags=re.IGNORECASE)
+    s = re.sub(r'\bH\s+D\b', ' ', s, flags=re.IGNORECASE)
     s = re.sub(r'[*=_\-]', ' ', s)
+    s = re.sub(r'\.\s*$', '', s)
     return ' '.join(s.split()).strip()
 
 def normalizar_canal(nome: str) -> str:
     if not nome: return ""
-    original_nome = nome
-    nome = strip_qualities_keep_case(nome)
+    original_nome = html.unescape(nome)
+    nome = strip_qualities_keep_case(original_nome)
     
+    nome = re.sub(r'\bADULT SWIN\b', 'ADULT SWIM', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bZOOMOOO\b', 'ZOOMOO', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bJP NEWS\b', 'JOVEM PAN NEWS', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bJOVEM PAN\b(?! NEWS)', 'JOVEM PAN NEWS', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bFOX SPORTS 2\b', 'ESPN 5', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bFOX SPORTS\b', 'ESPN 4', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bESPN EXTRA\b', 'ESPN 6', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bBOOMERANG\b', 'CARTOONITO', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bMAX PRIME\b', 'HBO POP', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bHBO\s*\+\b', 'HBO PLUS', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bH2\b', 'HISTORY 2', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bDISCOVERY H&H\b', 'DISCOVERY HOME & HEALTH', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bDISCOVERY TLC\b', 'TLC', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bID\s+INVESTIGA[CÇ][AÃ]O DISCOVERY\b', 'INVESTIGACAO DISCOVERY', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bFOX PREMIUM\b', 'STAR PREMIUM', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bFOX CHANNEL\b', 'STAR CHANNEL', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bFOX LIFE\b', 'STAR LIFE', nome, flags=re.IGNORECASE)
@@ -286,6 +371,9 @@ def normalizar_canal(nome: str) -> str:
     nome = re.sub(r'\bTC\s+CULT\b', 'TELECINE CULT', nome, flags=re.IGNORECASE)
     nome = re.sub(r'^GB\b', 'GLOBO', nome, flags=re.IGNORECASE)
     nome = re.sub(r'^RECORDTV\b', 'RECORD', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bRECORD\s+TV\b', 'RECORD', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bSBT\s+TV\b', 'SBT', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bBAND\s+TV\b', 'BAND', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bREDE\s+TV!?\b', 'REDETV', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bAGRO\s*\+\b', 'AGROMAIS', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bSPORTTV\b', 'SPORTV', nome, flags=re.IGNORECASE)
@@ -301,7 +389,8 @@ def inferir_emissora_pelo_grupo(nome_normalizado: str, nome_grupo: str) -> str:
     grupo = nome_grupo.upper()
     if "GLOBO" in grupo and not nome_normalizado.startswith("GLOBO") and " NEWS" not in nome_normalizado:
         return f"GLOBO {nome_normalizado}"
-    if "SBT" in grupo and not nome_normalizado.startswith("SBT"): return f"SBT {nome_normalizado}"
+    if "SBT" in grupo and not nome_normalizado.startswith("SBT") and not any(k in nome_normalizado for k in ("REDETV", "CULTURA", "BRASIL", "APARECIDA", "GAZETA")):
+        return f"SBT {nome_normalizado}"
     if "RECORD" in grupo and not nome_normalizado.startswith("RECORD"): return f"RECORD {nome_normalizado}"
     if "BAND" in grupo and not nome_normalizado.startswith("BAND"): return f"BAND {nome_normalizado}"
     if "PREMIERE" in grupo and not nome_normalizado.startswith("PREMIERE") and len(nome_normalizado) <= 4: return f"PREMIERE {nome_normalizado}"
@@ -309,12 +398,19 @@ def inferir_emissora_pelo_grupo(nome_normalizado: str, nome_grupo: str) -> str:
 
 def is_valid_provider_tvid(channel_name: str, tvid: str) -> bool:
     if not tvid or len(tvid) < 2: return False
-    tvid_clean = re.sub(r'\.(br|us|uk|pt|ar|mx|cl|co|pe|latam|int)$', '', tvid.lower())
+    tvid_clean = re.sub(r'\.(br|us|uk|pt|ar|mx|cl|co|pe|latam|int|bt)$', '', tvid.lower())
     tvid_clean = re.sub(r'^(auto\.|yt\.|br\.|canais\.)', '', tvid_clean)
     tvid_clean = re.sub(r'[^a-z0-9]', '', tvid_clean)
     if not tvid_clean: return False
 
     base_clean = normalizar_canal(channel_name)
+    # Bloqueia compartilhamento de um mesmo tvg-id genérico (ex: GloboRJ.br, globosp.br, RecordTV.br, Band.br, SBT.br)
+    # entre dezenas de afiliadas regionais diferentes para não sobrescrever os <channel id="..."> no XML!
+    if base_clean.startswith(("GLOBO ", "RECORD ", "BAND ", "SBT ")):
+        if base_clean not in {"GLOBO SP", "GLOBO SAO PAULO", "GLOBO RJ", "GLOBO RIO", "GLOBO NEWS", "RECORD SP", "BAND SP", "SBT SP", "SBT"}:
+            if tvid_clean in {"globorj", "globosp", "recordtv", "recordtvbrasilia", "band", "sbt"}:
+                return False
+
     candidates = [base_clean] + CHANNEL_SYNONYMS.get(base_clean, [])
     
     for cand in candidates:
@@ -405,15 +501,12 @@ def download_to_temp_file(url: str, attempts: int = 4) -> Path:
 # EXTRAÇÃO E ENRIQUECIMENTO DE METADADOS (ESTRITO PARA SÉRIES REAIS)
 # =====================================================================
 _RE_XMLTV_NS = re.compile(r"^\s*(\d+)\s*\.\s*(\d+)\s*\.")
-# Exige SEMPRE Temporada + Episódio explícitos (nunca aceita "E1" solto sem temporada ou sem "Ep.")
 _RE_SE_PATTERNS = [
     re.compile(r"\bS(\d{1,2})\s*[:\-]?\s*E(?:P)?(\d{1,3})\b", re.IGNORECASE),
     re.compile(r"\bT(?:EMP(?:ORADA)?)?\s*\.?\s*(\d{1,2})\s*[\-:/, ]+\s*E(?:P(?:IS[OÓ]DIO)?)?\s*\.?\s*(\d{1,3})\b", re.IGNORECASE),
     re.compile(r"\b(\d{1,2})\s*[ªº]\s*T(?:EMP(?:ORADA)?)?\s*[\-:/, ]*\s*E(?:P(?:IS[OÓ]DIO)?)?\s*\.?\s*(\d{1,3})\b", re.IGNORECASE),
 ]
-# Episódio sem temporada só é aceito se estiver escrito explicitamente "Ep." ou "Episódio" (nunca apenas a letra "E")
 _RE_EXPLICIT_EPISODE = re.compile(r"\b(?:EPIS[OÓ]DIO|EP\.)\s*(\d{1,3})\b", re.IGNORECASE)
-# Remove sufixos indevidos como " - E1", "(E1)", "[E1]" que algumas fontes colocam em títulos de filmes
 _RE_TRAILING_FAKE_EP = re.compile(r"(?:\s*[\-\|:]\s*|\s+)(?:\[|\()?E(?:P)?\.?\s*0*1(?:\]|\))?\s*$", re.IGNORECASE)
 
 def is_non_series_channel(channel_name: str) -> bool:
@@ -421,33 +514,27 @@ def is_non_series_channel(channel_name: str) -> bool:
     return any(kw in norm_ch for kw in NON_SERIES_CHANNEL_KEYWORDS)
 
 def is_likely_movie_or_sport(categories: Iterable[str], desc: str, duration_minutes: float, channel_name: str) -> bool:
-    """Identifica se o programa é Filme, Esporte ou Jornalismo para bloquear qualquer tag de episódio."""
     if is_non_series_channel(channel_name):
         return True
 
     cats_upper = " | ".join(c.upper() for c in categories if c)
     desc_upper = (desc or "").upper()
 
-    # Se a categoria disser explicitamente que é Série/Novela/Sitcom/Desenho, permite episódio
     if any(skw in cats_upper for skw in SERIES_CATEGORY_KEYWORDS):
         return False
 
-    # Se a categoria disser que é Filme, Cinema, Longa, Esporte ou Notícias -> Bloqueia episódio!
     if any(mkw in cats_upper for mkw in NON_SERIES_CATEGORY_KEYWORDS):
         return True
 
-    # Se a sinopse começa com ficha técnica de filme ou menciona direção/elenco de longa-metragem e dura >= 80 min
     if duration_minutes >= 85:
         if any(w in desc_upper for w in ("DIREÇÃO:", "DIRECAO:", "SINOPSE:", "LONGA-METRAGEM", "FILME DE ")):
             return True
-        # Programas com mais de 85 minutos sem menção a "série/temporada/episódio/capítulo" na categoria ou descrição são filmes/eventos
         if not any(w in desc_upper for w in ("TEMPORADA", "EPISÓDIO", "EPISODIO", "SÉRIE", "SERIE", "CAPÍTULO", "CAPITULO")):
             return True
 
     return False
 
 def extract_program_metadata(el: ET.Element, channel_name: str = "", duration_minutes: float = 0.0) -> dict[str, Any]:
-    """Extrai metadados garantindo que Filmes nunca recebam Temporada/Episódio falsos."""
     title = ""
     sub_title = ""
     desc = ""
@@ -478,7 +565,6 @@ def extract_program_metadata(el: ET.Element, channel_name: str = "", duration_mi
                 if m:
                     s_val = int(m.group(1)) + 1
                     e_val = int(m.group(2)) + 1
-                    # Ignora "0.0." (S1E1 genérico que fontes colocam em filmes) a menos que a categoria confirme Série
                     if not (s_val == 1 and e_val == 1 and "0.0." in txt):
                         season, episode = s_val, e_val
             else:
@@ -488,7 +574,6 @@ def extract_program_metadata(el: ET.Element, channel_name: str = "", duration_mi
                         season, episode = int(m.group(1)), int(m.group(2))
                         break
 
-    # Se o título vier com subtítulo acoplado (ex: "Duelo com Bobby Flay : Um Pouco Caipira")
     if " : " in title and not sub_title:
         parts = [p.strip() for p in title.split(" : ", 1)]
         if len(parts) == 2 and parts[0] and parts[1]:
@@ -497,10 +582,8 @@ def extract_program_metadata(el: ET.Element, channel_name: str = "", duration_mi
             else:
                 title, sub_title = parts[0], parts[1]
 
-    # Limpa "E1" falso no final do título se houver
     title = _RE_TRAILING_FAKE_EP.sub("", title).strip()
 
-    # Busca temporada e episódio via Regex estrita (SxxExx ou Txx Exx)
     if season is None and episode is None:
         search_blob = f"{title} | {sub_title} | {desc}"
         for pat in _RE_SE_PATTERNS:
@@ -517,12 +600,10 @@ def extract_program_metadata(el: ET.Element, channel_name: str = "", duration_mi
                 if 0 < e_val <= 1500:
                     episode = e_val
 
-    # Verifica se é Filme, Esporte ou Jornalismo: se for, ZERA temporada e episódio!
     if is_likely_movie_or_sport(categories, desc, duration_minutes, channel_name):
         season = None
         episode = None
 
-    # Limpa códigos S01E02 repetidos do título e do subtítulo
     for pat in _RE_SE_PATTERNS:
         title = pat.sub("", title).strip(" -:|")
         if sub_title:
@@ -563,7 +644,10 @@ def read_source_from_file(spec: SourceSpec, file_path: Path) -> EpgSource:
             display_names = [(node.text or "").strip() for node in child if local_tag(node) == "display-name" and (node.text or "").strip()]
             names[channel_id] = display_names
             norm_candidates: list[str] = []
-            for candidate in [*display_names, channel_id, normalize_source_id(channel_id)]:
+            # Também extrai o nome limpo de IDs compostos do EPGShare (ex: "São.Paulo/SP..Globo.SP.br")
+            clean_id_part = re.sub(r'^.*?\.\.', '', channel_id)
+            clean_id_part = re.sub(r'\.(br|us|uk|pt|ar|mx|cl|co|pe|latam|int)$', '', clean_id_part, flags=re.IGNORECASE).replace('.', ' ')
+            for candidate in [*display_names, channel_id, normalize_source_id(channel_id), clean_id_part]:
                 normalized = normalize_name(candidate)
                 if not normalized or normalized in norm_candidates: continue
                 norm_candidates.append(normalized)
@@ -626,6 +710,126 @@ def read_optional_source(spec: SourceSpec) -> tuple[EpgSource | None, str | None
             try: tmp_path.unlink()
             except Exception: pass
 
+# Padrões de afiliadas estaduais/regionais para desmembramento inteligente
+_AFFILIATE_PATTERNS = (
+    r'\b(EPTV|RBS(?:\s+TV)?|RPC(?:\s+TV)?|NSC(?:\s+TV)?|REDE\s+AMAZONICA|AMAZONICA|'
+    r'TV\s+ANHANGUERA|ANHANGUERA|TV\s+LIBERAL|TV\s+MIRANTE|TV\s+VERDES\s+MARES|VERDES\s+MARES|'
+    r'INTER\s*TV|TV\s+INTEGRACAO|INTEGRACAO|TV\s+TEM|TV\s+VANGUARDA|VANGUARDA|'
+    r'TV\s+TRIBUNA|TV\s+GAZETA|TV\s+MORENA|TV\s+CENTRO\s+AMERICA|CENTRO\s+AMERICA|'
+    r'TV\s+BAHIA|REDE\s+BAHIA|TV\s+SANTA\s+CRUZ|TV\s+SUBAE|TV\s+SUDOESTE|TV\s+OESTE|TV\s+SAO\s+FRANCISCO|'
+    r'TV\s+ASA\s+BRANCA|ASA\s+BRANCA|TV\s+GRANDE\s+RIO|TV\s+CABO\s+BRANCO|TV\s+PARAIBA|'
+    r'TV\s+SERGIPE|TV\s+CLUBE|TV\s+TAPAJOS|TV\s+RIO\s+SUL|RIO\s+SUL|TV\s+DIARIO|TV\s+FRONTEIRA|'
+    r'REDE\s+MASSA|TV\s+JANGADEIRO|TV\s+JORNAL|TV\s+ALTEROSA|TV\s+ARATU|TV\s+SERRA\s+DOURADA|'
+    r'TV\s+TAMBAU|TV\s+DIFUSORA|VTV|TV\s+CIDADE\s+VERDE|'
+    r'TV\s+GUAIBA|RECORD\s+ITAPOAN|TV\s+ITAPOAN|RIC\s*TV|TV\s+CORREIO|TV\s+TROPICAL|TV\s+CIDADE|'
+    r'TV\s+TAROBA|TV\s+MANAIRA)\b'
+)
+
+def expand_open_tv_and_affiliate_aliases(nome_limpo: str, grupo: str) -> list[str]:
+    """Desmembra nomes compostos de afiliadas da Globo, SBT, Record e Band para encontrar
+    o guia regional exato na fonte ou, se não existir na fonte, usar a grade da rede principal."""
+    extras: list[str] = []
+    up = f"{nome_limpo} {grupo}".upper()
+
+    # Identifica a rede principal (Globo, SBT, Record, Band)
+    network = ""
+    if (nome_limpo.startswith("GLOBO") or "GLOBO" in grupo.upper()) and "NEWS" not in nome_limpo and "NOVELAS" not in nome_limpo and "GLOOB" not in nome_limpo:
+        network = "GLOBO"
+    elif nome_limpo.startswith("SBT") and "NEWS" not in nome_limpo:
+        network = "SBT"
+    elif nome_limpo.startswith("RECORD") and "NEWS" not in nome_limpo:
+        network = "RECORD"
+    elif nome_limpo.startswith("BAND") and "NEWS" not in nome_limpo and "SPORT" not in nome_limpo:
+        network = "BAND"
+
+    if not network:
+        return extras
+
+    # 1. Se tiver nome de afiliada (ex: "GLOBO EPTV CAMPINAS", "GLOBO TV GAZETA ALAGOAS", "SBT TV JORNAL RECIFE")
+    without_net = re.sub(rf'^{network}(?:\s+TV)?\s+', '', nome_limpo).strip()
+    if without_net and without_net != nome_limpo:
+        extras.append(without_net)
+        if not without_net.startswith("TV "):
+            extras.append(f"TV {without_net}")
+
+    # 2. Remove o nome intermediário da afiliada para testar "GLOBO <CIDADE/UF>" (ex: "GLOBO CAMPINAS", "GLOBO ALAGOAS", "GLOBO CURITIBA")
+    city_only = re.sub(_AFFILIATE_PATTERNS, ' ', without_net, flags=re.IGNORECASE)
+    city_only = ' '.join(city_only.split()).strip()
+    if city_only and city_only != without_net:
+        extras.append(f"{network} {city_only}")
+        extras.append(city_only)
+        # Se tiver UF no final da cidade, testa também sem a UF (ex: "GLOBO MANAUS AM" -> "GLOBO MANAUS")
+        city_no_uf = re.sub(r'\s+(SP|RJ|RS|MG|BA|PR|PE|CE|PA|MA|SC|GO|PB|ES|AM|RN|AL|PI|MT|DF|MS|SE|RO|TO|AC|AP|RR)$', '', city_only)
+        if city_no_uf and city_no_uf != city_only:
+            extras.append(f"{network} {city_no_uf}")
+            extras.append(city_no_uf)
+
+    # 3. Identifica Estado/UF no nome para testar a cabeça de rede estadual (ex: "GLOBO BA", "GLOBO BAHIA", "GLOBO SALVADOR")
+    uf_match = re.search(r'\b(SP|RJ|RS|MG|BA|PR|PE|CE|PA|MA|SC|GO|PB|ES|AM|RN|AL|PI|MT|DF|MS|SE|RO|TO|AC|AP|RR)\b', nome_limpo)
+    if uf_match:
+        uf = uf_match.group(1)
+        for state_alias in UF_TO_STATE_AND_CAPITAL.get(uf, []):
+            extras.append(f"{network} {state_alias}")
+            if network == "RECORD":
+                extras.append(f"RECORD TV {state_alias}")
+
+    # Casos específicos muito comuns nas listas M3U brasileiras
+    if "GAZETA ALAGOAS" in nome_limpo or "ALAGOAS" in nome_limpo:
+        extras.extend(["TV GAZETA ALAGOAS", "TV GAZETA DE ALAGOAS", f"{network} ALAGOAS", f"{network} MACEIO"])
+    if "GAZETA VITORIA" in nome_limpo or "GAZETA SUL" in nome_limpo:
+        extras.extend(["TV GAZETA ES", "TV GAZETA VITORIA", "GLOBO VITORIA", "GLOBO ES"])
+    if "VERDES MARES" in nome_limpo:
+        extras.extend(["TV VERDES MARES", "GLOBO FORTALEZA", "GLOBO CEARA", "GLOBO CE"])
+    if "REDE AMAZONICA" in nome_limpo or "AMAZONICA" in nome_limpo:
+        extras.extend(["REDE AMAZONICA", "TV AMAZONAS", "GLOBO MANAUS", "GLOBO AMAZONAS", "GLOBO AM"])
+    if "TV LIBERAL" in nome_limpo:
+        extras.extend(["TV LIBERAL", "GLOBO BELEM", "GLOBO PARA", "GLOBO PA"])
+    if "TV MIRANTE" in nome_limpo:
+        extras.extend(["TV MIRANTE", "GLOBO SAO LUIS", "GLOBO MARANHAO", "GLOBO MA"])
+    if "ANHANGUERA" in nome_limpo:
+        extras.extend(["TV ANHANGUERA", "GLOBO GOIANIA", "GLOBO GOIAS", "GLOBO GO"])
+    if "RBS" in nome_limpo:
+        extras.extend(["RBS TV", "GLOBO RBS", "GLOBO PORTO ALEGRE", "GLOBO RS"])
+    if "RPC" in nome_limpo:
+        extras.extend(["RPC", "RPC TV", "GLOBO CURITIBA", "GLOBO PARANA", "GLOBO PR"])
+    if "NSC" in nome_limpo:
+        extras.extend(["NSC TV", "GLOBO FLORIANOPOLIS", "GLOBO SANTA CATARINA", "GLOBO SC"])
+    if "EPTV" in nome_limpo:
+        extras.extend(["EPTV", "EPTV CAMPINAS", "GLOBO CAMPINAS", "GLOBO RIBEIRAO PRETO"])
+    if "TV TEM" in nome_limpo:
+        extras.extend(["TV TEM", "GLOBO BAURU", "GLOBO SOROCABA", "GLOBO SP"])
+    if "VANGUARDA" in nome_limpo:
+        extras.extend(["TV VANGUARDA", "REDE VANGUARDA", "GLOBO SAO JOSE DOS CAMPOS", "GLOBO SP"])
+    if "INTEGRACAO" in nome_limpo:
+        extras.extend(["TV INTEGRACAO", "GLOBO UBERLANDIA", "GLOBO JUIZ DE FORA", "GLOBO MINAS", "GLOBO MG"])
+    if "INTER TV" in nome_limpo or "INTERTV" in nome_limpo or "INTER VALE" in nome_limpo:
+        if "CABUGI" in nome_limpo or "RN" in nome_limpo:
+            extras.extend(["INTER TV CABUGI", "GLOBO NATAL", "GLOBO RN"])
+        elif "MG" in nome_limpo or "MINAS" in nome_limpo or "VALES" in nome_limpo:
+            extras.extend(["INTER TV GRANDE MINAS", "INTER TV DOS VALES", "GLOBO MINAS", "GLOBO MG"])
+        else:
+            extras.extend(["INTER TV", "GLOBO RJ", "GLOBO RIO"])
+    if "ASA BRANCA" in nome_limpo or "PERNAMBUCO" in nome_limpo or "RECIFE" in nome_limpo:
+        extras.extend([f"{network} RECIFE", f"{network} PERNAMBUCO", f"{network} PE", f"{network} NORDESTE"])
+    if "CABO BRANCO" in nome_limpo or "PARAIBA" in nome_limpo:
+        extras.extend(["TV CABO BRANCO", "TV PARAIBA", "GLOBO JOAO PESSOA", "GLOBO PB"])
+    if "MORENA" in nome_limpo:
+        extras.extend(["TV MORENA", "GLOBO CAMPO GRANDE", "GLOBO MS"])
+    if "CENTRO AMERICA" in nome_limpo:
+        extras.extend(["TV CENTRO AMERICA", "GLOBO CUIABA", "GLOBO MT"])
+
+    # 4. Fallback seguro de Rede Nacional (garante que toda afiliada tenha a grade da rede se a cidade não existir na fonte)
+    if network == "GLOBO":
+        extras.extend(["GLOBO SP", "GLOBO SAO PAULO", "TV GLOBO", "GLOBO RJ", "GLOBO RIO", "GLOBO"])
+    elif network == "SBT":
+        extras.extend(["SBT SP", "SBT SAO PAULO", "SBT", "SBT NACIONAL"])
+    elif network == "RECORD":
+        extras.extend(["RECORD SP", "RECORD TV SP", "RECORD", "RECORD TV", "RECORD NACIONAL"])
+    elif network == "BAND":
+        extras.extend(["BAND SP", "BAND", "TV BAND", "BANDEIRANTES", "REDE BANDEIRANTES"])
+
+    return extras
+
 def aliases_for(entry: dict[str, object]) -> list[str]:
     values: list[str] = [str(entry.get("name", ""))]
     values.extend(str(x) for x in entry.get("aliases", []) or [])
@@ -638,10 +842,15 @@ def aliases_for(entry: dict[str, object]) -> list[str]:
             output.append(n)
             seen.add(n)
 
+    # Primeiro: adiciona todos os nomes exatos e sinônimos diretos do canal
+    cleaned_ pairs: list[str] = []
     for value in values:
         nome_limpo = normalizar_canal(value)
         nome_com_grupo = inferir_emissora_pelo_grupo(nome_limpo, grupo)
-        
+        cleaned_pairs.append(nome_com_grupo)
+        if nome_limpo != nome_com_grupo:
+            cleaned_pairs.append(nome_limpo)
+
         add_norm(nome_com_grupo)
         add_norm(nome_limpo)
         
@@ -653,6 +862,11 @@ def aliases_for(entry: dict[str, object]) -> list[str]:
             add_norm(sem_uf)
             for syn in CHANNEL_SYNONYMS.get(sem_uf, []):
                 add_norm(syn)
+
+    # Segundo: adiciona variações desmembradas de afiliadas e fallback de rede aberta (em ordem de especificidade)
+    for base_cl in cleaned_pairs:
+        for aff_alias in expand_open_tv_and_affiliate_aliases(base_cl, grupo):
+            add_norm(aff_alias)
 
     return output
 
@@ -983,6 +1197,7 @@ def make_validation(entry: dict[str, object], chosen: CandidateEvaluation, all_e
     }
 
 def generate_quality_variants(base_names: Iterable[str]) -> list[str]:
+    """Gera variações incluindo [1], [2], [3], (BR2) e ² para casar 100% dos canais das Listas 1 e 2."""
     suffixes = [
         "",
         " SD",
@@ -995,12 +1210,30 @@ def generate_quality_variants(base_names: Iterable[str]) -> list[str]:
         " [H265]",
         " H265",
         " 4K",
+        " HD [1]",
+        " HD [2]",
+        " HD [3]",
+        " FHD [1]",
+        " FHD [2]",
+        " FHD [3]",
+        " SD [1]",
+        " SD [2]",
+        " SD [3]",
+        " [1]",
+        " [2]",
+        " [3]",
+        " HD (BR2)",
+        " FHD (BR2)",
+        " FHD ²",
+        " HD ²",
+        " SD ²",
     ]
     result = []
     seen = set()
     for base in base_names:
-        clean_base = strip_qualities_keep_case(base)
-        for root in (base.strip(), clean_base):
+        b_unesc = html.unescape(str(base)).strip()
+        clean_base = strip_qualities_keep_case(b_unesc)
+        for root in (b_unesc, clean_base):
             if not root or len(root) > 160:
                 continue
             for suf in suffixes:
@@ -1053,7 +1286,6 @@ def get_primary_export_ids(entry: dict[str, object]) -> list[str]:
 def apply_rich_metadata_to_element(
     el: ET.Element, meta_pool: list[dict[str, Any]], channel_name: str, duration_minutes: float
 ) -> None:
-    """Aplica metadados mantendo Filmes 100% limpos (sem E1) e enriquecendo apenas Séries reais."""
     base_meta = extract_program_metadata(el, channel_name, duration_minutes)
     all_metas = [base_meta, *(meta_pool or [])]
 
@@ -1079,24 +1311,20 @@ def apply_rich_metadata_to_element(
             if c not in merged_cats:
                 merged_cats.append(c)
 
-    # Verifica com o conjunto completo de categorias e descrição se é Filme/Esporte/Jornalismo
     is_movie_or_sport = is_likely_movie_or_sport(merged_cats, best_desc, duration_minutes, channel_name)
     if is_movie_or_sport:
         best_season = None
         best_episode = None
 
-    # SEMPRE remove tags <episode-num> originais (pois fontes como Open-EPG colocam 0.0. em filmes, fazendo o TiviMate mostrar "E1")
     for old_ep in list(el.findall("episode-num")):
         el.remove(old_ep)
 
-    # Limpa o título principal
     title_node = el.find("title")
     clean_title = base_meta["title"] or (title_node.text.strip() if title_node is not None and title_node.text else "")
     clean_title = _RE_TRAILING_FAKE_EP.sub("", clean_title).strip()
     if title_node is not None and clean_title:
         title_node.text = clean_title
 
-    # Só cria etiqueta de Temporada/Episódio se NÃO for filme/esporte e tiver temporada + episódio válidos
     se_badge = ""
     if not is_movie_or_sport:
         if best_season is not None and best_episode is not None:
@@ -1104,10 +1332,8 @@ def apply_rich_metadata_to_element(
         elif best_episode is not None and best_episode > 1:
             se_badge = f"Ep. {best_episode}"
 
-    # Atualiza ou remove <sub-title> redundante
     sub_node = el.find("sub-title")
     if is_movie_or_sport:
-        # Em filmes, remove subtítulos que sejam apenas repetição do título ou tags falsas
         if sub_node is not None:
             el.remove(sub_node)
         best_sub = ""
@@ -1123,7 +1349,6 @@ def apply_rich_metadata_to_element(
         elif sub_node is not None:
             el.remove(sub_node)
 
-    # Constrói a descrição (<desc>)
     header_parts = []
     if se_badge and (not best_desc or se_badge.lower() not in best_desc.lower()):
         header_parts.append(f"[{se_badge}]")
@@ -1146,7 +1371,6 @@ def apply_rich_metadata_to_element(
             desc_node = ET.SubElement(el, "desc")
         desc_node.text = final_desc
 
-    # Só grava a tag <episode-num> no XML se tiver CERTEZA que é uma Série com Temporada e Episódio reais!
     if not is_movie_or_sport and best_season is not None and best_episode is not None:
         s_idx = max(0, best_season - 1)
         e_idx = max(0, best_episode - 1)
@@ -1338,7 +1562,7 @@ def write_epg_stream(
                 gz.write(data)
                 if plain is not None: plain.write(data)
 
-            generator = "EPG Universal Otimizado (Filmes Limpos + Séries com TxxExx)"
+            generator = "EPG Universal Otimizado (Afiliadas + Filmes Limpos + Séries TxxExx)"
             source_name = "Consolidado Inteligente de Múltiplas Fontes"
             emit((f"<?xml version='1.0' encoding='utf-8'?>\n<tv generator-info-name={quoteattr(generator)} source-info-name={quoteattr(source_name)}>\n").encode("utf-8"))
 
@@ -1383,7 +1607,7 @@ def write_epg_stream(
     return programme_count, len(xml_id_to_data)
 
 def main() -> None:
-    print("Iniciando geração de EPG (Filmes Limpos sem E1 + Séries com TxxExx)...")
+    print("Iniciando geração de EPG (Base Estável + Afiliadas Globo/Abertos + Filmes Limpos)...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -1391,10 +1615,10 @@ def main() -> None:
     
     entries = []
     grouped_by_norm: dict[str, dict[str, Any]] = {}
-    VOD_BLACKLIST = {"VOD", "PLAYBACK", "XXX", "ADULTO", "EVENTO", "LANCAMENTO", "LANÇAMENTO", "FILMES", "SERIES", "SÉRIES"}
+    VOD_BLACKLIST = {"VOD", "PLAYBACK", "XXX", "ADULTO", "EVENTO", "LANCAMENTO", "LANÇAMENTO", "FILMES", "SERIES", "SÉRIES", "24H", "24HS"}
 
     def merge_channel_record(ch_id: str, name: str, aliases: Iterable[str] = (), tvg_ids: Iterable[str] = (), comp_ids: Iterable[str] = (), source_ids: Iterable[str] = (), group: str = "") -> None:
-        base_name = name or ch_id
+        base_name = html.unescape(name or ch_id).strip()
         if not base_name: return
         norm_key = normalize_name(base_name) or base_name.strip().upper()
         if norm_key not in grouped_by_norm:
@@ -1410,7 +1634,7 @@ def main() -> None:
         rec = grouped_by_norm[norm_key]
         if base_name: rec["aliases"].add(base_name)
         for a in aliases:
-            if a: rec["aliases"].add(str(a).strip())
+            if a: rec["aliases"].add(html.unescape(str(a)).strip())
         for t in tvg_ids:
             if t: rec["tvg_ids_to_export"].add(str(t).strip())
         for c in comp_ids:
@@ -1441,9 +1665,9 @@ def main() -> None:
                     name_match = re.search(r',([^,]*?)$', current_extinf)
                     
                     tvg_id = tvg_id_match.group(1).strip() if tvg_id_match else ""
-                    tvg_name = tvg_name_match.group(1).strip() if tvg_name_match else ""
+                    tvg_name = html.unescape(tvg_name_match.group(1).strip()) if tvg_name_match else ""
                     group = group_match.group(1).strip() if group_match else ""
-                    name = name_match.group(1).strip() if name_match else ""
+                    name = html.unescape(name_match.group(1).strip()) if name_match else ""
                     current_extinf = None
                     
                     if any(blacklisted in group.upper() for blacklisted in VOD_BLACKLIST):
@@ -1473,14 +1697,21 @@ def main() -> None:
             cat_list = cat_data.get("channels", []) if isinstance(cat_data, dict) else (cat_data if isinstance(cat_data, list) else [])
             for ch in cat_list:
                 if not isinstance(ch, dict): continue
+                ch_groups = ch.get("groups", []) or []
+                grp_str = " | ".join(str(g) for g in ch_groups) if isinstance(ch_groups, list) else str(ch.get("group", ch.get("group-title", "")))
                 merge_channel_record(
                     ch_id=str(ch.get("id", ch.get("name", ""))).strip(),
                     name=str(ch.get("name", ch.get("id", ""))).strip(),
-                    aliases=[*(ch.get("aliases", []) or []), *(ch.get("tvg_names", []) or [])],
+                    aliases=[
+                        *(ch.get("aliases", []) or []),
+                        *(ch.get("tvg_names", []) or []),
+                        *(ch.get("original_names", []) or []),
+                        *(ch.get("blank_tvg_id_names", []) or []),
+                    ],
                     tvg_ids=ch.get("tvg_ids_to_export", []) or [],
                     comp_ids=ch.get("compatibility_ids", []) or [],
                     source_ids=ch.get("source_ids", []) or [],
-                    group=str(ch.get("group", ch.get("group-title", ""))),
+                    group=grp_str,
                 )
             print(f"  -> {len(grouped_by_norm)} emissoras base carregadas do dicionário.")
         except Exception as e:
