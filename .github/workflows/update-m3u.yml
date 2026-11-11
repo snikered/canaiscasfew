@@ -37,7 +37,7 @@ jobs:
       - name: Rodar Extratores (Em Paralelo)
         run: |
           set -e
-          for script in guiadetv.py meuguia.py tvmap.py tvplus.py mitv.py; do
+          for script in guiadetv.py meuguia.py tvmap.py tvplus.py mitv.py webfinal.py; do
             if [ -f "$script" ]; then
               python3 "$script" &
             fi
