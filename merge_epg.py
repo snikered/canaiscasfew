@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""EPG Universal Consolidado — Busca em Camadas + Bloqueio de tvg-id Coringa em Rede Aberta
+"""EPG Universal Consolidado — Busca em Camadas + Bloqueio de tvg-id Coringa + Sem Repetição TxxExx/SxxExx
 - Força o player IPTV a casar todos os canais abertos (Globo, Record, SBT, Band, RedeTV, Cultura)
   estritamente pelo NOME DO CANAL (<display-name>), impedindo que globosp.br / RecordTV.br
   joguem a grade de SP em cima das afiliadas da Bahia, Nordeste, Minas, Manaus, etc.
 - Mantém todos os tvg-ids normais dos canais fechados (HBO, SporTV, ESPN, Telecine, Discovery, etc.).
 - Preserva nomes de afiliadas entre parênteses como "GLOBO PE (ASA BRANCA) HD".
 - Bloqueia colisões entre Globo Aberta e Gloob/Gloobinho (infantil) ou Globo Internacional/Portugal/ON.
+- Evita repetição de temporada/episódio (T01E03 + S01E03) no TiviMate e no Televizo.
 - Lê arquivos .m3u e .safe.m3u locais mesmo quando não possuem linha http:// abaixo do #EXTINF.
 """
 from __future__ import annotations
@@ -178,7 +179,6 @@ PLACEHOLDER_TITLES = {
     "NO INFORMATION",
     "OFF AIR",
     "ENCERRAMENTO",
-    # placeholders de fontes (ex.: IPTV-EPG BR publica 73 blocos "No Data" por dia)
     "NO DATA", "NODATA", "NO DATA AVAILABLE", "NO EPG", "NO EPG AVAILABLE", "EPG NOT AVAILABLE",
     "NOT AVAILABLE", "UNAVAILABLE", "UNKNOWN", "TBD", "N A", "NA",
     "SEM DADOS", "SEM INFORMACAO", "SEM INFORMACOES", "INFORMACAO INDISPONIVEL",
@@ -422,9 +422,6 @@ UF_TO_STATE_AND_CAPITAL = {
     "RR": ["RORAIMA", "BOA VISTA", "REDE AMAZONICA BOA VISTA", "RR"],
 }
 
-# IDs que o painel IPTV atribui de forma errada a outros canais (ex: TVBrasil.br / AandE.br / agromais.br no Cartoonito).
-# Ao bloquear esses IDs como <channel id="..."> primário e exportar apenas o nome limpo do canal,
-# o TiviMate é obrigado a casar pelo <display-name> exato (igual ao Televizo)!
 POISONED_OPEN_TV_IDS = {
     "globo", "tvglobo", "redeglobo", "globosp", "globorj", "globonacional", "globohd", "globofhd",
     "record", "recordtv", "rederecord", "recordsp", "recordtvsp", "recordrj", "recordtvrj",
@@ -433,7 +430,6 @@ POISONED_OPEN_TV_IDS = {
     "sbt", "sbtsp", "sbtrj", "sbtnacional", "tvsbt", "sbthd",
     "band", "bandtv", "tvband", "bandeirantes", "redebandeirantes", "bandsp", "bandrj", "bandhd",
     "redetv", "redetvsp", "tvbrasil", "tvcultura", "cultura",
-    # IDs corrompidos no servidor que sequestram o Cartoonito / Tooncast no TiviMate:
     "aande", "ae", "agromais", "terraviva", "canalrural", "canaldoboi", "boomerang",
 }
 
@@ -508,22 +504,6 @@ def inferir_emissora_pelo_grupo(nome_normalizado: str, nome_grupo: str) -> str:
     if "PREMIERE" in grupo and not nome_normalizado.startswith("PREMIERE") and len(nome_normalizado) <= 4: return f"PREMIERE {nome_normalizado}"
     return nome_normalizado
 
-# IDs genéricos ("coringas") que os servidores IPTV repetem em todas as afiliadas abertas do Brasil.
-# Ao NÃO exportar esses IDs no <channel id="..."> do XML, o player IPTV não encontra o ID coringa
-# e é forçado a casar cada afiliada (e também SP/RJ) pelo seu NOME (<display-name>)!
-POISONED_OPEN_TV_IDS |= {
-    "globo", "tvglobo", "redeglobo", "globosp", "globorj", "globonacional", "globohd", "globofhd",
-    "record", "recordtv", "rederecord", "recordsp", "recordtvsp", "recordrj", "recordtvrj",
-    "recordtvbrasilia", "recordbrasilia", "recordnacional", "recordhd", "recordtvminas", "recordminas",
-    "recordtvrs", "recordrs", "recordtvba", "recordbahia", "recordtvgoias", "recordgoias",
-    "sbt", "sbtsp", "sbtrj", "sbtnacional", "tvsbt", "sbthd",
-    "band", "bandtv", "tvband", "bandeirantes", "redebandeirantes", "bandsp", "bandrj", "bandhd",
-    "redetv", "redetvsp", "tvbrasil", "tvcultura", "cultura",
-}
-
-
-# IDs que, NAS LISTAS DO USUÁRIO, aparecem em canais diferentes entre si (ex.: AandE.br em
-# TV Brasil + Cartoonito + Tooncast + Music Box + Record News). Detectado a cada execução.
 AUTO_POISONED_IDS: set[str] = set()
 
 def clean_tvid_key(tvid: str) -> str:
@@ -543,7 +523,7 @@ def detect_poisoned_ids(pairs: Iterable[tuple[str, str]]) -> set[str]:
     out = set()
     for k, sets in bases.items():
         lst = list(sets)
-        independent = [a for a in lst if not any(a < b for b in lst)]  # descarta quem é subconjunto de outro
+        independent = [a for a in lst if not any(a < b for b in lst)]
         if len(independent) >= 2:
             out.add(k)
     return out
@@ -559,8 +539,6 @@ def is_valid_provider_tvid(channel_name: str, tvid: str) -> bool:
         return False
 
     base_clean = normalizar_canal(channel_name)
-    # Para qualquer canal das 4 grandes redes abertas (Globo, Record, SBT, Band),
-    # NUNCA exporta tvg-id do provedor para obrigar o player a casar 100% pelo nome regional exato!
     if base_clean.startswith(("GLOBO ", "TV GLOBO", "RECORD ", "SBT ", "BAND ", "TV BAHIA", "TV ASA BRANCA", "TV VERDES MARES", "TV GAZETA", "TV ANHANGUERA", "TV LIBERAL", "TV MIRANTE", "RBS ", "RPC ", "NSC ", "EPTV")):
         if "NEWS" not in base_clean and "SPORTS" not in base_clean and "NOVELAS" not in base_clean:
             return False
@@ -652,16 +630,27 @@ def download_to_temp_file(url: str, attempts: int = 4) -> Path:
     raise RuntimeError(f"Falha ao baixar ({last_error})")
 
 # =====================================================================
-# EXTRAÇÃO E ENRIQUECIMENTO DE METADADOS (ESTRITO PARA SÉRIES REAIS)
+# EXTRAÇÃO E ENRIQUECIMENTO DE METADADOS (SEM REPETIÇÃO T01E03 / S01E03)
 # =====================================================================
 _RE_XMLTV_NS = re.compile(r"^\s*(\d+)\s*\.\s*(\d+)\s*\.")
 _RE_SE_PATTERNS = [
-    re.compile(r"\bS(\d{1,2})\s*[:\-]?\s*E(?:P)?(\d{1,3})\b", re.IGNORECASE),
-    re.compile(r"\bT(?:EMP(?:ORADA)?)?\s*\.?\s*(\d{1,2})\s*[\-:/, ]+\s*E(?:P(?:IS[OÓ]DIO)?)?\s*\.?\s*(\d{1,3})\b", re.IGNORECASE),
-    re.compile(r"\b(\d{1,2})\s*[ªº]\s*T(?:EMP(?:ORADA)?)?\s*[\-:/, ]*\s*E(?:P(?:IS[OÓ]DIO)?)?\s*\.?\s*(\d{1,3})\b", re.IGNORECASE),
+    re.compile(r"[\[\(\-\s]*\bS(\d{1,2})\s*[:\-., ]*\s*E(?:P|PIS[OÓ]DIO)?\.?\s*(\d{1,4})\b[\]\)]*", re.IGNORECASE),
+    re.compile(r"[\[\(\-\s]*\bT(?:EMP(?:ORADA)?)?\s*\.?\s*(\d{1,2})\s*[\-:/, ]*\s*E(?:P(?:IS[OÓ]DIO)?)?\.?\s*(\d{1,4})\b[\]\)]*", re.IGNORECASE),
+    re.compile(r"[\[\(\-\s]*\b(\d{1,2})\s*[ªº]\s*T(?:EMP(?:ORADA)?)?\s*[\-:/, ]*\s*E(?:P(?:IS[OÓ]DIO)?)?\.?\s*(\d{1,4})\b[\]\)]*", re.IGNORECASE),
 ]
-_RE_EXPLICIT_EPISODE = re.compile(r"\b(?:EPIS[OÓ]DIO|EP\.)\s*(\d{1,3})\b", re.IGNORECASE)
+_RE_EXPLICIT_EPISODE = re.compile(r"[\[\(\-\s]*\b(?:EPIS[OÓ]DIO|EP\.?)\s*(\d{1,4})\b[\]\)]*", re.IGNORECASE)
 _RE_TRAILING_FAKE_EP = re.compile(r"(?:\s*[\-\|:]\s*|\s+)(?:\[|\()?E(?:P)?\.?\s*0*1(?:\]|\))?\s*$", re.IGNORECASE)
+
+def strip_se_tokens(text: str) -> str:
+    """Remove qualquer S01E02, T01E02, T1 Ep 2, [T01 E02] ou Ep. 2 duplicado do texto."""
+    if not text:
+        return ""
+    s = text
+    for pat in _RE_SE_PATTERNS:
+        s = pat.sub(" ", s)
+    s = _RE_EXPLICIT_EPISODE.sub(" ", s)
+    s = re.sub(r"\s{2,}", " ", s).strip(" -:|,;/[]()")
+    return s
 
 def is_non_series_channel(channel_name: str) -> bool:
     norm_ch = normalizar_canal(channel_name)
@@ -731,7 +720,7 @@ def extract_program_metadata(el: ET.Element, channel_name: str = "", duration_mi
     if " : " in title and not sub_title:
         parts = [p.strip() for p in title.split(" : ", 1)]
         if len(parts) == 2 and parts[0] and parts[1]:
-            if parts[0].upper() == parts[1].upper():
+            if parts[0].upper() == parts[1].upper() or parts[0].upper().endswith(parts[1].upper()):
                 title = parts[0]
             else:
                 title, sub_title = parts[0], parts[1]
@@ -758,12 +747,17 @@ def extract_program_metadata(el: ET.Element, channel_name: str = "", duration_mi
         season = None
         episode = None
 
-    for pat in _RE_SE_PATTERNS:
-        title = pat.sub("", title).strip(" -:|")
-        if sub_title:
-            sub_title = pat.sub("", sub_title).strip(" -:|")
+    title = strip_se_tokens(title) or title
+    if sub_title:
+        sub_title = strip_se_tokens(sub_title)
+    if desc:
+        desc = strip_se_tokens(desc)
 
-    if sub_title and (sub_title.upper() == title.upper() or _RE_TRAILING_FAKE_EP.fullmatch(sub_title)):
+    if sub_title and (
+        sub_title.upper() == title.upper()
+        or title.upper().endswith(sub_title.upper())
+        or _RE_TRAILING_FAKE_EP.fullmatch(sub_title)
+    ):
         sub_title = ""
 
     return {
@@ -854,7 +848,6 @@ def read_source_from_file(spec: SourceSpec, file_path: Path) -> EpgSource:
             rows[channel_id].append(ProgrammeRow(start=start, stop=stop or start, title=title, normalized_title=norm_title, element=child))
 
     for channel_id in list(rows):
-        # fonte que preenche a grade com o NOME DO PRÓPRIO CANAL (>=80% dos blocos) não tem programação real
         own_names = {normalize_programme_title(n) for n in [*names.get(channel_id, []), channel_id]}
         own_names.discard("")
         ch_rows = rows[channel_id]
@@ -902,9 +895,6 @@ def read_optional_source(spec: SourceSpec) -> tuple[EpgSource | None, str | None
         if tmp_path and tmp_path.exists() and str(tmp_path).endswith(".tmp"):
             try: tmp_path.unlink()
             except Exception: pass
-              
-_AGREEMENT_CACHE: dict[tuple[str, str, str, str], dict[str, object]] = {}
-_HEALTH_CACHE: dict[tuple[str, str], dict[str, object]] = {}
 
 _AFFILIATE_PATTERNS = (
     r'\b(EPTV|RBS(?:\s+TV)?|RPC(?:\s+TV)?|NSC(?:\s+TV)?|REDE\s+AMAZONICA|AMAZONICA|'
@@ -956,15 +946,24 @@ def _network_of_normalized(value: str) -> str:
 _GLOBO_BRAND_COMPACT = tuple(b.replace(" ", "") for b in _GLOBO_ONLY_BRANDS) + ("NSCTV",)
 
 def _fuzzy_incompatible(alias: str, candidate: str) -> bool:
-    """True quando a aproximação cruzaria emissoras, UFs, cidades ou 'BRASIL' x 'BRASÍLIA'."""
+    """True quando a aproximação cruzaria emissoras, UFs, cidades, Gloob/News/Estrangeiros ou 'BRASIL' x 'BRASÍLIA'."""
     if alias == candidate:
         return False
-    # TVBRASILIA ~ TVBRASIL: capital do DF não é a TV Brasil (EBC)
+    if ("GLOOB" in alias) != ("GLOOB" in candidate):
+        return True
+    if ("NEWS" in alias) != ("NEWS" in candidate):
+        return True
+    if ("NOVELA" in alias) != ("NOVELA" in candidate):
+        return True
+    if ("XSPORTS" in alias) != ("XSPORTS" in candidate):
+        return True
+    foreign_markers = ("INTERNACIONAL", "PORTUGAL", "AFRICA", "EUROPA", "GLOBOON", "GLOBONOW", "AMERICAS", "CABOVERDE", "MOZAMBIQUE")
+    if any(fm in candidate for fm in foreign_markers) and not any(fm in alias for fm in foreign_markers):
+        return True
     if alias.replace("BRASILIA", "BRASIL") == candidate.replace("BRASILIA", "BRASIL"):
         return True
-    # o fuzzy não pode "inventar" marca de afiliada da Globo (TVCAMPINAS ~ EPTVCAMPINAS)
     if candidate.startswith(_GLOBO_BRAND_COMPACT) and not alias.startswith(_GLOBO_BRAND_COMPACT) \
-            and not (alias.startswith("EP") and candidate.startswith("EPTV")):  # "EP CAMPINAS" = EPTV
+            and not (alias.startswith("EP") and candidate.startswith("EPTV")):
         return True
     na, nc = _network_of_normalized(alias), _network_of_normalized(candidate)
     if na and nc:
@@ -973,7 +972,6 @@ def _fuzzy_incompatible(alias: str, candidate: str) -> bool:
         ra = re.sub(r"^TV", "", alias[len(na):]); rc = re.sub(r"^TV", "", candidate[len(nc):])
         if ra != rc and ra in _UF_CODES and rc in _UF_CODES:
             return True
-        # mesma emissora, cidades diferentes (SBTCAMPINAS ~ SBTMINAS)
         if ra and rc and ra != rc and ra not in rc and rc not in ra and ra[:4] != rc[:4] \
                 and SequenceMatcher(None, ra, rc).ratio() < 0.8:
             return True
@@ -1326,6 +1324,9 @@ def now_next_for(source: EpgSource, channel_id: str, now: datetime) -> tuple[dic
             if current is not None: break
     return current, next_item
 
+_AGREEMENT_CACHE: dict[tuple[str, str, str, str], dict[str, object]] = {}
+_HEALTH_CACHE: dict[tuple[str, str], dict[str, object]] = {}
+
 def _calc_agreement(a_rows: list[ProgrammeRow], b_rows: list[ProgrammeRow], offset: timedelta) -> dict[str, object]:
     similarities = []
     b_floor = 0
@@ -1504,7 +1505,7 @@ def evaluate_candidates(matches: list[ChannelMatch], now: datetime, max_active_v
             has_programmes,
             -ev.match.tier,
             is_healthy_full_day,
-            int(ev.match.match_score >= 0.999),  # nome exato vence um consenso de aproximações
+            int(ev.match.match_score >= 0.999),
             consensus_tier,
             round(ev.health_score, 2),
             round(ev.richness_score, 2),
@@ -1596,7 +1597,6 @@ def generate_quality_variants(base_names: Iterable[str]) -> list[str]:
     seen = set()
     for base in base_names:
         b_unesc = html.unescape(str(base)).strip()
-        # Mantém também a variante com parênteses originais (ex: "GLOBO PE (ASA BRANCA)")
         b_keep_parens = re.sub(r'\s+\b(SD|HD|FHD|UHD|4K|H265|HEVC)\b.*$', '', b_unesc, flags=re.IGNORECASE).strip()
         clean_base = strip_qualities_keep_case(b_unesc)
         for root in (b_unesc, b_keep_parens, clean_base):
@@ -1614,12 +1614,23 @@ def get_clean_aliases(entry: dict[str, object]) -> list[str]:
     raw_name = str(entry.get("name", "")).strip()
     if raw_name:
         values.append(raw_name)
+        values.append(raw_name.upper())
+        values.append(raw_name.title())
     if entry.get("tvg_names"):
-        values.extend(str(x).strip() for x in entry.get("tvg_names", []) if x)
+        for x in entry.get("tvg_names", []):
+            if x:
+                s = str(x).strip()
+                values.extend([s, s.upper(), s.title()])
     if entry.get("aliases"):
-        values.extend(str(x).strip() for x in entry.get("aliases", []) if x)
+        for x in entry.get("aliases", []):
+            if x:
+                s = str(x).strip()
+                values.extend([s, s.upper(), s.title()])
         
     norm_clean = normalizar_canal(raw_name)
+    if norm_clean:
+        values.append(norm_clean)
+        values.append(norm_clean.title())
     for syn in CHANNEL_SYNONYMS.get(norm_clean, []):
         values.append(syn)
         values.append(syn.title())
@@ -1691,6 +1702,9 @@ def apply_rich_metadata_to_element(
     if title_node is not None and clean_title:
         title_node.text = clean_title
 
+    best_sub = strip_se_tokens(best_sub)
+    best_desc = strip_se_tokens(best_desc)
+
     se_badge = ""
     if not is_movie_or_sport:
         if best_season is not None and best_episode is not None:
@@ -1698,27 +1712,22 @@ def apply_rich_metadata_to_element(
         elif best_episode is not None and best_episode > 1:
             se_badge = f"Ep. {best_episode}"
 
+    # No <sub-title>, gravamos APENAS o nome do episódio (sem o se_badge),
+    # pois a tag <episode-num system="xmltv_ns"> abaixo já faz o player exibir S01E03 / T01E03 uma única vez!
     sub_node = el.find("sub-title")
-    if is_movie_or_sport:
+    if is_movie_or_sport or not best_sub or best_sub.upper() == clean_title.upper() or clean_title.upper().endswith(best_sub.upper()):
         if sub_node is not None:
             el.remove(sub_node)
         best_sub = ""
     else:
-        if best_sub and best_sub.upper() != clean_title.upper():
-            if sub_node is None:
-                sub_node = ET.SubElement(el, "sub-title")
-            sub_node.text = f"{se_badge} - {best_sub}" if se_badge and se_badge not in best_sub else best_sub
-        elif se_badge:
-            if sub_node is None:
-                sub_node = ET.SubElement(el, "sub-title")
-            sub_node.text = se_badge
-        elif sub_node is not None:
-            el.remove(sub_node)
+        if sub_node is None:
+            sub_node = ET.SubElement(el, "sub-title")
+        sub_node.text = best_sub
 
     header_parts = []
-    if se_badge and (not best_desc or se_badge.lower() not in best_desc.lower()):
+    if se_badge:
         header_parts.append(f"[{se_badge}]")
-    if best_sub and best_sub.upper() != clean_title.upper() and (not best_desc or best_sub.lower() not in best_desc.lower()):
+    if best_sub and (not best_desc or best_sub.lower() not in best_desc.lower()):
         header_parts.append(best_sub)
     if best_date and (not best_desc or best_date not in best_desc):
         header_parts.append(f"({best_date})")
@@ -1753,8 +1762,6 @@ def stitch_multi_source_schedule(
     for comp in leader_ev.comparisons:
         other_key = str(comp.get("other_source_key", ""))
         agreement = comp.get("agreement")
-        # só entra no preenchimento de lacunas quem CONCORDA com a líder em programação comparável;
-        # candidata sem dados comparáveis ou divergente (outro canal, placeholder, aproximação errada) fica de fora
         if isinstance(agreement, float) and agreement >= AGREEMENT_THRESHOLD \
                 and int(comp.get("comparable") or 0) >= MIN_COMPARABLE_PROGRAMMES:
             shift_by_source_key[other_key] = int(comp.get("detected_shift") or 0)
@@ -1942,7 +1949,7 @@ def write_epg_stream(
                 gz.write(data)
                 if plain is not None: plain.write(data)
 
-            generator = "EPG Universal Otimizado (Afiliadas Locais por Nome + Blindagem Anti-Gloob)"
+            generator = "EPG Universal Otimizado (Afiliadas Locais por Nome + Sem Repetição SxxExx)"
             source_name = "Consolidado Inteligente de Múltiplas Fontes"
             emit((f"<?xml version='1.0' encoding='utf-8'?>\n<tv generator-info-name={quoteattr(generator)} source-info-name={quoteattr(source_name)}>\n").encode("utf-8"))
 
@@ -1987,7 +1994,7 @@ def write_epg_stream(
     return programme_count, len(xml_id_to_data)
 
 def main() -> None:
-    print("Iniciando geração de EPG (Afiliadas e Abertos Casados por Nome + Blindagem Anti-Gloob)...")
+    print("Iniciando geração de EPG (Afiliadas e Abertos Casados por Nome + Sem Repetição SxxExx)...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -2032,13 +2039,13 @@ def main() -> None:
         idx = 0
         while idx < len(raw_lines):
             line = raw_lines[idx].strip()
-            if not line.startswith("#EXTINF:"):
+            if not (line.upper().startswith("#EXTINF") or ('tvg-' in line.lower() and ',' in line)):
                 idx += 1
                 continue
 
-            current_extinf = line
+            current_extinf = line if line.upper().startswith("#EXTINF") else f"#EXTINF:-1 {line}"
             next_line = raw_lines[idx + 1].strip() if (idx + 1) < len(raw_lines) else ""
-            if next_line.startswith(("http://", "https://", "rtmp://")):
+            if next_line.lower().startswith(("http://", "https://", "rtmp://", "rtsp://")):
                 idx += 2
                 lower_url = next_line.split("?")[0].lower()
                 if lower_url.endswith(('.mp4', '.mkv', '.avi', '.mov', '.wmv', '.flv', '.webm')):
@@ -2087,9 +2094,13 @@ def main() -> None:
                 if not isinstance(ch, dict): continue
                 ch_groups = ch.get("groups", []) or []
                 grp_str = " | ".join(str(g) for g in ch_groups) if isinstance(ch_groups, list) else str(ch.get("group", ch.get("group-title", "")))
+                ch_name_val = str(ch.get("name", ch.get("id", ""))).strip()
+                for tid in (*(ch.get("tvg_ids_to_export") or []), *(ch.get("compatibility_ids") or [])):
+                    if tid and ch_name_val:
+                        id_observations.append((str(tid).strip(), ch_name_val))
                 merge_channel_record(
                     ch_id=str(ch.get("id", ch.get("name", ""))).strip(),
-                    name=str(ch.get("name", ch.get("id", ""))).strip(),
+                    name=ch_name_val,
                     aliases=[
                         *(ch.get("aliases", []) or []),
                         *(ch.get("tvg_names", []) or []),
@@ -2171,7 +2182,8 @@ def main() -> None:
                         name_upper = name.upper()
                         if re.search(r'\bS\d{1,3}\s*E\d{1,3}\b|\bT\d{1,3}\s*EP?\d{1,3}\b|\b24HS?\b|^24\s*H\b', name_upper):
                             continue
-                        
+                        if epg_id:
+                            id_observations.append((epg_id, name))
                         merge_channel_record(
                             ch_id=name,
                             name=name,
@@ -2194,6 +2206,8 @@ def main() -> None:
             except Exception as e:
                 print(f"  -> Lista {idx+1} bloqueada para o IP do GitHub ({e}). Usando Dicionário/M3U Local!")
 
+    AUTO_POISONED_IDS.update(detect_poisoned_ids(id_observations))
+
     for v in grouped_by_norm.values():
         v["aliases"] = sorted(v["aliases"])
         v["tvg_ids_to_export"] = sorted(v["tvg_ids_to_export"])
@@ -2201,7 +2215,7 @@ def main() -> None:
         v["source_ids"] = sorted(v["source_ids"])
         entries.append(v)
         
-    print(f"\nCatálogo unificado pronto: {len(entries)} emissoras base únicas.")
+    print(f"\nCatálogo unificado pronto: {len(entries)} emissoras base únicas ({len(AUTO_POISONED_IDS)} IDs compartilhados bloqueados).")
 
     try: overrides = json.loads(OVERRIDES_PATH.read_text("utf-8")) if OVERRIDES_PATH.exists() else {}
     except Exception: overrides = {}
