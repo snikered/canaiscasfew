@@ -150,6 +150,7 @@ EPG_SOURCES_CONFIG = [
     ("Meu Guia", "epg_meuguia.xml", "meuguia", 2.5),
     ("MiTV", "epg_mitv.xml", "mitv", 2.0),
     ("TV Plus", "epg_tvplus.xml", "tvplus", 1.8),
+    ("WebFinal", "epg_webfinal.xml", "webfinal", 1.8),
     ("Open-EPG BR", "https://www.open-epg.com/files/brazil.xml", "openepg", 1.5),
     ("Open-EPG BR 4", "https://www.open-epg.com/files/brazil4.xml", "openepg", 1.4),
     ("Claro", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/claro.xml", "git_operadora", 1.5),
