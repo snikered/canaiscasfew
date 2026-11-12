@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""Sincronizador Fiel de Listas M3U (Preserva 100% da Formatação, Grupos, Filmes e Séries):
-- Baixa a M3U original completa (usando curl nativo + fallback cloudscraper).
-- Mantém a linha #EXTINF original 100% intacta (mesmos grupos, mesmas tags, mesma ordem).
-- Nos Canais ao Vivo: altera SOMENTE o atributo tvg-id="..." para casar com o epg.xml.gz e posiciona no topo.
-- Nos Filmes e Séries (VOD): copia as linhas originais sem tocar em nada, posicionando logo abaixo dos canais.
+"""Sincronizador Fiel de Listas M3U (Força m3u_plus + Restaura Grupos Reais de Canais, Filmes e Séries):
+- Converte automaticamente links get.php para type=m3u_plus (evitando que o painel envie apenas 3 grupos genéricos).
+- Consulta as categorias reais da API Xtream (Live + VOD + Series) para restaurar os grupos exatos caso o M3U venha achatado.
+- Mantém Canais ao Vivo no topo (com tvg-id sincronizado com o epg.xml.gz) e Filmes/Séries separados nos seus grupos originais.
 """
 from __future__ import annotations
 
@@ -48,6 +47,147 @@ IPTV_USER_AGENTS = [
 
 VOD_URL_EXTENSIONS = (".mp4", ".mkv", ".avi", ".mov", ".wmv", ".flv", ".webm", ".mpg", ".mpeg", ".divx")
 _RE_TVG_ID = re.compile(r'tvg-id="[^"]*"', re.IGNORECASE)
+_RE_GROUP_TITLE = re.compile(r'group-title="([^"]*)"', re.IGNORECASE)
+_RE_STREAM_ID_FROM_URL = re.compile(r"/(\d+)(?:\.[a-z0-9]+)?(?:\?.*)?$", re.IGNORECASE)
+
+# Nomes de grupos genéricos que indicam que o servidor mandou uma lista achatada sem m3u_plus
+GENERIC_BROKEN_GROUPS = {
+    "",
+    "canais",
+    "geral",
+    "canal completo",
+    "canal completo sd hd fhd",
+    "canal completo sd fhd",
+    "filmes e series",
+    "filmes e séries",
+    "vod",
+}
+
+
+def ensure_m3u_plus_url(url: str) -> str:
+    """Garante que qualquer link Xtream Codes use type=m3u_plus para o servidor enviar todos os group-title!"""
+    parsed = urllib.parse.urlparse(url)
+    if "get.php" not in parsed.path:
+        return url
+    q = urllib.parse.parse_qs(parsed.query, keep_blank_values=True)
+    # Força m3u_plus (se estiver m3u simples, o servidor esmaga todos os grupos em 3 categorias!)
+    q["type"] = ["m3u_plus"]
+    if "output" not in q:
+        q["output"] = ["ts"]
+    new_query = urllib.parse.urlencode(q, doseq=True)
+    return urllib.parse.urlunparse(parsed._replace(query=new_query))
+
+
+def build_br_headers(ua: str, host_url: str = "") -> dict[str, str]:
+    fake_ip = random.choice(BR_RESIDENTIAL_IPS)
+    headers = {
+        "User-Agent": ua,
+        "Accept": "*/*",
+        "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8",
+        "X-Forwarded-For": fake_ip,
+        "X-Real-IP": fake_ip,
+        "CF-Connecting-IP": fake_ip,
+        "True-Client-IP": fake_ip,
+        "Client-IP": fake_ip,
+        "Connection": "keep-alive",
+    }
+    if host_url:
+        parsed = urllib.parse.urlparse(host_url)
+        headers["Referer"] = f"{parsed.scheme}://{parsed.netloc}/"
+    return headers
+
+
+def create_http_client() -> requests.Session:
+    if cloudscraper is not None:
+        session = cloudscraper.create_scraper(
+            browser={"browser": "chrome", "platform": "windows", "mobile": False}
+        )
+    else:
+        session = requests.Session()
+
+    br_proxy = os.environ.get("BR_PROXY", "").strip()
+    if br_proxy:
+        session.proxies = {"http": br_proxy, "https": br_proxy}
+    return session
+
+
+def request_with_bypass(url: str, stream: bool = False, timeout: int = 90) -> requests.Response:
+    session = create_http_client()
+    last_err: Exception | None = None
+
+    for ua in IPTV_USER_AGENTS:
+        headers = build_br_headers(ua, url)
+        try:
+            resp = session.get(url, headers=headers, stream=stream, timeout=timeout, allow_redirects=True)
+            if resp.status_code == 200:
+                return resp
+            last_err = RuntimeError(f"HTTP {resp.status_code}")
+        except Exception as exc:
+            last_err = exc
+
+    raise RuntimeError(f"Todas as tentativas de bypass falharam ({last_err})")
+
+
+def fetch_xtream_category_maps(url: str) -> tuple[dict[str, str], dict[str, str]]:
+    """Busca na API Xtream o mapa exato {stream_id: nome_do_grupo} para Canais Ao Vivo e para Filmes VOD,
+    garantindo que mesmo se a M3U vier com grupos quebrados, cada canal e filme receba sua categoria real!"""
+    live_id_to_group: dict[str, str] = {}
+    vod_id_to_group: dict[str, str] = {}
+
+    parsed = urllib.parse.urlparse(url)
+    query = urllib.parse.parse_qs(parsed.query)
+    if "username" not in query or "password" not in query:
+        return live_id_to_group, vod_id_to_group
+
+    user = query["username"][0]
+    pwd = query["password"][0]
+    base_url = f"{parsed.scheme}://{parsed.netloc}"
+
+    try:
+        # 1. Categorias e Streams de TV ao Vivo
+        c_live = request_with_bypass(
+            f"{base_url}/player_api.php?username={user}&password={pwd}&action=get_live_categories", timeout=25
+        ).json()
+        live_cats = {
+            str(c.get("category_id", "")): html.unescape(str(c.get("category_name", "")).strip())
+            for c in (c_live if isinstance(c_live, list) else [])
+            if isinstance(c, dict) and c.get("category_name")
+        }
+        s_live = request_with_bypass(
+            f"{base_url}/player_api.php?username={user}&password={pwd}&action=get_live_streams", timeout=40
+        ).json()
+        for ch in (s_live if isinstance(s_live, list) else []):
+            if isinstance(ch, dict) and ch.get("stream_id"):
+                grp = live_cats.get(str(ch.get("category_id", "")), "")
+                if grp:
+                    live_id_to_group[str(ch["stream_id"])] = grp
+        print(f"  -> ✓ Mapa de grupos de Canais carregado da API: {len(live_cats)} categorias ({len(live_id_to_group)} canais).")
+    except Exception as e:
+        print(f"  -> Nota: Mapa de categorias Live via API não disponível ({e}).")
+
+    try:
+        # 2. Categorias e Streams de Filmes (VOD)
+        c_vod = request_with_bypass(
+            f"{base_url}/player_api.php?username={user}&password={pwd}&action=get_vod_categories", timeout=25
+        ).json()
+        vod_cats = {
+            str(c.get("category_id", "")): html.unescape(str(c.get("category_name", "")).strip())
+            for c in (c_vod if isinstance(c_vod, list) else [])
+            if isinstance(c, dict) and c.get("category_name")
+        }
+        s_vod = request_with_bypass(
+            f"{base_url}/player_api.php?username={user}&password={pwd}&action=get_vod_streams", timeout=45
+        ).json()
+        for v in (s_vod if isinstance(s_vod, list) else []):
+            if isinstance(v, dict) and v.get("stream_id"):
+                grp = vod_cats.get(str(v.get("category_id", "")), "")
+                if grp:
+                    vod_id_to_group[str(v["stream_id"])] = grp
+        print(f"  -> ✓ Mapa de grupos de Filmes carregado da API: {len(vod_cats)} categorias ({len(vod_id_to_group)} filmes).")
+    except Exception as e:
+        print(f"  -> Nota: Mapa de categorias VOD via API não disponível ({e}).")
+
+    return live_id_to_group, vod_id_to_group
 
 
 def load_epg_id_index(epg_path: Path) -> dict[str, str]:
@@ -77,7 +217,6 @@ def load_epg_id_index(epg_path: Path) -> dict[str, str]:
 
 
 def resolve_best_tvg_id(channel_name: str, original_tvg_id: str, epg_index: dict[str, str]) -> str:
-    # Canais 24h ficam com tvg-id vazio para não puxarem guia errado
     if re.search(r"\b24\s*H(?:S|ORAS)?\b", channel_name, re.I):
         return ""
 
@@ -99,18 +238,26 @@ def resolve_best_tvg_id(channel_name: str, original_tvg_id: str, epg_index: dict
 
 
 def replace_only_tvg_id_in_extinf(extinf_line: str, new_tvg_id: str) -> str:
-    """Altera EXCLUSIVAMENTE o atributo tvg-id="..." dentro da linha #EXTINF original,
-    preservando 100% da formatação, group-title, tvg-name, tvg-logo e nome do canal."""
     safe_id = new_tvg_id.replace('"', "'")
     if _RE_TVG_ID.search(extinf_line):
         return _RE_TVG_ID.sub(f'tvg-id="{safe_id}"', extinf_line, count=1)
-    # Se a linha #EXTINF não tinha tvg-id, insere logo após #EXTINF:-1
     return re.sub(r"^(#EXTINF:[^\s,]+)", rf'\1 tvg-id="{safe_id}"', extinf_line, count=1)
 
 
+def ensure_group_title_in_extinf(extinf_line: str, desired_group: str) -> str:
+    if not desired_group:
+        return extinf_line
+    safe_grp = desired_group.replace('"', "'")
+    m = _RE_GROUP_TITLE.search(extinf_line)
+    if m:
+        curr_grp = m.group(1).strip()
+        if not curr_grp or curr_grp.lower() in GENERIC_BROKEN_GROUPS or "canal completo" in curr_grp.lower():
+            return _RE_GROUP_TITLE.sub(f'group-title="{safe_grp}"', extinf_line, count=1)
+        return extinf_line
+    return re.sub(r"^(#EXTINF:[^\s,]+)", rf'\1 group-title="{safe_grp}"', extinf_line, count=1)
+
+
 def is_vod_stream(stream_url: str, extinf_line: str) -> bool:
-    """Detecta se o item é VOD (Filme ou Série) apenas pela estrutura da URL ou padrão SxxExx,
-    sem destruir nenhum grupo original."""
     clean_path = stream_url.split("?", 1)[0].lower()
     if clean_path.endswith(VOD_URL_EXTENSIONS):
         return True
@@ -122,70 +269,55 @@ def is_vod_stream(stream_url: str, extinf_line: str) -> bool:
 
 
 def download_raw_m3u_to_disk(url: str, target_path: Path) -> bool:
-    """Tenta baixar a M3U original completa primeiro via curl (HTTP/1.1 + headers BR) e depois via cloudscraper."""
+    plus_url = ensure_m3u_plus_url(url)
+    urls_to_try = [plus_url] if plus_url == url else [plus_url, url]
     br_proxy = os.environ.get("BR_PROXY", "").strip()
 
-    for ua in IPTV_USER_AGENTS:
-        fake_ip = random.choice(BR_RESIDENTIAL_IPS)
-        cmd = [
-            "curl", "-sS", "-L", "--http1.1",
-            "--max-time", "300",
-            "--connect-timeout", "25",
-            "--retry", "2",
-            "-A", ua,
-            "-H", "Accept: */*",
-            "-H", "Accept-Language: pt-BR,pt;q=0.9,en-US;q=0.8",
-            "-H", f"X-Forwarded-For: {fake_ip}",
-            "-H", f"X-Real-IP: {fake_ip}",
-            "-H", f"CF-Connecting-IP: {fake_ip}",
-            "-o", str(target_path),
-            url,
-        ]
-        if br_proxy:
-            cmd[1:1] = ["-x", br_proxy]
+    for target_url in urls_to_try:
+        for ua in IPTV_USER_AGENTS:
+            fake_ip = random.choice(BR_RESIDENTIAL_IPS)
+            cmd = [
+                "curl", "-sS", "-L", "--http1.1",
+                "--max-time", "300",
+                "--connect-timeout", "25",
+                "--retry", "2",
+                "-A", ua,
+                "-H", "Accept: */*",
+                "-H", "Accept-Language: pt-BR,pt;q=0.9,en-US;q=0.8",
+                "-H", f"X-Forwarded-For: {fake_ip}",
+                "-H", f"X-Real-IP: {fake_ip}",
+                "-H", f"CF-Connecting-IP: {fake_ip}",
+                "-o", str(target_path),
+                target_url,
+            ]
+            if br_proxy:
+                cmd[1:1] = ["-x", br_proxy]
 
-        res = subprocess.run(cmd, capture_output=True, text=True)
-        if res.returncode == 0 and target_path.exists() and target_path.stat().st_size > 2048:
-            # Verifica se o arquivo baixado realmente contém #EXTM3U ou #EXTINF (e não uma página HTML de erro)
-            with target_path.open("r", encoding="utf-8", errors="ignore") as f:
-                head = f.read(4096)
-                if "#EXTM3U" in head.upper() or "#EXTINF" in head.upper():
-                    return True
-
-    # Fallback via Cloudscraper / Requests
-    session = (
-        cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "windows", "mobile": False})
-        if cloudscraper is not None
-        else requests.Session()
-    )
-    if br_proxy:
-        session.proxies = {"http": br_proxy, "https": br_proxy}
-
-    for ua in IPTV_USER_AGENTS:
-        fake_ip = random.choice(BR_RESIDENTIAL_IPS)
-        headers = {
-            "User-Agent": ua,
-            "Accept": "*/*",
-            "Accept-Language": "pt-BR,pt;q=0.9",
-            "X-Forwarded-For": fake_ip,
-            "X-Real-IP": fake_ip,
-            "CF-Connecting-IP": fake_ip,
-        }
-        try:
-            with session.get(url, headers=headers, stream=True, timeout=240, allow_redirects=True) as resp:
-                if resp.status_code != 200:
-                    continue
-                with target_path.open("wb") as out:
-                    for chunk in resp.iter_content(chunk_size=1024 * 1024):
-                        if chunk:
-                            out.write(chunk)
-            if target_path.exists() and target_path.stat().st_size > 2048:
+            res = subprocess.run(cmd, capture_output=True, text=True)
+            if res.returncode == 0 and target_path.exists() and target_path.stat().st_size > 2048:
                 with target_path.open("r", encoding="utf-8", errors="ignore") as f:
-                    head = f.read(4096)
+                    head = f.read(8192)
                     if "#EXTM3U" in head.upper() or "#EXTINF" in head.upper():
                         return True
-        except Exception:
-            continue
+
+        session = create_http_client()
+        for ua in IPTV_USER_AGENTS:
+            headers = build_br_headers(ua, target_url)
+            try:
+                with session.get(target_url, headers=headers, stream=True, timeout=240, allow_redirects=True) as resp:
+                    if resp.status_code != 200:
+                        continue
+                    with target_path.open("wb") as out:
+                        for chunk in resp.iter_content(chunk_size=1024 * 1024):
+                            if chunk:
+                                out.write(chunk)
+                if target_path.exists() and target_path.stat().st_size > 2048:
+                    with target_path.open("r", encoding="utf-8", errors="ignore") as f:
+                        head = f.read(8192)
+                        if "#EXTM3U" in head.upper() or "#EXTINF" in head.upper():
+                            return True
+            except Exception:
+                continue
 
     return False
 
@@ -193,8 +325,6 @@ def download_raw_m3u_to_disk(url: str, target_path: Path) -> bool:
 def process_m3u_preserving_format(
     url: str, epg_index: dict[str, str], epg_public_url: str, out_file_path: Path
 ) -> tuple[int, int, int]:
-    """Lê a M3U original, mantém TODA a formatação e grupos originais intactos,
-    coloca os Canais ao Vivo no começo (com tvg-id ajustado) e os Filmes/Séries logo abaixo."""
     tmp_raw = tempfile.NamedTemporaryFile(delete=False, suffix=".raw.m3u")
     tmp_raw_path = Path(tmp_raw.name)
     tmp_raw.close()
@@ -208,12 +338,15 @@ def process_m3u_preserving_format(
     vod_count = 0
 
     try:
-        print("  -> Baixando arquivo M3U original completo (Canais + Filmes + Séries)...")
+        # Carrega o mapa oficial de categorias da API Xtream para garantir grupos perfeitos
+        live_id_to_group, vod_id_to_group = fetch_xtream_category_maps(url)
+
+        print("  -> Baixando arquivo M3U completo (com type=m3u_plus)...")
         if not download_raw_m3u_to_disk(url, tmp_raw_path):
-            raise RuntimeError("O servidor bloqueou o download direto do arquivo M3U completo a partir do IP do GitHub.")
+            raise RuntimeError("O servidor bloqueou o download direto do arquivo M3U a partir do IP do GitHub.")
 
         raw_size_mb = tmp_raw_path.stat().st_size / (1024 * 1024)
-        print(f"  -> ✓ Arquivo M3U original baixado ({raw_size_mb:.2f} MB). Processando canais e preservando VODs...")
+        print(f"  -> ✓ Arquivo M3U baixado ({raw_size_mb:.2f} MB). Separando Canais, Filmes e Séries com seus grupos...")
 
         header = f'#EXTM3U url-tvg="{epg_public_url}" x-tvg-url="{epg_public_url}"\n' if epg_public_url else "#EXTM3U\n"
 
@@ -231,7 +364,6 @@ def process_m3u_preserving_format(
                     continue
 
                 if line.startswith("#"):
-                    # Guarda #EXTINF e eventuais tags extras (#EXTGRP, #EXTVLCOPT) exatamente como vieram
                     pending_lines.append(line)
                     continue
 
@@ -243,14 +375,38 @@ def process_m3u_preserving_format(
 
                     extinf_line = pending_lines[extinf_idx]
 
+                    # Se houver tag #EXTGRP: abaixo do #EXTINF, extrai o grupo dela caso o #EXTINF não tenha group-title
+                    extgrp_val = ""
+                    for pl in pending_lines:
+                        if pl.upper().startswith("#EXTGRP:"):
+                            extgrp_val = pl.split(":", 1)[1].strip()
+                            break
+
+                    stream_id_m = _RE_STREAM_ID_FROM_URL.search(line)
+                    stream_id = stream_id_m.group(1) if stream_id_m else ""
+
                     if is_vod_stream(line, extinf_line):
-                        # É Filme ou Série (VOD): escreve TODAS as linhas originais sem alterar nem 1 vírgula!
+                        # É Filme ou Série (VOD): restaura o grupo real se o M3U veio achatado e separa Filmes de Séries!
+                        api_vod_grp = vod_id_to_group.get(stream_id, "") if stream_id else ""
+                        is_series_ep = (
+                            "/series/" in line.lower()
+                            or bool(re.search(r"\bS\d{1,2}\s*E\d{1,3}\b|\bT\d{1,2}\s*EP?\d{1,3}\b", extinf_line, re.I))
+                        )
+                        fallback_vod_grp = api_vod_grp or extgrp_val or ("Séries" if is_series_ep else "Filmes")
+                        pending_lines[extinf_idx] = ensure_group_title_in_extinf(extinf_line, fallback_vod_grp)
+
                         for pl in pending_lines:
                             vod_out.write(pl + "\n")
                         vod_out.write(line + "\n")
                         vod_count += 1
                     else:
-                        # É Canal ao Vivo: altera SOMENTE o atributo tvg-id="..." mantendo o resto da linha idêntico!
+                        # É Canal ao Vivo: restaura a categoria real da API (se o M3U veio com 'Canal Completo SD FHD')
+                        # e substitui o tvg-id pelo ID exato do seu epg.xml.gz!
+                        api_live_grp = live_id_to_group.get(stream_id, "") if stream_id else ""
+                        fallback_live_grp = api_live_grp or extgrp_val
+                        if fallback_live_grp:
+                            extinf_line = ensure_group_title_in_extinf(extinf_line, fallback_live_grp)
+
                         tvg_id_m = re.search(r'tvg-id="(.*?)"', extinf_line, re.I)
                         tvg_name_m = re.search(r'tvg-name="(.*?)"', extinf_line, re.I)
                         comma_name_m = re.search(r',([^,]*)$', extinf_line)
@@ -273,7 +429,6 @@ def process_m3u_preserving_format(
 
                     pending_lines.clear()
 
-        # Junta o bloco intacto de Filmes e Séries (VOD) logo abaixo dos Canais ao Vivo
         if vod_count > 0:
             with out_file_path.open("ab") as live_append, tmp_vod_path.open("rb") as vod_in:
                 shutil.copyfileobj(vod_in, live_append, length=1024 * 1024)
@@ -307,12 +462,12 @@ def push_files_to_secret_gist_via_git(generated_files: list[Path], token: str, g
             if target_m3u.stat().st_size > 95 * 1024 * 1024:
                 print(
                     f"  -> Nota: {fpath.name} tem {target_m3u.stat().st_size / (1024*1024):.1f} MB (>95MB). "
-                    f"Enviando como {target_gz.name} ({target_gz.stat().st_size / (1024*1024):.1f} MB) para caber no limite do GitHub!"
+                    f"Enviando como {target_gz.name} ({target_gz.stat().st_size / (1024*1024):.1f} MB)!"
                 )
                 target_m3u.unlink()
 
         subprocess.run(["git", "add", "."], cwd=work_dir, check=True)
-        subprocess.run(["git", "commit", "-m", "Atualiza Listas M3U (Formato Original + TVG-ID)"], cwd=work_dir, check=True, stdout=subprocess.DEVNULL)
+        subprocess.run(["git", "commit", "-m", "Atualiza Listas M3U (Grupos Originais + TVG-ID)"], cwd=work_dir, check=True, stdout=subprocess.DEVNULL)
         subprocess.run(["git", "push", "--force", gist_repo_url, "HEAD:main"], cwd=work_dir, check=True)
         print(f"\n✓ Gist Secreto ({gist_id}) atualizado via Git Push com sucesso!")
     finally:
@@ -343,7 +498,7 @@ def main() -> None:
             size_mb = out_file.stat().st_size / (1024 * 1024)
             print(
                 f"  -> ✓ [lista_{i}.m3u] {live_cnt} Canais ao Vivo no topo ({matched_cnt} com EPG) + "
-                f"{vod_cnt} Filmes/Séries intactos abaixo | Tamanho total: {size_mb:.2f} MB"
+                f"{vod_cnt} Filmes/Séries abaixo | Tamanho total: {size_mb:.2f} MB"
             )
             generated_files.append(out_file)
         except Exception as e:
