@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
-"""Sincronizador Completo de Listas M3U (Canais no Topo com TVG-ID Corrigido + VODs Abaixo):
-- Separa Canais ao Vivo e VODs (Filmes e Séries).
-- Aplica correção precisa de tvg-id APENAS nos Canais ao Vivo usando o seu epg.xml.gz.
-- Mantém todos os VODs (Filmes e Séries) intactos logo abaixo dos canais ao vivo.
-- Remove apenas conteúdo Adulto (+18 / XXX).
-- Publica via Git Push direto no Gist Secreto para suportar listas grandes (100MB~150MB+) + versão .m3u.gz.
+"""Sincronizador Fiel de Listas M3U (Preserva 100% da Formatação, Grupos, Filmes e Séries):
+- Baixa a M3U original completa (usando curl nativo + fallback cloudscraper).
+- Mantém a linha #EXTINF original 100% intacta (mesmos grupos, mesmas tags, mesma ordem).
+- Nos Canais ao Vivo: altera SOMENTE o atributo tvg-id="..." para casar com o epg.xml.gz e posiciona no topo.
+- Nos Filmes e Séries (VOD): copia as linhas originais sem tocar em nada, posicionando logo abaixo dos canais.
 """
 from __future__ import annotations
 
 import gzip
 import html
-import json
 import os
 import random
 import re
@@ -48,75 +46,8 @@ IPTV_USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
 ]
 
-# Bloqueia apenas conteúdo Adulto (Preserva Filmes, Séries e 24h!)
-ADULT_FILTER_RE = re.compile(
-    r"(\bADULTO[S]?\b|\bXXX\b|\bSEXO\b|\bPORN[OÔ]?\b|\b18\+\b|\+\s*18\b|\bONLYFANS\b|"
-    r"\bSEXY\s*HOT\b|\bPLAYBOY\b|\bSEX\s*PRIV[EÉ]\b|\bVENUS\b|\bBRAZZERS\b)",
-    re.IGNORECASE,
-)
-
-# Identifica grupos ou nomes que são VOD ou 24h (não devem receber tvg-id de canal linear)
-VOD_GROUP_RE = re.compile(
-    r"(\bVOD\b|\bFILMES?\b|\bSERIES?\b|\bSÉRIES?\b|\bLAN[CÇ]AMENTOS?\b|\bNOVELAS?\b|"
-    r"\bCOLET[AÂ]NEA\b|\bNETFLIX\b|\bDISNEY\+?\b|\bPRIME\s*VIDEO\b|\bMAX\b|\bGLOBOPLAY\b|"
-    r"\bAPPLE\s*TV\b|\bPARAMOUNT\+\b|\bCRUNCHYROLL\b|\bDORAMAS?\b|\bANIMES?\b|\bCINEMA\b)",
-    re.IGNORECASE,
-)
-CHANNEL_24H_OR_EP_RE = re.compile(
-    r"(\b24\s*H(?:S|ORAS)?\b|\bS\d{1,2}\s*E\d{1,3}\b|\bT\d{1,2}\s*EP?\d{1,3}\b)",
-    re.IGNORECASE,
-)
 VOD_URL_EXTENSIONS = (".mp4", ".mkv", ".avi", ".mov", ".wmv", ".flv", ".webm", ".mpg", ".mpeg", ".divx")
-
-
-def build_br_headers(ua: str, host_url: str = "") -> dict[str, str]:
-    fake_ip = random.choice(BR_RESIDENTIAL_IPS)
-    headers = {
-        "User-Agent": ua,
-        "Accept": "*/*",
-        "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8",
-        "X-Forwarded-For": fake_ip,
-        "X-Real-IP": fake_ip,
-        "CF-Connecting-IP": fake_ip,
-        "True-Client-IP": fake_ip,
-        "Client-IP": fake_ip,
-        "Connection": "keep-alive",
-    }
-    if host_url:
-        parsed = urllib.parse.urlparse(host_url)
-        headers["Referer"] = f"{parsed.scheme}://{parsed.netloc}/"
-    return headers
-
-
-def create_http_client() -> requests.Session:
-    if cloudscraper is not None:
-        session = cloudscraper.create_scraper(
-            browser={"browser": "chrome", "platform": "windows", "mobile": False}
-        )
-    else:
-        session = requests.Session()
-
-    br_proxy = os.environ.get("BR_PROXY", "").strip()
-    if br_proxy:
-        session.proxies = {"http": br_proxy, "https": br_proxy}
-    return session
-
-
-def request_with_bypass(url: str, stream: bool = False, timeout: int = 90) -> requests.Response:
-    session = create_http_client()
-    last_err: Exception | None = None
-
-    for ua in IPTV_USER_AGENTS:
-        headers = build_br_headers(ua, url)
-        try:
-            resp = session.get(url, headers=headers, stream=stream, timeout=timeout, allow_redirects=True)
-            if resp.status_code == 200:
-                return resp
-            last_err = RuntimeError(f"HTTP {resp.status_code}")
-        except Exception as exc:
-            last_err = exc
-
-    raise RuntimeError(f"Todas as tentativas de bypass falharam ({last_err})")
+_RE_TVG_ID = re.compile(r'tvg-id="[^"]*"', re.IGNORECASE)
 
 
 def load_epg_id_index(epg_path: Path) -> dict[str, str]:
@@ -146,7 +77,8 @@ def load_epg_id_index(epg_path: Path) -> dict[str, str]:
 
 
 def resolve_best_tvg_id(channel_name: str, original_tvg_id: str, epg_index: dict[str, str]) -> str:
-    if CHANNEL_24H_OR_EP_RE.search(channel_name):
+    # Canais 24h ficam com tvg-id vazio para não puxarem guia errado
+    if re.search(r"\b24\s*H(?:S|ORAS)?\b", channel_name, re.I):
         return ""
 
     for candidate in (
@@ -163,28 +95,106 @@ def resolve_best_tvg_id(channel_name: str, original_tvg_id: str, epg_index: dict
         if k_id and k_id in epg_index:
             return epg_index[k_id]
 
-    return strip_qualities_keep_case(channel_name) or channel_name
+    return strip_qualities_keep_case(channel_name) or original_tvg_id or channel_name
 
 
-def is_vod_entry(stream_url: str, group: str, name: str) -> bool:
+def replace_only_tvg_id_in_extinf(extinf_line: str, new_tvg_id: str) -> str:
+    """Altera EXCLUSIVAMENTE o atributo tvg-id="..." dentro da linha #EXTINF original,
+    preservando 100% da formatação, group-title, tvg-name, tvg-logo e nome do canal."""
+    safe_id = new_tvg_id.replace('"', "'")
+    if _RE_TVG_ID.search(extinf_line):
+        return _RE_TVG_ID.sub(f'tvg-id="{safe_id}"', extinf_line, count=1)
+    # Se a linha #EXTINF não tinha tvg-id, insere logo após #EXTINF:-1
+    return re.sub(r"^(#EXTINF:[^\s,]+)", rf'\1 tvg-id="{safe_id}"', extinf_line, count=1)
+
+
+def is_vod_stream(stream_url: str, extinf_line: str) -> bool:
+    """Detecta se o item é VOD (Filme ou Série) apenas pela estrutura da URL ou padrão SxxExx,
+    sem destruir nenhum grupo original."""
     clean_path = stream_url.split("?", 1)[0].lower()
-    if clean_path.endswith(VOD_URL_EXTENSIONS) or "/movie/" in clean_path or "/series/" in clean_path:
+    if clean_path.endswith(VOD_URL_EXTENSIONS):
         return True
-    if re.search(r"\bS\d{1,2}\s*E\d{1,3}\b|\bT\d{1,2}\s*EP?\d{1,3}\b", name, re.I):
+    if "/movie/" in clean_path or "/series/" in clean_path or "/vod/" in clean_path:
         return True
-    if VOD_GROUP_RE.search(group) and not any(
-        ch_kw in group.upper() for ch_kw in ("CANAIS", "TV ABERTA", "ESPORTES", "TELECINE", "HBO", "DOCUMENTARIOS", "INFANTIL", "NOTICIAS", "VARIEDADES")
-    ):
+    if re.search(r"\bS\d{1,2}\s*E\d{1,3}\b|\bT\d{1,2}\s*EP?\d{1,3}\b", extinf_line, re.I):
         return True
     return False
 
 
-def build_combined_playlist(
+def download_raw_m3u_to_disk(url: str, target_path: Path) -> bool:
+    """Tenta baixar a M3U original completa primeiro via curl (HTTP/1.1 + headers BR) e depois via cloudscraper."""
+    br_proxy = os.environ.get("BR_PROXY", "").strip()
+
+    for ua in IPTV_USER_AGENTS:
+        fake_ip = random.choice(BR_RESIDENTIAL_IPS)
+        cmd = [
+            "curl", "-sS", "-L", "--http1.1",
+            "--max-time", "300",
+            "--connect-timeout", "25",
+            "--retry", "2",
+            "-A", ua,
+            "-H", "Accept: */*",
+            "-H", "Accept-Language: pt-BR,pt;q=0.9,en-US;q=0.8",
+            "-H", f"X-Forwarded-For: {fake_ip}",
+            "-H", f"X-Real-IP: {fake_ip}",
+            "-H", f"CF-Connecting-IP: {fake_ip}",
+            "-o", str(target_path),
+            url,
+        ]
+        if br_proxy:
+            cmd[1:1] = ["-x", br_proxy]
+
+        res = subprocess.run(cmd, capture_output=True, text=True)
+        if res.returncode == 0 and target_path.exists() and target_path.stat().st_size > 2048:
+            # Verifica se o arquivo baixado realmente contém #EXTM3U ou #EXTINF (e não uma página HTML de erro)
+            with target_path.open("r", encoding="utf-8", errors="ignore") as f:
+                head = f.read(4096)
+                if "#EXTM3U" in head.upper() or "#EXTINF" in head.upper():
+                    return True
+
+    # Fallback via Cloudscraper / Requests
+    session = (
+        cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "windows", "mobile": False})
+        if cloudscraper is not None
+        else requests.Session()
+    )
+    if br_proxy:
+        session.proxies = {"http": br_proxy, "https": br_proxy}
+
+    for ua in IPTV_USER_AGENTS:
+        fake_ip = random.choice(BR_RESIDENTIAL_IPS)
+        headers = {
+            "User-Agent": ua,
+            "Accept": "*/*",
+            "Accept-Language": "pt-BR,pt;q=0.9",
+            "X-Forwarded-For": fake_ip,
+            "X-Real-IP": fake_ip,
+            "CF-Connecting-IP": fake_ip,
+        }
+        try:
+            with session.get(url, headers=headers, stream=True, timeout=240, allow_redirects=True) as resp:
+                if resp.status_code != 200:
+                    continue
+                with target_path.open("wb") as out:
+                    for chunk in resp.iter_content(chunk_size=1024 * 1024):
+                        if chunk:
+                            out.write(chunk)
+            if target_path.exists() and target_path.stat().st_size > 2048:
+                with target_path.open("r", encoding="utf-8", errors="ignore") as f:
+                    head = f.read(4096)
+                    if "#EXTM3U" in head.upper() or "#EXTINF" in head.upper():
+                        return True
+        except Exception:
+            continue
+
+    return False
+
+
+def process_m3u_preserving_format(
     url: str, epg_index: dict[str, str], epg_public_url: str, out_file_path: Path
 ) -> tuple[int, int, int]:
-    """Gera o arquivo M3U com TODOS os Canais ao Vivo no começo (com tvg-id corrigido)
-    e TODOS os VODs (Filmes e Séries) logo depois!
-    """
+    """Lê a M3U original, mantém TODA a formatação e grupos originais intactos,
+    coloca os Canais ao Vivo no começo (com tvg-id ajustado) e os Filmes/Séries logo abaixo."""
     tmp_raw = tempfile.NamedTemporaryFile(delete=False, suffix=".raw.m3u")
     tmp_raw_path = Path(tmp_raw.name)
     tmp_raw.close()
@@ -198,172 +208,75 @@ def build_combined_playlist(
     vod_count = 0
 
     try:
-        # 1. Tenta baixar o arquivo M3U completo em streaming (que contém Canais + Filmes + Séries)
-        m3u_downloaded = False
-        try:
-            print("  -> Baixando M3U completa (Canais + VODs) via stream...")
-            resp = request_with_bypass(url, stream=True, timeout=240)
-            with tmp_raw_path.open("wb") as out:
-                for chunk in resp.iter_content(chunk_size=1024 * 1024):
-                    if chunk:
-                        out.write(chunk)
-            if tmp_raw_path.stat().st_size > 1024:
-                m3u_downloaded = True
-        except Exception as e:
-            print(f"  -> Download direto da M3U completa falhou ({e}). Usando API Xtream separada (Canais + Filmes)...")
+        print("  -> Baixando arquivo M3U original completo (Canais + Filmes + Séries)...")
+        if not download_raw_m3u_to_disk(url, tmp_raw_path):
+            raise RuntimeError("O servidor bloqueou o download direto do arquivo M3U completo a partir do IP do GitHub.")
+
+        raw_size_mb = tmp_raw_path.stat().st_size / (1024 * 1024)
+        print(f"  -> ✓ Arquivo M3U original baixado ({raw_size_mb:.2f} MB). Processando canais e preservando VODs...")
 
         header = f'#EXTM3U url-tvg="{epg_public_url}" x-tvg-url="{epg_public_url}"\n' if epg_public_url else "#EXTM3U\n"
 
-        if m3u_downloaded:
-            # Separa em disco: grava Canais direto no out_file_path (topo) e VODs no tmp_vod_path
-            with (
-                tmp_raw_path.open("r", encoding="utf-8", errors="ignore") as raw_in,
-                out_file_path.open("w", encoding="utf-8") as live_out,
-                tmp_vod_path.open("w", encoding="utf-8") as vod_out,
-            ):
-                live_out.write(header)
-                current_extinf: str | None = None
+        with (
+            tmp_raw_path.open("r", encoding="utf-8", errors="ignore") as raw_in,
+            out_file_path.open("w", encoding="utf-8") as live_out,
+            tmp_vod_path.open("w", encoding="utf-8") as vod_out,
+        ):
+            live_out.write(header)
+            pending_lines: list[str] = []
 
-                for raw_line in raw_in:
-                    line = raw_line.strip()
-                    if not line:
+            for raw_line in raw_in:
+                line = raw_line.strip()
+                if not line or line.upper().startswith("#EXTM3U"):
+                    continue
+
+                if line.startswith("#"):
+                    # Guarda #EXTINF e eventuais tags extras (#EXTGRP, #EXTVLCOPT) exatamente como vieram
+                    pending_lines.append(line)
+                    continue
+
+                if line.startswith(("http://", "https://", "rtmp://", "rtsp://")) and pending_lines:
+                    extinf_idx = next((idx for idx, l in enumerate(pending_lines) if l.upper().startswith("#EXTINF")), None)
+                    if extinf_idx is None:
+                        pending_lines.clear()
                         continue
-                    if line.startswith("#EXTINF"):
-                        current_extinf = line
-                        continue
-                    if line.startswith(("http://", "https://", "rtmp://")) and current_extinf:
-                        extinf = current_extinf
-                        current_extinf = None
 
-                        group_m = re.search(r'group-title="(.*?)"', extinf, re.I)
-                        tvg_id_m = re.search(r'tvg-id="(.*?)"', extinf, re.I)
-                        logo_m = re.search(r'tvg-logo="(.*?)"', extinf, re.I)
-                        name_m = re.search(r',([^,]*)$', extinf)
+                    extinf_line = pending_lines[extinf_idx]
 
-                        group = html.unescape(group_m.group(1).strip()) if group_m else "Geral"
+                    if is_vod_stream(line, extinf_line):
+                        # É Filme ou Série (VOD): escreve TODAS as linhas originais sem alterar nem 1 vírgula!
+                        for pl in pending_lines:
+                            vod_out.write(pl + "\n")
+                        vod_out.write(line + "\n")
+                        vod_count += 1
+                    else:
+                        # É Canal ao Vivo: altera SOMENTE o atributo tvg-id="..." mantendo o resto da linha idêntico!
+                        tvg_id_m = re.search(r'tvg-id="(.*?)"', extinf_line, re.I)
+                        tvg_name_m = re.search(r'tvg-name="(.*?)"', extinf_line, re.I)
+                        comma_name_m = re.search(r',([^,]*)$', extinf_line)
+
                         orig_tvg_id = tvg_id_m.group(1).strip() if tvg_id_m else ""
-                        logo = logo_m.group(1).strip() if logo_m else ""
-                        name = html.unescape(name_m.group(1).strip()) if name_m else ""
-                        if not name:
-                            continue
+                        ch_name = html.unescape(
+                            (comma_name_m.group(1).strip() if comma_name_m else "")
+                            or (tvg_name_m.group(1).strip() if tvg_name_m else "")
+                        )
 
-                        # Bloqueia apenas conteúdo Adulto
-                        if ADULT_FILTER_RE.search(group) or ADULT_FILTER_RE.search(name):
-                            continue
+                        best_tvg_id = resolve_best_tvg_id(ch_name, orig_tvg_id, epg_index)
+                        if best_tvg_id and name_key(best_tvg_id) in epg_index:
+                            matched_epg += 1
 
-                        logo_attr = f' tvg-logo="{logo}"' if logo else ""
+                        pending_lines[extinf_idx] = replace_only_tvg_id_in_extinf(extinf_line, best_tvg_id)
+                        for pl in pending_lines:
+                            live_out.write(pl + "\n")
+                        live_out.write(line + "\n")
+                        live_count += 1
 
-                        if is_vod_entry(line, group, name):
-                            # É VOD (Filme ou Série): mantém intacto no bloco de VODs (com tvg-id vazio para não pesar no EPG)
-                            vod_out.write(
-                                f'#EXTINF:-1 tvg-id="" tvg-name="{name}"{logo_attr} group-title="{group}",{name}\n{line}\n'
-                            )
-                            vod_count += 1
-                        else:
-                            # É Canal ao Vivo: corrige o tvg-id com precisão e grava no topo!
-                            best_tvg_id = resolve_best_tvg_id(name, orig_tvg_id, epg_index)
-                            if best_tvg_id and name_key(best_tvg_id) in epg_index:
-                                matched_epg += 1
-                            live_out.write(
-                                f'#EXTINF:-1 tvg-id="{best_tvg_id}" tvg-name="{name}"{logo_attr} group-title="{group}",{name}\n{line}\n'
-                            )
-                            live_count += 1
+                    pending_lines.clear()
 
-            # Concatena todos os VODs logo abaixo dos Canais ao Vivo!
-            if vod_count > 0:
-                with out_file_path.open("ab") as live_append, tmp_vod_path.open("rb") as vod_in:
-                    shutil.copyfileobj(vod_in, live_append, length=1024 * 1024)
-
-            return live_count, matched_epg, vod_count
-
-        # 2. Fallback via API Xtream (Baixa Canais Ao Vivo + Filmes VOD separados e junta!)
-        parsed = urllib.parse.urlparse(url)
-        query = urllib.parse.parse_qs(parsed.query)
-        if "username" not in query or "password" not in query:
-            raise RuntimeError("URL não é Xtream Codes e download direto falhou.")
-
-        user = query["username"][0]
-        pwd = query["password"][0]
-        out_fmt = (query.get("output", ["ts"])[0] or "ts").lower()
-        base_url = f"{parsed.scheme}://{parsed.netloc}"
-        ext = "m3u8" if out_fmt in {"m3u8", "hls"} else "ts"
-
-        # 2A. Busca Categorias e Canais Ao Vivo
-        cat_live_url = f"{base_url}/player_api.php?username={user}&password={pwd}&action=get_live_categories"
-        cats_live = request_with_bypass(cat_live_url, timeout=30).json()
-        live_cat_map = {
-            str(c.get("category_id", "")): html.unescape(str(c.get("category_name", "Canais")).strip())
-            for c in (cats_live if isinstance(cats_live, list) else [])
-            if isinstance(c, dict)
-        }
-
-        streams_live_url = f"{base_url}/player_api.php?username={user}&password={pwd}&action=get_live_streams"
-        live_streams = request_with_bypass(streams_live_url, timeout=45).json()
-
-        with out_file_path.open("w", encoding="utf-8") as out:
-            out.write(header)
-
-            # Grava TODOS os Canais ao Vivo no começo do arquivo
-            for ch in (live_streams if isinstance(live_streams, list) else []):
-                if not isinstance(ch, dict):
-                    continue
-                name = html.unescape(str(ch.get("name", "")).strip())
-                stream_id = ch.get("stream_id")
-                if not name or not stream_id:
-                    continue
-                group = live_cat_map.get(str(ch.get("category_id", "")), "Canais")
-                if ADULT_FILTER_RE.search(group) or ADULT_FILTER_RE.search(name):
-                    continue
-
-                orig_tvg_id = str(ch.get("epg_channel_id", "")).strip()
-                best_tvg_id = resolve_best_tvg_id(name, orig_tvg_id, epg_index)
-                if best_tvg_id and name_key(best_tvg_id) in epg_index:
-                    matched_epg += 1
-
-                logo = str(ch.get("stream_icon", "")).strip()
-                logo_attr = f' tvg-logo="{logo}"' if logo else ""
-                stream_url = f"{base_url}/live/{user}/{pwd}/{stream_id}.{ext}"
-
-                out.write(
-                    f'#EXTINF:-1 tvg-id="{best_tvg_id}" tvg-name="{name}"{logo_attr} group-title="{group}",{name}\n{stream_url}\n'
-                )
-                live_count += 1
-
-            # 2B. Busca Categorias e Filmes VOD separadamente na API e junta abaixo dos canais!
-            try:
-                cat_vod_url = f"{base_url}/player_api.php?username={user}&password={pwd}&action=get_vod_categories"
-                cats_vod = request_with_bypass(cat_vod_url, timeout=30).json()
-                vod_cat_map = {
-                    str(c.get("category_id", "")): html.unescape(str(c.get("category_name", "Filmes")).strip())
-                    for c in (cats_vod if isinstance(cats_vod, list) else [])
-                    if isinstance(c, dict)
-                }
-
-                streams_vod_url = f"{base_url}/player_api.php?username={user}&password={pwd}&action=get_vod_streams"
-                vod_streams = request_with_bypass(streams_vod_url, timeout=60).json()
-
-                for vod in (vod_streams if isinstance(vod_streams, list) else []):
-                    if not isinstance(vod, dict):
-                        continue
-                    name = html.unescape(str(vod.get("name", "")).strip())
-                    stream_id = vod.get("stream_id")
-                    container_ext = str(vod.get("container_extension", "mp4")).strip() or "mp4"
-                    if not name or not stream_id:
-                        continue
-                    group = vod_cat_map.get(str(vod.get("category_id", "")), "Filmes")
-                    if ADULT_FILTER_RE.search(group) or ADULT_FILTER_RE.search(name):
-                        continue
-
-                    logo = str(vod.get("stream_icon", "")).strip()
-                    logo_attr = f' tvg-logo="{logo}"' if logo else ""
-                    vod_url = f"{base_url}/movie/{user}/{pwd}/{stream_id}.{container_ext}"
-
-                    out.write(
-                        f'#EXTINF:-1 tvg-id="" tvg-name="{name}"{logo_attr} group-title="{group}",{name}\n{vod_url}\n'
-                    )
-                    vod_count += 1
-            except Exception as e_vod:
-                print(f"  -> Aviso ao puxar VODs via API ({e_vod}).")
+        # Junta o bloco intacto de Filmes e Séries (VOD) logo abaixo dos Canais ao Vivo
+        if vod_count > 0:
+            with out_file_path.open("ab") as live_append, tmp_vod_path.open("rb") as vod_in:
+                shutil.copyfileobj(vod_in, live_append, length=1024 * 1024)
 
         return live_count, matched_epg, vod_count
 
@@ -375,7 +288,6 @@ def build_combined_playlist(
 
 
 def push_files_to_secret_gist_via_git(generated_files: list[Path], token: str, gist_id: str) -> None:
-    """Usa Git Push direto para o repositório do Gist Secreto (suporta arquivos grandes sem erro na API JSON)."""
     work_dir = Path(tempfile.mkdtemp(prefix="gist_push_"))
     try:
         gist_repo_url = f"https://x-access-token:{token}@gist.github.com/{gist_id}.git"
@@ -385,26 +297,22 @@ def push_files_to_secret_gist_via_git(generated_files: list[Path], token: str, g
         subprocess.run(["git", "config", "http.postBuffer", "524288000"], cwd=work_dir, check=True)
 
         for fpath in generated_files:
-            # Copia o arquivo .m3u completo
             target_m3u = work_dir / fpath.name
             shutil.copy2(fpath, target_m3u)
 
-            # Gera também a versão compactada .m3u.gz (10x menor, ideal caso a lista passe de 100 MB)
             target_gz = work_dir / f"{fpath.name}.gz"
             with fpath.open("rb") as f_in, gzip.open(target_gz, "wb", compresslevel=6) as f_out:
                 shutil.copyfileobj(f_in, f_out, length=1024 * 1024)
 
-            # Se o arquivo .m3u descompactado passar de 95 MB (limite hard do Git do GitHub é 100 MB),
-            # mantém apenas a versão .m3u.gz no Gist para o push nunca ser rejeitado!
             if target_m3u.stat().st_size > 95 * 1024 * 1024:
                 print(
                     f"  -> Nota: {fpath.name} tem {target_m3u.stat().st_size / (1024*1024):.1f} MB (>95MB). "
-                    f"Enviando versão compactada {target_gz.name} ({target_gz.stat().st_size / (1024*1024):.1f} MB)!"
+                    f"Enviando como {target_gz.name} ({target_gz.stat().st_size / (1024*1024):.1f} MB) para caber no limite do GitHub!"
                 )
                 target_m3u.unlink()
 
         subprocess.run(["git", "add", "."], cwd=work_dir, check=True)
-        subprocess.run(["git", "commit", "-m", "Atualiza Listas M3U (Canais + VOD)"], cwd=work_dir, check=True, stdout=subprocess.DEVNULL)
+        subprocess.run(["git", "commit", "-m", "Atualiza Listas M3U (Formato Original + TVG-ID)"], cwd=work_dir, check=True, stdout=subprocess.DEVNULL)
         subprocess.run(["git", "push", "--force", gist_repo_url, "HEAD:main"], cwd=work_dir, check=True)
         print(f"\n✓ Gist Secreto ({gist_id}) atualizado via Git Push com sucesso!")
     finally:
@@ -427,7 +335,7 @@ def main() -> None:
         print(f"\nProcessando M3U_URL_{i}...")
         out_file = out_dir / f"lista_{i}.m3u"
         try:
-            live_cnt, matched_cnt, vod_cnt = build_combined_playlist(url, epg_index, epg_public_url, out_file)
+            live_cnt, matched_cnt, vod_cnt = process_m3u_preserving_format(url, epg_index, epg_public_url, out_file)
             if live_cnt == 0 and vod_cnt == 0:
                 print(f"  -> ⚠ M3U_URL_{i} retornou vazia. Pulando.")
                 continue
@@ -435,14 +343,14 @@ def main() -> None:
             size_mb = out_file.stat().st_size / (1024 * 1024)
             print(
                 f"  -> ✓ [lista_{i}.m3u] {live_cnt} Canais ao Vivo no topo ({matched_cnt} com EPG) + "
-                f"{vod_cnt} VODs abaixo | Tamanho total: {size_mb:.2f} MB"
+                f"{vod_cnt} Filmes/Séries intactos abaixo | Tamanho total: {size_mb:.2f} MB"
             )
             generated_files.append(out_file)
         except Exception as e:
-            print(f"  -> ❌ Erro/Bloqueio na M3U_URL_{i}: {e}")
+            print(f"  -> ❌ Erro na M3U_URL_{i}: {e}")
 
     if not generated_files:
-        raise RuntimeError("Nenhuma lista pôde ser gerada.")
+        raise RuntimeError("Nenhuma lista M3U completa pôde ser baixada.")
 
     gist_token = os.environ.get("GIST_TOKEN", "").strip()
     gist_id = os.environ.get("GIST_ID", "").strip()
