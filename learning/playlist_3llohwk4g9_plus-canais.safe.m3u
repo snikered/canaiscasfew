@@ -1,0 +1,935 @@
+#EXTM3U
+#EXTINF:-1 tvg-id="a.and.e.br" tvg-name="A&amp;E FHD H.265" group-title="CANAIS: FILMES E SÉRIES ✨",A&E FHD H.265
+#EXTINF:-1 tvg-id="a.and.e.br" tvg-name="A&amp;E" group-title="CANAIS: FILMES E SÉRIES ✨",A&E
+#EXTINF:-1 tvg-id="a.and.e.br" tvg-name="A&amp;E FHD" group-title="CANAIS: FILMES E SÉRIES ✨",A&E FHD
+#EXTINF:-1 tvg-id="a.and.e.br" tvg-name="A&amp;E HD" group-title="CANAIS: FILMES E SÉRIES ✨",A&E HD
+#EXTINF:-1 tvg-id="a.and.e.br" tvg-name="A&amp;E HD ¹" group-title="CANAIS: FILMES E SÉRIES ✨",A&E HD ¹
+#EXTINF:-1 tvg-id="" tvg-name="A&amp;E HD ²" group-title="CANAIS: FILMES E SÉRIES ✨",A&E HD ²
+#EXTINF:-1 tvg-id="axn.br" tvg-name="AXN FHD H.265" group-title="CANAIS: FILMES E SÉRIES ✨",AXN FHD H.265
+#EXTINF:-1 tvg-id="axn.br" tvg-name="AXN" group-title="CANAIS: FILMES E SÉRIES ✨",AXN
+#EXTINF:-1 tvg-id="axn.br" tvg-name="AXN FHD" group-title="CANAIS: FILMES E SÉRIES ✨",AXN FHD
+#EXTINF:-1 tvg-id="axn.br" tvg-name="AXN HD" group-title="CANAIS: FILMES E SÉRIES ✨",AXN HD
+#EXTINF:-1 tvg-id="axn.br" tvg-name="AXN HD ¹" group-title="CANAIS: FILMES E SÉRIES ✨",AXN HD ¹
+#EXTINF:-1 tvg-id="axn.br" tvg-name="AXN HD ²" group-title="CANAIS: FILMES E SÉRIES ✨",AXN HD ²
+#EXTINF:-1 tvg-id="amc.br" tvg-name="AMC FHD H.265" group-title="CANAIS: FILMES E SÉRIES ✨",AMC FHD H.265
+#EXTINF:-1 tvg-id="amc.br" tvg-name="AMC" group-title="CANAIS: FILMES E SÉRIES ✨",AMC
+#EXTINF:-1 tvg-id="amc.br" tvg-name="AMC FHD" group-title="CANAIS: FILMES E SÉRIES ✨",AMC FHD
+#EXTINF:-1 tvg-id="amc.br" tvg-name="AMC HD" group-title="CANAIS: FILMES E SÉRIES ✨",AMC HD
+#EXTINF:-1 tvg-id="amc.br" tvg-name="AMC HD ¹" group-title="CANAIS: FILMES E SÉRIES ✨",AMC HD ¹
+#EXTINF:-1 tvg-id="amc.br" tvg-name="AMC HD ²" group-title="CANAIS: FILMES E SÉRIES ✨",AMC HD ²
+#EXTINF:-1 tvg-id="animal.planet.br" tvg-name="ANIMAL PLANET FHD H.265" group-title="CANAIS: DOCUMENTÁRIOS ✨",ANIMAL PLANET FHD H.265
+#EXTINF:-1 tvg-id="animal.planet.br" tvg-name="ANIMAL PLANET" group-title="CANAIS: DOCUMENTÁRIOS ✨",ANIMAL PLANET
+#EXTINF:-1 tvg-id="animal.planet.br" tvg-name="ANIMAL PLANET FHD" group-title="CANAIS: DOCUMENTÁRIOS ✨",ANIMAL PLANET FHD
+#EXTINF:-1 tvg-id="animal.planet.br" tvg-name="ANIMAL PLANET HD" group-title="CANAIS: DOCUMENTÁRIOS ✨",ANIMAL PLANET HD
+#EXTINF:-1 tvg-id="arte.1.br" tvg-name="ARTE 1 HD" group-title="CANAIS: FILMES E SÉRIES ✨",ARTE 1 HD
+#EXTINF:-1 tvg-id="arte.1.br" tvg-name="ARTE 1 FHD" group-title="CANAIS: FILMES E SÉRIES ✨",ARTE 1 FHD
+#EXTINF:-1 tvg-id="band.br" tvg-name="BAND SP FHD  H.265" group-title="CANAIS: BAND ✨",BAND SP FHD  H.265
+#EXTINF:-1 tvg-id="band.br" tvg-name="BAND SP FHD" group-title="CANAIS: BAND ✨",BAND SP FHD
+#EXTINF:-1 tvg-id="band.br" tvg-name="BAND SP FHD ¹" group-title="CANAIS: BAND ✨",BAND SP FHD ¹
+#EXTINF:-1 tvg-id="band.br" tvg-name="BAND SP HD" group-title="CANAIS: BAND ✨",BAND SP HD
+#EXTINF:-1 tvg-id="band.br" tvg-name="BAND SP HD ¹" group-title="CANAIS: BAND ✨",BAND SP HD ¹
+#EXTINF:-1 tvg-id="band.bahia.br" tvg-name="BAND BAHIA FHD" group-title="CANAIS: BAND ✨",BAND BAHIA FHD
+#EXTINF:-1 tvg-id="band.bahia.br" tvg-name="BAND BAHIA" group-title="CANAIS: BAND ✨",BAND BAHIA
+#EXTINF:-1 tvg-id="band.rj.br" tvg-name="BAND RJ" group-title="CANAIS: BAND ✨",BAND RJ
+#EXTINF:-1 tvg-id="band.campinas.br" tvg-name="BAND CAMPINAS HD" group-title="CANAIS: BAND ✨",BAND CAMPINAS HD
+#EXTINF:-1 tvg-id="band.rs.br" tvg-name="BAND RS HD" group-title="CANAIS: BAND ✨",BAND RS HD
+#EXTINF:-1 tvg-id="bandsports.br" tvg-name="BAND SPORTS FHD H.265" group-title="CANAIS: ESPORTES ⚽",BAND SPORTS FHD H.265
+#EXTINF:-1 tvg-id="bandsports.br" tvg-name="BAND SPORTS FHD" group-title="CANAIS: ESPORTES ⚽",BAND SPORTS FHD
+#EXTINF:-1 tvg-id="bandsports.br" tvg-name="BAND SPORTS HD" group-title="CANAIS: ESPORTES ⚽",BAND SPORTS HD
+#EXTINF:-1 tvg-id="bandsports.br" tvg-name="BAND SPORTS HD ¹" group-title="CANAIS: ESPORTES ⚽",BAND SPORTS HD ¹
+#EXTINF:-1 tvg-id="bandsports.br" tvg-name="BAND SPORTS HD ³" group-title="CANAIS: ESPORTES ⚽",BAND SPORTS HD ³
+#EXTINF:-1 tvg-id="band.news.br" tvg-name="BAND NEWS FHD H.265" group-title="CANAIS: NOTÍCIAS ✨",BAND NEWS FHD H.265
+#EXTINF:-1 tvg-id="band.news.br" tvg-name="BAND NEWS FHD" group-title="CANAIS: NOTÍCIAS ✨",BAND NEWS FHD
+#EXTINF:-1 tvg-id="band.news.br" tvg-name="BAND NEWS HD" group-title="CANAIS: NOTÍCIAS ✨",BAND NEWS HD
+#EXTINF:-1 tvg-id="band.news.br" tvg-name="BAND NEWS HD ²" group-title="CANAIS: NOTÍCIAS ✨",BAND NEWS HD ²
+#EXTINF:-1 tvg-id="sbt.br" tvg-name="SBT NEWS FHD H.265" group-title="CANAIS: NOTÍCIAS ✨",SBT NEWS FHD H.265
+#EXTINF:-1 tvg-id="sbt.br" tvg-name="SBT NEWS FHD" group-title="CANAIS: NOTÍCIAS ✨",SBT NEWS FHD
+#EXTINF:-1 tvg-id="cartoon.network.br" tvg-name="CARTOON NETWOORK FHD H.265" group-title="CANAIS: INFANTIS ✨",CARTOON NETWOORK FHD H.265
+#EXTINF:-1 tvg-id="cartoon.network.br" tvg-name="CARTOON NETWORK" group-title="CANAIS: INFANTIS ✨",CARTOON NETWORK
+#EXTINF:-1 tvg-id="cartoon.network.br" tvg-name="CARTOON NETWORK FHD" group-title="CANAIS: INFANTIS ✨",CARTOON NETWORK FHD
+#EXTINF:-1 tvg-id="cartoon.network.br" tvg-name="CARTOON NETWORK HD" group-title="CANAIS: INFANTIS ✨",CARTOON NETWORK HD
+#EXTINF:-1 tvg-id="cartoon.network.br" tvg-name="CARTOON NETWOORK HD ¹" group-title="CANAIS: INFANTIS ✨",CARTOON NETWOORK HD ¹
+#EXTINF:-1 tvg-id="cartoon.network.br" tvg-name="CARTOON NETWOORK HD ²" group-title="CANAIS: INFANTIS ✨",CARTOON NETWOORK HD ²
+#EXTINF:-1 tvg-id="cartoonito.br" tvg-name="CARTOONITO" group-title="CANAIS: INFANTIS ✨",CARTOONITO
+#EXTINF:-1 tvg-id="cartoonito.br" tvg-name="CARTOONITO FHD" group-title="CANAIS: INFANTIS ✨",CARTOONITO FHD
+#EXTINF:-1 tvg-id="cartoonito.br" tvg-name="CARTOONITO HD" group-title="CANAIS: INFANTIS ✨",CARTOONITO HD
+#EXTINF:-1 tvg-id="cartoonito.br" tvg-name="CARTOONITO HD ¹" group-title="CANAIS: INFANTIS ✨",CARTOONITO HD ¹
+#EXTINF:-1 tvg-id="cartoonito.br" tvg-name="CARTOONITO HD ²" group-title="CANAIS: INFANTIS ✨",CARTOONITO HD ²
+#EXTINF:-1 tvg-id="modo.viagem.br" tvg-name="MODO VIAGEM FHD" group-title="CANAIS: VARIEDADES ✨",MODO VIAGEM FHD
+#EXTINF:-1 tvg-id="modo.viagem.br" tvg-name="MODO VIAGEM HD" group-title="CANAIS: VARIEDADES ✨",MODO VIAGEM HD
+#EXTINF:-1 tvg-id="bis.br" tvg-name="BIS FHD H.265" group-title="CANAIS: VARIEDADES ✨",BIS FHD H.265
+#EXTINF:-1 tvg-id="bis.br" tvg-name="BIS" group-title="CANAIS: VARIEDADES ✨",BIS
+#EXTINF:-1 tvg-id="bis.br" tvg-name="BIS FHD" group-title="CANAIS: VARIEDADES ✨",BIS FHD
+#EXTINF:-1 tvg-id="bis.br" tvg-name="BIS HD" group-title="CANAIS: VARIEDADES ✨",BIS HD
+#EXTINF:-1 tvg-id="cinemax.br" tvg-name="CINEMAX FHD H.265" group-title="CANAIS: FILMES E SÉRIES ✨",CINEMAX FHD H.265
+#EXTINF:-1 tvg-id="cinemax.br" tvg-name="CINEMAX" group-title="CANAIS: FILMES E SÉRIES ✨",CINEMAX
+#EXTINF:-1 tvg-id="cinemax.br" tvg-name="CINEMAX FHD" group-title="CANAIS: FILMES E SÉRIES ✨",CINEMAX FHD
+#EXTINF:-1 tvg-id="cinemax.br" tvg-name="CINEMAX HD" group-title="CANAIS: FILMES E SÉRIES ✨",CINEMAX HD
+#EXTINF:-1 tvg-id="cinemax.br" tvg-name="CINEMAX HD ¹" group-title="CANAIS: FILMES E SÉRIES ✨",CINEMAX HD ¹
+#EXTINF:-1 tvg-id="cinemax.br" tvg-name="CINEMAX HD ²" group-title="CANAIS: FILMES E SÉRIES ✨",CINEMAX HD ²
+#EXTINF:-1 tvg-id="canal.brasil.br" tvg-name="CANAL BRASIL FHD H.265" group-title="CANAIS: FILMES E SÉRIES ✨",CANAL BRASIL FHD H.265
+#EXTINF:-1 tvg-id="canal.brasil.br" tvg-name="CANAL BRASIL FHD" group-title="CANAIS: FILMES E SÉRIES ✨",CANAL BRASIL FHD
+#EXTINF:-1 tvg-id="canal.brasil.br" tvg-name="CANAL BRASIL HD" group-title="CANAIS: FILMES E SÉRIES ✨",CANAL BRASIL HD
+#EXTINF:-1 tvg-id="canal.brasil.br" tvg-name="CANAL BRASIL HD ¹" group-title="CANAIS: FILMES E SÉRIES ✨",CANAL BRASIL HD ¹
+#EXTINF:-1 tvg-id="canal.brasil.br" tvg-name="CANAL BRASIL HD ²" group-title="CANAIS: FILMES E SÉRIES ✨",CANAL BRASIL HD ²
+#EXTINF:-1 tvg-id="cnn.brasil.br" tvg-name="CNN BRASIL FHD H.265" group-title="CANAIS: NOTÍCIAS ✨",CNN BRASIL FHD H.265
+#EXTINF:-1 tvg-id="cnn.brasil.br" tvg-name="CNN BRASIL FHD" group-title="CANAIS: NOTÍCIAS ✨",CNN BRASIL FHD
+#EXTINF:-1 tvg-id="cnn.brasil.br" tvg-name="CNN BRASIL HD" group-title="CANAIS: NOTÍCIAS ✨",CNN BRASIL HD
+#EXTINF:-1 tvg-id="cnn.brasil.br" tvg-name="CNN BRASIL HD ¹" group-title="CANAIS: NOTÍCIAS ✨",CNN BRASIL HD ¹
+#EXTINF:-1 tvg-id="cnn.brasil.br" tvg-name="CNN BRASIL HD ²" group-title="CANAIS: NOTÍCIAS ✨",CNN BRASIL HD ²
+#EXTINF:-1 tvg-id="jovem.pan.news.br" tvg-name="JOVEM PAN NEWS FHD" group-title="CANAIS: NOTÍCIAS ✨",JOVEM PAN NEWS FHD
+#EXTINF:-1 tvg-id="jovem.pan.news.br" tvg-name="JOVEM PAN FHD ¹" group-title="CANAIS: NOTÍCIAS ✨",JOVEM PAN FHD ¹
+#EXTINF:-1 tvg-id="jovem.pan.news.br" tvg-name="JOVEM PAN NEWS HD" group-title="CANAIS: NOTÍCIAS ✨",JOVEM PAN NEWS HD
+#EXTINF:-1 tvg-id="jovem.pan.news.br" tvg-name="JOVEM PAN HD ¹" group-title="CANAIS: NOTÍCIAS ✨",JOVEM PAN HD ¹
+#EXTINF:-1 tvg-id="combate.br" tvg-name="COMBATE  FHD H.265" group-title="CANAIS: ESPORTES ⚽",COMBATE  FHD H.265
+#EXTINF:-1 tvg-id="combate.br" tvg-name="COMBATE" group-title="CANAIS: ESPORTES ⚽",COMBATE
+#EXTINF:-1 tvg-id="combate.br" tvg-name="COMBATE FHD" group-title="CANAIS: ESPORTES ⚽",COMBATE FHD
+#EXTINF:-1 tvg-id="combate.br" tvg-name="COMBATE HD" group-title="CANAIS: ESPORTES ⚽",COMBATE HD
+#EXTINF:-1 tvg-id="combate.br" tvg-name="COMBATE HD ¹" group-title="CANAIS: ESPORTES ⚽",COMBATE HD ¹
+#EXTINF:-1 tvg-id="combate.br" tvg-name="COMBATE HD ²" group-title="CANAIS: ESPORTES ⚽",COMBATE HD ²
+#EXTINF:-1 tvg-id="curta.br" tvg-name="CURTA" group-title="CANAIS: VARIEDADES ✨",CURTA
+#EXTINF:-1 tvg-id="" tvg-name="CINE SKY 01" group-title="CANAIS: CINE SKY ✨",CINE SKY 01
+#EXTINF:-1 tvg-id="" tvg-name="CINE SKY 02" group-title="CANAIS: CINE SKY ✨",CINE SKY 02
+#EXTINF:-1 tvg-id="" tvg-name="CINE SKY 03" group-title="CANAIS: CINE SKY ✨",CINE SKY 03
+#EXTINF:-1 tvg-id="" tvg-name="CINE SKY 05" group-title="CANAIS: CINE SKY ✨",CINE SKY 05
+#EXTINF:-1 tvg-id="" tvg-name="NOSSO FUTEBOL 01" group-title="CANAIS: PPV / ESPORTES ⚽",NOSSO FUTEBOL 01
+#EXTINF:-1 tvg-id="" tvg-name="GE TV FHD" group-title="CANAIS: PPV / ESPORTES ⚽",GE TV FHD
+#EXTINF:-1 tvg-id="" tvg-name="CAZÉ TV HD" group-title="CANAIS: PPV / ESPORTES ⚽",CAZÉ TV HD
+#EXTINF:-1 tvg-id="" tvg-name="CAZÉ TV HD ¹" group-title="CANAIS: PPV / ESPORTES ⚽",CAZÉ TV HD ¹
+#EXTINF:-1 tvg-id="" tvg-name="CAZE TV FHD" group-title="CANAIS: PPV / ESPORTES ⚽",CAZE TV FHD
+#EXTINF:-1 tvg-id="paramount.plus.1.br" tvg-name="PARAMOUNT + 1" group-title="CANAIS: PARAMOUNT + LIBERTADORES ⚽",PARAMOUNT + 1
+#EXTINF:-1 tvg-id="paramount.plus.2.br" tvg-name="PARAMOUNT + 2" group-title="CANAIS: PARAMOUNT + LIBERTADORES ⚽",PARAMOUNT + 2
+#EXTINF:-1 tvg-id="paramount.plus.3.br" tvg-name="PARAMOUNT + 3" group-title="CANAIS: PARAMOUNT + LIBERTADORES ⚽",PARAMOUNT + 3
+#EXTINF:-1 tvg-id="paramount.plus.4.br" tvg-name="PARAMOUNT + 4" group-title="CANAIS: PARAMOUNT + LIBERTADORES ⚽",PARAMOUNT + 4
+#EXTINF:-1 tvg-id="paramount.plus.1.br" tvg-name="PARAMOUNT + 5" group-title="CANAIS: PARAMOUNT + LIBERTADORES ⚽",PARAMOUNT + 5
+#EXTINF:-1 tvg-id="paramount.plus.1.br" tvg-name="PARAMOUNT + 6" group-title="CANAIS: PARAMOUNT + LIBERTADORES ⚽",PARAMOUNT + 6
+#EXTINF:-1 tvg-id="paramount.plus.1.br" tvg-name="PARAMOUNT + 7" group-title="CANAIS: PARAMOUNT + LIBERTADORES ⚽",PARAMOUNT + 7
+#EXTINF:-1 tvg-id="paramount.plus.1.br" tvg-name="PARAMOUNT + 8" group-title="CANAIS: PARAMOUNT + LIBERTADORES ⚽",PARAMOUNT + 8
+#EXTINF:-1 tvg-id="paramount.plus.1.br" tvg-name="PARAMOUNT + 9" group-title="CANAIS: PARAMOUNT + LIBERTADORES ⚽",PARAMOUNT + 9
+#EXTINF:-1 tvg-id="prime.video.br" tvg-name="PRIME VIDEO 01" group-title="CANAIS: PRIME VIDEO ⚽",PRIME VIDEO 01
+#EXTINF:-1 tvg-id="prime.video.br" tvg-name="PRIME VIDEO 02" group-title="CANAIS: PRIME VIDEO ⚽",PRIME VIDEO 02
+#EXTINF:-1 tvg-id="prime.video.br" tvg-name="PRIME VIDEO 03" group-title="CANAIS: PRIME VIDEO ⚽",PRIME VIDEO 03
+#EXTINF:-1 tvg-id="prime.video.br" tvg-name="PRIME VIDEO 04" group-title="CANAIS: PRIME VIDEO ⚽",PRIME VIDEO 04
+#EXTINF:-1 tvg-id="prime.video.br" tvg-name="PRIME VIDEO 05" group-title="CANAIS: PRIME VIDEO ⚽",PRIME VIDEO 05
+#EXTINF:-1 tvg-id="" tvg-name="CANAL GOAT 01" group-title="CANAIS: PPV / ESPORTES ⚽",CANAL GOAT 01
+#EXTINF:-1 tvg-id="" tvg-name="CANAL GOAT 02" group-title="CANAIS: PPV / ESPORTES ⚽",CANAL GOAT 02
+#EXTINF:-1 tvg-id="" tvg-name="CANAL GOAT 03" group-title="CANAIS: PPV / ESPORTES ⚽",CANAL GOAT 03
+#EXTINF:-1 tvg-id="" tvg-name="CULTURA PA" group-title="CANAIS: ABERTOS ✨",CULTURA PA
+#EXTINF:-1 tvg-id="canal.do.boi.br" tvg-name="CANAL DO BOI" group-title="CANAIS: ABERTOS ✨",CANAL DO BOI
+#EXTINF:-1 tvg-id="discovery.br" tvg-name="DISCOVERY CHANNEL FHD H.265" group-title="CANAIS: DISCOVERY ✨",DISCOVERY CHANNEL FHD H.265
+#EXTINF:-1 tvg-id="discovery.br" tvg-name="DISCOVERY CHANNEL" group-title="CANAIS: DISCOVERY ✨",DISCOVERY CHANNEL
+#EXTINF:-1 tvg-id="discovery.br" tvg-name="DISCOVERY CHANNEL ²" group-title="CANAIS: DISCOVERY ✨",DISCOVERY CHANNEL ²
+#EXTINF:-1 tvg-id="discovery.br" tvg-name="DISCOVERY CHANNEL FHD" group-title="CANAIS: DISCOVERY ✨",DISCOVERY CHANNEL FHD
+#EXTINF:-1 tvg-id="discovery.br" tvg-name="DISCOVERY CHANNEL FHD*" group-title="CANAIS: DISCOVERY ✨",DISCOVERY CHANNEL FHD*
+#EXTINF:-1 tvg-id="discovery.br" tvg-name="DISCOVERY CHANNEL HD" group-title="CANAIS: DISCOVERY ✨",DISCOVERY CHANNEL HD
+#EXTINF:-1 tvg-id="discovery.br" tvg-name="DISCOVERY CHANNEL HD ²" group-title="CANAIS: DISCOVERY ✨",DISCOVERY CHANNEL HD ²
+#EXTINF:-1 tvg-id="discovery.home.and.health.br" tvg-name="DISCOVERY HOME &amp; HEALTH FHD H.265" group-title="CANAIS: DISCOVERY ✨",DISCOVERY HOME & HEALTH FHD H.265
+#EXTINF:-1 tvg-id="discovery.home.and.health.br" tvg-name="DISCOVERY HOME &amp; HEALTH" group-title="CANAIS: DISCOVERY ✨",DISCOVERY HOME & HEALTH
+#EXTINF:-1 tvg-id="discovery.home.and.health.br" tvg-name="DISCOVERY HOME &amp; HEALTH FHD" group-title="CANAIS: DISCOVERY ✨",DISCOVERY HOME & HEALTH FHD
+#EXTINF:-1 tvg-id="discovery.home.and.health.br" tvg-name="DISCOVERY HOME &amp; HEALTH HD" group-title="CANAIS: DISCOVERY ✨",DISCOVERY HOME & HEALTH HD
+#EXTINF:-1 tvg-id="discovery.home.and.health.br" tvg-name="DISCOVERY HOME &amp; HEALT HD ¹" group-title="CANAIS: DISCOVERY ✨",DISCOVERY HOME & HEALT HD ¹
+#EXTINF:-1 tvg-id="discovery.home.and.health.br" tvg-name="DISCOVERY  HOME &amp; HEALTH HD ²" group-title="CANAIS: DISCOVERY ✨",DISCOVERY  HOME & HEALTH HD ²
+#EXTINF:-1 tvg-id="discovery.science.br" tvg-name="DISCOVERY SCIENCE FHD H.265" group-title="CANAIS: DISCOVERY ✨",DISCOVERY SCIENCE FHD H.265
+#EXTINF:-1 tvg-id="discovery.science.br" tvg-name="DISCOVERY SCIENCE" group-title="CANAIS: DISCOVERY ✨",DISCOVERY SCIENCE
+#EXTINF:-1 tvg-id="discovery.science.br" tvg-name="DISCOVERY SCIENCE FHD" group-title="CANAIS: DISCOVERY ✨",DISCOVERY SCIENCE FHD
+#EXTINF:-1 tvg-id="discovery.science.br" tvg-name="DISCOVERY SCIENCE HD" group-title="CANAIS: DISCOVERY ✨",DISCOVERY SCIENCE HD
+#EXTINF:-1 tvg-id="discovery.science.br" tvg-name="DISCOVERY SCIENCE HD ¹" group-title="CANAIS: DISCOVERY ✨",DISCOVERY SCIENCE HD ¹
+#EXTINF:-1 tvg-id="discovery.science.br" tvg-name="DISCOVERY SCIENCE HD ²" group-title="CANAIS: DISCOVERY ✨",DISCOVERY SCIENCE HD ²
+#EXTINF:-1 tvg-id="discovery.theater.br" tvg-name="DISCOVERY THEATER FHD H.265" group-title="CANAIS: DISCOVERY ✨",DISCOVERY THEATER FHD H.265
+#EXTINF:-1 tvg-id="discovery.theater.br" tvg-name="DISCOVERY THEATER" group-title="CANAIS: DISCOVERY ✨",DISCOVERY THEATER
+#EXTINF:-1 tvg-id="discovery.theater.br" tvg-name="DISCOVERY THEATER FHD" group-title="CANAIS: DISCOVERY ✨",DISCOVERY THEATER FHD
+#EXTINF:-1 tvg-id="discovery.theater.br" tvg-name="DISCOVERY THEATER HD" group-title="CANAIS: DISCOVERY ✨",DISCOVERY THEATER HD
+#EXTINF:-1 tvg-id="discovery.theater.br" tvg-name="DISCOVERY THEATER HD ¹" group-title="CANAIS: DISCOVERY ✨",DISCOVERY THEATER HD ¹
+#EXTINF:-1 tvg-id="discovery.theater.br" tvg-name="DISCOVERY THEATER HD ²" group-title="CANAIS: DISCOVERY ✨",DISCOVERY THEATER HD ²
+#EXTINF:-1 tvg-id="" tvg-name="DISCOVERY TLC FHD H.265" group-title="CANAIS: DISCOVERY ✨",DISCOVERY TLC FHD H.265
+#EXTINF:-1 tvg-id="tlc.br" tvg-name="DISCOVERY TLC" group-title="CANAIS: DISCOVERY ✨",DISCOVERY TLC
+#EXTINF:-1 tvg-id="tlc.br" tvg-name="DISCOVERY TLC FHD" group-title="CANAIS: DISCOVERY ✨",DISCOVERY TLC FHD
+#EXTINF:-1 tvg-id="tlc.br" tvg-name="DISCOVERY TLC HD" group-title="CANAIS: DISCOVERY ✨",DISCOVERY TLC HD
+#EXTINF:-1 tvg-id="discovery.turbo.br" tvg-name="DISCOVERY TURBO FHD H.265" group-title="CANAIS: DISCOVERY ✨",DISCOVERY TURBO FHD H.265
+#EXTINF:-1 tvg-id="discovery.turbo.br" tvg-name="DISCOVERY TURBO" group-title="CANAIS: DISCOVERY ✨",DISCOVERY TURBO
+#EXTINF:-1 tvg-id="discovery.turbo.br" tvg-name="DISCOVERY TURBO FHD" group-title="CANAIS: DISCOVERY ✨",DISCOVERY TURBO FHD
+#EXTINF:-1 tvg-id="discovery.turbo.br" tvg-name="DISCOVERY TURBO HD" group-title="CANAIS: DISCOVERY ✨",DISCOVERY TURBO HD
+#EXTINF:-1 tvg-id="discovery.turbo.br" tvg-name="DISCOVERY TURBO HD ¹" group-title="CANAIS: DISCOVERY ✨",DISCOVERY TURBO HD ¹
+#EXTINF:-1 tvg-id="discovery.turbo.br" tvg-name="DISCOVERY TURBO HD ²" group-title="CANAIS: DISCOVERY ✨",DISCOVERY TURBO HD ²
+#EXTINF:-1 tvg-id="discovery.world.br" tvg-name="DISCOVERY WORLD FHD H.265" group-title="CANAIS: DISCOVERY ✨",DISCOVERY WORLD FHD H.265
+#EXTINF:-1 tvg-id="discovery.world.br" tvg-name="DISCOVERY WORLD" group-title="CANAIS: DISCOVERY ✨",DISCOVERY WORLD
+#EXTINF:-1 tvg-id="discovery.world.br" tvg-name="DISCOVERY WORLD FHD" group-title="CANAIS: DISCOVERY ✨",DISCOVERY WORLD FHD
+#EXTINF:-1 tvg-id="discovery.world.br" tvg-name="DISCOVERY WORLD HD" group-title="CANAIS: DISCOVERY ✨",DISCOVERY WORLD HD
+#EXTINF:-1 tvg-id="discovery.world.br" tvg-name="DISCOVERY WORLD HD ¹" group-title="CANAIS: DISCOVERY ✨",DISCOVERY WORLD HD ¹
+#EXTINF:-1 tvg-id="discovery.world.br" tvg-name="DISCOVERY WORLD HD ²" group-title="CANAIS: DISCOVERY ✨",DISCOVERY WORLD HD ²
+#EXTINF:-1 tvg-id="investigacao.discovery.br" tvg-name="ID - INVESTIGAÇÃO DISCOVERY FHD H.265" group-title="CANAIS: DISCOVERY ✨",ID - INVESTIGAÇÃO DISCOVERY FHD H.265
+#EXTINF:-1 tvg-id="investigacao.discovery.br" tvg-name="ID - INVESTIGAÇÃO DISCOVERY FHD" group-title="CANAIS: DISCOVERY ✨",ID - INVESTIGAÇÃO DISCOVERY FHD
+#EXTINF:-1 tvg-id="investigacao.discovery.br" tvg-name="ID - INVESTIGAÇÃO DISCOVERY HD" group-title="CANAIS: DISCOVERY ✨",ID - INVESTIGAÇÃO DISCOVERY HD
+#EXTINF:-1 tvg-id="investigacao.discovery.br" tvg-name="ID - INVESTIGAÇÃO DISCOVERY HD ²" group-title="CANAIS: DISCOVERY ✨",ID - INVESTIGAÇÃO DISCOVERY HD ²
+#EXTINF:-1 tvg-id="investigacao.discovery.br" tvg-name="ID - INVESTIGAÇÃO DISCOVERY HD ³" group-title="CANAIS: DISCOVERY ✨",ID - INVESTIGAÇÃO DISCOVERY HD ³
+#EXTINF:-1 tvg-id="discovery.kids.br" tvg-name="DISCOVERY KIDS FHD H.265" group-title="CANAIS: INFANTIS ✨",DISCOVERY KIDS FHD H.265
+#EXTINF:-1 tvg-id="discovery.kids.br" tvg-name="DISCOVERY KIDS FHD" group-title="CANAIS: INFANTIS ✨",DISCOVERY KIDS FHD
+#EXTINF:-1 tvg-id="discovery.kids.br" tvg-name="DISCOVERY KIDS HD" group-title="CANAIS: INFANTIS ✨",DISCOVERY KIDS HD
+#EXTINF:-1 tvg-id="discovery.kids.br" tvg-name="DISCOVERY KIDS HD ¹" group-title="CANAIS: INFANTIS ✨",DISCOVERY KIDS HD ¹
+#EXTINF:-1 tvg-id="discovery.kids.br" tvg-name="DISCOVERY KIDS HD ²" group-title="CANAIS: INFANTIS ✨",DISCOVERY KIDS HD ²
+#EXTINF:-1 tvg-id="DAZN.br" tvg-name="DAZN FHD" group-title="CANAIS: PPV / ESPORTES ⚽",DAZN FHD
+#EXTINF:-1 tvg-id="DAZN.br" tvg-name="DAZN 2" group-title="CANAIS: PPV / ESPORTES ⚽",DAZN 2
+#EXTINF:-1 tvg-id="espn.br" tvg-name="ESPN FHD H.265" group-title="CANAIS: ESPN ⚽",ESPN FHD H.265
+#EXTINF:-1 tvg-id="espn.br" tvg-name="ESPN" group-title="CANAIS: ESPN ⚽",ESPN
+#EXTINF:-1 tvg-id="espn.br" tvg-name="ESPN FHD" group-title="CANAIS: ESPN ⚽",ESPN FHD
+#EXTINF:-1 tvg-id="espn.br" tvg-name="ESPN HD" group-title="CANAIS: ESPN ⚽",ESPN HD
+#EXTINF:-1 tvg-id="espn.br" tvg-name="ESPN HD ¹" group-title="CANAIS: ESPN ⚽",ESPN HD ¹
+#EXTINF:-1 tvg-id="espn.2.br" tvg-name="ESPN HD ²" group-title="CANAIS: ESPN ⚽",ESPN HD ²
+#EXTINF:-1 tvg-id="espn.2.br" tvg-name="ESPN 2 FHD H.265" group-title="CANAIS: ESPN ⚽",ESPN 2 FHD H.265
+#EXTINF:-1 tvg-id="espn.2.br" tvg-name="ESPN 2" group-title="CANAIS: ESPN ⚽",ESPN 2
+#EXTINF:-1 tvg-id="espn.2.br" tvg-name="ESPN 2 HD" group-title="CANAIS: ESPN ⚽",ESPN 2 HD
+#EXTINF:-1 tvg-id="espn.2.br" tvg-name="ESPN 2 FHD" group-title="CANAIS: ESPN ⚽",ESPN 2 FHD
+#EXTINF:-1 tvg-id="espn.2.br" tvg-name="ESPN 2 HD ¹" group-title="CANAIS: ESPN ⚽",ESPN 2 HD ¹
+#EXTINF:-1 tvg-id="espn.2.br" tvg-name="ESPN 2 HD ²" group-title="CANAIS: ESPN ⚽",ESPN 2 HD ²
+#EXTINF:-1 tvg-id="espn.3.br" tvg-name="ESPN 3 FHD H.265" group-title="CANAIS: ESPN ⚽",ESPN 3 FHD H.265
+#EXTINF:-1 tvg-id="espn.3.br" tvg-name="ESPN 3" group-title="CANAIS: ESPN ⚽",ESPN 3
+#EXTINF:-1 tvg-id="espn.3.br" tvg-name="ESPN 3 FHD" group-title="CANAIS: ESPN ⚽",ESPN 3 FHD
+#EXTINF:-1 tvg-id="espn.3.br" tvg-name="ESPN 3 FHD*" group-title="CANAIS: ESPN ⚽",ESPN 3 FHD*
+#EXTINF:-1 tvg-id="espn.3.br" tvg-name="ESPN 3 HD" group-title="CANAIS: ESPN ⚽",ESPN 3 HD
+#EXTINF:-1 tvg-id="espn.3.br" tvg-name="ESPN 3 HD ¹" group-title="CANAIS: ESPN ⚽",ESPN 3 HD ¹
+#EXTINF:-1 tvg-id="espn.3.br" tvg-name="ESPN 3 HD ²" group-title="CANAIS: ESPN ⚽",ESPN 3 HD ²
+#EXTINF:-1 tvg-id="espn.4.br" tvg-name="ESPN 4 FHD H.265" group-title="CANAIS: ESPN ⚽",ESPN 4 FHD H.265
+#EXTINF:-1 tvg-id="espn.4.br" tvg-name="ESPN 4" group-title="CANAIS: ESPN ⚽",ESPN 4
+#EXTINF:-1 tvg-id="espn.4.br" tvg-name="ESPN 4 FHD" group-title="CANAIS: ESPN ⚽",ESPN 4 FHD
+#EXTINF:-1 tvg-id="espn.4.br" tvg-name="ESPN 4 HD" group-title="CANAIS: ESPN ⚽",ESPN 4 HD
+#EXTINF:-1 tvg-id="espn.4.br" tvg-name="ESPN 4 HD ¹" group-title="CANAIS: ESPN ⚽",ESPN 4 HD ¹
+#EXTINF:-1 tvg-id="espn.4.br" tvg-name="ESPN 4 HD ²" group-title="CANAIS: ESPN ⚽",ESPN 4 HD ²
+#EXTINF:-1 tvg-id="espn.5.br" tvg-name="ESPN 5 FHD H.265" group-title="CANAIS: ESPN ⚽",ESPN 5 FHD H.265
+#EXTINF:-1 tvg-id="espn.5.br" tvg-name="ESPN 5" group-title="CANAIS: ESPN ⚽",ESPN 5
+#EXTINF:-1 tvg-id="espn.5.br" tvg-name="ESPN 5 FHD" group-title="CANAIS: ESPN ⚽",ESPN 5 FHD
+#EXTINF:-1 tvg-id="espn.5.br" tvg-name="ESPN 5 HD" group-title="CANAIS: ESPN ⚽",ESPN 5 HD
+#EXTINF:-1 tvg-id="espn.5.br" tvg-name="ESPN 5  HD ¹" group-title="CANAIS: ESPN ⚽",ESPN 5  HD ¹
+#EXTINF:-1 tvg-id="espn.5.br" tvg-name="ESPN 5 HD ²" group-title="CANAIS: ESPN ⚽",ESPN 5 HD ²
+#EXTINF:-1 tvg-id="espn.6.br" tvg-name="ESPN 6 FHD H.265" group-title="CANAIS: ESPN ⚽",ESPN 6 FHD H.265
+#EXTINF:-1 tvg-id="espn.6.br" tvg-name="ESPN 6 FHD" group-title="CANAIS: ESPN ⚽",ESPN 6 FHD
+#EXTINF:-1 tvg-id="espn.6.br" tvg-name="ESPN 6  HD" group-title="CANAIS: ESPN ⚽",ESPN 6  HD
+#EXTINF:-1 tvg-id="espn.6.br" tvg-name="ESPN 6 HD ¹" group-title="CANAIS: ESPN ⚽",ESPN 6 HD ¹
+#EXTINF:-1 tvg-id="Boomerang.br" tvg-name="EVANGELIZAR HD" group-title="CANAIS: RELIGIOSOS ⭐",EVANGELIZAR HD
+#EXTINF:-1 tvg-id="e.br" tvg-name="E! FHD" group-title="CANAIS: VARIEDADES ✨",E! FHD
+#EXTINF:-1 tvg-id="e.br" tvg-name="E! HD" group-title="CANAIS: VARIEDADES ✨",E! HD
+#EXTINF:-1 tvg-id="fishtv.br" tvg-name="FISH TV FHD" group-title="CANAIS: VARIEDADES ✨",FISH TV FHD
+#EXTINF:-1 tvg-id="fishtv.br" tvg-name="FISH TV HD" group-title="CANAIS: VARIEDADES ✨",FISH TV HD
+#EXTINF:-1 tvg-id="food.network.br" tvg-name="FOOD NETWOORK" group-title="CANAIS: VARIEDADES ✨",FOOD NETWOORK
+#EXTINF:-1 tvg-id="food.network.br" tvg-name="FOOD NETWORK FHD" group-title="CANAIS: VARIEDADES ✨",FOOD NETWORK FHD
+#EXTINF:-1 tvg-id="food.network.br" tvg-name="FOOD NETWORK HD" group-title="CANAIS: VARIEDADES ✨",FOOD NETWORK HD
+#EXTINF:-1 tvg-id="gnt.br" tvg-name="GNT FHD H.265" group-title="CANAIS: VARIEDADES ✨",GNT FHD H.265
+#EXTINF:-1 tvg-id="gnt.br" tvg-name="GNT" group-title="CANAIS: VARIEDADES ✨",GNT
+#EXTINF:-1 tvg-id="gnt.br" tvg-name="GNT FHD" group-title="CANAIS: VARIEDADES ✨",GNT FHD
+#EXTINF:-1 tvg-id="gnt.br" tvg-name="GNT HD" group-title="CANAIS: VARIEDADES ✨",GNT HD
+#EXTINF:-1 tvg-id="gnt.br" tvg-name="GNT HD ¹" group-title="CANAIS: VARIEDADES ✨",GNT HD ¹
+#EXTINF:-1 tvg-id="gnt.br" tvg-name="GNT HD ²" group-title="CANAIS: VARIEDADES ✨",GNT HD ²
+#EXTINF:-1 tvg-id="globo.news.br" tvg-name="GLOBO NEWS FHD H.265" group-title="CANAIS: NOTÍCIAS ✨",GLOBO NEWS FHD H.265
+#EXTINF:-1 tvg-id="globo.news.br" tvg-name="GLOBO NEWS" group-title="CANAIS: NOTÍCIAS ✨",GLOBO NEWS
+#EXTINF:-1 tvg-id="globo.news.br" tvg-name="GLOBO NEWS FHD" group-title="CANAIS: NOTÍCIAS ✨",GLOBO NEWS FHD
+#EXTINF:-1 tvg-id="globo.news.br" tvg-name="GLOBO NEWS HD" group-title="CANAIS: NOTÍCIAS ✨",GLOBO NEWS HD
+#EXTINF:-1 tvg-id="globo.news.br" tvg-name="GLOBO NEWS HD ¹" group-title="CANAIS: NOTÍCIAS ✨",GLOBO NEWS HD ¹
+#EXTINF:-1 tvg-id="globo.news.br" tvg-name="GLOBO NEWS HD ²" group-title="CANAIS: NOTÍCIAS ✨",GLOBO NEWS HD ²
+#EXTINF:-1 tvg-id="gloob.br" tvg-name="GLOOB" group-title="CANAIS: INFANTIS ✨",GLOOB
+#EXTINF:-1 tvg-id="gloob.br" tvg-name="GLOOB HD" group-title="CANAIS: INFANTIS ✨",GLOOB HD
+#EXTINF:-1 tvg-id="gloob.br" tvg-name="GLOOB FHD" group-title="CANAIS: INFANTIS ✨",GLOOB FHD
+#EXTINF:-1 tvg-id="gloobinho.br" tvg-name="GLOOBINHO" group-title="CANAIS: INFANTIS ✨",GLOOBINHO
+#EXTINF:-1 tvg-id="gloobinho.br" tvg-name="GLOOBINHO HD" group-title="CANAIS: INFANTIS ✨",GLOOBINHO HD
+#EXTINF:-1 tvg-id="history.br" tvg-name="HISTORY FHD H.265" group-title="CANAIS: DOCUMENTÁRIOS ✨",HISTORY FHD H.265
+#EXTINF:-1 tvg-id="history.br" tvg-name="HISTORY" group-title="CANAIS: DOCUMENTÁRIOS ✨",HISTORY
+#EXTINF:-1 tvg-id="history.br" tvg-name="HISTORY FHD" group-title="CANAIS: DOCUMENTÁRIOS ✨",HISTORY FHD
+#EXTINF:-1 tvg-id="history.br" tvg-name="HISTORY HD" group-title="CANAIS: DOCUMENTÁRIOS ✨",HISTORY HD
+#EXTINF:-1 tvg-id="history.2.br" tvg-name="HISTORY 2 FHD H.265" group-title="CANAIS: DOCUMENTÁRIOS ✨",HISTORY 2 FHD H.265
+#EXTINF:-1 tvg-id="history.2.br" tvg-name="HISTORY 2" group-title="CANAIS: DOCUMENTÁRIOS ✨",HISTORY 2
+#EXTINF:-1 tvg-id="history.2.br" tvg-name="HISTORY 2 FHD" group-title="CANAIS: DOCUMENTÁRIOS ✨",HISTORY 2 FHD
+#EXTINF:-1 tvg-id="history.2.br" tvg-name="HISTORY 2 HD" group-title="CANAIS: DOCUMENTÁRIOS ✨",HISTORY 2 HD
+#EXTINF:-1 tvg-id="hbo.br" tvg-name="HBO FHD H.265" group-title="CANAIS: HBO ✨",HBO FHD H.265
+#EXTINF:-1 tvg-id="hbo.br" tvg-name="HBO FHD" group-title="CANAIS: HBO ✨",HBO FHD
+#EXTINF:-1 tvg-id="hbo.br" tvg-name="HBO HD" group-title="CANAIS: HBO ✨",HBO HD
+#EXTINF:-1 tvg-id="hbo.br" tvg-name="HBO HD ¹" group-title="CANAIS: HBO ✨",HBO HD ¹
+#EXTINF:-1 tvg-id="" tvg-name="HBO HD ²" group-title="CANAIS: HBO ✨",HBO HD ²
+#EXTINF:-1 tvg-id="hbo2.br" tvg-name="HBO 2 FHD H.265" group-title="CANAIS: HBO ✨",HBO 2 FHD H.265
+#EXTINF:-1 tvg-id="hbo2.br" tvg-name="HBO 2" group-title="CANAIS: HBO ✨",HBO 2
+#EXTINF:-1 tvg-id="hbo2.br" tvg-name="HBO 2 FHD" group-title="CANAIS: HBO ✨",HBO 2 FHD
+#EXTINF:-1 tvg-id="hbo2.br" tvg-name="HBO 2 HD" group-title="CANAIS: HBO ✨",HBO 2 HD
+#EXTINF:-1 tvg-id="hbo2.br" tvg-name="HBO 2 HD ¹" group-title="CANAIS: HBO ✨",HBO 2 HD ¹
+#EXTINF:-1 tvg-id="hbo2.br" tvg-name="HBO 2 HD ²" group-title="CANAIS: HBO ✨",HBO 2 HD ²
+#EXTINF:-1 tvg-id="hbo.family.br" tvg-name="HBO FAMILY FHD H.265" group-title="CANAIS: HBO ✨",HBO FAMILY FHD H.265
+#EXTINF:-1 tvg-id="hbo.family.br" tvg-name="HBO FAMILY" group-title="CANAIS: HBO ✨",HBO FAMILY
+#EXTINF:-1 tvg-id="hbo.family.br" tvg-name="HBO FAMILY FHD" group-title="CANAIS: HBO ✨",HBO FAMILY FHD
+#EXTINF:-1 tvg-id="hbo.family.br" tvg-name="HBO FAMILY HD" group-title="CANAIS: HBO ✨",HBO FAMILY HD
+#EXTINF:-1 tvg-id="hbo.family.br" tvg-name="HBO FAMILY HD ¹" group-title="CANAIS: HBO ✨",HBO FAMILY HD ¹
+#EXTINF:-1 tvg-id="hbo.family.br" tvg-name="HBO FAMILY HD ²" group-title="CANAIS: HBO ✨",HBO FAMILY HD ²
+#EXTINF:-1 tvg-id="hbo.mundi.br" tvg-name="HBO MUNDI FHD H.265" group-title="CANAIS: HBO ✨",HBO MUNDI FHD H.265
+#EXTINF:-1 tvg-id="hbo.mundi.br" tvg-name="HBO MUNDI" group-title="CANAIS: HBO ✨",HBO MUNDI
+#EXTINF:-1 tvg-id="hbo.mundi.br" tvg-name="HBO MUNDI FHD" group-title="CANAIS: HBO ✨",HBO MUNDI FHD
+#EXTINF:-1 tvg-id="hbo.mundi.br" tvg-name="HBO MUNDI HD" group-title="CANAIS: HBO ✨",HBO MUNDI HD
+#EXTINF:-1 tvg-id="hbo.mundi.br" tvg-name="HBO MUNDI HD ¹" group-title="CANAIS: HBO ✨",HBO MUNDI HD ¹
+#EXTINF:-1 tvg-id="hbo.mundi.br" tvg-name="HBO MUNDI HD ²" group-title="CANAIS: HBO ✨",HBO MUNDI HD ²
+#EXTINF:-1 tvg-id="hbo.pop.br" tvg-name="HBO POP FHD H.265" group-title="CANAIS: HBO ✨",HBO POP FHD H.265
+#EXTINF:-1 tvg-id="hbo.pop.br" tvg-name="HBO POP" group-title="CANAIS: HBO ✨",HBO POP
+#EXTINF:-1 tvg-id="hbo.pop.br" tvg-name="HBO POP FHD" group-title="CANAIS: HBO ✨",HBO POP FHD
+#EXTINF:-1 tvg-id="hbo.pop.br" tvg-name="HBO POP HD" group-title="CANAIS: HBO ✨",HBO POP HD
+#EXTINF:-1 tvg-id="hbo.pop.br" tvg-name="HBO POP HD ¹" group-title="CANAIS: HBO ✨",HBO POP HD ¹
+#EXTINF:-1 tvg-id="hbo.pop.br" tvg-name="HBO POP HD ²" group-title="CANAIS: HBO ✨",HBO POP HD ²
+#EXTINF:-1 tvg-id="hbo.signature.br" tvg-name="HBO SIGNATURE FHD H.265" group-title="CANAIS: HBO ✨",HBO SIGNATURE FHD H.265
+#EXTINF:-1 tvg-id="hbo.signature.br" tvg-name="HBO SIGNATURE" group-title="CANAIS: HBO ✨",HBO SIGNATURE
+#EXTINF:-1 tvg-id="hbo.signature.br" tvg-name="HBO SIGNATURE FHD" group-title="CANAIS: HBO ✨",HBO SIGNATURE FHD
+#EXTINF:-1 tvg-id="hbo.signature.br" tvg-name="HBO SIGNATURE HD" group-title="CANAIS: HBO ✨",HBO SIGNATURE HD
+#EXTINF:-1 tvg-id="hbo.signature.br" tvg-name="HBO SIGNATURE HD ¹" group-title="CANAIS: HBO ✨",HBO SIGNATURE HD ¹
+#EXTINF:-1 tvg-id="hbo.signature.br" tvg-name="HBO SIGNATURE HD ²" group-title="CANAIS: HBO ✨",HBO SIGNATURE HD ²
+#EXTINF:-1 tvg-id="hbo.plus.br" tvg-name="HBO PLUS FHD H.265" group-title="CANAIS: HBO ✨",HBO PLUS FHD H.265
+#EXTINF:-1 tvg-id="hbo.plus.br" tvg-name="HBO PLUS FHD" group-title="CANAIS: HBO ✨",HBO PLUS FHD
+#EXTINF:-1 tvg-id="hbo.plus.br" tvg-name="HBO PLUS HD" group-title="CANAIS: HBO ✨",HBO PLUS HD
+#EXTINF:-1 tvg-id="hbo.plus.br" tvg-name="HBO PLUS HD ¹" group-title="CANAIS: HBO ✨",HBO PLUS HD ¹
+#EXTINF:-1 tvg-id="hbo.plus.br" tvg-name="HBO PLUS HD ²" group-title="CANAIS: HBO ✨",HBO PLUS HD ²
+#EXTINF:-1 tvg-id="hbo.xtreme.br" tvg-name="HBO XTREME" group-title="CANAIS: HBO ✨",HBO XTREME
+#EXTINF:-1 tvg-id="hbo.xtreme.br" tvg-name="HBO XTREME FHD" group-title="CANAIS: HBO ✨",HBO XTREME FHD
+#EXTINF:-1 tvg-id="hbo.xtreme.br" tvg-name="HBO XTREME HD" group-title="CANAIS: HBO ✨",HBO XTREME HD
+#EXTINF:-1 tvg-id="hbo.xtreme.br" tvg-name="HBO XTREME HD ¹" group-title="CANAIS: HBO ✨",HBO XTREME HD ¹
+#EXTINF:-1 tvg-id="hgtv.br" tvg-name="HGTV FHD" group-title="CANAIS: DOCUMENTÁRIOS ✨",HGTV FHD
+#EXTINF:-1 tvg-id="hgtv.br" tvg-name="HGTV FHD H.265" group-title="CANAIS: DOCUMENTÁRIOS ✨",HGTV FHD H.265
+#EXTINF:-1 tvg-id="hgtv.br" tvg-name="HGTV HD" group-title="CANAIS: DOCUMENTÁRIOS ✨",HGTV HD
+#EXTINF:-1 tvg-id="off.br" tvg-name="OFF" group-title="CANAIS: VARIEDADES ✨",OFF
+#EXTINF:-1 tvg-id="off.br" tvg-name="OFF FHD" group-title="CANAIS: VARIEDADES ✨",OFF FHD
+#EXTINF:-1 tvg-id="off.br" tvg-name="OFF HD" group-title="CANAIS: VARIEDADES ✨",OFF HD
+#EXTINF:-1 tvg-id="premiere.clubes.br" tvg-name="PREMIERE CLUBES FHD H.265" group-title="CANAIS: PREMIERE ⚽",PREMIERE CLUBES FHD H.265
+#EXTINF:-1 tvg-id="premiere.clubes.br" tvg-name="PREMIERE CLUBES FHD" group-title="CANAIS: PREMIERE ⚽",PREMIERE CLUBES FHD
+#EXTINF:-1 tvg-id="premiere.clubes.br" tvg-name="PREMIERE CLUBES FHD ²" group-title="CANAIS: PREMIERE ⚽",PREMIERE CLUBES FHD ²
+#EXTINF:-1 tvg-id="premiere.clubes.br" tvg-name="PREMIERE CLUBES HD" group-title="CANAIS: PREMIERE ⚽",PREMIERE CLUBES HD
+#EXTINF:-1 tvg-id="premiere.clubes.br" tvg-name="PREMIERE CLUBES" group-title="CANAIS: PREMIERE ⚽",PREMIERE CLUBES
+#EXTINF:-1 tvg-id="premiere.2.br" tvg-name="PREMIERE 2 FHD H.265" group-title="CANAIS: PREMIERE ⚽",PREMIERE 2 FHD H.265
+#EXTINF:-1 tvg-id="premiere.2.br" tvg-name="PREMIERE 2 FHD" group-title="CANAIS: PREMIERE ⚽",PREMIERE 2 FHD
+#EXTINF:-1 tvg-id="premiere.2.br" tvg-name="PREMIERE 2 FHD ¹" group-title="CANAIS: PREMIERE ⚽",PREMIERE 2 FHD ¹
+#EXTINF:-1 tvg-id="premiere.2.br" tvg-name="PREMIERE 2 FHD ²" group-title="CANAIS: PREMIERE ⚽",PREMIERE 2 FHD ²
+#EXTINF:-1 tvg-id="premiere.2.br" tvg-name="PREMIERE 2 HD" group-title="CANAIS: PREMIERE ⚽",PREMIERE 2 HD
+#EXTINF:-1 tvg-id="premiere.2.br" tvg-name="PREMIERE 2 HD ¹" group-title="CANAIS: PREMIERE ⚽",PREMIERE 2 HD ¹
+#EXTINF:-1 tvg-id="premiere.3.br" tvg-name="PREMIERE 3 FHD H.265" group-title="CANAIS: PREMIERE ⚽",PREMIERE 3 FHD H.265
+#EXTINF:-1 tvg-id="premiere.3.br" tvg-name="PREMIERE 3 FHD" group-title="CANAIS: PREMIERE ⚽",PREMIERE 3 FHD
+#EXTINF:-1 tvg-id="premiere.3.br" tvg-name="PREMIERE 3 FHD ¹" group-title="CANAIS: PREMIERE ⚽",PREMIERE 3 FHD ¹
+#EXTINF:-1 tvg-id="premiere.3.br" tvg-name="PREMIERE 3 HD" group-title="CANAIS: PREMIERE ⚽",PREMIERE 3 HD
+#EXTINF:-1 tvg-id="premiere.3.br" tvg-name="PREMIERE 3 HD ¹" group-title="CANAIS: PREMIERE ⚽",PREMIERE 3 HD ¹
+#EXTINF:-1 tvg-id="premiere.3.br" tvg-name="PREMIERE 3 HD ²" group-title="CANAIS: PREMIERE ⚽",PREMIERE 3 HD ²
+#EXTINF:-1 tvg-id="premiere.4.br" tvg-name="PREMIERE 4 FHD H.265" group-title="CANAIS: PREMIERE ⚽",PREMIERE 4 FHD H.265
+#EXTINF:-1 tvg-id="premiere.4.br" tvg-name="PREMIERE 4 FHD" group-title="CANAIS: PREMIERE ⚽",PREMIERE 4 FHD
+#EXTINF:-1 tvg-id="premiere.4.br" tvg-name="PREMIERE 4 FHD ¹" group-title="CANAIS: PREMIERE ⚽",PREMIERE 4 FHD ¹
+#EXTINF:-1 tvg-id="premiere.4.br" tvg-name="PREMIERE 4 HD" group-title="CANAIS: PREMIERE ⚽",PREMIERE 4 HD
+#EXTINF:-1 tvg-id="premiere.4.br" tvg-name="PREMIERE 4 HD ¹" group-title="CANAIS: PREMIERE ⚽",PREMIERE 4 HD ¹
+#EXTINF:-1 tvg-id="premiere.4.br" tvg-name="PREMIERE 4 HD ²" group-title="CANAIS: PREMIERE ⚽",PREMIERE 4 HD ²
+#EXTINF:-1 tvg-id="premiere.5.br" tvg-name="PREMIERE 5 FHD H.265" group-title="CANAIS: PREMIERE ⚽",PREMIERE 5 FHD H.265
+#EXTINF:-1 tvg-id="premiere.5.br" tvg-name="PREMIERE 5 FHD" group-title="CANAIS: PREMIERE ⚽",PREMIERE 5 FHD
+#EXTINF:-1 tvg-id="premiere.5.br" tvg-name="PREMIERE 5 FHD ¹" group-title="CANAIS: PREMIERE ⚽",PREMIERE 5 FHD ¹
+#EXTINF:-1 tvg-id="premiere.5.br" tvg-name="PREMIERE 5 FHD ²" group-title="CANAIS: PREMIERE ⚽",PREMIERE 5 FHD ²
+#EXTINF:-1 tvg-id="premiere.5.br" tvg-name="PREMIERE 5 HD" group-title="CANAIS: PREMIERE ⚽",PREMIERE 5 HD
+#EXTINF:-1 tvg-id="premiere.5.br" tvg-name="PREMIERE 5 HD ¹" group-title="CANAIS: PREMIERE ⚽",PREMIERE 5 HD ¹
+#EXTINF:-1 tvg-id="premiere.5.br" tvg-name="PREMIERE 5 HD ²" group-title="CANAIS: PREMIERE ⚽",PREMIERE 5 HD ²
+#EXTINF:-1 tvg-id="premiere.6.br" tvg-name="PREMIERE 6 FHD H.265" group-title="CANAIS: PREMIERE ⚽",PREMIERE 6 FHD H.265
+#EXTINF:-1 tvg-id="premiere.6.br" tvg-name="PREMIERE 6 FHD" group-title="CANAIS: PREMIERE ⚽",PREMIERE 6 FHD
+#EXTINF:-1 tvg-id="premiere.6.br" tvg-name="PREMIERE 6 FHD ¹" group-title="CANAIS: PREMIERE ⚽",PREMIERE 6 FHD ¹
+#EXTINF:-1 tvg-id="premiere.6.br" tvg-name="PREMIERE 6 HD" group-title="CANAIS: PREMIERE ⚽",PREMIERE 6 HD
+#EXTINF:-1 tvg-id="premiere.6.br" tvg-name="PREMIERE 6 HD ¹" group-title="CANAIS: PREMIERE ⚽",PREMIERE 6 HD ¹
+#EXTINF:-1 tvg-id="premiere.7.br" tvg-name="PREMIERE 7 FHD" group-title="CANAIS: PREMIERE ⚽",PREMIERE 7 FHD
+#EXTINF:-1 tvg-id="premiere.7.br" tvg-name="PREMIERE 7 FHD ¹" group-title="CANAIS: PREMIERE ⚽",PREMIERE 7 FHD ¹
+#EXTINF:-1 tvg-id="premiere.7.br" tvg-name="PREMIERE 7 FHD ²" group-title="CANAIS: PREMIERE ⚽",PREMIERE 7 FHD ²
+#EXTINF:-1 tvg-id="premiere.7.br" tvg-name="PREMIERE 7 HD" group-title="CANAIS: PREMIERE ⚽",PREMIERE 7 HD
+#EXTINF:-1 tvg-id="premiere.7.br" tvg-name="PREMIERE 7 HD ¹" group-title="CANAIS: PREMIERE ⚽",PREMIERE 7 HD ¹
+#EXTINF:-1 tvg-id="premiere.8.br" tvg-name="PREMIERE 8 FHD" group-title="CANAIS: PREMIERE ⚽",PREMIERE 8 FHD
+#EXTINF:-1 tvg-id="premiere.8.br" tvg-name="PREMIERE 8 FHD MOSAICO" group-title="CANAIS: PREMIERE ⚽",PREMIERE 8 FHD MOSAICO
+#EXTINF:-1 tvg-id="premiere.8.br" tvg-name="PREMIERE 8 HD" group-title="CANAIS: PREMIERE ⚽",PREMIERE 8 HD
+#EXTINF:-1 tvg-id="record.br" tvg-name="RECORD SP FHD H.265" group-title="CANAIS: RECORD ✨",RECORD SP FHD H.265
+#EXTINF:-1 tvg-id="record.br" tvg-name="RECORD SP FHD" group-title="CANAIS: RECORD ✨",RECORD SP FHD
+#EXTINF:-1 tvg-id="record.br" tvg-name="RECORD SP HD" group-title="CANAIS: RECORD ✨",RECORD SP HD
+#EXTINF:-1 tvg-id="" tvg-name="RECORD SP HD ¹" group-title="CANAIS: RECORD ✨",RECORD SP HD ¹
+#EXTINF:-1 tvg-id="record.br" tvg-name="RECORD HD ¹" group-title="CANAIS: RECORD ✨",RECORD HD ¹
+#EXTINF:-1 tvg-id="record.tv.goias.br" tvg-name="RECORD GOIAS" group-title="CANAIS: RECORD ✨",RECORD GOIAS
+#EXTINF:-1 tvg-id="record.tv.goias.br" tvg-name="RECORD GOIAS HD" group-title="CANAIS: RECORD ✨",RECORD GOIAS HD
+#EXTINF:-1 tvg-id="record.tv.minas.br" tvg-name="RECORD MINAS" group-title="CANAIS: RECORD ✨",RECORD MINAS
+#EXTINF:-1 tvg-id="record.tv.minas.br" tvg-name="RECORD MINAS HD" group-title="CANAIS: RECORD ✨",RECORD MINAS HD
+#EXTINF:-1 tvg-id="record.rio.br" tvg-name="RECORD RJ" group-title="CANAIS: RECORD ✨",RECORD RJ
+#EXTINF:-1 tvg-id="record.rio.br" tvg-name="RECORD RJ FHD" group-title="CANAIS: RECORD ✨",RECORD RJ FHD
+#EXTINF:-1 tvg-id="record.rio.br" tvg-name="RECORD RJ HD" group-title="CANAIS: RECORD ✨",RECORD RJ HD
+#EXTINF:-1 tvg-id="record.tv.belem.br" tvg-name="RECORD BELEM" group-title="CANAIS: RECORD ✨",RECORD BELEM
+#EXTINF:-1 tvg-id="record.tv.bahia.br" tvg-name="RECORD BAHIA HD" group-title="CANAIS: RECORD ✨",RECORD BAHIA HD
+#EXTINF:-1 tvg-id="record.tv.bahia.br" tvg-name="RECORD BAHIA ¹" group-title="CANAIS: RECORD ✨",RECORD BAHIA ¹
+#EXTINF:-1 tvg-id="record.brasilia.br" tvg-name="RECORD BRASILIA HD" group-title="CANAIS: RECORD ✨",RECORD BRASILIA HD
+#EXTINF:-1 tvg-id="record.news.sc.br" tvg-name="RECORD SANTA CATARINA HD" group-title="CANAIS: RECORD ✨",RECORD SANTA CATARINA HD
+#EXTINF:-1 tvg-id="record.news.sc.br" tvg-name="RECORD NSC SANTA CATARINA HD" group-title="CANAIS: RECORD ✨",RECORD NSC SANTA CATARINA HD
+#EXTINF:-1 tvg-id="record.tv.cabralia.br" tvg-name="RECORD SANTA CATARINA HD¹" group-title="CANAIS: RECORD ✨",RECORD SANTA CATARINA HD¹
+#EXTINF:-1 tvg-id="record.rs.br" tvg-name="RECORD RS FHD" group-title="CANAIS: RECORD ✨",RECORD RS FHD
+#EXTINF:-1 tvg-id="record.rs.br" tvg-name="RECORD RS HD" group-title="CANAIS: RECORD ✨",RECORD RS HD
+#EXTINF:-1 tvg-id="record.rs.br" tvg-name="RECORD RS HD ¹" group-title="CANAIS: RECORD ✨",RECORD RS HD ¹
+#EXTINF:-1 tvg-id="tv.tropical.hd.record.br" tvg-name="RECORD TROPICAL FHD" group-title="CANAIS: RECORD ✨",RECORD TROPICAL FHD
+#EXTINF:-1 tvg-id="record.tv.cascavel.br" tvg-name="RECORD TV PARANA HD" group-title="CANAIS: RECORD ✨",RECORD TV PARANA HD
+#EXTINF:-1 tvg-id="tv.atalaia.br" tvg-name="RECORD SERGIPE - ATALAIA HD" group-title="CANAIS: RECORD ✨",RECORD SERGIPE - ATALAIA HD
+#EXTINF:-1 tvg-id="record.tv.minas.br" tvg-name="RECORD TV MINAS HD" group-title="CANAIS: RECORD ✨",RECORD TV MINAS HD
+#EXTINF:-1 tvg-id="record.news.br" tvg-name="RECORD NEWS FHD" group-title="CANAIS: NOTÍCIAS ✨",RECORD NEWS FHD
+#EXTINF:-1 tvg-id="record.news.br" tvg-name="RECORD NEWS HD" group-title="CANAIS: NOTÍCIAS ✨",RECORD NEWS HD
+#EXTINF:-1 tvg-id="record.news.br" tvg-name="RECORD NEWS HD ¹" group-title="CANAIS: NOTÍCIAS ✨",RECORD NEWS HD ¹
+#EXTINF:-1 tvg-id="redetv.br" tvg-name="REDETV FHD" group-title="CANAIS: REDETV ✨",REDETV FHD
+#EXTINF:-1 tvg-id="redetv.br" tvg-name="REDETV FHD ¹" group-title="CANAIS: REDETV ✨",REDETV FHD ¹
+#EXTINF:-1 tvg-id="redetv.br" tvg-name="REDETV HD" group-title="CANAIS: REDETV ✨",REDETV HD
+#EXTINF:-1 tvg-id="redetv.br" tvg-name="REDETV HD ¹" group-title="CANAIS: REDETV ✨",REDETV HD ¹
+#EXTINF:-1 tvg-id="rede.gospel.br" tvg-name="REDE GOSPEL FHD" group-title="CANAIS: RELIGIOSOS ⭐",REDE GOSPEL FHD
+#EXTINF:-1 tvg-id="rede.vida.br" tvg-name="REDE VIDA" group-title="CANAIS: RELIGIOSOS ⭐",REDE VIDA
+#EXTINF:-1 tvg-id="rede.vida.br" tvg-name="REDE VIDA HD" group-title="CANAIS: RELIGIOSOS ⭐",REDE VIDA HD
+#EXTINF:-1 tvg-id="sbt.br" tvg-name="SBT FHD" group-title="CANAIS: SBT ✨",SBT FHD
+#EXTINF:-1 tvg-id="sbt.br" tvg-name="SBT FHD ¹" group-title="CANAIS: SBT ✨",SBT FHD ¹
+#EXTINF:-1 tvg-id="sbt.br" tvg-name="SBT FHD ²" group-title="CANAIS: SBT ✨",SBT FHD ²
+#EXTINF:-1 tvg-id="sbt.br" tvg-name="SBT" group-title="CANAIS: SBT ✨",SBT
+#EXTINF:-1 tvg-id="sbt.br" tvg-name="SBT HD" group-title="CANAIS: SBT ✨",SBT HD
+#EXTINF:-1 tvg-id="sbt.br" tvg-name="SBT HD ¹" group-title="CANAIS: SBT ✨",SBT HD ¹
+#EXTINF:-1 tvg-id="sbt.rio.br" tvg-name="SBT RJ FHD" group-title="CANAIS: SBT ✨",SBT RJ FHD
+#EXTINF:-1 tvg-id="sbt.rio.br" tvg-name="SBT RJ HD" group-title="CANAIS: SBT ✨",SBT RJ HD
+#EXTINF:-1 tvg-id="tv.jangadeiro.br" tvg-name="SBT JANGADEIRO FHD" group-title="CANAIS: SBT ✨",SBT JANGADEIRO FHD
+#EXTINF:-1 tvg-id="sbt.piaui.br" tvg-name="SBT PIAUI HD" group-title="CANAIS: SBT ✨",SBT PIAUI HD
+#EXTINF:-1 tvg-id="tv.aratu.br" tvg-name="SBT ARATU BAHIA HD" group-title="CANAIS: SBT ✨",SBT ARATU BAHIA HD
+#EXTINF:-1 tvg-id="sbt.rs.br" tvg-name="SBT RS HD" group-title="CANAIS: SBT ✨",SBT RS HD
+#EXTINF:-1 tvg-id="Sbt.br" tvg-name="SBT PARANA HD" group-title="CANAIS: SBT ✨",SBT PARANA HD
+#EXTINF:-1 tvg-id="sony.br" tvg-name="SONY FHD H.265" group-title="CANAIS: FILMES E SÉRIES ✨",SONY FHD H.265
+#EXTINF:-1 tvg-id="sony.br" tvg-name="SONY" group-title="CANAIS: FILMES E SÉRIES ✨",SONY
+#EXTINF:-1 tvg-id="sony.br" tvg-name="SONY FHD" group-title="CANAIS: FILMES E SÉRIES ✨",SONY FHD
+#EXTINF:-1 tvg-id="sony.br" tvg-name="SONY HD" group-title="CANAIS: FILMES E SÉRIES ✨",SONY HD
+#EXTINF:-1 tvg-id="sony.br" tvg-name="SONY HD ¹" group-title="CANAIS: FILMES E SÉRIES ✨",SONY HD ¹
+#EXTINF:-1 tvg-id="sony.br" tvg-name="SONY HD ²" group-title="CANAIS: FILMES E SÉRIES ✨",SONY HD ²
+#EXTINF:-1 tvg-id="space.br" tvg-name="SPACE FHD H.265" group-title="CANAIS: FILMES E SÉRIES ✨",SPACE FHD H.265
+#EXTINF:-1 tvg-id="space.br" tvg-name="SPACE" group-title="CANAIS: FILMES E SÉRIES ✨",SPACE
+#EXTINF:-1 tvg-id="space.br" tvg-name="SPACE FHD" group-title="CANAIS: FILMES E SÉRIES ✨",SPACE FHD
+#EXTINF:-1 tvg-id="space.br" tvg-name="SPACE HD" group-title="CANAIS: FILMES E SÉRIES ✨",SPACE HD
+#EXTINF:-1 tvg-id="space.br" tvg-name="SPACE HD ¹" group-title="CANAIS: FILMES E SÉRIES ✨",SPACE HD ¹
+#EXTINF:-1 tvg-id="space.br" tvg-name="SPACE HD ²" group-title="CANAIS: FILMES E SÉRIES ✨",SPACE HD ²
+#EXTINF:-1 tvg-id="studio.universal.br" tvg-name="STUDIO UNIVERSAL FHD H.265" group-title="CANAIS: FILMES E SÉRIES ✨",STUDIO UNIVERSAL FHD H.265
+#EXTINF:-1 tvg-id="studio.universal.br" tvg-name="STUDIO UNIVERSAL FHD" group-title="CANAIS: FILMES E SÉRIES ✨",STUDIO UNIVERSAL FHD
+#EXTINF:-1 tvg-id="studio.universal.br" tvg-name="STUDIO UNIVERSAL HD" group-title="CANAIS: FILMES E SÉRIES ✨",STUDIO UNIVERSAL HD
+#EXTINF:-1 tvg-id="studio.universal.br" tvg-name="STUDIO UNIVERSAL HD ¹" group-title="CANAIS: FILMES E SÉRIES ✨",STUDIO UNIVERSAL HD ¹
+#EXTINF:-1 tvg-id="studio.universal.br" tvg-name="STUDIO UNIVERSAL HD ²" group-title="CANAIS: FILMES E SÉRIES ✨",STUDIO UNIVERSAL HD ²
+#EXTINF:-1 tvg-id="sportv.br" tvg-name="SPORTV FHD H.265" group-title="CANAIS: SPORTV ⚽",SPORTV FHD H.265
+#EXTINF:-1 tvg-id="sportv.br" tvg-name="SPORTV" group-title="CANAIS: SPORTV ⚽",SPORTV
+#EXTINF:-1 tvg-id="sportv.br" tvg-name="SPORTV FHD" group-title="CANAIS: SPORTV ⚽",SPORTV FHD
+#EXTINF:-1 tvg-id="sportv.br" tvg-name="SPORTV HD" group-title="CANAIS: SPORTV ⚽",SPORTV HD
+#EXTINF:-1 tvg-id="sportv.br" tvg-name="SPORTV HD ¹" group-title="CANAIS: SPORTV ⚽",SPORTV HD ¹
+#EXTINF:-1 tvg-id="sportv.br" tvg-name="SPORTV HD ²" group-title="CANAIS: SPORTV ⚽",SPORTV HD ²
+#EXTINF:-1 tvg-id="sportv2.br" tvg-name="SPORTV 2 FHD H.265" group-title="CANAIS: SPORTV ⚽",SPORTV 2 FHD H.265
+#EXTINF:-1 tvg-id="sportv2.br" tvg-name="SPORTV 2" group-title="CANAIS: SPORTV ⚽",SPORTV 2
+#EXTINF:-1 tvg-id="sportv2.br" tvg-name="SPORTV 2 FHD" group-title="CANAIS: SPORTV ⚽",SPORTV 2 FHD
+#EXTINF:-1 tvg-id="sportv2.br" tvg-name="SPORTV 2 HD" group-title="CANAIS: SPORTV ⚽",SPORTV 2 HD
+#EXTINF:-1 tvg-id="sportv2.br" tvg-name="SPORTV 2 HD ¹" group-title="CANAIS: SPORTV ⚽",SPORTV 2 HD ¹
+#EXTINF:-1 tvg-id="sportv2.br" tvg-name="SPORTV 2 HD ²" group-title="CANAIS: SPORTV ⚽",SPORTV 2 HD ²
+#EXTINF:-1 tvg-id="sportv3.br" tvg-name="SPORTV 3 FHD H.265" group-title="CANAIS: SPORTV ⚽",SPORTV 3 FHD H.265
+#EXTINF:-1 tvg-id="sportv3.br" tvg-name="SPORTV 3 HD" group-title="CANAIS: SPORTV ⚽",SPORTV 3 HD
+#EXTINF:-1 tvg-id="sportv3.br" tvg-name="SPORTV 3 FHD" group-title="CANAIS: SPORTV ⚽",SPORTV 3 FHD
+#EXTINF:-1 tvg-id="sportv3.br" tvg-name="SPORTV 3 HD ¹" group-title="CANAIS: SPORTV ⚽",SPORTV 3 HD ¹
+#EXTINF:-1 tvg-id="sportv3.br" tvg-name="SPORTV 3 HD ²" group-title="CANAIS: SPORTV ⚽",SPORTV 3 HD ²
+#EXTINF:-1 tvg-id="sportv.4.br" tvg-name="SPORTV 4 FHD" group-title="CANAIS: SPORTV ⚽",SPORTV 4 FHD
+#EXTINF:-1 tvg-id="tnt.novelas.br" tvg-name="TNT NOVELAS FHD .265" group-title="CANAIS: FILMES E SÉRIES ✨",TNT NOVELAS FHD .265
+#EXTINF:-1 tvg-id="tnt.novelas.br" tvg-name="TNT NOVELAS" group-title="CANAIS: FILMES E SÉRIES ✨",TNT NOVELAS
+#EXTINF:-1 tvg-id="tnt.novelas.br" tvg-name="TNT NOVELAS FHD" group-title="CANAIS: FILMES E SÉRIES ✨",TNT NOVELAS FHD
+#EXTINF:-1 tvg-id="tnt.novelas.br" tvg-name="TNT NOVELAS HD" group-title="CANAIS: FILMES E SÉRIES ✨",TNT NOVELAS HD
+#EXTINF:-1 tvg-id="tnt.series.br" tvg-name="TNT SÉRIES FHD H.265" group-title="CANAIS: FILMES E SÉRIES ✨",TNT SÉRIES FHD H.265
+#EXTINF:-1 tvg-id="tnt.series.br" tvg-name="TNT SÉRIES" group-title="CANAIS: FILMES E SÉRIES ✨",TNT SÉRIES
+#EXTINF:-1 tvg-id="tnt.series.br" tvg-name="TNT SÉRIES FHD" group-title="CANAIS: FILMES E SÉRIES ✨",TNT SÉRIES FHD
+#EXTINF:-1 tvg-id="tnt.series.br" tvg-name="TNT SÉRIES HD" group-title="CANAIS: FILMES E SÉRIES ✨",TNT SÉRIES HD
+#EXTINF:-1 tvg-id="tnt.series.br" tvg-name="TNT SÉRIES HD ¹" group-title="CANAIS: FILMES E SÉRIES ✨",TNT SÉRIES HD ¹
+#EXTINF:-1 tvg-id="tnt.series.br" tvg-name="TNT SÉRIES HD ²" group-title="CANAIS: FILMES E SÉRIES ✨",TNT SÉRIES HD ²
+#EXTINF:-1 tvg-id="tnt.br" tvg-name="TNT FHD H.265" group-title="CANAIS: FILMES E SÉRIES ✨",TNT FHD H.265
+#EXTINF:-1 tvg-id="tnt.br" tvg-name="TNT FHD" group-title="CANAIS: FILMES E SÉRIES ✨",TNT FHD
+#EXTINF:-1 tvg-id="tnt.br" tvg-name="TNT" group-title="CANAIS: FILMES E SÉRIES ✨",TNT
+#EXTINF:-1 tvg-id="tnt.br" tvg-name="TNT HD" group-title="CANAIS: FILMES E SÉRIES ✨",TNT HD
+#EXTINF:-1 tvg-id="tnt.br" tvg-name="TNT HD ¹" group-title="CANAIS: FILMES E SÉRIES ✨",TNT HD ¹
+#EXTINF:-1 tvg-id="tnt.br" tvg-name="TNT HD ²" group-title="CANAIS: FILMES E SÉRIES ✨",TNT HD ²
+#EXTINF:-1 tvg-id="tcm.br" tvg-name="TCM HD" group-title="CANAIS: FILMES E SÉRIES ✨",TCM HD
+#EXTINF:-1 tvg-id="telecine.action.br" tvg-name="TELECINE ACTION FHD H.265" group-title="CANAIS: TELECINE ✨",TELECINE ACTION FHD H.265
+#EXTINF:-1 tvg-id="telecine.action.br" tvg-name="TELECINE ACTION" group-title="CANAIS: TELECINE ✨",TELECINE ACTION
+#EXTINF:-1 tvg-id="telecine.action.br" tvg-name="TELECINE ACTION FHD" group-title="CANAIS: TELECINE ✨",TELECINE ACTION FHD
+#EXTINF:-1 tvg-id="telecine.action.br" tvg-name="TELECINE ACTION HD" group-title="CANAIS: TELECINE ✨",TELECINE ACTION HD
+#EXTINF:-1 tvg-id="telecine.action.br" tvg-name="TELECINE ACTION HD ¹" group-title="CANAIS: TELECINE ✨",TELECINE ACTION HD ¹
+#EXTINF:-1 tvg-id="telecine.action.br" tvg-name="TELECINE ACTION HD ²" group-title="CANAIS: TELECINE ✨",TELECINE ACTION HD ²
+#EXTINF:-1 tvg-id="telecine.cult.br" tvg-name="TELECINE CULT FHD H.265" group-title="CANAIS: TELECINE ✨",TELECINE CULT FHD H.265
+#EXTINF:-1 tvg-id="telecine.cult.br" tvg-name="TELECINE CULT" group-title="CANAIS: TELECINE ✨",TELECINE CULT
+#EXTINF:-1 tvg-id="telecine.cult.br" tvg-name="TELECINE CULT FHD" group-title="CANAIS: TELECINE ✨",TELECINE CULT FHD
+#EXTINF:-1 tvg-id="telecine.cult.br" tvg-name="TELECINE CULT HD" group-title="CANAIS: TELECINE ✨",TELECINE CULT HD
+#EXTINF:-1 tvg-id="telecine.cult.br" tvg-name="TELECINE CULT HD ¹" group-title="CANAIS: TELECINE ✨",TELECINE CULT HD ¹
+#EXTINF:-1 tvg-id="telecine.cult.br" tvg-name="TELECINE CULT HD ²" group-title="CANAIS: TELECINE ✨",TELECINE CULT HD ²
+#EXTINF:-1 tvg-id="telecine.fun.br" tvg-name="TELECINE FUN FHD H.265" group-title="CANAIS: TELECINE ✨",TELECINE FUN FHD H.265
+#EXTINF:-1 tvg-id="telecine.fun.br" tvg-name="TELECINE FUN" group-title="CANAIS: TELECINE ✨",TELECINE FUN
+#EXTINF:-1 tvg-id="telecine.fun.br" tvg-name="TELECINE FUN FHD" group-title="CANAIS: TELECINE ✨",TELECINE FUN FHD
+#EXTINF:-1 tvg-id="telecine.fun.br" tvg-name="TELECINE FUN HD" group-title="CANAIS: TELECINE ✨",TELECINE FUN HD
+#EXTINF:-1 tvg-id="telecine.fun.br" tvg-name="TELECINE FUN HD ¹" group-title="CANAIS: TELECINE ✨",TELECINE FUN HD ¹
+#EXTINF:-1 tvg-id="telecine.fun.br" tvg-name="TELECINE FUN HD ²" group-title="CANAIS: TELECINE ✨",TELECINE FUN HD ²
+#EXTINF:-1 tvg-id="telecine.pipoca.br" tvg-name="TELECINE PIPOCA FHD H.265" group-title="CANAIS: TELECINE ✨",TELECINE PIPOCA FHD H.265
+#EXTINF:-1 tvg-id="telecine.pipoca.br" tvg-name="TELECINE PIPOCA" group-title="CANAIS: TELECINE ✨",TELECINE PIPOCA
+#EXTINF:-1 tvg-id="telecine.pipoca.br" tvg-name="TELECINE PIPOCA FHD" group-title="CANAIS: TELECINE ✨",TELECINE PIPOCA FHD
+#EXTINF:-1 tvg-id="telecine.pipoca.br" tvg-name="TELECINE PIPOCA HD" group-title="CANAIS: TELECINE ✨",TELECINE PIPOCA HD
+#EXTINF:-1 tvg-id="telecine.pipoca.br" tvg-name="TELECINE PIPOCA HD ¹" group-title="CANAIS: TELECINE ✨",TELECINE PIPOCA HD ¹
+#EXTINF:-1 tvg-id="telecine.pipoca.br" tvg-name="TELECINE PIPOCA HD ²" group-title="CANAIS: TELECINE ✨",TELECINE PIPOCA HD ²
+#EXTINF:-1 tvg-id="telecine.premium.br" tvg-name="TELECINE PREMIUM FHD H.265" group-title="CANAIS: TELECINE ✨",TELECINE PREMIUM FHD H.265
+#EXTINF:-1 tvg-id="telecine.premium.br" tvg-name="TELECINE PREMIUM" group-title="CANAIS: TELECINE ✨",TELECINE PREMIUM
+#EXTINF:-1 tvg-id="telecine.premium.br" tvg-name="TELECINE PREMIUM FHD" group-title="CANAIS: TELECINE ✨",TELECINE PREMIUM FHD
+#EXTINF:-1 tvg-id="telecine.premium.br" tvg-name="TELECINE PREMIUM HD" group-title="CANAIS: TELECINE ✨",TELECINE PREMIUM HD
+#EXTINF:-1 tvg-id="telecine.premium.br" tvg-name="TELECINE PREMIUM HD ¹" group-title="CANAIS: TELECINE ✨",TELECINE PREMIUM HD ¹
+#EXTINF:-1 tvg-id="telecine.touch.br" tvg-name="TELECINE TOUCH FHD H.265" group-title="CANAIS: TELECINE ✨",TELECINE TOUCH FHD H.265
+#EXTINF:-1 tvg-id="telecine.touch.br" tvg-name="TELECINE TOUCH" group-title="CANAIS: TELECINE ✨",TELECINE TOUCH
+#EXTINF:-1 tvg-id="telecine.touch.br" tvg-name="TELECINE TOUCH FHD" group-title="CANAIS: TELECINE ✨",TELECINE TOUCH FHD
+#EXTINF:-1 tvg-id="telecine.touch.br" tvg-name="TELECINE TOUCH HD" group-title="CANAIS: TELECINE ✨",TELECINE TOUCH HD
+#EXTINF:-1 tvg-id="telecine.touch.br" tvg-name="TELECINE TOUCH HD ¹" group-title="CANAIS: TELECINE ✨",TELECINE TOUCH HD ¹
+#EXTINF:-1 tvg-id="telecine.touch.br" tvg-name="TELECINE TOUCH HD ²" group-title="CANAIS: TELECINE ✨",TELECINE TOUCH HD ²
+#EXTINF:-1 tvg-id="tooncast.br" tvg-name="TOONSCAST" group-title="CANAIS: INFANTIS ✨",TOONSCAST
+#EXTINF:-1 tvg-id="tooncast.br" tvg-name="TOONCAST FHD" group-title="CANAIS: INFANTIS ✨",TOONCAST FHD
+#EXTINF:-1 tvg-id="tooncast.br" tvg-name="TOONCAST HD" group-title="CANAIS: INFANTIS ✨",TOONCAST HD
+#EXTINF:-1 tvg-id="lifetime.br" tvg-name="LIFETIME FHD" group-title="CANAIS: VARIEDADES ✨",LIFETIME FHD
+#EXTINF:-1 tvg-id="lifetime.br" tvg-name="LIFETIME HD" group-title="CANAIS: VARIEDADES ✨",LIFETIME HD
+#EXTINF:-1 tvg-id="lifetime.br" tvg-name="LIFETIME" group-title="CANAIS: VARIEDADES ✨",LIFETIME
+#EXTINF:-1 tvg-id="rede.super.br" tvg-name="REDE SUPER HD" group-title="CANAIS: RELIGIOSOS ⭐",REDE SUPER HD
+#EXTINF:-1 tvg-id="sportynet.br" tvg-name="SPORTYNET" group-title="CANAIS: PPV / ESPORTES ⚽",SPORTYNET
+#EXTINF:-1 tvg-id="tv.aparecida.br" tvg-name="TV APARECIDA FHD" group-title="CANAIS: RELIGIOSOS ⭐",TV APARECIDA FHD
+#EXTINF:-1 tvg-id="tv.aparecida.br" tvg-name="TV APARECIDA HD" group-title="CANAIS: RELIGIOSOS ⭐",TV APARECIDA HD
+#EXTINF:-1 tvg-id="cancao.nova.br" tvg-name="CANÇÃO NOVA FHD" group-title="CANAIS: RELIGIOSOS ⭐",CANÇÃO NOVA FHD
+#EXTINF:-1 tvg-id="cancao.nova.br" tvg-name="CANÇÃO NOVA HD" group-title="CANAIS: RELIGIOSOS ⭐",CANÇÃO NOVA HD
+#EXTINF:-1 tvg-id="Boomerang.br" tvg-name="TV EVANGELIZAR HD ¹" group-title="CANAIS: RELIGIOSOS ⭐",TV EVANGELIZAR HD ¹
+#EXTINF:-1 tvg-id="tv.ra.tim.bum.br" tvg-name="TV RA TIM BUM" group-title="CANAIS: ABERTOS ✨",TV RA TIM BUM
+#EXTINF:-1 tvg-id="tv.brasil.br" tvg-name="TV BRASIL FHD" group-title="CANAIS: ABERTOS ✨",TV BRASIL FHD
+#EXTINF:-1 tvg-id="tv.brasil.br" tvg-name="TV BRASIL" group-title="CANAIS: ABERTOS ✨",TV BRASIL
+#EXTINF:-1 tvg-id="tv.gazeta.br" tvg-name="TV GAZETA" group-title="CANAIS: ABERTOS ✨",TV GAZETA
+#EXTINF:-1 tvg-id="tv.senado.br" tvg-name="TV SENADO HD" group-title="CANAIS: ABERTOS ✨",TV SENADO HD
+#EXTINF:-1 tvg-id="tv.diario.br" tvg-name="TV DIÁRIO HD" group-title="CANAIS: ABERTOS ✨",TV DIÁRIO HD
+#EXTINF:-1 tvg-id="tv.camara.br" tvg-name="TV CÂMARA" group-title="CANAIS: ABERTOS ✨",TV CÂMARA
+#EXTINF:-1 tvg-id="tv.justica.br" tvg-name="TV JUSTIÇA" group-title="CANAIS: ABERTOS ✨",TV JUSTIÇA
+#EXTINF:-1 tvg-id="universal.br" tvg-name="UNIVERSAL CHANNEL FHD H.265" group-title="CANAIS: FILMES E SÉRIES ✨",UNIVERSAL CHANNEL FHD H.265
+#EXTINF:-1 tvg-id="universal.br" tvg-name="UNIVERSAL CHANNEL" group-title="CANAIS: FILMES E SÉRIES ✨",UNIVERSAL CHANNEL
+#EXTINF:-1 tvg-id="universal.br" tvg-name="UNIVERSAL CHANNEL FHD" group-title="CANAIS: FILMES E SÉRIES ✨",UNIVERSAL CHANNEL FHD
+#EXTINF:-1 tvg-id="universal.br" tvg-name="UNIVERSAL CHANNEL HD" group-title="CANAIS: FILMES E SÉRIES ✨",UNIVERSAL CHANNEL HD
+#EXTINF:-1 tvg-id="universal.br" tvg-name="UNIVERSAL CHANNEL HD ¹" group-title="CANAIS: FILMES E SÉRIES ✨",UNIVERSAL CHANNEL HD ¹
+#EXTINF:-1 tvg-id="universal.br" tvg-name="UNIVERSAL CHANNEL HD ²" group-title="CANAIS: FILMES E SÉRIES ✨",UNIVERSAL CHANNEL HD ²
+#EXTINF:-1 tvg-id="globoplay.novelas.br" tvg-name="NOVELAS GLOBOPLAY FHD H.265" group-title="CANAIS: NOVELAS GLOBOPLAY ✨",NOVELAS GLOBOPLAY FHD H.265
+#EXTINF:-1 tvg-id="globoplay.novelas.br" tvg-name="NOVELAS GLOBOPLAY" group-title="CANAIS: NOVELAS GLOBOPLAY ✨",NOVELAS GLOBOPLAY
+#EXTINF:-1 tvg-id="globoplay.novelas.br" tvg-name="NOVELAS GLOBOPLAY ²" group-title="CANAIS: NOVELAS GLOBOPLAY ✨",NOVELAS GLOBOPLAY ²
+#EXTINF:-1 tvg-id="globoplay.novelas.br" tvg-name="NOVELAS GLOBOPLAY FHD" group-title="CANAIS: VARIEDADES ✨",NOVELAS GLOBOPLAY FHD
+#EXTINF:-1 tvg-id="globoplay.novelas.br" tvg-name="NOVELAS GLOBOPLAY FHD*" group-title="CANAIS: NOVELAS GLOBOPLAY ✨",NOVELAS GLOBOPLAY FHD*
+#EXTINF:-1 tvg-id="globoplay.novelas.br" tvg-name="NOVELAS GLOBOPLAY HD" group-title="CANAIS: NOVELAS GLOBOPLAY ✨",NOVELAS GLOBOPLAY HD
+#EXTINF:-1 tvg-id="globoplay.novelas.br" tvg-name="NOVELAS GLOBOPLAY HD ¹" group-title="CANAIS: NOVELAS GLOBOPLAY ✨",NOVELAS GLOBOPLAY HD ¹
+#EXTINF:-1 tvg-id="megapix.br" tvg-name="MEGAPIX FHD H.265" group-title="CANAIS: FILMES E SÉRIES ✨",MEGAPIX FHD H.265
+#EXTINF:-1 tvg-id="megapix.br" tvg-name="MEGAPIX" group-title="CANAIS: FILMES E SÉRIES ✨",MEGAPIX
+#EXTINF:-1 tvg-id="megapix.br" tvg-name="MEGAPIX FHD" group-title="CANAIS: FILMES E SÉRIES ✨",MEGAPIX FHD
+#EXTINF:-1 tvg-id="megapix.br" tvg-name="MEGAPIX HD" group-title="CANAIS: FILMES E SÉRIES ✨",MEGAPIX HD
+#EXTINF:-1 tvg-id="megapix.br" tvg-name="MEGAPIX HD ¹" group-title="CANAIS: FILMES E SÉRIES ✨",MEGAPIX HD ¹
+#EXTINF:-1 tvg-id="megapix.br" tvg-name="MEGAPIX HD ²" group-title="CANAIS: FILMES E SÉRIES ✨",MEGAPIX HD ²
+#EXTINF:-1 tvg-id="multishow.br" tvg-name="MULTISHOW" group-title="CANAIS: MÚSICA ✨",MULTISHOW
+#EXTINF:-1 tvg-id="multishow.br" tvg-name="MULTISHOW HD" group-title="CANAIS: MÚSICA ✨",MULTISHOW HD
+#EXTINF:-1 tvg-id="multishow.br" tvg-name="MULTISHOW FHD" group-title="CANAIS: MÚSICA ✨",MULTISHOW FHD
+#EXTINF:-1 tvg-id="tv.novo.tempo.br" tvg-name="NOVO TEMPO" group-title="CANAIS: RELIGIOSOS ⭐",NOVO TEMPO
+#EXTINF:-1 tvg-id="warner.br" tvg-name="WARNER FHD H.265" group-title="CANAIS: FILMES E SÉRIES ✨",WARNER FHD H.265
+#EXTINF:-1 tvg-id="warner.br" tvg-name="WARNER" group-title="CANAIS: FILMES E SÉRIES ✨",WARNER
+#EXTINF:-1 tvg-id="warner.br" tvg-name="WARNER FHD" group-title="CANAIS: FILMES E SÉRIES ✨",WARNER FHD
+#EXTINF:-1 tvg-id="warner.br" tvg-name="WARNER HD" group-title="CANAIS: FILMES E SÉRIES ✨",WARNER HD
+#EXTINF:-1 tvg-id="warner.br" tvg-name="WARNER HD ¹" group-title="CANAIS: FILMES E SÉRIES ✨",WARNER HD ¹
+#EXTINF:-1 tvg-id="warner.br" tvg-name="WARNER HD ²" group-title="CANAIS: FILMES E SÉRIES ✨",WARNER HD ²
+#EXTINF:-1 tvg-id="woohoo.br" tvg-name="WOOHOO FHD H.265" group-title="CANAIS: INFANTIS ✨",WOOHOO FHD H.265
+#EXTINF:-1 tvg-id="woohoo.br" tvg-name="WOOHOO HD" group-title="CANAIS: INFANTIS ✨",WOOHOO HD
+#EXTINF:-1 tvg-id="zoomoo.br" tvg-name="ZOOMOO HD" group-title="CANAIS: INFANTIS ✨",ZOOMOO HD
+#EXTINF:-1 tvg-id="" tvg-name="RIT TV" group-title="CANAIS: RELIGIOSOS ⭐",RIT TV
+#EXTINF:-1 tvg-id="band.news.br" tvg-name="RADIO Band News FM" group-title="RÁDIOS FM ✨",RADIO Band News FM
+#EXTINF:-1 tvg-id="record.news.br" tvg-name="Rádio Ourem News" group-title="RÁDIOS FM ✨",Rádio Ourem News
+#EXTINF:-1 tvg-id="tv.capital.br" tvg-name="Rádio Capital SP" group-title="RÁDIOS FM ✨",Rádio Capital SP
+#EXTINF:-1 tvg-id="rede.clube.br" tvg-name="Rádio Clube DF" group-title="RÁDIOS FM ✨",Rádio Clube DF
+#EXTINF:-1 tvg-id="tv.aparecida.br" tvg-name="Rádio Aparecida SP" group-title="RÁDIOS FM ✨",Rádio Aparecida SP
+#EXTINF:-1 tvg-id="rede.vida.br" tvg-name="Rádio Viola PR" group-title="RÁDIOS FM ✨",Rádio Viola PR
+#EXTINF:-1 tvg-id="tv.metropolitana.hd.band.br" tvg-name="Rádio Metropolitana SP" group-title="RÁDIOS FM ✨",Rádio Metropolitana SP
+#EXTINF:-1 tvg-id="cancao.nova.br" tvg-name="Rádio canção Nova SP" group-title="RÁDIOS FM ✨",Rádio canção Nova SP
+#EXTINF:-1 tvg-id="band.rs.br" tvg-name="Rádio Guaíba RS" group-title="RÁDIOS FM ✨",Rádio Guaíba RS
+#EXTINF:-1 tvg-id="band.rs.br" tvg-name="Rádio Atlântida RS" group-title="RÁDIOS FM ✨",Rádio Atlântida RS
+#EXTINF:-1 tvg-id="tv.pantanal.br" tvg-name="Rádio Difusora Pantanal MS" group-title="RÁDIOS FM ✨",Rádio Difusora Pantanal MS
+#EXTINF:-1 tvg-id="rede.massa.hd.sbt.br" tvg-name="Rádio Massa SP" group-title="RÁDIOS FM ✨",Rádio Massa SP
+#EXTINF:-1 tvg-id="rede.difusora.br" tvg-name="Rádio Difusora PB" group-title="RÁDIOS FM ✨",Rádio Difusora PB
+#EXTINF:-1 tvg-id="tv.jangadeiro.br" tvg-name="Rádio Jangadeiro CE" group-title="RÁDIOS FM ✨",Rádio Jangadeiro CE
+#EXTINF:-1 tvg-id="tv.senado.br" tvg-name="Rádio Senado DF" group-title="RÁDIOS FM ✨",Rádio Senado DF
+#EXTINF:-1 tvg-id="tv.pampa.sul.hd.rede.br" tvg-name="Rádio Pampa RS" group-title="RÁDIOS FM ✨",Rádio Pampa RS
+#EXTINF:-1 tvg-id="record.tv.itapoan.br" tvg-name="Rádio Itapoan BA" group-title="RÁDIOS FM ✨",Rádio Itapoan BA
+#EXTINF:-1 tvg-id="tv.mirante.sao.luis.br" tvg-name="Rádio Mirante MA" group-title="RÁDIOS FM ✨",Rádio Mirante MA
+#EXTINF:-1 tvg-id="rede.gazeta.br" tvg-name="Rádio Gazeta SP" group-title="RÁDIOS FM ✨",Rádio Gazeta SP
+#EXTINF:-1 tvg-id="rede.super.br" tvg-name="Rádio Super MG" group-title="RÁDIOS FM ✨",Rádio Super MG
+#EXTINF:-1 tvg-id="tv.arapuan.br" tvg-name="Rádio Arapuan PB" group-title="RÁDIOS FM ✨",Rádio Arapuan PB
+#EXTINF:-1 tvg-id="tv.correio.br" tvg-name="Rádio 98 Correio Sat PB" group-title="RÁDIOS FM ✨",Rádio 98 Correio Sat PB
+#EXTINF:-1 tvg-id="tv.imperial.br" tvg-name="Rádio Imperial RS" group-title="RÁDIOS FM ✨",Rádio Imperial RS
+#EXTINF:-1 tvg-id="rede.super.br" tvg-name="Rádio Super RD SP" group-title="RÁDIOS FM ✨",Rádio Super RD SP
+#EXTINF:-1 tvg-id="tv.tropical.br" tvg-name="Rádio Tropical SP" group-title="RÁDIOS FM ✨",Rádio Tropical SP
+#EXTINF:-1 tvg-id="redetv.rio.de.janeiro.br" tvg-name="Rádio Rio de janeiro RJ" group-title="RÁDIOS FM ✨",Rádio Rio de janeiro RJ
+#EXTINF:-1 tvg-id="viva.br" tvg-name="Web Rádio viva bem" group-title="RÁDIOS FM ✨",Web Rádio viva bem
+#EXTINF:-1 tvg-id="tv.cidade.br" tvg-name="Cidade 99.1" group-title="RÁDIOS FM ✨",Cidade 99.1
+#EXTINF:-1 tvg-id="band.news.br" tvg-name="Band News  Goiânia" group-title="RÁDIOS FM ✨",Band News  Goiânia
+#EXTINF:-1 tvg-id="rede.gospel.br" tvg-name="Rádio gospel capital" group-title="RÁDIOS FM ✨",Rádio gospel capital
+#EXTINF:-1 tvg-id="tv.cidade.verde.br" tvg-name="Rádio cidade verde PI" group-title="RÁDIOS FM ✨",Rádio cidade verde PI
+#EXTINF:-1 tvg-id="record.interior.br" tvg-name="Rádio futebol interior SP" group-title="RÁDIOS FM ✨",Rádio futebol interior SP
+#EXTINF:-1 tvg-id="tv.antena.10.br" tvg-name="Rádio antena + PR" group-title="RÁDIOS FM ✨",Rádio antena + PR
+#EXTINF:-1 tvg-id="globo.rj.br" tvg-name="Rádio Globo RJ" group-title="RÁDIOS FM ✨",Rádio Globo RJ
+#EXTINF:-1 tvg-id="band.bahia.br" tvg-name="Band FM Bahia" group-title="RÁDIOS FM ✨",Band FM Bahia
+#EXTINF:-1 tvg-id="rede.clube.br" tvg-name="Rádio Clube PE" group-title="RÁDIOS FM ✨",Rádio Clube PE
+#EXTINF:-1 tvg-id="rede.clube.br" tvg-name="Rádio Clube PI" group-title="RÁDIOS FM ✨",Rádio Clube PI
+#EXTINF:-1 tvg-id="globo.sp.br" tvg-name="Rádio Globo hits SP" group-title="RÁDIOS FM ✨",Rádio Globo hits SP
+#EXTINF:-1 tvg-id="jovem.pan.news.br" tvg-name="Jovem Pan SP" group-title="RÁDIOS FM ✨",Jovem Pan SP
+#EXTINF:-1 tvg-id="band.news.br" tvg-name="Band News RJ" group-title="RÁDIOS FM ✨",Band News RJ
+#EXTINF:-1 tvg-id="" tvg-name="NBA TV" group-title="CANAIS: NBA / PPV ⛹️",NBA TV
+#EXTINF:-1 tvg-id="" tvg-name="NBA | League Pass 02" group-title="CANAIS: NBA / PPV ⛹️",NBA | League Pass 02
+#EXTINF:-1 tvg-id="" tvg-name="NBA | League Pass 01" group-title="CANAIS: NBA / PPV ⛹️",NBA | League Pass 01
+#EXTINF:-1 tvg-id="" tvg-name="NBA | League Pass 03" group-title="CANAIS: NBA / PPV ⛹️",NBA | League Pass 03
+#EXTINF:-1 tvg-id="" tvg-name="NBA | League Pass 04" group-title="CANAIS: NBA / PPV ⛹️",NBA | League Pass 04
+#EXTINF:-1 tvg-id="" tvg-name="NBA | League Pass 05" group-title="CANAIS: NBA / PPV ⛹️",NBA | League Pass 05
+#EXTINF:-1 tvg-id="" tvg-name="NBA | League Pass 06" group-title="CANAIS: NBA / PPV ⛹️",NBA | League Pass 06
+#EXTINF:-1 tvg-id="" tvg-name="NBA | League Pass 07" group-title="CANAIS: NBA / PPV ⛹️",NBA | League Pass 07
+#EXTINF:-1 tvg-id="" tvg-name="NBA | League Pass 08" group-title="CANAIS: NBA / PPV ⛹️",NBA | League Pass 08
+#EXTINF:-1 tvg-id="" tvg-name="NBA | League Pass 09" group-title="CANAIS: NBA / PPV ⛹️",NBA | League Pass 09
+#EXTINF:-1 tvg-id="premiere.clubes.br" tvg-name="FLUMINENSE X VITÓRIA 01 ÁS: 20:00" group-title="CANAIS: PPV / ESPORTES ⚽",FLUMINENSE X VITÓRIA 01 ÁS: 20:00
+#EXTINF:-1 tvg-id="premiere.clubes.br" tvg-name="FLUMINENSE X VITÓRIA 02 ÁS: 20:00" group-title="CANAIS: PPV / ESPORTES ⚽",FLUMINENSE X VITÓRIA 02 ÁS: 20:00
+#EXTINF:-1 tvg-id="premiere.clubes.br" tvg-name="VASCO X PALMEIRAS 01 ÁS: 17:00" group-title="CANAIS: PPV / ESPORTES ⚽",VASCO X PALMEIRAS 01 ÁS: 17:00
+#EXTINF:-1 tvg-id="sportv.br" tvg-name="VASCO X PALMEIRAS 02 ÁS: 17:00" group-title="CANAIS: PPV / ESPORTES ⚽",VASCO X PALMEIRAS 02 ÁS: 17:00
+#EXTINF:-1 tvg-id="premiere.4.br" tvg-name="SÃO PAULO X CORINTHIANS 01 ÁS: 21:30" group-title="CANAIS: PPV / ESPORTES ⚽",SÃO PAULO X CORINTHIANS 01 ÁS: 21:30
+#EXTINF:-1 tvg-id="globo.sp.br" tvg-name="SÃO PAULO X CORINTHIANS 02 ÁS: 21:30" group-title="CANAIS: PPV / ESPORTES ⚽",SÃO PAULO X CORINTHIANS 02 ÁS: 21:30
+#EXTINF:-1 tvg-id="premiere.3.br" tvg-name="BOTAFOGO X ATLÉTICO - MG 01 ÁS: 21:30" group-title="CANAIS: PPV / ESPORTES ⚽",BOTAFOGO X ATLÉTICO - MG 01 ÁS: 21:30
+#EXTINF:-1 tvg-id="premiere.3.br" tvg-name="BOTAFOGO X ATLÉTICO - MG 02 ÁS: 21:30" group-title="CANAIS: PPV / ESPORTES ⚽",BOTAFOGO X ATLÉTICO - MG 02 ÁS: 21:30
+#EXTINF:-1 tvg-id="premiere.4.br" tvg-name="VASCO X FLAMENGO 01 ÁS: 20:00" group-title="CANAIS: PPV / ESPORTES ⚽",VASCO X FLAMENGO 01 ÁS: 20:00
+#EXTINF:-1 tvg-id="premiere.clubes.br" tvg-name="VASCO X FLAMENGO 02 ÁS: 20:00" group-title="CANAIS: PPV / ESPORTES ⚽",VASCO X FLAMENGO 02 ÁS: 20:00
+#EXTINF:-1 tvg-id="premiere.2.br" tvg-name="CORITIBA X GRÊMIO 01 ÁS: 19:30" group-title="CANAIS: PPV / ESPORTES ⚽",CORITIBA X GRÊMIO 01 ÁS: 19:30
+#EXTINF:-1 tvg-id="premiere.2.br" tvg-name="CORITIBA X GRÊMIO 02 ÁS: 19:30" group-title="CANAIS: PPV / ESPORTES ⚽",CORITIBA X GRÊMIO 02 ÁS: 19:30
+#EXTINF:-1 tvg-id="premiere.clubes.br" tvg-name="FLAMENGO X ATLÉTICO - MG 01 ÁS: 20:00" group-title="CANAIS: PPV / ESPORTES ⚽",FLAMENGO X ATLÉTICO - MG 01 ÁS: 20:00
+#EXTINF:-1 tvg-id="premiere.clubes.br" tvg-name="FLAMENGO X ATLÉTICO - MG 02 ÁS: 20:00" group-title="CANAIS: PPV / ESPORTES ⚽",FLAMENGO X ATLÉTICO - MG 02 ÁS: 20:00
+#EXTINF:-1 tvg-id="" tvg-name="X SPORTS HD" group-title="CANAIS: ESPORTES ⚽",X SPORTS HD
+#EXTINF:-1 tvg-id="" tvg-name="X SPORTS FHD" group-title="CANAIS: ESPORTES ⚽",X SPORTS FHD
+#EXTINF:-1 tvg-id="netflix.br" tvg-name="NETFLIX LUTAS" group-title="CANAIS: PPV / ESPORTES ⚽",NETFLIX LUTAS
+#EXTINF:-1 tvg-id="tv.pai.eterno.br" tvg-name="TV PAI ETERNO HD" group-title="CANAIS: RELIGIOSOS ⭐",TV PAI ETERNO HD
+#EXTINF:-1 tvg-id="globo.sp.br" tvg-name="GLOBO SP H.265" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO SP H.265
+#EXTINF:-1 tvg-id="globo.sp.br" tvg-name="GLOBO SP FHD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO SP FHD
+#EXTINF:-1 tvg-id="globo.sp.br" tvg-name="GLOBO SP HD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO SP HD
+#EXTINF:-1 tvg-id="globo.rj.br" tvg-name="GLOBO RJ H.265" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO RJ H.265
+#EXTINF:-1 tvg-id="globo.rj.br" tvg-name="GLOBO RJ FHD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO RJ FHD
+#EXTINF:-1 tvg-id="globo.rj.br" tvg-name="GLOBO RJ HD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO RJ HD
+#EXTINF:-1 tvg-id="inter.tv.alto.litoral.globo.br" tvg-name="GLOBO RJ INTER ALTO LITORAL H.265" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO RJ INTER ALTO LITORAL H.265
+#EXTINF:-1 tvg-id="inter.tv.alto.litoral.globo.br" tvg-name="GLOBO RJ INTER TV ALTO LITORAL FHD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO RJ INTER TV ALTO LITORAL FHD
+#EXTINF:-1 tvg-id="" tvg-name="GLOBO RJ INTERIOR HD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO RJ INTERIOR HD
+#EXTINF:-1 tvg-id="inter.tv.planicie.tv.globo.br" tvg-name="GLOBO RJ PLANÍCIE HD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO RJ PLANÍCIE HD
+#EXTINF:-1 tvg-id="rede.amazonica.manaus.br" tvg-name="GLOBO AMAZONICA MANAUS HD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO AMAZONICA MANAUS HD
+#EXTINF:-1 tvg-id="rede.amazonica.macapaglobo.br" tvg-name="GLOBO AMAZÔNICA MACAPÁ HD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO AMAZÔNICA MACAPÁ HD
+#EXTINF:-1 tvg-id="" tvg-name="GLOBO AMAZÔNICA PORTO VELHO FHD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO AMAZÔNICA PORTO VELHO FHD
+#EXTINF:-1 tvg-id="rede.amazonica.rio.branco.br" tvg-name="GLOBO AMAZÔNICA RIO BRANCO HD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO AMAZÔNICA RIO BRANCO HD
+#EXTINF:-1 tvg-id="" tvg-name="GLOBO BOA VISTA RORAIMA HD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO BOA VISTA RORAIMA HD
+#EXTINF:-1 tvg-id="eptv.central.sao.carlos.br" tvg-name="GLOBO EPTV CENTRAL SÃO CARLOS SP HD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO EPTV CENTRAL SÃO CARLOS SP HD
+#EXTINF:-1 tvg-id="eptv.sul.de.minas.br" tvg-name="GLOBO EPTV SUL DE MINAS FHD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO EPTV SUL DE MINAS FHD
+#EXTINF:-1 tvg-id="eptv.sul.de.minas.br" tvg-name="GLOBO EPTV SUL DE MINAS HD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO EPTV SUL DE MINAS HD
+#EXTINF:-1 tvg-id="intertv.grande.minas.br" tvg-name="GLOBO INTER TV GRANDE MINAS FHD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO INTER TV GRANDE MINAS FHD
+#EXTINF:-1 tvg-id="intertv.grande.minas.br" tvg-name="GLOBO INTER TV GRANDE MINAS HD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO INTER TV GRANDE MINAS HD
+#EXTINF:-1 tvg-id="intertv.grande.minas.br" tvg-name="GLOBO INTER TV GRANDE MINAS HD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO INTER TV GRANDE MINAS HD
+#EXTINF:-1 tvg-id="globo.minas.br" tvg-name="GLOBO MINAS FHD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO MINAS FHD
+#EXTINF:-1 tvg-id="globo.minas.br" tvg-name="GLOBO MINAS HD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO MINAS HD
+#EXTINF:-1 tvg-id="globo.minas.br" tvg-name="GLOBO MINAS HD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO MINAS HD
+#EXTINF:-1 tvg-id="globo.nordeste.br" tvg-name="GLOBO NORDESTE FHD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO NORDESTE FHD
+#EXTINF:-1 tvg-id="globo.nordeste.br" tvg-name="GLOBO NORDESTE HD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO NORDESTE HD
+#EXTINF:-1 tvg-id="globo.nordeste.br" tvg-name="GLOBO NORDESTE HD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO NORDESTE HD
+#EXTINF:-1 tvg-id="tv.anhanguera.goiania.br" tvg-name="GLOBO TV ANHANGUERA GOIÂNIA FHD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO TV ANHANGUERA GOIÂNIA FHD
+#EXTINF:-1 tvg-id="tv.anhanguera.goiania.br" tvg-name="GLOBO TV ANHANGUERA GOIÂNIA HD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO TV ANHANGUERA GOIÂNIA HD
+#EXTINF:-1 tvg-id="tv.anhanguera.goiania.br" tvg-name="GLOBO TV ANHANGUERA GOIÂNIA HD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO TV ANHANGUERA GOIÂNIA HD
+#EXTINF:-1 tvg-id="" tvg-name="GLOBO TV BELÉM FHD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO TV BELÉM FHD
+#EXTINF:-1 tvg-id="" tvg-name="GLOBO TV BELÉM HD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO TV BELÉM HD
+#EXTINF:-1 tvg-id="globo.brasilia.br" tvg-name="GLOBO TV BRASÍLIA FHD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO TV BRASÍLIA FHD
+#EXTINF:-1 tvg-id="globo.brasilia.br" tvg-name="GLOBO TV BRASÍLIA HD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO TV BRASÍLIA HD
+#EXTINF:-1 tvg-id="tv.cabo.branco.br" tvg-name="GLOBO TV CABO BRANCO FHD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO TV CABO BRANCO FHD
+#EXTINF:-1 tvg-id="tv.cabo.branco.br" tvg-name="GLOBO TV CABO BRANCO HD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO TV CABO BRANCO HD
+#EXTINF:-1 tvg-id="tv.gazeta.al.br" tvg-name="GLOBO TV GAZETA ALAGOAS FHD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO TV GAZETA ALAGOAS FHD
+#EXTINF:-1 tvg-id="tv.gazeta.al.br" tvg-name="GLOBO TV GAZETA ALAGOAS HD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO TV GAZETA ALAGOAS HD
+#EXTINF:-1 tvg-id="tv.liberal.belem.hd.tv.globo.br" tvg-name="GLOBO TV LIBERAL BELÉM HD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO TV LIBERAL BELÉM HD
+#EXTINF:-1 tvg-id="tv.liberal.belem.hd.tv.globo.br" tvg-name="GLOBO TV LIBERAL BELÉM HD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO TV LIBERAL BELÉM HD
+#EXTINF:-1 tvg-id="tv.liberal.paragominas.br" tvg-name="GLOBO TV LIBERAL PARAGOMINAS HD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO TV LIBERAL PARAGOMINAS HD
+#EXTINF:-1 tvg-id="" tvg-name="GLOBO TV PORTO VELHO HD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",GLOBO TV PORTO VELHO HD
+#EXTINF:-1 tvg-id="tv.gazeta.es.br" tvg-name="TV GAZETA VITÓRIA ES FHD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",TV GAZETA VITÓRIA ES FHD
+#EXTINF:-1 tvg-id="tv.gazeta.es.br" tvg-name="TV GAZETA VITÓRIA ES HD" group-title="CANAIS: GLOBO CAPITAIS  - ✨",TV GAZETA VITÓRIA ES HD
+#EXTINF:-1 tvg-id="rede.amazonica.rondonia.br" tvg-name="GLOBO AMAZONICA RO H.265" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO AMAZONICA RO H.265
+#EXTINF:-1 tvg-id="rede.amazonica.acre.br" tvg-name="GLOBO AMAZÔNICA CRUZEIRO ACRE H.265" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO AMAZÔNICA CRUZEIRO ACRE H.265
+#EXTINF:-1 tvg-id="globo.tv.bahia.br" tvg-name="GLOBO BAHIA SANTA CRUZ H.265" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO BAHIA SANTA CRUZ H.265
+#EXTINF:-1 tvg-id="globo.tv.bahia.br" tvg-name="GLOBO BAHIA VDC H.265" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO BAHIA VDC H.265
+#EXTINF:-1 tvg-id="" tvg-name="GLOBO CACOAL H.265" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO CACOAL H.265
+#EXTINF:-1 tvg-id="tv.centro.america.br" tvg-name="GLOBO CENTRO AMERICA H.265" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO CENTRO AMERICA H.265
+#EXTINF:-1 tvg-id="tv.centro.america.br" tvg-name="GLOBO CENTRO AMERICA HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO CENTRO AMERICA HD
+#EXTINF:-1 tvg-id="tv.centro.america.br" tvg-name="GLOBO CENTRO AMERICA HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO CENTRO AMERICA HD
+#EXTINF:-1 tvg-id="" tvg-name="GLOBO DIVINÓPOLIS HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO DIVINÓPOLIS HD
+#EXTINF:-1 tvg-id="eptv.campinas.e.regiao.br" tvg-name="GLOBO EPTV CAMPINAS FHD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO EPTV CAMPINAS FHD
+#EXTINF:-1 tvg-id="eptv.campinas.e.regiao.br" tvg-name="GLOBO EPTV CAMPINAS HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO EPTV CAMPINAS HD
+#EXTINF:-1 tvg-id="eptv.campinas.e.regiao.br" tvg-name="GLOBO EPTV CAMPINAS HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO EPTV CAMPINAS HD
+#EXTINF:-1 tvg-id="eptv.ribeirao.preto.br" tvg-name="GLOBO EPTV RIBEIRÃO PRETO HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO EPTV RIBEIRÃO PRETO HD
+#EXTINF:-1 tvg-id="tv.integracao.uberlandia.br" tvg-name="GLOBO INTEGRAÇÃO UBERLÂNDIA HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO INTEGRAÇÃO UBERLÂNDIA HD
+#EXTINF:-1 tvg-id="tv.inter.cabugi.hd.tv.globo.br" tvg-name="GLOBO INTER CABUGI FHD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO INTER CABUGI FHD
+#EXTINF:-1 tvg-id="tv.inter.cabugi.hd.tv.globo.br" tvg-name="GLOBO INTER CABUGI RN HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO INTER CABUGI RN HD
+#EXTINF:-1 tvg-id="globo.tv.internacional.br" tvg-name="GLOBO INTER PT HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO INTER PT HD
+#EXTINF:-1 tvg-id="tv.integracao.hd.tv.globo.br" tvg-name="GLOBO INTER TV CORONEL FABRICIANO HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO INTER TV CORONEL FABRICIANO HD
+#EXTINF:-1 tvg-id="intertv.costa.branca.br" tvg-name="GLOBO INTER TV COSTA BRANCA HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO INTER TV COSTA BRANCA HD
+#EXTINF:-1 tvg-id="inter.tv.dos.vales.br" tvg-name="GLOBO INTER TV DOS VALES FHD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO INTER TV DOS VALES FHD
+#EXTINF:-1 tvg-id="inter.tv.dos.vales.br" tvg-name="GLOBO INTER TV DOS VALES HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO INTER TV DOS VALES HD
+#EXTINF:-1 tvg-id="inter.tv.dos.vales.br" tvg-name="GLOBO INTER TV GOVERNADOR VALADARES HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO INTER TV GOVERNADOR VALADARES HD
+#EXTINF:-1 tvg-id="" tvg-name="GLOBO NACIONAL FHD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO NACIONAL FHD
+#EXTINF:-1 tvg-id="globo.br" tvg-name="GLOBO NOW" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO NOW
+#EXTINF:-1 tvg-id="nsc.tv.centro.oeste.tv.globo.br" tvg-name="GLOBO NSC CENTRO OESTE FHD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO NSC CENTRO OESTE FHD
+#EXTINF:-1 tvg-id="nsc.tv.florianopolis.tv.globo.br" tvg-name="GLOBO NSC FLORIANÓPOLIS FHD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO NSC FLORIANÓPOLIS FHD
+#EXTINF:-1 tvg-id="nsc.tv.florianopolis.tv.globo.br" tvg-name="GLOBO NSC FLORIANÓPOLIS HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO NSC FLORIANÓPOLIS HD
+#EXTINF:-1 tvg-id="nsc.tv.florianopolis.tv.globo.br" tvg-name="GLOBO NSC FLORIANÓPOLIS HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO NSC FLORIANÓPOLIS HD
+#EXTINF:-1 tvg-id="nsc.tv.blumenau.tv.globo.br" tvg-name="GLOBO NSC TV BLUMENAU FHD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO NSC TV BLUMENAU FHD
+#EXTINF:-1 tvg-id="nsc.tv.blumenau.tv.globo.br" tvg-name="GLOBO NSC TV BLUMENAU HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO NSC TV BLUMENAU HD
+#EXTINF:-1 tvg-id="nsc.tv.chapeco.tv.globo.br" tvg-name="GLOBO NSC TV CHAPECÓ FHD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO NSC TV CHAPECÓ FHD
+#EXTINF:-1 tvg-id="nsc.tv.chapeco.tv.globo.br" tvg-name="GLOBO NSC TV CHAPECÓ HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO NSC TV CHAPECÓ HD
+#EXTINF:-1 tvg-id="nsc.tv.criciuma.tv.globo.br" tvg-name="GLOBO NSC TV CRICIÚMA FHD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO NSC TV CRICIÚMA FHD
+#EXTINF:-1 tvg-id="nsc.tv.joinville.tv.globo.br" tvg-name="GLOBO NSC TV JOINVILLE FHD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO NSC TV JOINVILLE FHD
+#EXTINF:-1 tvg-id="" tvg-name="GLOBO RBS PASSO FUNDO HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO RBS PASSO FUNDO HD
+#EXTINF:-1 tvg-id="rbs.tv.santa.cruz.do.sul.br" tvg-name="GLOBO RBS SANTA CRUZ FHD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO RBS SANTA CRUZ FHD
+#EXTINF:-1 tvg-id="rbs.tv.santa.cruz.do.sul.br" tvg-name="GLOBO RBS SANTA CRUZ HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO RBS SANTA CRUZ HD
+#EXTINF:-1 tvg-id="rbs.tv.caxias.do.sul.br" tvg-name="GLOBO RBS TV CAXIAS DO SUL HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO RBS TV CAXIAS DO SUL HD
+#EXTINF:-1 tvg-id="rbs.tv.cruz.alta.br" tvg-name="GLOBO RBS TV CRUZ ALTA HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO RBS TV CRUZ ALTA HD
+#EXTINF:-1 tvg-id="rbs.tv.erechim.tv.globo.br" tvg-name="GLOBO RBS TV ERECHIM HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO RBS TV ERECHIM HD
+#EXTINF:-1 tvg-id="rbs.tv.pelotas.tv.globo.br" tvg-name="GLOBO RBS TV PELOTAS FHD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO RBS TV PELOTAS FHD
+#EXTINF:-1 tvg-id="rbs.tv.porto.alegre.br" tvg-name="GLOBO RBS TV PORTO ALEGRE FHD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO RBS TV PORTO ALEGRE FHD
+#EXTINF:-1 tvg-id="rbs.tv.porto.alegre.br" tvg-name="GLOBO RBS TV PORTO ALEGRE HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO RBS TV PORTO ALEGRE HD
+#EXTINF:-1 tvg-id="rbs.tv.santa.maria.br" tvg-name="GLOBO RBS TV SANTA MARIA HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO RBS TV SANTA MARIA HD
+#EXTINF:-1 tvg-id="rbs.tv.santa.rosa.tv.globo.br" tvg-name="GLOBO RBS TV SANTA ROSA HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO RBS TV SANTA ROSA HD
+#EXTINF:-1 tvg-id="rbs.tv.uruguaiana.br" tvg-name="GLOBO RBS TV URUGUAIANA HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO RBS TV URUGUAIANA HD
+#EXTINF:-1 tvg-id="tv.globo.rpc.cascavel.br" tvg-name="GLOBO RPC CASCAVEL HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO RPC CASCAVEL HD
+#EXTINF:-1 tvg-id="globo.rpc.br" tvg-name="GLOBO RPC CURITIBA FHD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO RPC CURITIBA FHD
+#EXTINF:-1 tvg-id="globo.rpc.br" tvg-name="GLOBO RPC CURITIBA HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO RPC CURITIBA HD
+#EXTINF:-1 tvg-id="globo.rpc.br" tvg-name="GLOBO RPC CURITIBA HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO RPC CURITIBA HD
+#EXTINF:-1 tvg-id="rpc.foz.do.iguacu.hd.tv.globo.br" tvg-name="GLOBO RPC FOZ DO IGUAÇU FHD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO RPC FOZ DO IGUAÇU FHD
+#EXTINF:-1 tvg-id="rpc.guarapuava.hd.tv.globo.br" tvg-name="GLOBO RPC GUARAPUAVA HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO RPC GUARAPUAVA HD
+#EXTINF:-1 tvg-id="rpc.londrina.br" tvg-name="GLOBO RPC LONDRINA HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO RPC LONDRINA HD
+#EXTINF:-1 tvg-id="rpc.maringa.br" tvg-name="GLOBO RPC MARINGÁ FHD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO RPC MARINGÁ FHD
+#EXTINF:-1 tvg-id="rpc.maringa.br" tvg-name="GLOBO RPC MARINGÁ HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO RPC MARINGÁ HD
+#EXTINF:-1 tvg-id="rpc.paranavai.br" tvg-name="GLOBO RPC PARANAVAÍ HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO RPC PARANAVAÍ HD
+#EXTINF:-1 tvg-id="rpc.ponta.grossa.br" tvg-name="GLOBO RPC PONTA GROSSA FHD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO RPC PONTA GROSSA FHD
+#EXTINF:-1 tvg-id="rpc.ponta.grossa.br" tvg-name="GLOBO RPC PONTA GROSSA HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO RPC PONTA GROSSA HD
+#EXTINF:-1 tvg-id="rpc.ponta.grossa.br" tvg-name="GLOBO RPC PONTA GROSSA HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO RPC PONTA GROSSA HD
+#EXTINF:-1 tvg-id="tv.tem.sao.jose.do.rio.preto.br" tvg-name="GLOBO SÃO JOSÉ DO RIO PRETO HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO SÃO JOSÉ DO RIO PRETO HD
+#EXTINF:-1 tvg-id="tv.tem.sao.jose.do.rio.preto.br" tvg-name="GLOBO SÃO JOSÉ DO RIO PRETO HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO SÃO JOSÉ DO RIO PRETO HD
+#EXTINF:-1 tvg-id="tv.tapajos.br" tvg-name="GLOBO TAPAJÓS PA HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TAPAJÓS PA HD
+#EXTINF:-1 tvg-id="tv.tapajos.br" tvg-name="GLOBO TAPAJÓS SANTARÉM HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TAPAJÓS SANTARÉM HD
+#EXTINF:-1 tvg-id="tv.alvorada.do.sul.br" tvg-name="GLOBO TV ALVORADA DO SUL HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV ALVORADA DO SUL HD
+#EXTINF:-1 tvg-id="tv.anhanguera.tocantins.br" tvg-name="GLOBO TV ANHANGUERA TOCANTINS HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV ANHANGUERA TOCANTINS HD
+#EXTINF:-1 tvg-id="tv.asa.branca.br" tvg-name="GLOBO TV ASA BRANCA FHD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV ASA BRANCA FHD
+#EXTINF:-1 tvg-id="globo.tv.bahia.br" tvg-name="GLOBO TV BAHIA FHD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV BAHIA FHD
+#EXTINF:-1 tvg-id="globo.tv.bahia.br" tvg-name="GLOBO TV BAHIA HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV BAHIA HD
+#EXTINF:-1 tvg-id="globo.tv.bahia.br" tvg-name="GLOBO TV BAHIA HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV BAHIA HD
+#EXTINF:-1 tvg-id="tv.mirante.hd.tv.globo.br" tvg-name="GLOBO TV CLUBE PIAUÍ FHD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV CLUBE PIAUÍ FHD
+#EXTINF:-1 tvg-id="tv.mirante.hd.tv.globo.br" tvg-name="GLOBO TV CLUBE PIAUÍ HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV CLUBE PIAUÍ HD
+#EXTINF:-1 tvg-id="tv.diario.br" tvg-name="GLOBO TV DIÁRIO HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV DIÁRIO HD
+#EXTINF:-1 tvg-id="tv.diario.mogi.das.cruzes.br" tvg-name="GLOBO TV DIÁRIO MOGI DAS CRUZES HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV DIÁRIO MOGI DAS CRUZES HD
+#EXTINF:-1 tvg-id="globo.tv.fronteira.president.br" tvg-name="GLOBO TV FRONTEIRA PAULISTA HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV FRONTEIRA PAULISTA HD
+#EXTINF:-1 tvg-id="tv.gazeta.es.br" tvg-name="GLOBO TV GAZETA ES HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV GAZETA ES HD
+#EXTINF:-1 tvg-id="tv.guajaramirim.br" tvg-name="GLOBO TV GUAJARÁ MIRIM HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV GUAJARÁ MIRIM HD
+#EXTINF:-1 tvg-id="tv.integracao.araxa.br" tvg-name="GLOBO TV INTEGRAÇÃO ARAXÁ HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV INTEGRAÇÃO ARAXÁ HD
+#EXTINF:-1 tvg-id="tv.integracao.ituiutaba.br" tvg-name="GLOBO TV INTEGRAÇÃO ITUITABA HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV INTEGRAÇÃO ITUITABA HD
+#EXTINF:-1 tvg-id="tv.integracao.juiz.de.fora.br" tvg-name="GLOBO TV INTEGRAÇÃO JUIZ DE FORA HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV INTEGRAÇÃO JUIZ DE FORA HD
+#EXTINF:-1 tvg-id="tv.integracao.juiz.de.fora.br" tvg-name="GLOBO TV INTEGRAÇÃO JUIZ DE FORA MG FHD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV INTEGRAÇÃO JUIZ DE FORA MG FHD
+#EXTINF:-1 tvg-id="tv.integracao.juiz.de.fora.br" tvg-name="GLOBO TV INTEGRAÇÃO JUIZ DE FORA MG HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV INTEGRAÇÃO JUIZ DE FORA MG HD
+#EXTINF:-1 tvg-id="tv.integracao.uberaba.br" tvg-name="GLOBO TV INTEGRAÇÃO UBERABA HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV INTEGRAÇÃO UBERABA HD
+#EXTINF:-1 tvg-id="tv.integracao.uberlandia.br" tvg-name="GLOBO TV INTEGRAÇÃO UBERLANDIA FHD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV INTEGRAÇÃO UBERLANDIA FHD
+#EXTINF:-1 tvg-id="tv.integracao.uberlandia.br" tvg-name="GLOBO TV INTEGRAÇÃO UBERLÂNDIA HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV INTEGRAÇÃO UBERLÂNDIA HD
+#EXTINF:-1 tvg-id="tv.itacoatiara.br" tvg-name="GLOBO TV ITACOTIARA HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV ITACOTIARA HD
+#EXTINF:-1 tvg-id="tv.jiparana.br" tvg-name="GLOBO TV JI-PARANA HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV JI-PARANA HD
+#EXTINF:-1 tvg-id="tv.liberal.belem.hd.tv.globo.br" tvg-name="GLOBO TV LIBERAL ALTAMIRA HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV LIBERAL ALTAMIRA HD
+#EXTINF:-1 tvg-id="tv.liberal.castanhalglobo.br" tvg-name="GLOBO TV LIBERAL CASTANHAL HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV LIBERAL CASTANHAL HD
+#EXTINF:-1 tvg-id="" tvg-name="GLOBO TV LIBERAL MARABÁ HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV LIBERAL MARABÁ HD
+#EXTINF:-1 tvg-id="tv.liberal.parauapebas.br" tvg-name="GLOBO TV LIBERAL PARAUABEBAS HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV LIBERAL PARAUABEBAS HD
+#EXTINF:-1 tvg-id="tv.liberal.redencao.br" tvg-name="GLOBO TV LIBERAL REDENÇÃO HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV LIBERAL REDENÇÃO HD
+#EXTINF:-1 tvg-id="" tvg-name="GLOBO TV MIRANTE BALSAS HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV MIRANTE BALSAS HD
+#EXTINF:-1 tvg-id="tv.mirante.cocais.br" tvg-name="GLOBO TV MIRANTE COCAIS FHD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV MIRANTE COCAIS FHD
+#EXTINF:-1 tvg-id="tv.mirante.cocais.br" tvg-name="GLOBO TV MIRANTE COCAIS HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV MIRANTE COCAIS HD
+#EXTINF:-1 tvg-id="tv.mirante.imperatriz.br" tvg-name="GLOBO TV MIRANTE IMPERATRIZ HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV MIRANTE IMPERATRIZ HD
+#EXTINF:-1 tvg-id="tv.mirante.sao.luis.br" tvg-name="GLOBO TV MIRANTE SÃO LUIS FHD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV MIRANTE SÃO LUIS FHD
+#EXTINF:-1 tvg-id="tv.mirante.sao.luis.br" tvg-name="GLOBO TV MIRANTE SÃO LUIS HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV MIRANTE SÃO LUIS HD
+#EXTINF:-1 tvg-id="tv.morena.corumba.br" tvg-name="GLOBO TV MORENA CORUMBÁ HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV MORENA CORUMBÁ HD
+#EXTINF:-1 tvg-id="tv.morena.br" tvg-name="GLOBO TV MORENA FHD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV MORENA FHD
+#EXTINF:-1 tvg-id="tv.morena.br" tvg-name="GLOBO TV MORENA HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV MORENA HD
+#EXTINF:-1 tvg-id="tv.morena.ponta.pora.hd.tv.globo.br" tvg-name="GLOBO TV MORENA PONTAPORÃ HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV MORENA PONTAPORÃ HD
+#EXTINF:-1 tvg-id="tv.morena.br" tvg-name="GLOBO TV MORENA HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV MORENA HD
+#EXTINF:-1 tvg-id="" tvg-name="GLOBO TV OESTE HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV OESTE HD
+#EXTINF:-1 tvg-id="tv.paraiba.br" tvg-name="GLOBO TV PARAIBA HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV PARAIBA HD
+#EXTINF:-1 tvg-id="tv.parintins.br" tvg-name="GLOBO TV PARINTINS HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV PARINTINS HD
+#EXTINF:-1 tvg-id="rbs.tv.bage.globo.br" tvg-name="GLOBO TV RBS BAGÉ HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV RBS BAGÉ HD
+#EXTINF:-1 tvg-id="tv.globo.recife.br" tvg-name="GLOBO TV RECIFE FHD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV RECIFE FHD
+#EXTINF:-1 tvg-id="tv.globo.recife.br" tvg-name="GLOBO TV RECIFE HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV RECIFE HD
+#EXTINF:-1 tvg-id="tv.rio.sul.br" tvg-name="GLOBO TV RIO SUL HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV RIO SUL HD
+#EXTINF:-1 tvg-id="tv.rio.sul.br" tvg-name="GLOBO TV RIO SUL HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV RIO SUL HD
+#EXTINF:-1 tvg-id="tv.sergipe.br" tvg-name="GLOBO TV SERGIPE FHD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV SERGIPE FHD
+#EXTINF:-1 tvg-id="tv.sergipe.br" tvg-name="GLOBO TV SERGIPE HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV SERGIPE HD
+#EXTINF:-1 tvg-id="" tvg-name="GLOBO TV SERRA MAR HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV SERRA MAR HD
+#EXTINF:-1 tvg-id="tv.subae.br" tvg-name="GLOBO TV SUBAÉ BA HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV SUBAÉ BA HD
+#EXTINF:-1 tvg-id="tv.sudoeste.br" tvg-name="GLOBO TV SUDOESTE FHD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV SUDOESTE FHD
+#EXTINF:-1 tvg-id="" tvg-name="GLOBO TV SÃO FRANCISCO HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV SÃO FRANCISCO HD
+#EXTINF:-1 tvg-id="tv.tem.itapetininga.br" tvg-name="GLOBO TV TEM ITAPETININGA HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV TEM ITAPETININGA HD
+#EXTINF:-1 tvg-id="tv.tem.sorocaba.br" tvg-name="GLOBO TV TEM SOROCABA FHD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV TEM SOROCABA FHD
+#EXTINF:-1 tvg-id="tv.tem.sorocaba.br" tvg-name="GLOBO TV TEM SOROCABA HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV TEM SOROCABA HD
+#EXTINF:-1 tvg-id="" tvg-name="GLOBO TV TEM TAUBATÉ HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV TEM TAUBATÉ HD
+#EXTINF:-1 tvg-id="tv.tribuna.santos.br" tvg-name="GLOBO TV TRIBUNA SANTOS HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV TRIBUNA SANTOS HD
+#EXTINF:-1 tvg-id="tv.vanguarda.br" tvg-name="GLOBO TV VANGUARDA SJC FHD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV VANGUARDA SJC FHD
+#EXTINF:-1 tvg-id="tv.vanguarda.br" tvg-name="GLOBO TV VANGUARDA SJC HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV VANGUARDA SJC HD
+#EXTINF:-1 tvg-id="tv.vanguarda.taubate.br" tvg-name="GLOBO TV VANGUARDA TTE HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV VANGUARDA TTE HD
+#EXTINF:-1 tvg-id="tv.verdes.mares.caririglobo.br" tvg-name="GLOBO TV VERDES MARES CARIRI HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV VERDES MARES CARIRI HD
+#EXTINF:-1 tvg-id="tv.verdes.mares.br" tvg-name="GLOBO TV VERDES MARES CE FHD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV VERDES MARES CE FHD
+#EXTINF:-1 tvg-id="tv.verdes.mares.br" tvg-name="GLOBO TV VERDES MARES CE HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV VERDES MARES CE HD
+#EXTINF:-1 tvg-id="tv.verdes.mares.br" tvg-name="GLOBO TV VERDES MARES CE HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV VERDES MARES CE HD
+#EXTINF:-1 tvg-id="" tvg-name="GLOBO TV VILHENA HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",GLOBO TV VILHENA HD
+#EXTINF:-1 tvg-id="" tvg-name="TV DIÁRIO FORTALEZA HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",TV DIÁRIO FORTALEZA HD
+#EXTINF:-1 tvg-id="tv.rio.sul.br" tvg-name="TV RIO SUL HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",TV RIO SUL HD
+#EXTINF:-1 tvg-id="tv.tem.bauru.br" tvg-name="TV TEM BAURU FHD" group-title="CANAIS: GLOBO REGIONAIS - ✨",TV TEM BAURU FHD
+#EXTINF:-1 tvg-id="tv.tem.bauru.br" tvg-name="TV TEM BAURU HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",TV TEM BAURU HD
+#EXTINF:-1 tvg-id="tv.tem.bauru.br" tvg-name="TV TEM BAURU HD" group-title="CANAIS: GLOBO REGIONAIS - ✨",TV TEM BAURU HD
+#EXTINF:-1 tvg-id="" tvg-name="DISNEY + 01 HD" group-title="CANAIS: DISNEY + SÉRIE B ⚽",DISNEY + 01 HD
+#EXTINF:-1 tvg-id="" tvg-name="DISNEY + 02 HD" group-title="CANAIS: DISNEY + SÉRIE B ⚽",DISNEY + 02 HD
+#EXTINF:-1 tvg-id="" tvg-name="DISNEY + 03 HD" group-title="CANAIS: DISNEY + SÉRIE B ⚽",DISNEY + 03 HD
+#EXTINF:-1 tvg-id="" tvg-name="DISNEY + 04 HD" group-title="CANAIS: DISNEY + SÉRIE B ⚽",DISNEY + 04 HD
+#EXTINF:-1 tvg-id="" tvg-name="DISNEY + 05 HD" group-title="CANAIS: DISNEY + SÉRIE B ⚽",DISNEY + 05 HD
+#EXTINF:-1 tvg-id="" tvg-name="DISNEY + 06 HD" group-title="CANAIS: DISNEY + SÉRIE B ⚽",DISNEY + 06 HD
+#EXTINF:-1 tvg-id="" tvg-name="DISNEY + 07 HD" group-title="CANAIS: DISNEY + SÉRIE B ⚽",DISNEY + 07 HD
+#EXTINF:-1 tvg-id="" tvg-name="DISNEY + 08 HD" group-title="CANAIS: DISNEY + SÉRIE B ⚽",DISNEY + 08 HD
+#EXTINF:-1 tvg-id="" tvg-name="DISNEY + 09 HD" group-title="CANAIS: DISNEY + SÉRIE B ⚽",DISNEY + 09 HD
+#EXTINF:-1 tvg-id="" tvg-name="DISNEY + 10 HD" group-title="CANAIS: DISNEY + SÉRIE B ⚽",DISNEY + 10 HD
+#EXTINF:-1 tvg-id="" tvg-name="UFC FIGHT 01" group-title="CANAIS: UFC FIGHT ⚡",UFC FIGHT 01
+#EXTINF:-1 tvg-id="" tvg-name="UFC FIGHT 02" group-title="CANAIS: UFC FIGHT ⚡",UFC FIGHT 02
+#EXTINF:-1 tvg-id="" tvg-name="UFC FIGHT 03" group-title="CANAIS: UFC FIGHT ⚡",UFC FIGHT 03
+#EXTINF:-1 tvg-id="" tvg-name="HBO MAX 01" group-title="CANAIS: MAX - CHAMPIONS LEAGUE ⚽",HBO MAX 01
+#EXTINF:-1 tvg-id="" tvg-name="HBO MAX 02" group-title="CANAIS: MAX - CHAMPIONS LEAGUE ⚽",HBO MAX 02
+#EXTINF:-1 tvg-id="" tvg-name="HBO MAX 03" group-title="CANAIS: MAX - CHAMPIONS LEAGUE ⚽",HBO MAX 03
+#EXTINF:-1 tvg-id="" tvg-name="HBO MAX 04" group-title="CANAIS: MAX - CHAMPIONS LEAGUE ⚽",HBO MAX 04
+#EXTINF:-1 tvg-id="" tvg-name="HBO MAX 05" group-title="CANAIS: MAX - CHAMPIONS LEAGUE ⚽",HBO MAX 05
+#EXTINF:-1 tvg-id="" tvg-name="HBO MAX 06" group-title="CANAIS: MAX - CHAMPIONS LEAGUE ⚽",HBO MAX 06
+#EXTINF:-1 tvg-id="" tvg-name="HBO MAX 07" group-title="CANAIS: MAX - CHAMPIONS LEAGUE ⚽",HBO MAX 07
+#EXTINF:-1 tvg-id="" tvg-name="HBO MAX 08" group-title="CANAIS: MAX - CHAMPIONS LEAGUE ⚽",HBO MAX 08
+#EXTINF:-1 tvg-id="" tvg-name="HBO MAX 09" group-title="CANAIS: MAX - CHAMPIONS LEAGUE ⚽",HBO MAX 09
+#EXTINF:-1 tvg-id="" tvg-name="HBO MAX 10" group-title="CANAIS: MAX - CHAMPIONS LEAGUE ⚽",HBO MAX 10
+#EXTINF:-1 tvg-id="" tvg-name="HBO MAX 11" group-title="CANAIS: MAX - CHAMPIONS LEAGUE ⚽",HBO MAX 11
+#EXTINF:-1 tvg-id="" tvg-name="HBO MAX 12" group-title="CANAIS: MAX - CHAMPIONS LEAGUE ⚽",HBO MAX 12
+#EXTINF:-1 tvg-id="" tvg-name="HBO MAX 13" group-title="CANAIS: MAX - CHAMPIONS LEAGUE ⚽",HBO MAX 13
+#EXTINF:-1 tvg-id="" tvg-name="HBO MAX 14" group-title="CANAIS: MAX - CHAMPIONS LEAGUE ⚽",HBO MAX 14
+#EXTINF:-1 tvg-id="" tvg-name="HBO MAX 15" group-title="CANAIS: MAX - CHAMPIONS LEAGUE ⚽",HBO MAX 15
+#EXTINF:-1 tvg-id="" tvg-name="HBO MAX 16" group-title="CANAIS: MAX - CHAMPIONS LEAGUE ⚽",HBO MAX 16
+#EXTINF:-1 tvg-id="" tvg-name="HBO MAX 17" group-title="CANAIS: MAX - CHAMPIONS LEAGUE ⚽",HBO MAX 17
+#EXTINF:-1 tvg-id="" tvg-name="HBO MAX 18" group-title="CANAIS: MAX - CHAMPIONS LEAGUE ⚽",HBO MAX 18
+#EXTINF:-1 tvg-id="" tvg-name="A Cabana" group-title="Religiosos",A Cabana
+#EXTINF:-1 tvg-id="" tvg-name="A Caminho da Fe" group-title="Religiosos",A Caminho da Fe
+#EXTINF:-1 tvg-id="" tvg-name="A Colheita da Fé" group-title="Religiosos",A Colheita da Fé
+#EXTINF:-1 tvg-id="" tvg-name="A Criação" group-title="Religiosos",A Criação
+#EXTINF:-1 tvg-id="" tvg-name="A Espera de um Milagre" group-title="Religiosos",A Espera de um Milagre
+#EXTINF:-1 tvg-id="" tvg-name="A Estrela de Belem" group-title="Religiosos",A Estrela de Belem
+#EXTINF:-1 tvg-id="" tvg-name="A Filha do Pastor" group-title="Religiosos",A Filha do Pastor
+#EXTINF:-1 tvg-id="" tvg-name="A História de Esther" group-title="Religiosos",A História de Esther
+#EXTINF:-1 tvg-id="" tvg-name="A História de Fátima" group-title="Religiosos",A História de Fátima
+#EXTINF:-1 tvg-id="" tvg-name="A Luz Divina" group-title="Religiosos",A Luz Divina
+#EXTINF:-1 tvg-id="" tvg-name="A Oração Não Falha" group-title="Religiosos",A Oração Não Falha
+#EXTINF:-1 tvg-id="" tvg-name="A Paixao de Cristo" group-title="Religiosos",A Paixao de Cristo
+#EXTINF:-1 tvg-id="" tvg-name="A Profecia Celestina" group-title="Religiosos",A Profecia Celestina
+#EXTINF:-1 tvg-id="" tvg-name="A Prova de Fogo" group-title="Religiosos",A Prova de Fogo
+#EXTINF:-1 tvg-id="" tvg-name="A Virada" group-title="Religiosos",A Virada
+#EXTINF:-1 tvg-id="" tvg-name="Amor Incondicional - A Historia de Oseias" group-title="Religiosos",Amor Incondicional - A Historia de Oseias
+#EXTINF:-1 tvg-id="" tvg-name="Amor Incondicional A História de Oseias" group-title="Religiosos",Amor Incondicional A História de Oseias
+#EXTINF:-1 tvg-id="" tvg-name="Ana Uma Adaptacao da Serie Reis" group-title="Religiosos",Ana Uma Adaptacao da Serie Reis
+#EXTINF:-1 tvg-id="" tvg-name="As Histórias De Jonathan Sperry" group-title="Religiosos",As Histórias De Jonathan Sperry
+#EXTINF:-1 tvg-id="" tvg-name="Cartas Para Deus" group-title="Religiosos",Cartas Para Deus
+#EXTINF:-1 tvg-id="" tvg-name="Conversando com Deus" group-title="Religiosos",Conversando com Deus
+#EXTINF:-1 tvg-id="" tvg-name="Corajosos" group-title="Religiosos",Corajosos
+#EXTINF:-1 tvg-id="" tvg-name="Davi" group-title="Religiosos",Davi
+#EXTINF:-1 tvg-id="" tvg-name="David Vs Golias - A Batalha da Fe" group-title="Religiosos",David Vs Golias - A Batalha da Fe
+#EXTINF:-1 tvg-id="" tvg-name="Deixados para Trás" group-title="Religiosos",Deixados para Trás
+#EXTINF:-1 tvg-id="" tvg-name="Deixados para Trás - A Nova Geração" group-title="Religiosos",Deixados para Trás - A Nova Geração
+#EXTINF:-1 tvg-id="" tvg-name="Deixados para Trás 2 - Comando Tribulação" group-title="Religiosos",Deixados para Trás 2 - Comando Tribulação
+#EXTINF:-1 tvg-id="" tvg-name="Deixados para Trás 3 - Mundo em Guerra" group-title="Religiosos",Deixados para Trás 3 - Mundo em Guerra
+#EXTINF:-1 tvg-id="" tvg-name="Desafiando Gigantes" group-title="Religiosos",Desafiando Gigantes
+#EXTINF:-1 tvg-id="" tvg-name="Deus Nao Esta Morto" group-title="Religiosos",Deus Nao Esta Morto
+#EXTINF:-1 tvg-id="" tvg-name="Deus Nao Esta Morto 2" group-title="Religiosos",Deus Nao Esta Morto 2
+#EXTINF:-1 tvg-id="" tvg-name="Deus Nao Esta Morto 3" group-title="Religiosos",Deus Nao Esta Morto 3
+#EXTINF:-1 tvg-id="" tvg-name="Em Defesa de Cristo" group-title="Religiosos",Em Defesa de Cristo
+#EXTINF:-1 tvg-id="" tvg-name="Emblema da Fe" group-title="Religiosos",Emblema da Fe
+#EXTINF:-1 tvg-id="" tvg-name="Entre A Vingança e O Perdão" group-title="Religiosos",Entre A Vingança e O Perdão
+#EXTINF:-1 tvg-id="" tvg-name="Entrevista com Deus" group-title="Religiosos",Entrevista com Deus
+#EXTINF:-1 tvg-id="" tvg-name="Eu Acredito" group-title="Religiosos",Eu Acredito
+#EXTINF:-1 tvg-id="" tvg-name="Eu Só Posso Imaginar" group-title="Religiosos",Eu Só Posso Imaginar
+#EXTINF:-1 tvg-id="" tvg-name="Grace - Entre a Fe e a Fama" group-title="Religiosos",Grace - Entre a Fe e a Fama
+#EXTINF:-1 tvg-id="" tvg-name="Graça e Perdão" group-title="Religiosos",Graça e Perdão
+#EXTINF:-1 tvg-id="" tvg-name="Gênesis" group-title="Religiosos",Gênesis
+#EXTINF:-1 tvg-id="" tvg-name="Homens e Deuses" group-title="Religiosos",Homens e Deuses
+#EXTINF:-1 tvg-id="" tvg-name="Inabalável A Trajetória de Amy Newhouse" group-title="Religiosos",Inabalável A Trajetória de Amy Newhouse
+#EXTINF:-1 tvg-id="" tvg-name="Jesus" group-title="Religiosos",Jesus
+#EXTINF:-1 tvg-id="" tvg-name="Jesus - A História do Nascimento" group-title="Religiosos",Jesus - A História do Nascimento
+#EXTINF:-1 tvg-id="" tvg-name="Jesus De Nazare 1" group-title="Religiosos",Jesus De Nazare 1
+#EXTINF:-1 tvg-id="" tvg-name="Jesus De Nazare 2" group-title="Religiosos",Jesus De Nazare 2
+#EXTINF:-1 tvg-id="" tvg-name="Jesus De Nazare 3" group-title="Religiosos",Jesus De Nazare 3
+#EXTINF:-1 tvg-id="" tvg-name="Jesus De Nazare 4" group-title="Religiosos",Jesus De Nazare 4
+#EXTINF:-1 tvg-id="" tvg-name="José e Maria" group-title="Religiosos",José e Maria
+#EXTINF:-1 tvg-id="" tvg-name="Lutero" group-title="Religiosos",Lutero
+#EXTINF:-1 tvg-id="" tvg-name="Mais que Vencedores" group-title="Religiosos",Mais que Vencedores
+#EXTINF:-1 tvg-id="" tvg-name="Maria e José - Uma Adaptação da Novela Jesus" group-title="Religiosos",Maria e José - Uma Adaptação da Novela Jesus
+#EXTINF:-1 tvg-id="" tvg-name="Maria Madalena" group-title="Religiosos",Maria Madalena
+#EXTINF:-1 tvg-id="" tvg-name="Milagres de Jesus - O Filme" group-title="Religiosos",Milagres de Jesus - O Filme
+#EXTINF:-1 tvg-id="" tvg-name="Milagres do Paraiso" group-title="Religiosos",Milagres do Paraiso
+#EXTINF:-1 tvg-id="" tvg-name="Moisés" group-title="Religiosos",Moisés
+#EXTINF:-1 tvg-id="" tvg-name="Mãe do Filho de Deus" group-title="Religiosos",Mãe do Filho de Deus
+#EXTINF:-1 tvg-id="" tvg-name="Nada A Perder 2" group-title="Religiosos",Nada A Perder 2
+#EXTINF:-1 tvg-id="" tvg-name="No Tempo de Deus" group-title="Religiosos",No Tempo de Deus
+#EXTINF:-1 tvg-id="" tvg-name="Noe" group-title="Religiosos",Noe
+#EXTINF:-1 tvg-id="" tvg-name="Nosso Lar" group-title="Religiosos",Nosso Lar
+#EXTINF:-1 tvg-id="" tvg-name="O Ceu e de Verdade" group-title="Religiosos",O Ceu e de Verdade
+#EXTINF:-1 tvg-id="" tvg-name="O Despertar da Fé" group-title="Religiosos",O Despertar da Fé
+#EXTINF:-1 tvg-id="" tvg-name="O Encontro Perfeito" group-title="Religiosos",O Encontro Perfeito
+#EXTINF:-1 tvg-id="" tvg-name="O Evangelho Segundo João" group-title="Religiosos",O Evangelho Segundo João
+#EXTINF:-1 tvg-id="" tvg-name="O Fazendeiro e Deus" group-title="Religiosos",O Fazendeiro e Deus
+#EXTINF:-1 tvg-id="" tvg-name="O Jovem Messias" group-title="Religiosos",O Jovem Messias
+#EXTINF:-1 tvg-id="" tvg-name="O Livro de Gênesis" group-title="Religiosos",O Livro de Gênesis
+#EXTINF:-1 tvg-id="" tvg-name="O Milagre de Fátima" group-title="Religiosos",O Milagre de Fátima
+#EXTINF:-1 tvg-id="" tvg-name="O Pastor" group-title="Religiosos",O Pastor
+#EXTINF:-1 tvg-id="" tvg-name="O Peregrino - Uma Jornada para o Céu" group-title="Religiosos",O Peregrino - Uma Jornada para o Céu
+#EXTINF:-1 tvg-id="" tvg-name="O Poder da Graça" group-title="Religiosos",O Poder da Graça
+#EXTINF:-1 tvg-id="" tvg-name="O Salvador" group-title="Religiosos",O Salvador
+#EXTINF:-1 tvg-id="" tvg-name="O Soldado de Cristo" group-title="Religiosos",O Soldado de Cristo
+#EXTINF:-1 tvg-id="" tvg-name="Onde Esta Deus" group-title="Religiosos",Onde Esta Deus
+#EXTINF:-1 tvg-id="" tvg-name="Orações Para Bobby" group-title="Religiosos",Orações Para Bobby
+#EXTINF:-1 tvg-id="" tvg-name="Os Dez Mandamentos (1956)" group-title="Religiosos",Os Dez Mandamentos (1956)
+#EXTINF:-1 tvg-id="" tvg-name="Os Dez Mandamentos O Filme" group-title="Religiosos",Os Dez Mandamentos O Filme
+#EXTINF:-1 tvg-id="" tvg-name="Papa Francisco - Um Homem de Palavra" group-title="Religiosos",Papa Francisco - Um Homem de Palavra
+#EXTINF:-1 tvg-id="" tvg-name="Paulo - O Apostolo de Cristo" group-title="Religiosos",Paulo - O Apostolo de Cristo
+#EXTINF:-1 tvg-id="" tvg-name="Paulo de Tarso e A História do Cristianismo Primitivo" group-title="Religiosos",Paulo de Tarso e A História do Cristianismo Primitivo
+#EXTINF:-1 tvg-id="" tvg-name="Pedro A Redenção" group-title="Religiosos",Pedro A Redenção
+#EXTINF:-1 tvg-id="" tvg-name="Quarto de Guerra" group-title="Religiosos",Quarto de Guerra
+#EXTINF:-1 tvg-id="" tvg-name="Sansao" group-title="Religiosos",Sansao
+#EXTINF:-1 tvg-id="" tvg-name="Superação O Milagre da Fé" group-title="Religiosos",Superação O Milagre da Fé
+#EXTINF:-1 tvg-id="" tvg-name="Talento e Fé" group-title="Religiosos",Talento e Fé
+#EXTINF:-1 tvg-id="" tvg-name="TV Aparecida HD" group-title="Religiosos",TV Aparecida HD
+#EXTINF:-1 tvg-id="" tvg-name="Um Coração que Perdoa" group-title="Religiosos",Um Coração que Perdoa
+#EXTINF:-1 tvg-id="" tvg-name="Uma Batalha de Fé" group-title="Religiosos",Uma Batalha de Fé
+#EXTINF:-1 tvg-id="" tvg-name="Uma Jornada de Perdão" group-title="Religiosos",Uma Jornada de Perdão
+#EXTINF:-1 tvg-id="" tvg-name="Uma Licao de Vida (2010)" group-title="Religiosos",Uma Licao de Vida (2010)
+#EXTINF:-1 tvg-id="" tvg-name="Uma Prova De Fé" group-title="Religiosos",Uma Prova De Fé
+#EXTINF:-1 tvg-id="" tvg-name="Uma Prova de Fé 2 Voltando para Casa" group-title="Religiosos",Uma Prova de Fé 2 Voltando para Casa
+#EXTINF:-1 tvg-id="" tvg-name="Uma Questao de Fe" group-title="Religiosos",Uma Questao de Fe
+#EXTINF:-1 tvg-id="" tvg-name="Uma Vida com Proposito" group-title="Religiosos",Uma Vida com Proposito
+#EXTINF:-1 tvg-id="" tvg-name="Você Acredita" group-title="Religiosos",Você Acredita
+#EXTINF:-1 tvg-id="" tvg-name="90 Minutos no Paraíso" group-title="Religiosos",90 Minutos no Paraíso
+#EXTINF:-1 tvg-id="playboy.br" tvg-name="PLAY BOY FHD" group-title="Z - CANAIS: ADULTOS ⛔",PLAY BOY FHD
+#EXTINF:-1 tvg-id="" tvg-name="PREMIUM 01" group-title="Z - CANAIS: ADULTOS ⛔",PREMIUM 01
+#EXTINF:-1 tvg-id="" tvg-name="PREMIUM 02" group-title="Z - CANAIS: ADULTOS ⛔",PREMIUM 02
+#EXTINF:-1 tvg-id="" tvg-name="PREMIUM 03" group-title="Z - CANAIS: ADULTOS ⛔",PREMIUM 03
+#EXTINF:-1 tvg-id="" tvg-name="PREMIUM 06" group-title="Z - CANAIS: ADULTOS ⛔",PREMIUM 06
+#EXTINF:-1 tvg-id="" tvg-name="PREMIUM 07" group-title="Z - CANAIS: ADULTOS ⛔",PREMIUM 07
+#EXTINF:-1 tvg-id="" tvg-name="PREMIUM 08" group-title="Z - CANAIS: ADULTOS ⛔",PREMIUM 08
+#EXTINF:-1 tvg-id="" tvg-name="PREMIUM 09" group-title="Z - CANAIS: ADULTOS ⛔",PREMIUM 09
+#EXTINF:-1 tvg-id="" tvg-name="PREMIUM 10" group-title="Z - CANAIS: ADULTOS ⛔",PREMIUM 10
+#EXTINF:-1 tvg-id="" tvg-name="PREMIUM 11" group-title="Z - CANAIS: ADULTOS ⛔",PREMIUM 11
+#EXTINF:-1 tvg-id="" tvg-name="PREMIUM 12" group-title="Z - CANAIS: ADULTOS ⛔",PREMIUM 12
+#EXTINF:-1 tvg-id="" tvg-name="PREMIUM 13" group-title="Z - CANAIS: ADULTOS ⛔",PREMIUM 13
+#EXTINF:-1 tvg-id="" tvg-name="PREMIUM 14" group-title="Z - CANAIS: ADULTOS ⛔",PREMIUM 14
+#EXTINF:-1 tvg-id="" tvg-name="PREMIUM 15" group-title="Z - CANAIS: ADULTOS ⛔",PREMIUM 15
+#EXTINF:-1 tvg-id="" tvg-name="PREMIUM 16" group-title="Z - CANAIS: ADULTOS ⛔",PREMIUM 16
+#EXTINF:-1 tvg-id="sexy.hot.br" tvg-name="SEXY HOT" group-title="Z - CANAIS: ADULTOS ⛔",SEXY HOT
+#EXTINF:-1 tvg-id="venus.br" tvg-name="VENUS FHD" group-title="Z - CANAIS: ADULTOS ⛔",VENUS FHD
+#EXTINF:-1 tvg-id="" tvg-name="XXX: Balkan Erotic FHD" group-title="Z - CANAIS: ADULTOS ⛔",XXX: Balkan Erotic FHD
+#EXTINF:-1 tvg-id="" tvg-name="XXX: Bang U FHD" group-title="Z - CANAIS: ADULTOS ⛔",XXX: Bang U FHD
+#EXTINF:-1 tvg-id="" tvg-name="XXX: Barely Legal TV" group-title="Z - CANAIS: ADULTOS ⛔",XXX: Barely Legal TV
+#EXTINF:-1 tvg-id="hustler.br" tvg-name="XXX: Blue Hustler HD" group-title="Z - CANAIS: ADULTOS ⛔",XXX: Blue Hustler HD
+#EXTINF:-1 tvg-id="sexprive.brasileirinhas.br" tvg-name="XXX: Brasileirinhas FHD" group-title="Z - CANAIS: ADULTOS ⛔",XXX: Brasileirinhas FHD
+#EXTINF:-1 tvg-id="" tvg-name="XXX: Brazzers TV Europe FHD" group-title="Z - CANAIS: ADULTOS ⛔",XXX: Brazzers TV Europe FHD
+#EXTINF:-1 tvg-id="" tvg-name="XXX: Desire FHD" group-title="Z - CANAIS: ADULTOS ⛔",XXX: Desire FHD
+#EXTINF:-1 tvg-id="" tvg-name="XXX: Dorcel FHD" group-title="Z - CANAIS: ADULTOS ⛔",XXX: Dorcel FHD
+#EXTINF:-1 tvg-id="" tvg-name="XXX: Dorcel XXX FHD" group-title="Z - CANAIS: ADULTOS ⛔",XXX: Dorcel XXX FHD
+#EXTINF:-1 tvg-id="" tvg-name="XXX: Ero XXX FHD" group-title="Z - CANAIS: ADULTOS ⛔",XXX: Ero XXX FHD
+#EXTINF:-1 tvg-id="premiere.clubes.br" tvg-name="PREMIERE CLUBES 4K" group-title="CANAIS: 4K ⭐",PREMIERE CLUBES 4K
+#EXTINF:-1 tvg-id="record.br" tvg-name="RECORD 4K" group-title="CANAIS: 4K ⭐",RECORD 4K
+#EXTINF:-1 tvg-id="sbt.br" tvg-name="SBT 4K" group-title="CANAIS: 4K ⭐",SBT 4K
+#EXTINF:-1 tvg-id="axn.br" tvg-name="AXN 4K" group-title="CANAIS: 4K ⭐",AXN 4K
+#EXTINF:-1 tvg-id="cnn.brasil.br" tvg-name="CNN BRASIL 4K" group-title="CANAIS: 4K ⭐",CNN BRASIL 4K
+#EXTINF:-1 tvg-id="espn.3.br" tvg-name="ESPN 3 4K" group-title="CANAIS: 4K ⭐",ESPN 3 4K
+#EXTINF:-1 tvg-id="espn.br" tvg-name="ESPN 4K" group-title="CANAIS: 4K ⭐",ESPN 4K
+#EXTINF:-1 tvg-id="globo.rj.br" tvg-name="GLOBO 4K" group-title="CANAIS: 4K ⭐",GLOBO 4K
+#EXTINF:-1 tvg-id="telecine.action.br" tvg-name="TELECINE ACTION 4K" group-title="CANAIS: 4K ⭐",TELECINE ACTION 4K
+#EXTINF:-1 tvg-id="telecine.pipoca.br" tvg-name="TELECINE PIPOCA 4K" group-title="CANAIS: 4K ⭐",TELECINE PIPOCA 4K
+#EXTINF:-1 tvg-id="telecine.premium.br" tvg-name="TELECINE PREMIUM 4K" group-title="CANAIS: 4K ⭐",TELECINE PREMIUM 4K
