@@ -1,0 +1,47 @@
+name: Sincronizar Listas M3U (Pós-EPG)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 7 * * *" # Roda todo dia às 04:00 BRT (após o EPG da madrugada)
+  workflow_run:
+    workflows: ["Atualizar EPG"]
+    types: [completed]
+
+jobs:
+  sincronizar:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    env:
+      PYTHONUNBUFFERED: "1"
+      M3U_URL_1: ${{ secrets.M3U_URL_1 }}
+      M3U_URL_2: ${{ secrets.M3U_URL_2 }}
+      M3U_URL_3: ${{ secrets.M3U_URL_3 }}
+      M3U_URL_4: ${{ secrets.M3U_URL_4 }}
+      M3U_URL_5: ${{ secrets.M3U_URL_5 }}
+      GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
+      GIST_ID: ${{ secrets.GIST_ID }}
+      BR_PROXY: ${{ secrets.BR_PROXY }}
+      EPG_PUBLIC_URL: "https://raw.githubusercontent.com/${{ github.repository }}/epg/epg.xml.gz"
+
+    steps:
+      - name: Baixar o repositório (branch main)
+        uses: actions/checkout@v4
+
+      - name: Baixar o epg.xml.gz mais recente da branch epg
+        run: |
+          git fetch origin epg:epg
+          git checkout epg -- epg.xml.gz
+
+      - name: Preparar Python e Cloudscraper
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependências
+        run: |
+          pip install requests cloudscraper urllib3
+
+      - name: Corrigir TVG-IDs das listas e enviar para o Gist Secreto
+        run: |
+          python3 sync_playlists.py
