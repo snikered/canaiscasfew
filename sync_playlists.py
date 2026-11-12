@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
-"""Sincronizador Completo M3U + Categorias Reais da API Xtream:
-- Baixa os mapas de categorias reais da API em apenas 6 chamadas rápidas (Live, VOD e Series).
-- Lê a M3U completa (Canais + Filmes + Séries) e substitui os grupos genéricos
-  ('CANAIS COMPLETO(SD,HD,FHD,4K)', 'FILMES', 'SÉRIES') pelas categorias reais do servidor!
-- Corrige o tvg-id APENAS dos Canais ao Vivo usando o seu epg.xml.gz e posiciona os canais no topo.
-- Remove a categoria ADULTOS (opcional via variável REMOVE_ADULT=1, padrão ativo).
+"""Sincronizador M3U Definitivo (Restaura Grupos por ID + Nome para Canais, Filmes e Séries):
+- Mapeia Canais Ao Vivo, Filmes e Séries tanto pelo stream_id quanto pelo NOME normalizado (igual funcionou nas Séries!).
+- Desmembra 'CANAIS COMPLETO(SD,HD,FHD,4K)' e 'FILMES' nas dezenas de categorias reais da API Xtream.
+- Garante que as Séries tenham a estrutura que o TiviMate reconhece na aba 'Séries'.
+- Corrige o tvg-id apenas dos Canais ao Vivo usando o seu epg.xml.gz.
 """
 from __future__ import annotations
 
 import gzip
 import html
-import json
 import os
 import random
 import re
@@ -60,17 +58,23 @@ VOD_URL_EXTENSIONS = (".mp4", ".mkv", ".avi", ".mov", ".wmv", ".flv", ".webm", "
 _RE_TVG_ID = re.compile(r'tvg-id="[^"]*"', re.IGNORECASE)
 _RE_GROUP_TITLE = re.compile(r'group-title="([^"]*)"', re.IGNORECASE)
 _RE_STREAM_ID_FROM_URL = re.compile(r"/(\d+)(?:\.[a-z0-9]+)?(?:\?.*)?$", re.IGNORECASE)
+_RE_SERIES_EP_DETECT = re.compile(r"\b(?:S\d{1,2}\s*E\d{1,3}|T\d{1,2}\s*EP?\d{1,3})\b", re.IGNORECASE)
 _RE_SERIES_EP_SPLIT = re.compile(r"\s*[\-\|:]?\s*\b(?:S\d{1,2}\s*E\d{1,3}|T\d{1,2}\s*EP?\d{1,3})\b.*$", re.IGNORECASE)
+
+
+def norm_lookup_key(title: str) -> str:
+    s = html.unescape(title or "")
+    s = unicodedata.normalize("NFKD", s)
+    s = "".join(c for c in s if not unicodedata.combining(c)).upper()
+    s = re.sub(r"[^A-Z0-9]+", " ", s)
+    return " ".join(s.split())
 
 
 def norm_series_title(title: str) -> str:
     s = html.unescape(title or "")
     s = _RE_SERIES_EP_SPLIT.sub("", s)
     s = re.sub(r"\(\d{4}\)|\[\d{4}\]", " ", s)
-    s = unicodedata.normalize("NFKD", s)
-    s = "".join(c for c in s if not unicodedata.combining(c)).upper()
-    s = re.sub(r"[^A-Z0-9]+", " ", s)
-    return " ".join(s.split())
+    return norm_lookup_key(s)
 
 
 def ensure_m3u_plus_url(url: str) -> str:
@@ -135,26 +139,27 @@ def request_with_bypass(url: str, stream: bool = False, timeout: int = 90) -> re
     raise RuntimeError(f"Todas as tentativas de bypass falharam ({last_err})")
 
 
-def fetch_xtream_category_maps(url: str) -> tuple[dict[str, str], dict[str, str], dict[str, str]]:
-    """Consulta a API Xtream em apenas 6 chamadas rápidas para mapear:
-    1. {stream_id: categoria_real_canal}
-    2. {stream_id: categoria_real_filme}
-    3. {nome_normalizado_da_serie: categoria_real_serie}
-    """
-    live_id_to_group: dict[str, str] = {}
-    vod_id_to_group: dict[str, str] = {}
-    series_name_to_group: dict[str, str] = {}
+def fetch_xtream_category_maps(url: str) -> dict[str, dict[str, str]]:
+    """Mapeia as categorias reais da API tanto por ID quanto por NOME normalizado
+    (garantindo 100% de acerto mesmo se o ID da URL M3U for diferente!)."""
+    maps: dict[str, dict[str, str]] = {
+        "live_by_id": {},
+        "live_by_name": {},
+        "vod_by_id": {},
+        "vod_by_name": {},
+        "series_by_name": {},
+    }
 
     parsed = urllib.parse.urlparse(url)
     query = urllib.parse.parse_qs(parsed.query)
     if "username" not in query or "password" not in query:
-        return live_id_to_group, vod_id_to_group, series_name_to_group
+        return maps
 
     user = query["username"][0]
     pwd = query["password"][0]
     base_url = f"{parsed.scheme}://{parsed.netloc}"
 
-    # 1. Canais Ao Vivo
+    # 1. Canais Ao Vivo (Por ID e por Nome)
     try:
         c_live = request_with_bypass(
             f"{base_url}/player_api.php?username={user}&password={pwd}&action=get_live_categories", timeout=30
@@ -168,15 +173,25 @@ def fetch_xtream_category_maps(url: str) -> tuple[dict[str, str], dict[str, str]
             f"{base_url}/player_api.php?username={user}&password={pwd}&action=get_live_streams", timeout=45
         ).json()
         for ch in (s_live if isinstance(s_live, list) else []):
-            if isinstance(ch, dict) and ch.get("stream_id"):
-                grp = live_cats.get(str(ch.get("category_id", "")), "")
-                if grp:
-                    live_id_to_group[str(ch["stream_id"])] = grp
-        print(f"  -> ✓ Categorias de Canais mapeadas via API: {len(live_cats)} grupos ({len(live_id_to_group)} canais).")
+            if not isinstance(ch, dict):
+                continue
+            grp = live_cats.get(str(ch.get("category_id", "")), "")
+            if not grp:
+                continue
+            if ch.get("stream_id"):
+                maps["live_by_id"][str(ch["stream_id"])] = grp
+            if ch.get("name"):
+                raw_n = str(ch["name"])
+                maps["live_by_name"][norm_lookup_key(raw_n)] = grp
+                maps["live_by_name"][name_key(raw_n)] = grp
+        print(
+            f"  -> ✓ Categorias de Canais mapeadas: {len(live_cats)} grupos "
+            f"({len(maps['live_by_id'])} por ID | {len(maps['live_by_name'])} por nome)."
+        )
     except Exception as e:
-        print(f"  -> Nota: Mapa de categorias Live indisponível ({e}).")
+        print(f"  -> Nota: Mapa Live indisponível ({e}).")
 
-    # 2. Filmes VOD
+    # 2. Filmes VOD (Por ID e por Nome)
     try:
         c_vod = request_with_bypass(
             f"{base_url}/player_api.php?username={user}&password={pwd}&action=get_vod_categories", timeout=30
@@ -190,15 +205,25 @@ def fetch_xtream_category_maps(url: str) -> tuple[dict[str, str], dict[str, str]
             f"{base_url}/player_api.php?username={user}&password={pwd}&action=get_vod_streams", timeout=60
         ).json()
         for v in (s_vod if isinstance(s_vod, list) else []):
-            if isinstance(v, dict) and v.get("stream_id"):
-                grp = vod_cats.get(str(v.get("category_id", "")), "")
-                if grp:
-                    vod_id_to_group[str(v["stream_id"])] = grp
-        print(f"  -> ✓ Categorias de Filmes mapeadas via API: {len(vod_cats)} grupos ({len(vod_id_to_group)} filmes).")
+            if not isinstance(v, dict):
+                continue
+            grp = vod_cats.get(str(v.get("category_id", "")), "")
+            if not grp:
+                continue
+            if v.get("stream_id"):
+                maps["vod_by_id"][str(v["stream_id"])] = grp
+            if v.get("name"):
+                raw_v = str(v["name"])
+                maps["vod_by_name"][norm_lookup_key(raw_v)] = grp
+                maps["vod_by_name"][norm_series_title(raw_v)] = grp
+        print(
+            f"  -> ✓ Categorias de Filmes mapeadas: {len(vod_cats)} grupos "
+            f"({len(maps['vod_by_id'])} por ID | {len(maps['vod_by_name'])} por nome)."
+        )
     except Exception as e:
-        print(f"  -> Nota: Mapa de categorias VOD indisponível ({e}).")
+        print(f"  -> Nota: Mapa VOD indisponível ({e}).")
 
-    # 3. Séries (Apenas 2 chamadas: get_series_categories + get_series!)
+    # 3. Séries (Por Nome Base da Série)
     try:
         c_ser = request_with_bypass(
             f"{base_url}/player_api.php?username={user}&password={pwd}&action=get_series_categories", timeout=30
@@ -216,12 +241,15 @@ def fetch_xtream_category_maps(url: str) -> tuple[dict[str, str], dict[str, str]
                 grp = ser_cats.get(str(s.get("category_id", "")), "")
                 s_key = norm_series_title(str(s["name"]))
                 if grp and s_key:
-                    series_name_to_group[s_key] = grp
-        print(f"  -> ✓ Categorias de Séries mapeadas via API: {len(ser_cats)} grupos ({len(series_name_to_group)} séries).")
+                    maps["series_by_name"][s_key] = grp
+        print(
+            f"  -> ✓ Categorias de Séries mapeadas: {len(ser_cats)} grupos "
+            f"({len(maps['series_by_name'])} séries)."
+        )
     except Exception as e:
-        print(f"  -> Nota: Mapa de categorias de Séries indisponível ({e}).")
+        print(f"  -> Nota: Mapa Séries indisponível ({e}).")
 
-    return live_id_to_group, vod_id_to_group, series_name_to_group
+    return maps
 
 
 def load_epg_id_index(epg_path: Path) -> dict[str, str]:
@@ -278,28 +306,12 @@ def replace_only_tvg_id_in_extinf(extinf_line: str, new_tvg_id: str) -> str:
     return re.sub(r"^(#EXTINF:[^\s,]+)", rf'\1 tvg-id="{safe_id}"', extinf_line, count=1)
 
 
-def is_generic_flattened_group(grp: str) -> bool:
-    """Detecta se o group-title que veio na M3U é um daqueles 4 grupões achatados do painel."""
-    g = (grp or "").strip().upper()
-    if not g:
-        return True
-    if "CANAIS COMPLETO" in g or "CANAL COMPLETO" in g:
-        return True
-    if g in {"CANAIS", "GERAL", "FILMES", "SERIES", "SÉRIES", "VOD", "FILMES E SERIES", "FILMES E SÉRIES", "CANAIS INTERNACIONAIS"}:
-        return True
-    return False
-
-
-def apply_real_group_title(extinf_line: str, real_group: str) -> str:
-    if not real_group:
+def set_group_title_in_extinf(extinf_line: str, new_group: str) -> str:
+    if not new_group:
         return extinf_line
-    safe_grp = real_group.replace('"', "'")
-    m = _RE_GROUP_TITLE.search(extinf_line)
-    if m:
-        curr_grp = m.group(1).strip()
-        if is_generic_flattened_group(curr_grp):
-            return _RE_GROUP_TITLE.sub(f'group-title="{safe_grp}"', extinf_line, count=1)
-        return extinf_line
+    safe_grp = new_group.replace('"', "'")
+    if _RE_GROUP_TITLE.search(extinf_line):
+        return _RE_GROUP_TITLE.sub(f'group-title="{safe_grp}"', extinf_line, count=1)
     return re.sub(r"^(#EXTINF:[^\s,]+)", rf'\1 group-title="{safe_grp}"', extinf_line, count=1)
 
 
@@ -309,7 +321,7 @@ def is_vod_stream(stream_url: str, extinf_line: str) -> bool:
         return True
     if "/movie/" in clean_path or "/series/" in clean_path or "/vod/" in clean_path:
         return True
-    if re.search(r"\bS\d{1,2}\s*E\d{1,3}\b|\bT\d{1,2}\s*EP?\d{1,3}\b", extinf_line, re.I):
+    if _RE_SERIES_EP_DETECT.search(extinf_line):
         return True
     return False
 
@@ -382,18 +394,24 @@ def process_m3u_with_real_groups(
     live_count = 0
     matched_epg = 0
     vod_count = 0
+    regrouped_live = 0
+    regrouped_movies = 0
+    regrouped_series = 0
 
     try:
-        # 1. Puxa os mapas de categorias reais da API Xtream em 6 requisições rápidas
-        live_id_to_group, vod_id_to_group, series_name_to_group = fetch_xtream_category_maps(url)
+        maps = fetch_xtream_category_maps(url)
+        live_by_id = maps["live_by_id"]
+        live_by_name = maps["live_by_name"]
+        vod_by_id = maps["vod_by_id"]
+        vod_by_name = maps["vod_by_name"]
+        series_by_name = maps["series_by_name"]
 
-        # 2. Baixa a M3U completa (Canais + Filmes + Séries)
         print("  -> Baixando arquivo M3U completo...")
         if not download_raw_m3u_to_disk(url, tmp_raw_path):
             raise RuntimeError("O servidor bloqueou o download do arquivo M3U a partir do IP do GitHub.")
 
         raw_size_mb = tmp_raw_path.stat().st_size / (1024 * 1024)
-        print(f"  -> ✓ M3U baixada ({raw_size_mb:.2f} MB). Aplicando categorias reais da API e corrigindo TVG-IDs...")
+        print(f"  -> ✓ M3U baixada ({raw_size_mb:.2f} MB). Aplicando grupos reais de Canais, Filmes e Séries...")
 
         header = f'#EXTM3U url-tvg="{epg_public_url}" x-tvg-url="{epg_public_url}"\n' if epg_public_url else "#EXTM3U\n"
 
@@ -442,36 +460,53 @@ def process_m3u_with_real_groups(
                     stream_id = stream_id_m.group(1) if stream_id_m else ""
 
                     if is_vod_stream(line, extinf_line):
-                        # É Filme ou Série (VOD): descobre o subgrupo real daquele Filme ou daquela Série!
+                        is_series_item = (
+                            "/series/" in line.lower()
+                            or curr_grp.upper() in {"SERIES", "SÉRIES"}
+                            or bool(_RE_SERIES_EP_DETECT.search(item_name))
+                        )
+
                         real_vod_grp = ""
-                        if "/movie/" in line.lower() and stream_id in vod_id_to_group:
-                            real_vod_grp = vod_id_to_group[stream_id]
-                        elif "/series/" in line.lower() or re.search(r"\bS\d{1,2}\s*E\d{1,3}\b", item_name, re.I):
+                        if is_series_item:
                             s_key = norm_series_title(item_name)
-                            real_vod_grp = series_name_to_group.get(s_key, "")
-                        elif stream_id in vod_id_to_group:
-                            real_vod_grp = vod_id_to_group[stream_id]
+                            real_vod_grp = series_by_name.get(s_key, "")
+                            if real_vod_grp:
+                                regrouped_series += 1
+                        else:
+                            # Tenta primeiro pelo stream_id e logo em seguida pelo Nome do Filme!
+                            real_vod_grp = (
+                                vod_by_id.get(stream_id, "")
+                                or vod_by_name.get(norm_lookup_key(item_name), "")
+                                or vod_by_name.get(norm_series_title(item_name), "")
+                            )
+                            if real_vod_grp:
+                                regrouped_movies += 1
 
                         if REMOVE_ADULT and real_vod_grp and ADULT_FILTER_RE.search(real_vod_grp):
                             pending_lines.clear()
                             continue
 
                         if real_vod_grp:
-                            pending_lines[extinf_idx] = apply_real_group_title(extinf_line, real_vod_grp)
+                            pending_lines[extinf_idx] = set_group_title_in_extinf(extinf_line, real_vod_grp)
 
                         for pl in pending_lines:
                             vod_out.write(pl + "\n")
                         vod_out.write(line + "\n")
                         vod_count += 1
                     else:
-                        # É Canal ao Vivo: aplica a categoria real do canal (ex: 'CANAIS | ESPORTES') + corrige o tvg-id!
-                        real_live_grp = live_id_to_group.get(stream_id, "") if stream_id else ""
+                        # É Canal ao Vivo: busca o grupo real primeiro pelo stream_id e depois pelo Nome!
+                        real_live_grp = (
+                            live_by_id.get(stream_id, "")
+                            or live_by_name.get(norm_lookup_key(item_name), "")
+                            or live_by_name.get(name_key(item_name), "")
+                        )
                         if REMOVE_ADULT and real_live_grp and ADULT_FILTER_RE.search(real_live_grp):
                             pending_lines.clear()
                             continue
 
                         if real_live_grp:
-                            extinf_line = apply_real_group_title(extinf_line, real_live_grp)
+                            extinf_line = set_group_title_in_extinf(extinf_line, real_live_grp)
+                            regrouped_live += 1
 
                         best_tvg_id = resolve_best_tvg_id(item_name, orig_tvg_id, epg_index)
                         if best_tvg_id and name_key(best_tvg_id) in epg_index:
@@ -484,6 +519,11 @@ def process_m3u_with_real_groups(
                         live_count += 1
 
                     pending_lines.clear()
+
+        print(
+            f"  -> ✓ Grupos reais restaurados: {regrouped_live} canais | "
+            f"{regrouped_movies} filmes | {regrouped_series} episódios de séries!"
+        )
 
         if vod_count > 0:
             with out_file_path.open("ab") as live_append, tmp_vod_path.open("rb") as vod_in:
@@ -523,7 +563,7 @@ def push_files_to_secret_gist_via_git(generated_files: list[Path], token: str, g
                 target_m3u.unlink()
 
         subprocess.run(["git", "add", "."], cwd=work_dir, check=True)
-        subprocess.run(["git", "commit", "-m", "Atualiza Listas M3U (Categorias Reais + TVG-ID)"], cwd=work_dir, check=True, stdout=subprocess.DEVNULL)
+        subprocess.run(["git", "commit", "-m", "Atualiza Listas M3U (Grupos por ID+Nome + TVG-ID)"], cwd=work_dir, check=True, stdout=subprocess.DEVNULL)
         subprocess.run(["git", "push", "--force", gist_repo_url, "HEAD:main"], cwd=work_dir, check=True)
         print(f"\n✓ Gist Secreto ({gist_id}) atualizado via Git Push com sucesso!")
     finally:
