@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
-"""Sincronizador M3U Definitivo (Canais + Filmes + Séries com Categorias da API):
-- Canais Ao Vivo: Categorias reais da API ('Canais ⫸ ...') + EPG tvg-id calibrado.
-- Filmes VOD: Categorias reais da API ('Filmes ⫸ ...').
-- Séries VOD: Categorias reais da API ('Séries ⫸ ...') limpando 'S01E01' na busca para separar todas as pastas!
-- Diagnóstico automático no log: mostra exemplos reais de linhas de Filmes e Séries do arquivo bruto.
+"""Sincronizador M3U + Mapa JSON para Servidor Xtream Proxy:
+- Gera 'xtream_map_1.json' no Gist Secreto para o Cloudflare Worker injetar os tvg-ids na API Xtream em tempo real.
+- Gera 'lista_1.m3u' (Completa) e 'canais_1.m3u' (Só Canais) com a correção do bug '4x4'.
 """
 from __future__ import annotations
 
 import gzip
 import html
+import json
 import os
 import random
 import re
@@ -58,11 +57,8 @@ _RE_TVG_ID = re.compile(r'tvg-id="[^"]*"', re.IGNORECASE)
 _RE_GROUP_TITLE = re.compile(r'group-title="([^"]*)"', re.IGNORECASE)
 _RE_STREAM_ID_FROM_URL = re.compile(r"/([^/?#]+?)(?:\.[a-z0-9]+)?(?:\?.*)?$", re.IGNORECASE)
 
-# Regex para identificar episódios de séries (ex: S01E01, S01 E01, T01E01, 1x01)
-_RE_SERIES_EPISODE = re.compile(
-    r"(?:\bS\d{1,2}\s*E\d{1,3}\b|\bT\d{1,2}\s*E\d{1,3}\b|\b\d{1,2}x\d{1,3}\b|\bEPIS[OÓ]DIO\s+\d+\b)",
-    re.IGNORECASE,
-)
+# Regex estrita de episódio (Sem '4x4' para nunca confundir filmes como '4x100' ou '4x4' com séries!)
+_RE_SERIES_EPISODE = re.compile(r"\b(?:S\d{1,2}\s*E\d{1,3}|T\d{1,2}\s*EP?\d{1,3})\b", re.IGNORECASE)
 
 
 def norm_lookup_key(title: str) -> str:
@@ -75,16 +71,16 @@ def norm_lookup_key(title: str) -> str:
 
 def norm_movie_title(title: str) -> str:
     s = html.unescape(title or "")
+    s = re.sub(r"^[+\-\*\s]+", "", s)
     s = re.sub(r"\(\d{4}\)|\[\d{4}\]", " ", s)
     s = re.sub(r"\b(FHD|HD|SD|4K|UHD|H265|LEG|DUB|DUBLADO|LEGENDADO|DUAL)\b", " ", s, flags=re.I)
     return norm_lookup_key(s)
 
 
 def norm_series_base_title(title: str) -> str:
-    """Remove S01E01, Temporada, ano e tags de qualidade para achar o nome da Série na API."""
     s = html.unescape(title or "")
-    # Corta tudo a partir de S01E01 / S01 / T01 / Temporada
-    s = re.split(r"\b(?:S\d{1,2}\s*E\d{1,3}|S\d{1,2}\b|T\d{1,2}\s*E\d{1,3}|TEMPORADA\s*\d+|\d{1,2}X\d{1,3})", s, maxsplit=1, flags=re.I)[0]
+    s = re.sub(r"^[+\-\*\s]+", "", s)
+    s = re.split(r"\b(?:S\d{1,2}\s*E\d{1,3}|S\d{1,2}\b|T\d{1,2}\s*EP?\d{1,3}|TEMPORADA\s*\d+)", s, maxsplit=1, flags=re.I)[0]
     s = re.sub(r"\(\d{4}\)|\[\d{4}\]", " ", s)
     s = re.sub(r"\b(FHD|HD|SD|4K|UHD|H265|LEG|DUB|DUBLADO|LEGENDADO|DUAL)\b", " ", s, flags=re.I)
     return norm_lookup_key(s)
@@ -140,15 +136,15 @@ def request_with_bypass(url: str, stream: bool = False, timeout: int = 90) -> re
     raise RuntimeError(f"Todas as tentativas de bypass falharam ({last_err})")
 
 
-def fetch_all_category_maps(url: str) -> dict[str, dict[str, str]]:
-    """Busca na API Xtream os grupos reais de Canais Ao Vivo, Filmes VOD e Séries."""
-    maps: dict[str, dict[str, str]] = {
+def fetch_all_category_maps(url: str) -> dict[str, any]:
+    maps: dict[str, any] = {
         "live_by_id": {},
         "live_by_name": {},
         "vod_by_id": {},
         "vod_by_name": {},
         "series_by_id": {},
         "series_by_name": {},
+        "raw_live_streams": [],
     }
 
     parsed = urllib.parse.urlparse(url)
@@ -160,7 +156,6 @@ def fetch_all_category_maps(url: str) -> dict[str, dict[str, str]]:
     pwd = query["password"][0]
     base_url = f"{parsed.scheme}://{parsed.netloc}"
 
-    # 1. Canais Ao Vivo
     try:
         c_live = request_with_bypass(
             f"{base_url}/player_api.php?username={user}&password={pwd}&action=get_live_categories", timeout=30
@@ -173,6 +168,8 @@ def fetch_all_category_maps(url: str) -> dict[str, dict[str, str]]:
         s_live = request_with_bypass(
             f"{base_url}/player_api.php?username={user}&password={pwd}&action=get_live_streams", timeout=45
         ).json()
+        if isinstance(s_live, list):
+            maps["raw_live_streams"] = s_live
         for ch in (s_live if isinstance(s_live, list) else []):
             if not isinstance(ch, dict):
                 continue
@@ -189,7 +186,6 @@ def fetch_all_category_maps(url: str) -> dict[str, dict[str, str]]:
     except Exception as e:
         print(f"  -> Nota: Mapa Live indisponível ({e}).")
 
-    # 2. Filmes VOD
     try:
         c_vod = request_with_bypass(
             f"{base_url}/player_api.php?username={user}&password={pwd}&action=get_vod_categories", timeout=30
@@ -218,7 +214,6 @@ def fetch_all_category_maps(url: str) -> dict[str, dict[str, str]]:
     except Exception as e:
         print(f"  -> Nota: Mapa VOD indisponível ({e}).")
 
-    # 3. Séries
     try:
         c_ser = request_with_bypass(
             f"{base_url}/player_api.php?username={user}&password={pwd}&action=get_series_categories", timeout=30
@@ -339,23 +334,16 @@ def set_group_title_in_extinf(extinf_line: str, new_group: str) -> str:
 
 
 def classify_stream_type(stream_url: str, curr_grp: str, item_name: str) -> str:
-    """Classifica com precisão absoluta entre 'live', 'movie' e 'series'."""
     clean_path = stream_url.split("?", 1)[0].lower()
     grp_norm = norm_lookup_key(curr_grp)
     name_upper = item_name.upper().strip()
 
-    # 1. Canais ao vivo (/live/ ou 24H-) são SEMPRE live, mesmo que tenham S01 no nome
     if "/live/" in clean_path or name_upper.startswith("24H-") or grp_norm == "RADIOS":
         return "live"
-
-    # 2. Séries: URL com /series/, ou group-title original SERIE/SERIES, ou padrão S01E01 em arquivo VOD
     if "/series/" in clean_path or "SERIE" in grp_norm or _RE_SERIES_EPISODE.search(item_name):
         return "series"
-
-    # 3. Filmes: URL com /movie/, group-title FILMES, ou extensão de vídeo (.mp4, .mkv, etc.)
     if "/movie/" in clean_path or "FILME" in grp_norm or clean_path.endswith(VOD_URL_EXTENSIONS):
         return "movie"
-
     return "live"
 
 
@@ -407,6 +395,7 @@ def build_calibrated_playlists(
     epg_public_url: str,
     full_out_path: Path,
     live_only_out_path: Path,
+    xtream_map_out_path: Path,
 ) -> tuple[int, int, int, int]:
     tmp_raw = tempfile.NamedTemporaryFile(delete=False, suffix=".raw.m3u")
     tmp_raw_path = Path(tmp_raw.name)
@@ -416,10 +405,9 @@ def build_calibrated_playlists(
     matched_epg = 0
     movie_count = 0
     series_count = 0
-    series_matched_cat = 0
 
-    sample_movies: list[str] = []
-    sample_series: list[str] = []
+    # Mapa que o Cloudflare Worker Xtream Proxy usa para injetar o tvg-id na API player_api.php!
+    xtream_tvgid_map: dict[str, str] = {}
 
     try:
         maps = fetch_all_category_maps(url)
@@ -429,6 +417,19 @@ def build_calibrated_playlists(
         vod_by_name = maps["vod_by_name"]
         series_by_id = maps["series_by_id"]
         series_by_name = maps["series_by_name"]
+
+        # Pré-popula o xtream_tvgid_map com todos os canais da API get_live_streams
+        for ch in maps.get("raw_live_streams", []):
+            if not isinstance(ch, dict):
+                continue
+            ch_name = html.unescape(str(ch.get("name", "")).strip())
+            orig_id = str(ch.get("epg_channel_id", "")).strip()
+            sid = str(ch.get("stream_id", "")).strip()
+            if ch_name:
+                best_id = resolve_best_tvg_id(ch_name, orig_id, epg_index)
+                xtream_tvgid_map[norm_lookup_key(ch_name)] = best_id
+                if sid:
+                    xtream_tvgid_map[f"id:{sid}"] = best_id
 
         print("  -> Baixando arquivo .m3u original...")
         if not download_raw_m3u_exact_url(url, tmp_raw_path):
@@ -486,9 +487,6 @@ def build_calibrated_playlists(
                     kind = classify_stream_type(line.strip(), curr_grp, item_name)
 
                     if kind == "series":
-                        if len(sample_series) < 3:
-                            sample_series.append(f"{extinf_line} -> {line.strip()}")
-
                         base_series_key = norm_series_base_title(item_name)
                         real_ser_grp = (
                             series_by_id.get(stream_id, "")
@@ -500,7 +498,6 @@ def build_calibrated_playlists(
                             continue
 
                         if real_ser_grp:
-                            series_matched_cat += 1
                             pending_lines[extinf_idx] = set_group_title_in_extinf(extinf_line, real_ser_grp)
 
                         for pl in pending_lines:
@@ -509,9 +506,6 @@ def build_calibrated_playlists(
                         series_count += 1
 
                     elif kind == "movie":
-                        if len(sample_movies) < 3:
-                            sample_movies.append(f"{extinf_line} -> {line.strip()}")
-
                         real_movie_grp = (
                             vod_by_id.get(stream_id, "")
                             or vod_by_name.get(norm_lookup_key(item_name), "")
@@ -548,6 +542,8 @@ def build_calibrated_playlists(
                         if best_tvg_id and name_key(best_tvg_id) in epg_index:
                             matched_epg += 1
 
+                        xtream_tvgid_map[norm_lookup_key(item_name)] = best_tvg_id
+
                         pending_lines[extinf_idx] = replace_only_tvg_id_in_extinf(extinf_line, best_tvg_id)
                         for pl in pending_lines:
                             full_out.write(pl + "\n")
@@ -558,10 +554,7 @@ def build_calibrated_playlists(
 
                     pending_lines.clear()
 
-        print(f"  -> Amostra FILMES bruto: {sample_movies[:2]}")
-        print(f"  -> Amostra SÉRIES bruto: {sample_series[:2]}")
-        print(f"  -> ✓ Séries mapeadas nas pastas da API: {series_matched_cat}/{series_count}")
-
+        xtream_map_out_path.write_text(json.dumps(xtream_tvgid_map, ensure_ascii=False), encoding="utf-8")
         return live_count, matched_epg, movie_count, series_count
 
     finally:
@@ -579,19 +572,19 @@ def push_files_to_secret_gist_via_git(generated_files: list[Path], token: str, g
         subprocess.run(["git", "config", "http.postBuffer", "524288000"], cwd=work_dir, check=True)
 
         for fpath in generated_files:
-            target_m3u = work_dir / fpath.name
-            shutil.copy2(fpath, target_m3u)
+            target_file = work_dir / fpath.name
+            shutil.copy2(fpath, target_file)
 
             if fpath.name.startswith("lista_"):
                 target_gz = work_dir / f"{fpath.name}.gz"
                 with fpath.open("rb") as f_in, gzip.open(target_gz, "wb", compresslevel=6) as f_out:
                     shutil.copyfileobj(f_in, f_out, length=1024 * 1024)
 
-                if target_m3u.stat().st_size > 98 * 1024 * 1024:
-                    target_m3u.unlink()
+                if target_file.stat().st_size > 98 * 1024 * 1024:
+                    target_file.unlink()
 
         subprocess.run(["git", "add", "."], cwd=work_dir, check=True)
-        subprocess.run(["git", "commit", "-m", "Atualiza Listas M3U (Canais+Filmes+Series Categorizadas)"], cwd=work_dir, check=True, stdout=subprocess.DEVNULL)
+        subprocess.run(["git", "commit", "-m", "Atualiza Listas M3U + Mapa Xtream"], cwd=work_dir, check=True, stdout=subprocess.DEVNULL)
         subprocess.run(["git", "push", "--force", gist_repo_url, "HEAD:main"], cwd=work_dir, check=True)
         print(f"\n✓ Gist Secreto ({gist_id}) atualizado via Git Push com sucesso!")
     finally:
@@ -614,9 +607,10 @@ def main() -> None:
         print(f"\nProcessando M3U_URL_{i}...")
         full_file = out_dir / f"lista_{i}.m3u"
         live_file = out_dir / f"canais_{i}.m3u"
+        map_file = out_dir / f"xtream_map_{i}.json"
         try:
             live_cnt, matched_cnt, movie_cnt, series_cnt = build_calibrated_playlists(
-                url, epg_index, epg_public_url, full_file, live_file
+                url, epg_index, epg_public_url, full_file, live_file, map_file
             )
             if live_cnt == 0 and movie_cnt == 0 and series_cnt == 0:
                 print(f"  -> ⚠ M3U_URL_{i} retornou vazia. Pulando.")
@@ -626,9 +620,10 @@ def main() -> None:
             live_mb = live_file.stat().st_size / (1024 * 1024)
             print(
                 f"  -> ✓ [lista_{i}.m3u] {live_cnt} Canais ({matched_cnt} com EPG) + {movie_cnt} Filmes + {series_cnt} Episódios de Séries ({full_mb:.2f} MB)\n"
-                f"  -> ✓ [canais_{i}.m3u] Só Canais: {live_cnt} Canais ({live_mb:.2f} MB)"
+                f"  -> ✓ [canais_{i}.m3u] Só Canais: {live_cnt} Canais ({live_mb:.2f} MB)\n"
+                f"  -> ✓ [xtream_map_{i}.json] Mapa de TVG-IDs para o Servidor Xtream gerado!"
             )
-            generated_files.extend([full_file, live_file])
+            generated_files.extend([full_file, live_file, map_file])
         except Exception as e:
             print(f"  -> ❌ Erro na M3U_URL_{i}: {e}")
 
