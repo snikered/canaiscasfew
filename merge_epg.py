@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""EPG Universal Consolidado — Busca em Camadas + Visual Rico (+14/+18/LIVRE) + Apenas [TxxExx] Sem Redundância
-- Integra as fontes diretas da Vivo Play (vivo_epg.xml.gz) e Claro TV+ (claro_epg.xml.gz).
-- Formata todas as descrições com: 🟢 LIVRE / 🔵 +10 / 🟡 +12 / 🟠 +14 / 🔴 +16 / ⚫ +18 | 📅 Ano | ⏱ X mins | 🎭 Categorias.
-- Exibe SOMENTE [T03E07] (sem espaço e sem tag <episode-num> para impedir o player de injetar S04E07 duplicado).
-- Remove qualquer repetição de temporada/episódio ou subtítulo duplicado no título e na sinopse.
+"""EPG Universal Consolidado — 1 Canal Único por Emissora (Sem Clones/Variantes) + Vivo/Claro no Topo
+- Exporta estritamente 1 <channel> por emissora real (elimina a duplicação de exported_ids).
+- Unifica variantes de M3U (FHD, H265, BR2, Backup, Alternativo, Opção 1/2) num único canal base.
+- Remove a geração artificial de dezenas de sufixos de qualidade em <display-name>.
+- Corrige o health_score na janela de 36h para Vivo Play API e Claro assumirem a liderança.
+- Limpa títulos repetidos após ' : ' logo na leitura e mantém visual [T03E07] + 🟢 LIVRE / 🟠 +14.
 """
 from __future__ import annotations
 
@@ -39,14 +40,15 @@ except ImportError:
     from epg_utils import digit_signature, normalize_name as original_normalize_name, normalize_source_id
 
 _QUALITY = re.compile(
-    r"\b(SD|HD|FHD|UHD|4K|8K|H\.?264|H\.?265|HEVC|BR2|P)\b[\*\+]*", re.IGNORECASE
+    r"\b(SD|HD|FHD|UHD|4K|8K|H\.?264|H\.?265|HEVC|AVC|1080P|1080I|720P|60FPS|BR\d*|SRV\d*|SERVER\s*\d*|OP[CÇ][AÃ]O\s*\d*|ALT|ALTERNATIVO|BACKUP|BKP|LOW|MED|HIGH|PLUS\s*HD|P)\b[\*\+]*",
+    re.IGNORECASE,
 )
 
 
 def name_key(value: str) -> str:
-    """Chave de comparação: sem acento, sem qualidade/tags, mantém o conteúdo de ( )."""
+    """Chave de comparação: sem acento, sem qualidade/tags."""
     s = html.unescape(str(value or ""))
-    s = re.sub(r"[¹²³⁴]+", " ", s)
+    s = re.sub(r"[¹²³⁴⁵⁶⁷⁸⁹⁰]+", " ", s)
     s = unicodedata.normalize("NFKD", s)
     s = "".join(c for c in s if not unicodedata.combining(c)).upper()
     s = re.sub(r"\[[^\]]*\]", " ", s)
@@ -94,16 +96,6 @@ def dedupe_display_names(
     return out
 
 
-def name_collisions(names_by_id: dict[str, Iterable[str]]) -> dict[str, list[str]]:
-    owners: dict[str, set[str]] = {}
-    for cid, names in names_by_id.items():
-        for n in names:
-            b = name_key(n)
-            if b:
-                owners.setdefault(b, set()).add(cid)
-    return {b: sorted(v) for b, v in owners.items() if len(v) > 1}
-
-
 CATALOG_PATH = Path(os.environ.get("CHANNELS_FILE", "channels.json"))
 OVERRIDES_PATH = Path(os.environ.get("OVERRIDES_FILE", "overrides.json"))
 OUTPUT_DIR = Path(os.environ.get("OUTPUT_DIR", "output"))
@@ -133,7 +125,6 @@ IPTV_USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
 ]
 
-# Fontes enxutas e sem duplicatas (Vivo Play API e Claro no topo)
 EPG_SOURCES_CONFIG = [
     ("Afiliadas Locais", "epg_afiliadas.xml", "afiliadas_locais", 3.0),
     ("Vivo Play API", "vivo_epg.xml.gz", "vivo_api", 2.8),
@@ -245,7 +236,6 @@ SERIES_CATEGORY_KEYWORDS = (
     "DESENHO",
 )
 
-# Mapa enxuto de classificação indicativa: apenas bolinha + (+10, +12, +14, +16, +18) e LIVRE para L
 RATING_SHORT_MAP = {
     "L": "🟢 LIVRE",
     "LIVRE": "🟢 LIVRE",
@@ -448,16 +438,22 @@ POISONED_OPEN_TV_IDS = {
 }
 
 def strip_qualities_keep_case(name: str) -> str:
+    """Remove todas as tags de qualidade/servidor/backup de listas M3U para não criar canais variantes duplicados."""
     if not name: return ""
     s = html.unescape(name)
     s = re.sub(r'\[.*?\]|\|.*?\|', ' ', s)
-    s = re.sub(r'\(\s*(?:SD|HD|FHD|UHD|4K|8K|H\.?264|H\.?265|HEVC|HDR\+?|BR\d*|BACKUP|ALT|ALTERNATIVO|1080P|720P|\d+)\s*\)', ' ', s, flags=re.IGNORECASE)
+    s = re.sub(
+        r'\(\s*(?:SD|HD|FHD|UHD|4K|8K|H\.?264|H\.?265|HEVC|AVC|HDR\+?|BR\d*|SRV\d*|SERVER\s*\d*|OP[CÇ][AÃ]O\s*\d*|BACKUP|BKP|ALT|ALTERNATIVO|1080P|720P|60FPS|DUAL|LEG|DUB|\d+)\s*\)',
+        ' ',
+        s,
+        flags=re.IGNORECASE,
+    )
     s = re.sub(r'[()]', ' ', s)
-    s = re.sub(r'[\¹\²\³\⁴\~]', ' ', s)
-    tags = r'\b(SD|HD|FHD|UHD|4K|8K|H\.?264|H\.?265|HEVC|HDR\+?|LEG|LEGENDADO|DUB|DUBLADO|HQ|VIP|VOD|24H[S]?|24/7|1080P|720P|60FPS|PPV|EVENTOS?|ALTERNATIVO|BACKUP|BR2)\b[\*\²\³\¹\⁴\+]*'
+    s = re.sub(r'[\¹\²\³\⁴\⁵\⁶\⁷\⁸\⁹\⁰\~]', ' ', s)
+    tags = r'\b(SD|HD|FHD|UHD|4K|8K|H\.?264|H\.?265|HEVC|AVC|HDR\+?|LEG|LEGENDADO|DUB|DUBLADO|DUAL|HQ|VIP|VOD|24H[S]?|24/7|1080P|1080I|720P|60FPS|PPV|EVENTOS?|ALTERNATIVO|ALT|BACKUP|BKP|BR\d+|SRV\d+|SERVER\s*\d+|OP[CÇ][AÃ]O\s*\d+)\b[\*\²\³\¹\⁴\+]*'
     s = re.sub(tags, ' ', s, flags=re.IGNORECASE)
     s = re.sub(r'\bH\s+D\b', ' ', s, flags=re.IGNORECASE)
-    s = re.sub(r'[*=_\-–—]', ' ', s)
+    s = re.sub(r'[*=_\-–—/\\]', ' ', s)
     s = re.sub(r'\.\s*$', '', s)
     return ' '.join(s.split()).strip()
 
@@ -473,14 +469,23 @@ def normalizar_canal(nome: str) -> str:
     nome = re.sub(r'\bFOX SPORTS 2\b', 'ESPN 5', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bFOX SPORTS\b', 'ESPN 4', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bESPN EXTRA\b', 'ESPN 6', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bESPN BRASIL\b', 'ESPN', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bESPN 1\b', 'ESPN', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bSPORTV 1\b', 'SPORTV', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bPREMIERE 1\b', 'PREMIERE CLUBES', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'^PREMIERE$', 'PREMIERE CLUBES', nome.strip(), flags=re.IGNORECASE)
     nome = re.sub(r'\bBOOMERANG\b', 'CARTOONITO', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bMAX PRIME\b', 'HBO POP', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bMAX UP\b', 'HBO POP', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bMAX\b(?!\s+PRIME)', 'HBO MUNDI', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bHBO\s*\+\b', 'HBO PLUS', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bH2\b', 'HISTORY 2', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bHISTORY CHANNEL\b', 'HISTORY', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bDISCOVERY H&H\b', 'DISCOVERY HOME & HEALTH', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bDISCOVERY HOME\s*(?:&|AND)?\s*HEALT\b', 'DISCOVERY HOME & HEALTH', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bDISCOVERY HOME\s*(?:&|AND)?\s*HEALT[H]?\b', 'DISCOVERY HOME & HEALTH', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bDISCOVERY TLC\b', 'TLC', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bID\s+INVESTIGA[CÇ][AÃ]O DISCOVERY\b', 'INVESTIGACAO DISCOVERY', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bDISCOVERY ID\b', 'INVESTIGACAO DISCOVERY', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bFOX PREMIUM\b', 'STAR PREMIUM', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bFOX CHANNEL\b', 'STAR CHANNEL', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bFOX LIFE\b', 'STAR LIFE', nome, flags=re.IGNORECASE)
@@ -652,6 +657,22 @@ _RE_SE_PATTERNS = [
 _RE_EXPLICIT_EPISODE = re.compile(r"[\[\(\-\s]*\b(?:EPIS[OÓ]DIO|EP\.?)\s*(\d{1,4})\b[\]\)]*", re.IGNORECASE)
 _RE_TRAILING_FAKE_EP = re.compile(r"(?:\s*[\-\|:]\s*|\s+)(?:\[|\()?E(?:P)?\.?\s*0*1(?:\]|\))?\s*$", re.IGNORECASE)
 
+def clean_raw_title(raw_title: str) -> str:
+    """Limpa repetições após ' : ' (ex: 'Jogo X - Copa : Jogo X') e sufixos falsos ' - Ep. 1' logo na leitura."""
+    if not raw_title:
+        return ""
+    t = raw_title.strip()
+    if " : " in t:
+        parts = [p.strip() for p in t.split(" : ", 1)]
+        if len(parts) == 2 and parts[0] and parts[1]:
+            p0_up, p1_up = parts[0].upper(), parts[1].upper()
+            if p0_up == p1_up or p1_up in p0_up:
+                t = parts[0]
+            elif p0_up in p1_up:
+                t = parts[1]
+    t = _RE_TRAILING_FAKE_EP.sub("", t).strip()
+    return t
+
 def strip_se_tokens(text: str) -> str:
     """Remove qualquer S01E02, T01E02, [T03E07], Ep. 2 ou cabeçalhos antigos duplicados do texto."""
     if not text:
@@ -725,7 +746,7 @@ def extract_program_metadata(el: ET.Element, channel_name: str = "", duration_mi
         if not txt:
             continue
         if tag == "title" and not title:
-            title = txt
+            title = clean_raw_title(txt)
         elif tag == "sub-title" and not sub_title:
             sub_title = txt
         elif tag == "desc" and len(txt) > len(desc):
@@ -758,7 +779,6 @@ def extract_program_metadata(el: ET.Element, channel_name: str = "", duration_mi
             if m_age:
                 rating_badge = RATING_SHORT_MAP.get(m_age.group(1), "")
 
-    # Limpa duplicidades como "Jogo X - Copa do Rei : Jogo X"
     if " : " in title and not sub_title:
         parts = [p.strip() for p in title.split(" : ", 1)]
         if len(parts) == 2 and parts[0] and parts[1]:
@@ -1342,7 +1362,8 @@ def manual_override(overrides: dict[str, object], target_id: str) -> tuple[str |
 def programme_title(programme: ET.Element | None) -> str:
     if programme is None: return ""
     for child in programme:
-        if local_tag(child) == "title" and (child.text or "").strip(): return (child.text or "").strip()
+        if local_tag(child) == "title" and (child.text or "").strip():
+            return clean_raw_title((child.text or "").strip())
     return ""
 
 @lru_cache(maxsize=200000)
@@ -1451,18 +1472,20 @@ def schedule_health(source: EpgSource, channel_id: str, now: datetime) -> dict[s
         rich_points += min(1.0, pts)
     richness_score = round(rich_points / len(sample_rows), 4) if sample_rows else 0.0
 
-    for row in rows:
+    # Avalia gaps/overlaps apenas nas próximas 36h para não punir operadoras que trazem 7 dias de guia
+    eval_window_end = now + timedelta(hours=36)
+    eval_rows = [r for r in rows if r.stop > now and r.start < eval_window_end]
+    for row in eval_rows:
         start, stop = row.start, row.stop
         duration = stop - start
         if duration.total_seconds() <= 0 or duration > timedelta(hours=12): invalid += 1
         if previous_stop is not None:
-            if start < previous_stop - timedelta(seconds=30): overlaps += 1
-            elif start > previous_stop + timedelta(minutes=15): gaps += 1
+            if start < previous_stop - timedelta(seconds=60): overlaps += 1
+            elif start > previous_stop + timedelta(minutes=30): gaps += 1
         if previous_stop is None or stop > previous_stop: previous_stop = stop
         
     future_end = max((row.stop for row in rows if row.stop > now), default=None)
     future_hours = max(0.0, (future_end - now).total_seconds() / 3600) if future_end else 0.0
-    # Qualquer fonte com >= 20h futuras (como Vivo Play e Claro) atinge nota máxima de cobertura futura
     score = (
         (0.25 if current else 0.0)
         + (0.10 if next_item else 0.0)
@@ -1554,10 +1577,10 @@ def evaluate_candidates(matches: list[ChannelMatch], now: datetime, max_active_v
             int(ev.match.match_score >= 0.999),
             consensus_tier,
             round(ev.health_score, 2),
+            -ev.match.source.spec.priority,
             round(ev.richness_score, 2),
             ev.support_weight,
             ev.avg_support_agreement,
-            -ev.match.source.spec.priority,
         )
 
     evaluations.sort(key=rank, reverse=True)
@@ -1608,103 +1631,59 @@ def make_validation(entry: dict[str, object], chosen: CandidateEvaluation, all_e
         "cross_sources": chosen.comparisons, "candidates": candidates,
     }
 
-def generate_quality_variants(base_names: Iterable[str]) -> list[str]:
-    suffixes = [
-        "",
-        " SD",
-        " HD",
-        " FHD",
-        " FHD [H265]",
-        " FHD H265",
-        " HD [H265]",
-        " HD H265",
-        " [H265]",
-        " H265",
-        " 4K",
-        " HD [1]",
-        " HD [2]",
-        " HD [3]",
-        " FHD [1]",
-        " FHD [2]",
-        " FHD [3]",
-        " SD [1]",
-        " SD [2]",
-        " SD [3]",
-        " [1]",
-        " [2]",
-        " [3]",
-        " HD (BR2)",
-        " FHD (BR2)",
-        " FHD ²",
-        " HD ²",
-        " SD ²",
-    ]
+def get_clean_aliases(entry: dict[str, object]) -> list[str]:
+    """Retorna apenas os nomes reais e IDs de compatibilidade limpos, sem multiplicar dezenas de sufixos FHD/H265."""
     result = []
     seen = set()
-    for base in base_names:
-        b_unesc = html.unescape(str(base)).strip()
-        b_keep_parens = re.sub(r'\s+\b(SD|HD|FHD|UHD|4K|H265|HEVC)\b.*$', '', b_unesc, flags=re.IGNORECASE).strip()
-        clean_base = strip_qualities_keep_case(b_unesc)
-        for root in (b_unesc, b_keep_parens, clean_base):
-            if not root or len(root) > 160:
-                continue
-            for suf in suffixes:
-                cand = f"{root}{suf}".strip()
-                if cand and cand.upper() not in seen:
-                    result.append(cand)
-                    seen.add(cand.upper())
+
+    def add_alias(val: str):
+        v = html.unescape(str(val or "")).strip()
+        if not v or len(v) > 100:
+            return
+        if v.upper() not in seen:
+            result.append(v)
+            seen.add(v.upper())
+
+    raw_name = str(entry.get("name", "")).strip()
+    clean_base = strip_qualities_keep_case(raw_name)
+    norm_clean = normalizar_canal(raw_name)
+
+    for candidate in (clean_base, norm_clean, raw_name):
+        if candidate:
+            add_alias(candidate)
+
+    for cid in entry.get("compatibility_ids", []) or []:
+        if is_valid_provider_tvid(raw_name, str(cid)):
+            add_alias(str(cid))
+
+    for t_id in entry.get("tvg_ids_to_export", []) or []:
+        if is_valid_provider_tvid(raw_name, str(t_id)):
+            add_alias(str(t_id))
+
+    for syn in CHANNEL_SYNONYMS.get(norm_clean, []):
+        add_alias(syn)
+
+    for a in (entry.get("aliases", []) or [])[:8]:
+        a_clean = strip_qualities_keep_case(str(a))
+        if a_clean:
+            add_alias(a_clean)
+
     return result
 
-def get_clean_aliases(entry: dict[str, object]) -> list[str]:
-    values = []
-    raw_name = str(entry.get("name", "")).strip()
-    if raw_name:
-        values.append(raw_name)
-        values.append(raw_name.upper())
-        values.append(raw_name.title())
-    if entry.get("tvg_names"):
-        for x in entry.get("tvg_names", []):
-            if x:
-                s = str(x).strip()
-                values.extend([s, s.upper(), s.title()])
-    if entry.get("aliases"):
-        for x in entry.get("aliases", []):
-            if x:
-                s = str(x).strip()
-                values.extend([s, s.upper(), s.title()])
-        
-    norm_clean = normalizar_canal(raw_name)
-    if norm_clean:
-        values.append(norm_clean)
-        values.append(norm_clean.title())
-    for syn in CHANNEL_SYNONYMS.get(norm_clean, []):
-        values.append(syn)
-        values.append(syn.title())
-
-    return generate_quality_variants(values)
-
 def get_primary_export_ids(entry: dict[str, object]) -> list[str]:
-    ids = []
-    seen = set()
+    """Retorna ESTRITAMENTE 1 único ID por canal para nunca clonar a mesma emissora no XML."""
     raw_name = str(entry.get("name", "")).strip()
     target_id = str(entry.get("id", "")).strip()
     clean_base = strip_qualities_keep_case(raw_name) or target_id
 
-    def add_id(val: str):
-        v = val.strip()
-        if v and v not in seen and len(v) <= 180:
-            ids.append(v)
-            seen.add(v)
-
     for cid in entry.get("compatibility_ids", []) or []:
         if is_valid_provider_tvid(raw_name, str(cid)):
-            add_id(str(cid))
+            return [str(cid).strip()]
     for t_id in entry.get("tvg_ids_to_export", []) or []:
         if is_valid_provider_tvid(raw_name, str(t_id)):
-            add_id(str(t_id))
+            return [str(t_id).strip()]
 
-    add_id(clean_base)
-    return ids[:2]
+    return [clean_base]
 
 def apply_rich_metadata_to_element(
     el: ET.Element, meta_pool: list[dict[str, Any]], channel_name: str, duration_minutes: float
@@ -1746,13 +1725,12 @@ def apply_rich_metadata_to_element(
         best_season = None
         best_episode = None
 
-    # CRÍTICO: Remove TODAS as tags <episode-num> para impedir que o TiviMate/Televizo injete S04E07 duplicado!
     for old_ep in list(el.findall("episode-num")):
         el.remove(old_ep)
 
     title_node = el.find("title")
     clean_title = base_meta["title"] or (title_node.text.strip() if title_node is not None and title_node.text else "")
-    clean_title = _RE_TRAILING_FAKE_EP.sub("", clean_title).strip()
+    clean_title = clean_raw_title(clean_title)
     if title_node is not None and clean_title:
         title_node.text = clean_title
 
@@ -1769,7 +1747,6 @@ def apply_rich_metadata_to_element(
     if sub_node is not None:
         el.remove(sub_node)
 
-    # Formato estrito pedido: [T03E07] (sem espaço e sem SxxExx)
     se_badge = ""
     if not is_movie_or_sport:
         if best_season is not None and best_episode is not None:
@@ -1777,7 +1754,6 @@ def apply_rich_metadata_to_element(
         elif best_episode is not None and best_episode > 1:
             se_badge = f"[Ep.{best_episode:02d}]"
 
-    # Linha 1: 🟠 +14 | 📅 2021 | ⏱ 45 mins | 🎭 Séries, Policial
     meta_bar: list[str] = []
     if best_rating_badge:
         meta_bar.append(best_rating_badge)
@@ -1789,7 +1765,6 @@ def apply_rich_metadata_to_element(
     if merged_cats:
         meta_bar.append(f"🎭 {', '.join(merged_cats[:4])}")
 
-    # Linha 2 (Séries/Episódios): [T03E07] Nome do Episódio
     ep_line_parts: list[str] = []
     if se_badge:
         ep_line_parts.append(se_badge)
@@ -2026,7 +2001,7 @@ def write_epg_stream(
                 gz.write(data)
                 if plain is not None: plain.write(data)
 
-            generator = "EPG Universal Otimizado (Vivo/Claro Direto + [TxxExx] Limpo)"
+            generator = "EPG Universal Otimizado (1 Canal Único por Emissora + Vivo/Claro Direto)"
             source_name = "Consolidado Inteligente de Múltiplas Fontes"
             emit((f"<?xml version='1.0' encoding='utf-8'?>\n<tv generator-info-name={quoteattr(generator)} source-info-name={quoteattr(source_name)}>\n").encode("utf-8"))
 
@@ -2089,7 +2064,7 @@ def ensure_operator_epgs_generated() -> None:
             print(f"  -> Aviso ao extrair Vivo Play API: {e}")
 
 def main() -> None:
-    print("Iniciando geração de EPG (Vivo/Claro Direto + Visual +14/+18/LIVRE + Apenas [TxxExx])...")
+    print("Iniciando geração de EPG (Sem Variantes Repetidas + Vivo/Claro Direto + Apenas [TxxExx])...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -2106,11 +2081,15 @@ def main() -> None:
     def merge_channel_record(ch_id: str, name: str, aliases: Iterable[str] = (), tvg_ids: Iterable[str] = (), comp_ids: Iterable[str] = (), source_ids: Iterable[str] = (), group: str = "") -> None:
         base_name = html.unescape(name or ch_id).strip()
         if not base_name: return
-        norm_key = normalize_name(base_name) or base_name.strip().upper()
+        # Usa normalizar_canal + inferir_emissora_pelo_grupo para fundir variantes do mesmo canal na raiz
+        canon_name = inferir_emissora_pelo_grupo(normalizar_canal(base_name), group)
+        norm_key = original_normalize_name(canon_name) or canon_name.strip().upper()
+        if not norm_key or len(norm_key) < 2:
+            return
         if norm_key not in grouped_by_norm:
             grouped_by_norm[norm_key] = {
-                "id": ch_id or base_name,
-                "name": strip_qualities_keep_case(base_name) or base_name,
+                "id": ch_id or canon_name,
+                "name": strip_qualities_keep_case(base_name) or canon_name,
                 "aliases": set(),
                 "tvg_ids_to_export": set(),
                 "compatibility_ids": set(),
@@ -2118,9 +2097,12 @@ def main() -> None:
                 "group": group or "",
             }
         rec = grouped_by_norm[norm_key]
-        if base_name: rec["aliases"].add(base_name)
+        if base_name: rec["aliases"].add(strip_qualities_keep_case(base_name) or base_name)
         for a in aliases:
-            if a: rec["aliases"].add(html.unescape(str(a)).strip())
+            if a:
+                a_clean = strip_qualities_keep_case(html.unescape(str(a)).strip())
+                if a_clean:
+                    rec["aliases"].add(a_clean)
         for t in tvg_ids:
             if t: rec["tvg_ids_to_export"].add(str(t).strip())
         for c in comp_ids:
@@ -2352,6 +2334,7 @@ def main() -> None:
     stage_start = time.perf_counter()
     selected, report_rows, validations = [], [], []
 
+    # Desduplicação também por (source_key, source_channel_id) caso duas variantes da lista apontem para o mesmo canal na fonte
     for entry in entries:
         target_id = str(entry.get("id", ""))
         visible_name = str(entry.get("name", ""))
@@ -2385,7 +2368,7 @@ def main() -> None:
         validations.append(make_validation(entry, chosen, evaluations, now))
 
     matched_ids = {str(e.get("id", "")) for e, _, _, _ in selected}
-    clean_espelho_entries = [e for e in entries if str(e.get("id", "")) in matched_ids or len(entries) <= 1200]
+    clean_espelho_entries = [e for e in entries if str(e.get("id", "")) in matched_ids]
     espelho_to_save = {"updated_at": datetime.now(timezone.utc).isoformat(), "channels": clean_espelho_entries}
     (OUTPUT_DIR / "espelho.json").write_text(json.dumps(espelho_to_save, ensure_ascii=False, indent=2), "utf-8")
 
