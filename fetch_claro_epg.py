@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Extrator Direto da Claro TV+ (Claro Video / NET Gatekeeper) -> XMLTV (claro_epg.xml.gz)
-- Blindado contra bug de Fuso Horário: Prioriza Epoch Unix (unix_begin/unix_end) e trata offsets ISO (-03:00 vs UTC)
-  convertendo sempre com precisão matemática para America/Sao_Paulo (-0300).
-- Formata <desc> com o padrão enxuto:
+"""Extrator Direto da Claro TV+ (Claro Video) -> XMLTV (claro_epg.xml.gz)
+- Ordena estritamente todos os programas por canal e horário (corrige o bug onde 2489 programas viravam 41 no merge_epg.py).
+- Blindado contra bug de Fuso Horário: Prioriza Epoch Unix (unix_begin/unix_end) convertido para America/Sao_Paulo (-0300).
+- Formata <desc> no padrão enxuto:
     🟢 LIVRE | 📅 2024 | ⏱ 45 mins | 🎭 Esportes, Futebol
     🟠 +14 | 📅 2021 | ⏱ 60 mins | 🎭 Séries, Policial
+    [T03E07] Nome do Episódio
 """
 from __future__ import annotations
 
@@ -20,15 +21,11 @@ from typing import Any
 
 import requests
 
-# Fuso Horário Oficial do Brasil (BRT = UTC-3)
 BRT_TZ = timezone(timedelta(hours=-3))
 OUT_CLARO_GZ = Path("claro_epg.xml.gz")
 
-# Endpoints oficiais da Claro TV+ Brasil
 CLARO_MFWK_BASE = "https://mfwkweb-api.clarovideo.net/services/epg"
-CLARO_GATEKEEPER_BASE = "https://programacao.claro.com.br/gatekeeper"
 
-# Parâmetros padrão exigidos pela API mfwkweb da Claro TV+ Brasil
 CLARO_COMMON_PARAMS = {
     "device_id": "web",
     "device_category": "web",
@@ -70,7 +67,6 @@ RATING_SHORT_MAP = {
 
 
 def format_rating_badge(raw_rating: Any) -> tuple[str, str]:
-    """Converte classificação da Claro para ('🟢 LIVRE', 'L') ou ('🟠 +14', 'PG-14')."""
     if raw_rating is None:
         return "", ""
     r = str(raw_rating).strip().upper()
@@ -78,7 +74,7 @@ def format_rating_badge(raw_rating: Any) -> tuple[str, str]:
         return "", ""
     if "LIVRE" in r or r in {"L", "0", "G", "ALL"}:
         return "🟢 LIVRE", "L"
-    m = re.search(r"\b(10|12|14|16|18)\b", r)
+    m = re.search(r"(?:\+|\b)(10|12|14|16|18)\b", r)
     if m:
         age = m.group(1)
         return RATING_SHORT_MAP[age], f"PG-{age}"
@@ -92,8 +88,8 @@ def build_clean_visual_desc(
     duration_mins: int | None = None,
     categories: list[str] | None = None,
     sub_title: str = "",
+    se_badge: str = "",
 ) -> str:
-    """Monta o cabeçalho curto com bolinha +14/+18 ou LIVRE na mesma linha dos metadados."""
     meta_parts: list[str] = []
     if rating_badge:
         meta_parts.append(rating_badge)
@@ -104,15 +100,22 @@ def build_clean_visual_desc(
     if categories:
         clean_cats = [c.strip() for c in categories if c and c.strip()]
         if clean_cats:
-            meta_parts.append(f"🎭 {', '.join(dict.fromkeys(clean_cats))}")
+            meta_parts.append(f"🎭 {', '.join(dict.fromkeys(clean_cats[:4]))}")
 
     header_lines: list[str] = []
     if meta_parts:
         header_lines.append(" | ".join(meta_parts))
-    if sub_title:
-        header_lines.append(f"📝 {sub_title.strip()}")
 
+    clean_sub = (sub_title or "").strip()
     clean_syn = (synopsis or "").strip()
+    if clean_sub and clean_syn.lower().startswith(clean_sub.lower()):
+        clean_syn = clean_syn[len(clean_sub):].lstrip(" -–—:|.,")
+
+    ep_parts = [p for p in (se_badge, clean_sub) if p]
+    if ep_parts:
+        ep_str = " ".join(ep_parts)
+        header_lines.append(ep_str if se_badge else f"📝 {ep_str}")
+
     if header_lines and clean_syn:
         return "\n".join(header_lines) + "\n\n" + clean_syn
     if header_lines:
@@ -121,7 +124,6 @@ def build_clean_visual_desc(
 
 
 def make_channel_id(name: str) -> str:
-    """Gera ID padronizado ex: 'SporTV 2 HD' -> 'SporTV2.br'."""
     s = html.unescape(name or "")
     s = re.sub(r"\b(FHD|UHD|4K|HD|SD)\b", " ", s, flags=re.I)
     s = unicodedata.normalize("NFKD", s)
@@ -136,12 +138,6 @@ def parse_claro_time_to_brt(
     date_str: Any = None,
     source_default_tz: timezone = BRT_TZ,
 ) -> tuple[str, datetime | None]:
-    """Conversor de Horário Blindado para a Claro TV+:
-    1. Se tiver unix_begin / unix_end (Epoch UTC em segundos ou ms), usa ele como verdade absoluta!
-    2. Se vier string ISO com fuso ('2026-11-13T18:00:00-03:00' ou 'Z'), respeita o offset e converte para BRT (-0300).
-    3. Se vier string sem fuso ('2026/11/13 18:00:00' ou '20261113180000'), aplica source_default_tz e converte para -0300.
-    """
-    # 1. Prioridade máxima: Timestamp Unix (nunca erra fuso horário)
     if unix_ts is not None and str(unix_ts).strip() != "":
         try:
             val = float(str(unix_ts).strip())
@@ -157,37 +153,6 @@ def parse_claro_time_to_brt(
         return "", None
 
     raw = str(date_str).strip()
-
-    # 2. Caso já venha no formato XMLTV ex: "20261113150000 -0300" ou "20261113180000 +0000"
-    m_xml = re.match(r"^(\d{14})(?:\s*([+-]\d{4}|Z))?$", raw)
-    if m_xml:
-        digits, tz_part = m_xml.group(1), m_xml.group(2)
-        dt_naive = datetime.strptime(digits, "%Y%m%d%H%M%S")
-        if tz_part in {"Z", "+0000", "-0000"}:
-            dt_aware = dt_naive.replace(tzinfo=timezone.utc).astimezone(BRT_TZ)
-        elif tz_part and len(tz_part) == 5:
-            sign = -1 if tz_part[0] == "-" else 1
-            hh, mm = int(tz_part[1:3]), int(tz_part[3:5])
-            custom_tz = timezone(timedelta(minutes=sign * (hh * 60 + mm)))
-            dt_aware = dt_naive.replace(tzinfo=custom_tz).astimezone(BRT_TZ)
-        else:
-            dt_aware = dt_naive.replace(tzinfo=source_default_tz).astimezone(BRT_TZ)
-        return dt_aware.strftime("%Y%m%d%H%M%S -0300"), dt_aware
-
-    # 3. Formato ISO 8601 (ex: "2026-11-13T15:30:00-03:00" ou "2026-11-13T18:30:00Z")
-    try:
-        iso_norm = raw.replace("/", "-")
-        if iso_norm.endswith("Z"):
-            iso_norm = iso_norm[:-1] + "+00:00"
-        dt_parsed = datetime.fromisoformat(iso_norm)
-        if dt_parsed.tzinfo is None:
-            dt_parsed = dt_parsed.replace(tzinfo=source_default_tz)
-        dt_brt = dt_parsed.astimezone(BRT_TZ)
-        return dt_brt.strftime("%Y%m%d%H%M%S -0300"), dt_brt
-    except Exception:
-        pass
-
-    # 4. Outros formatos comuns da Claro ("YYYY/MM/DD HH:MM:SS" ou "DD/MM/YYYY HH:MM:SS")
     for fmt in ("%Y-%m-%d %H:%M:%S", "%Y/%m/%d %H:%M:%S", "%d/%m/%Y %H:%M:%S", "%Y%m%d%H%M%S"):
         try:
             dt_naive = datetime.strptime(raw[:19], fmt)
@@ -195,7 +160,6 @@ def parse_claro_time_to_brt(
             return dt_brt.strftime("%Y%m%d%H%M%S -0300"), dt_brt
         except Exception:
             continue
-
     return "", None
 
 
@@ -216,7 +180,6 @@ def fetch_claro_mfwk_window(
     dt_from_brt: datetime,
     dt_to_brt: datetime,
 ) -> list[dict[str, Any]]:
-    """Consulta um bloco de horas na API mfwkweb da Claro TV+."""
     params = {
         **CLARO_COMMON_PARAMS,
         "date_from": dt_from_brt.strftime("%Y%m%d%H%M%S"),
@@ -238,25 +201,22 @@ def fetch_claro_mfwk_window(
 def generate_claro_epg(days_ahead: int = 2, out_gz_path: Path = OUT_CLARO_GZ) -> int:
     session = create_session()
 
-    # Sempre ancorado no horário de Brasília (-03:00), arredondado para o início da hora
     now_brt = datetime.now(BRT_TZ).replace(minute=0, second=0, microsecond=0)
     start_brt = now_brt - timedelta(hours=3)
     end_brt = now_brt + timedelta(days=days_ahead)
 
-    # Divide em janelas de 12 horas para a API da Claro não truncar eventos
     windows: list[tuple[datetime, datetime]] = []
     curr = start_brt
     while curr < end_brt:
-        nxt = min(curr + timedelta(hours=12), end_brt)
+        nxt = min(curr + timedelta(hours=6), end_brt)
         windows.append((curr, nxt))
         curr = nxt
 
     print(f"Consultando API Claro TV+ em {len(windows)} janelas de tempo (Fuso BRT -0300)...")
 
     tv_root = ET.Element("tv", {"generator-info-name": "claro-tvmais-extractor"})
-    seen_channels: set[str] = set()
-    seen_programmes: set[tuple[str, str]] = set()
-    prog_count = 0
+    channels_by_id: dict[str, ET.Element] = {}
+    progs_by_channel: dict[str, dict[str, tuple[datetime, ET.Element]]] = {}
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
         futures = [pool.submit(fetch_claro_mfwk_window, session, w_from, w_to) for w_from, w_to in windows]
@@ -270,9 +230,8 @@ def generate_claro_epg(days_ahead: int = 2, out_gz_path: Path = OUT_CLARO_GZ) ->
                     continue
 
                 xml_cid = make_channel_id(ch_name)
-                if xml_cid not in seen_channels:
-                    seen_channels.add(xml_cid)
-                    ch_el = ET.SubElement(tv_root, "channel", {"id": xml_cid})
+                if xml_cid not in channels_by_id:
+                    ch_el = ET.Element("channel", {"id": xml_cid})
                     dn_el = ET.SubElement(ch_el, "display-name", {"lang": "pt"})
                     dn_el.text = ch_name
 
@@ -284,13 +243,13 @@ def generate_claro_epg(days_ahead: int = 2, out_gz_path: Path = OUT_CLARO_GZ) ->
                     logo = str(ch.get("image") or ch.get("logo") or "").strip()
                     if logo:
                         ET.SubElement(ch_el, "icon", {"src": logo})
+                    channels_by_id[xml_cid] = ch_el
 
                 events = ch.get("events") or []
                 for ev in events:
                     if not isinstance(ev, dict):
                         continue
 
-                    # Usa unix_begin / unix_end com prioridade para garantir zero erro de fuso horário!
                     start_str, dt_start = parse_claro_time_to_brt(
                         unix_ts=ev.get("unix_begin"),
                         date_str=ev.get("date_begin"),
@@ -303,14 +262,10 @@ def generate_claro_epg(days_ahead: int = 2, out_gz_path: Path = OUT_CLARO_GZ) ->
                     )
 
                     title = html.unescape(str(ev.get("name") or ev.get("title") or "").strip())
-                    if not start_str or not stop_str or not title:
+                    if not start_str or not stop_str or not dt_start or not dt_stop or not title:
                         continue
-
-                    # Evita programas duplicados na fronteira entre duas janelas de 12h
-                    dedup_key = (xml_cid, start_str)
-                    if dedup_key in seen_programmes:
+                    if dt_stop <= dt_start:
                         continue
-                    seen_programmes.add(dedup_key)
 
                     ext = ev.get("ext") if isinstance(ev.get("ext"), dict) else {}
                     sub_title = html.unescape(
@@ -321,6 +276,15 @@ def generate_claro_epg(days_ahead: int = 2, out_gz_path: Path = OUT_CLARO_GZ) ->
                     )
                     year = str(ext.get("year") or ev.get("year") or "").strip()[:4]
 
+                    # Extrai Temporada e Episódio no formato [T03E07]
+                    se_badge = ""
+                    s_num = ext.get("season_number") or ev.get("season_number")
+                    e_num = ext.get("episode_number") or ev.get("episode_number")
+                    if s_num and e_num and str(s_num).isdigit() and str(e_num).isdigit():
+                        s_i, e_i = int(s_num), int(e_num)
+                        if 0 < s_i <= 60 and 0 < e_i <= 999:
+                            se_badge = f"[T{s_i:02d}E{e_i:02d}]"
+
                     raw_rating = (
                         ev.get("parental_rating")
                         or ext.get("parental_rating")
@@ -329,43 +293,31 @@ def generate_claro_epg(days_ahead: int = 2, out_gz_path: Path = OUT_CLARO_GZ) ->
                     )
                     rating_badge, rating_code = format_rating_badge(raw_rating)
 
-                    dur_mins: int | None = None
-                    if dt_start and dt_stop:
-                        diff = int((dt_stop - dt_start).total_seconds() // 60)
-                        if 1 <= diff <= 720:
-                            dur_mins = diff
+                    dur_mins = int((dt_stop - dt_start).total_seconds() // 60)
 
                     cats: list[str] = []
-                    raw_genres = ext.get("genres") or ev.get("genres") or ev.get("talent") or ""
+                    raw_genres = ext.get("genres") or ev.get("genres") or ""
                     if isinstance(raw_genres, list):
                         cats = [str(g).strip() for g in raw_genres if str(g).strip()]
                     elif isinstance(raw_genres, str) and raw_genres.strip():
                         cats = [g.strip() for g in re.split(r"[,/]", raw_genres) if g.strip()]
 
-                    p_el = ET.SubElement(
-                        tv_root,
+                    p_el = ET.Element(
                         "programme",
                         {"start": start_str, "stop": stop_str, "channel": xml_cid},
                     )
 
                     t_el = ET.SubElement(p_el, "title", {"lang": "pt"})
-                    t_el.text = (
-                        f"{title} : {sub_title}"
-                        if sub_title and sub_title.lower() not in title.lower()
-                        else title
-                    )
-
-                    if sub_title:
-                        st_el = ET.SubElement(p_el, "sub-title", {"lang": "pt"})
-                        st_el.text = sub_title
+                    t_el.text = title
 
                     desc_text = build_clean_visual_desc(
                         synopsis=synopsis,
                         rating_badge=rating_badge,
                         year=year,
-                        duration_mins=dur_mins,
+                        duration_mins=dur_mins if 1 <= dur_mins <= 720 else None,
                         categories=cats,
-                        sub_title=sub_title if not rating_badge else "",
+                        sub_title=sub_title,
+                        se_badge=se_badge,
                     )
                     if desc_text:
                         d_el = ET.SubElement(p_el, "desc", {"lang": "pt"})
@@ -393,13 +345,25 @@ def generate_claro_epg(days_ahead: int = 2, out_gz_path: Path = OUT_CLARO_GZ) ->
                         v_el = ET.SubElement(r_el, "value")
                         v_el.text = rating_code
 
-                    prog_count += 1
+                    progs_by_channel.setdefault(xml_cid, {})[start_str] = (dt_start, p_el)
+
+    # 1. Adiciona todos os canais ordenados
+    for cid in sorted(channels_by_id.keys()):
+        tv_root.append(channels_by_id[cid])
+
+    # 2. Adiciona todos os programas ESTRITAMENTE ordenados por horário de início em cada canal
+    prog_count = 0
+    for cid in sorted(progs_by_channel.keys()):
+        sorted_events = sorted(progs_by_channel[cid].values(), key=lambda x: x[0])
+        for _, p_elem in sorted_events:
+            tv_root.append(p_elem)
+            prog_count += 1
 
     xml_bytes = ET.tostring(tv_root, encoding="utf-8", xml_declaration=True)
     with gzip.open(out_gz_path, "wb", compresslevel=6) as gz_out:
         gz_out.write(xml_bytes)
 
-    print(f"✓ Claro TV+ EPG salvo em {out_gz_path} ({len(seen_channels)} canais, {prog_count} programas em -0300).")
+    print(f"✓ Claro TV+ EPG salvo e ordenado em {out_gz_path} ({len(channels_by_id)} canais, {prog_count} programas em -0300).")
     return prog_count
 
 
