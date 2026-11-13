@@ -732,7 +732,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | VARIEDADES"
+      "group": ""
     },
     {
       "id": "auto.adulttvlivecams1",
@@ -882,12 +882,10 @@
       "aliases": [
         "Al Jazeera~"
       ],
-      "tvg_ids_to_export": [
-        "AlJazeera.qa"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | NOTICIARIO"
+      "group": ""
     },
     {
       "id": "auto.24haladdin",
@@ -1012,9 +1010,6 @@
       "id": "auto.animalplanet",
       "name": "Animal Planet",
       "aliases": [
-        "ANIMAL PLANET",
-        "ANIMAL PLANET FHD",
-        "ANIMAL PLANET FHD H.265",
         "ANIMAL PLANET FHD*",
         "ANIMAL PLANET FHD²",
         "ANIMAL PLANET H265",
@@ -1024,6 +1019,7 @@
         "ANIMAL PLANET SD",
         "ANIMAL PLANET SD*",
         "ANIMAL PLANET SD²",
+        "Animal Planet",
         "Animal Planet 4K",
         "Animal Planet FHD",
         "Animal Planet FHD [H265]",
@@ -1033,13 +1029,11 @@
         "Animal Planet [1]"
       ],
       "tvg_ids_to_export": [
-        "AnimalPlanet.br",
-        "animal.planet.br",
         "animalplanet.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: DOCUMENTÁRIOS ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.24hanimaniacs",
@@ -1080,6 +1074,7 @@
       "id": "auto.appletv02",
       "name": "Apple TV 02",
       "aliases": [
+        "APPLE TV 02",
         "Apple TV 02"
       ],
       "tvg_ids_to_export": [],
@@ -1091,7 +1086,6 @@
       "id": "auto.appletv03",
       "name": "Apple TV 03",
       "aliases": [
-        "APPLE TV 03",
         "Apple TV 03"
       ],
       "tvg_ids_to_export": [],
@@ -1103,7 +1097,6 @@
       "id": "auto.appletv04",
       "name": "Apple TV 04",
       "aliases": [
-        "APPLE TV 04",
         "Apple TV 04"
       ],
       "tvg_ids_to_export": [],
@@ -1420,12 +1413,10 @@
       "aliases": [
         "Arirang TV Issue Korea~"
       ],
-      "tvg_ids_to_export": [
-        "ArirangTV.kr"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | NOTICIARIO"
+      "group": ""
     },
     {
       "id": "auto.arte1",
@@ -1433,6 +1424,7 @@
       "aliases": [
         "ARTE 1",
         "ARTE 1 FHD",
+        "ARTE 1 HD",
         "ARTE 1 SD*",
         "Arte 1 FHD",
         "Arte 1 FHD [H265]",
@@ -1869,7 +1861,7 @@
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: 4K ⭐"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.axnfhdr",
@@ -1946,11 +1938,11 @@
       "id": "auto.band",
       "name": "BAND",
       "aliases": [
+        "BAND",
         "BAND  SD",
         "BAND  SD²",
         "BAND FHD",
         "BAND HD",
-        "Band",
         "Band 4K"
       ],
       "tvg_ids_to_export": [
@@ -1965,18 +1957,15 @@
       "name": "BAND BAHIA",
       "aliases": [
         "BAND BAHIA",
-        "BAND BAHIA FHD",
         "BAND BAHIA HD",
         "BAND BAHIA HD²",
         "Band Bahia HD [1]",
         "Band Bahia [1]"
       ],
-      "tvg_ids_to_export": [
-        "band.bahia.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: BAND ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.bandbelem",
@@ -2003,7 +1992,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | BAND"
+      "group": ""
     },
     {
       "id": "auto.bandbrasilia2",
@@ -2012,12 +2001,10 @@
         "Band Brasília HD [2]",
         "Band Brasília [2]"
       ],
-      "tvg_ids_to_export": [
-        "Band.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | BAND"
+      "group": ""
     },
     {
       "id": "auto.bandbsb",
@@ -2036,20 +2023,16 @@
       "aliases": [
         "BAND CAMPINAS",
         "BAND CAMPINAS FHD",
-        "BAND CAMPINAS HD",
         "BAND CAMPINAS SD",
         "Band Campinas HD [1]",
         "Band Campinas HD [2]",
         "Band Campinas [1]",
         "Band Campinas [2]"
       ],
-      "tvg_ids_to_export": [
-        "Band.br",
-        "band.campinas.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: BAND ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.bandcascavel",
@@ -2106,12 +2089,10 @@
         "Band Curitiba [1]",
         "Band Curitiba [2]"
       ],
-      "tvg_ids_to_export": [
-        "Band.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | BAND"
+      "group": ""
     },
     {
       "id": "Band FM Bahia",
@@ -2134,12 +2115,10 @@
         "Band Goiania HD [2]",
         "Band Goiania [2]"
       ],
-      "tvg_ids_to_export": [
-        "Band.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | BAND"
+      "group": ""
     },
     {
       "id": "auto.bandmaceio2",
@@ -2148,12 +2127,10 @@
         "Band Maceio HD [2]",
         "Band Maceio [2]"
       ],
-      "tvg_ids_to_export": [
-        "Band.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | BAND"
+      "group": ""
     },
     {
       "id": "auto.bandmanairaparaiba",
@@ -2178,12 +2155,10 @@
         "Band MG [1]",
         "Band MG [2]"
       ],
-      "tvg_ids_to_export": [
-        "Band.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | BAND"
+      "group": ""
     },
     {
       "id": "auto.bandminas",
@@ -2212,12 +2187,9 @@
       "name": "BAND NEWS",
       "aliases": [
         "BAND NEWS",
-        "BAND NEWS FHD",
-        "BAND NEWS FHD H.265",
         "BAND NEWS FHD*",
         "BAND NEWS FHD²",
         "BAND NEWS HD",
-        "BAND NEWS HD ²",
         "BAND NEWS HD*",
         "BAND NEWS HD²",
         "BAND NEWS SD*",
@@ -2230,13 +2202,11 @@
         "Band News [1]"
       ],
       "tvg_ids_to_export": [
-        "BandNews.br",
-        "band.news.br",
         "bandnews.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: NOTÍCIAS ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "Band News Goiânia",
@@ -2381,13 +2351,10 @@
         "Band RJ [1]",
         "Band RJ [2]"
       ],
-      "tvg_ids_to_export": [
-        "Band.br",
-        "band.rj.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: BAND ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.bandrs",
@@ -2396,19 +2363,15 @@
         "BAND  RS FHD",
         "BAND  RS HD",
         "BAND RS",
-        "BAND RS HD",
         "Band RS HD [1]",
         "Band RS HD [2]",
         "Band RS [1]",
         "Band RS [2]"
       ],
-      "tvg_ids_to_export": [
-        "Band.br",
-        "band.rs.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: BAND ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.bandsctvbv",
@@ -2444,12 +2407,9 @@
         "BAND SP",
         "BAND SP 4K",
         "BAND SP FHD",
-        "BAND SP FHD  H.265",
-        "BAND SP FHD ¹",
         "BAND SP FHD*",
         "BAND SP H265",
         "BAND SP HD",
-        "BAND SP HD ¹",
         "BAND SP HD*",
         "BAND SP SD",
         "BAND SP SD*",
@@ -2461,13 +2421,10 @@
         "Band SP [1]",
         "Band SP [2]"
       ],
-      "tvg_ids_to_export": [
-        "Band.br",
-        "band.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: BAND ✨"
+      "group": ""
     },
     {
       "id": "auto.bandsports",
@@ -2475,13 +2432,10 @@
       "aliases": [
         "BAND SPORTS",
         "BAND SPORTS FHD",
-        "BAND SPORTS FHD H.265",
         "BAND SPORTS FHD*",
         "BAND SPORTS FHD²",
         "BAND SPORTS H265",
         "BAND SPORTS HD",
-        "BAND SPORTS HD ³",
-        "BAND SPORTS HD ¹",
         "BAND SPORTS HD*",
         "BAND SPORTS HD²",
         "BAND SPORTS SD",
@@ -2496,12 +2450,11 @@
         "BandSports SD"
       ],
       "tvg_ids_to_export": [
-        "BandSports.br",
         "bandsports.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: ESPORTES ⚽"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.bandtriangulo",
@@ -2923,7 +2876,6 @@
       "aliases": [
         "BIS",
         "BIS FHD",
-        "BIS FHD H.265",
         "BIS FHD [H265]",
         "BIS FHD*",
         "BIS HD",
@@ -2934,12 +2886,11 @@
         "Bis [3]"
       ],
       "tvg_ids_to_export": [
-        "Bis.br",
         "bis.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: VARIEDADES ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.bisfhdr",
@@ -3810,20 +3761,18 @@
       "id": "auto.canaldoboi",
       "name": "CANAL DO BOI",
       "aliases": [
-        "CANAL DO BOI",
         "CANAL DO BOI FHD",
         "CANAL DO BOI FHD*",
         "CANAL DO BOI HD",
         "CANAL DO BOI HD*",
         "CANAL DO BOI SD",
+        "Canal do Boi",
         "Canal do Boi HD"
       ],
-      "tvg_ids_to_export": [
-        "canal.do.boi.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: ABERTOS ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.canalfutura1",
@@ -3832,48 +3781,43 @@
         "Canal Futura HD [1]",
         "Canal Futura [1]"
       ],
-      "tvg_ids_to_export": [
-        "Futura.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | VARIEDADES"
+      "group": ""
     },
     {
       "id": "auto.canalgoat012",
       "name": "CANAL GOAT 01",
       "aliases": [
-        "CANAL GOAT 01",
         "CANAL GOAT 01 [2]"
       ],
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: PPV / ESPORTES ⚽"
+      "group": ""
     },
     {
       "id": "auto.canalgoat022",
       "name": "CANAL GOAT 02",
       "aliases": [
-        "CANAL GOAT 02",
         "CANAL GOAT 02 [2]"
       ],
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: PPV / ESPORTES ⚽"
+      "group": ""
     },
     {
       "id": "auto.canalgoat032",
       "name": "CANAL GOAT 03",
       "aliases": [
-        "CANAL GOAT 03",
         "CANAL GOAT 03 [2]"
       ],
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: PPV / ESPORTES ⚽"
+      "group": ""
     },
     {
       "id": "auto.canalgoat1",
@@ -4015,13 +3959,13 @@
         "CANAL OFF SD",
         "Canal OFF",
         "Canal Off HD",
+        "OFF",
         "OFF Channel",
-        "OFF FHD",
         "OFF FHD*",
         "OFF HD*",
         "OFF SD",
         "OFF SD*",
-        "Off",
+        "Off FHD",
         "Off HD"
       ],
       "tvg_ids_to_export": [
@@ -4073,7 +4017,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | NOTICIARIO"
+      "group": ""
     },
     {
       "id": "auto.woohoo",
@@ -4119,18 +4063,16 @@
       "id": "auto.cancaonova2",
       "name": "Canção Nova",
       "aliases": [
-        "CANÇÃO NOVA FHD",
         "CANÇÃO NOVA HD",
         "CANÇÃO NOVA SD",
         "Canção Nova [2]"
       ],
       "tvg_ids_to_export": [
-        "CANCAON",
-        "cancao.nova.br"
+        "CANCAON"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: RELIGIOSOS ⭐"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.24hscargapesada",
@@ -4204,6 +4146,7 @@
         "CARTOON NETWORK HD",
         "CARTOON NETWORK HD*",
         "CARTOON NETWORK HD²",
+        "CARTOON NETWORK SD",
         "CARTOON NETWORK SD*",
         "CARTOON NETWORK SD²",
         "Cartoon Network 4K",
@@ -4215,13 +4158,11 @@
         "Cartoon Network [1]"
       ],
       "tvg_ids_to_export": [
-        "CartoonNetwork.br",
-        "cartoon.network.br",
         "cartoonnetwork.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: INFANTIS ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.cartoonito",
@@ -4235,25 +4176,20 @@
         "CARTOONITO FHD*",
         "CARTOONITO FHD²",
         "CARTOONITO HD",
-        "CARTOONITO HD ²",
-        "CARTOONITO HD ¹",
         "CARTOONITO HD*",
         "CARTOONITO HD²",
         "CARTOONITO SD",
         "CARTOONITO SD*",
         "CARTOONITO SD²",
-        "Cartoonito",
         "Cartoonito HD [1]",
         "Cartoonito [1]"
       ],
       "tvg_ids_to_export": [
-        "AandE.br",
-        "agromais.br",
-        "cartoonito.br"
+        "agromais.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: INFANTIS ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.cartoonitofhdr",
@@ -4928,7 +4864,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | VARIEDADES"
+      "group": ""
     },
     {
       "id": "auto.24hschicagopddistrito21",
@@ -5570,17 +5506,13 @@
       "id": "auto.cnnbrasil",
       "name": "CNN BRASIL",
       "aliases": [
-        "CNN BRASIL",
         "CNN BRASIL 4K",
         "CNN BRASIL FHD",
-        "CNN BRASIL FHD H.265",
         "CNN BRASIL FHD*",
-        "CNN BRASIL HD",
-        "CNN BRASIL HD ²",
-        "CNN BRASIL HD ¹",
         "CNN BRASIL HD*",
         "CNN BRASIL SD*",
         "CNN BRASIL SD²",
+        "CNN Brasil",
         "CNN Brasil FHD",
         "CNN Brasil FHD [H265]",
         "CNN Brasil HD",
@@ -5589,12 +5521,11 @@
         "CNN Brasil [1]"
       ],
       "tvg_ids_to_export": [
-        "cnn.brasil.br",
         "cnnbrasil.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: NOTÍCIAS ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.cnnbrasilfhdr",
@@ -5621,7 +5552,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | NOTICIARIO"
+      "group": ""
     },
     {
       "id": "auto.cnnenespanol",
@@ -6164,15 +6095,10 @@
       "name": "COMBATE",
       "aliases": [
         "COMBATE",
-        "COMBATE  FHD H.265",
-        "COMBATE FHD",
         "COMBATE FHD [1]",
         "COMBATE FHD*",
         "COMBATE FHD²",
         "COMBATE H265",
-        "COMBATE HD",
-        "COMBATE HD ²",
-        "COMBATE HD ¹",
         "COMBATE HD*",
         "COMBATE HD²",
         "COMBATE SD*",
@@ -6189,7 +6115,7 @@
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: ESPORTES ⚽"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.combatefhdr",
@@ -6529,6 +6455,7 @@
       "name": "Curta!",
       "aliases": [
         "CURTA!",
+        "CURTA! FHD",
         "CURTA! FHD [H265]",
         "CURTA! FHD*",
         "CURTA! HD",
@@ -6539,12 +6466,10 @@
         "Curta! HD [3]",
         "Curta! [3]"
       ],
-      "tvg_ids_to_export": [
-        "Curta.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | VARIEDADES"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.24hcurtasmetragens",
@@ -6730,12 +6655,10 @@
         "DAZN 2 [1]",
         "DAZN 2 [2]"
       ],
-      "tvg_ids_to_export": [
-        "DAZN.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: PPV / ESPORTES ⚽"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.dazn3",
@@ -7459,8 +7382,8 @@
       "id": "auto.discovery",
       "name": "Discovery",
       "aliases": [
-        "DISCOVERY",
         "DISCOVERY CHANNEL 4K",
+        "Discovery",
         "Discovery Channel 4K",
         "Discovery Channel FHD",
         "Discovery Channel FHD [H265]",
@@ -7544,7 +7467,6 @@
       "id": "auto.discoveryhomeandhealth",
       "name": "Discovery Home & Health",
       "aliases": [
-        "DISCOVERY  HOME & HEALTH HD ²",
         "DISCOVERY H&H FHD",
         "DISCOVERY H&H FHD [H265]",
         "DISCOVERY H&H FHD²",
@@ -7561,10 +7483,6 @@
         "DISCOVERY H&amp;H HD²",
         "DISCOVERY H&amp;H SD",
         "DISCOVERY H&amp;H SD²",
-        "DISCOVERY HOME & HEALTH",
-        "DISCOVERY HOME & HEALTH FHD",
-        "DISCOVERY HOME & HEALTH FHD H.265",
-        "DISCOVERY HOME & HEALTH HD",
         "Discovery H&H",
         "Discovery Home & Health",
         "Discovery Home & Health FHD",
@@ -7581,13 +7499,11 @@
         "Discovery Home and Health"
       ],
       "tvg_ids_to_export": [
-        "DiscoveryHomeHealth.br",
-        "discovery.home.and.health.br",
         "discoveryhomehealth.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: DISCOVERY ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "DISCOVERY ID",
@@ -7613,13 +7529,8 @@
       "name": "DISCOVERY KIDS",
       "aliases": [
         "DISCOVERY KIDS",
-        "DISCOVERY KIDS FHD",
-        "DISCOVERY KIDS FHD H.265",
         "DISCOVERY KIDS FHD*",
         "DISCOVERY KIDS FHD²",
-        "DISCOVERY KIDS HD",
-        "DISCOVERY KIDS HD ²",
-        "DISCOVERY KIDS HD ¹",
         "DISCOVERY KIDS HD*",
         "DISCOVERY KIDS HD²",
         "DISCOVERY KIDS SD*",
@@ -7632,13 +7543,11 @@
         "Discovery Kids [3]"
       ],
       "tvg_ids_to_export": [
-        "DiscoveryKids.br",
-        "discovery.kids.br",
         "discoverykids.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: INFANTIS ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.discoverykidsfhdr",
@@ -7666,12 +7575,6 @@
       "id": "auto.discoveryscience",
       "name": "Discovery Science",
       "aliases": [
-        "DISCOVERY SCIENCE",
-        "DISCOVERY SCIENCE FHD",
-        "DISCOVERY SCIENCE FHD H.265",
-        "DISCOVERY SCIENCE HD",
-        "DISCOVERY SCIENCE HD ²",
-        "DISCOVERY SCIENCE HD ¹",
         "Discovery Science",
         "Discovery Science FHD",
         "Discovery Science FHD [H265]",
@@ -7681,13 +7584,11 @@
         "Discovery Science [1]"
       ],
       "tvg_ids_to_export": [
-        "DiscoveryScience.br",
-        "discovery.science.br",
         "discoveryscience.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: DISCOVERY ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.discoverysciencefhdr",
@@ -7704,12 +7605,6 @@
       "id": "auto.discoverytheater",
       "name": "Discovery Theater",
       "aliases": [
-        "DISCOVERY THEATER",
-        "DISCOVERY THEATER FHD",
-        "DISCOVERY THEATER FHD H.265",
-        "DISCOVERY THEATER HD",
-        "DISCOVERY THEATER HD ²",
-        "DISCOVERY THEATER HD ¹",
         "Discovery Theater",
         "Discovery Theater FHD",
         "Discovery Theater FHD [H265]",
@@ -7719,33 +7614,24 @@
         "Discovery Theater [1]"
       ],
       "tvg_ids_to_export": [
-        "DiscoveryTheater.br",
-        "discovery.theater.br",
         "discoverytheater.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: DISCOVERY ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.discoverytlc3",
       "name": "Discovery TLC",
       "aliases": [
-        "DISCOVERY TLC",
-        "DISCOVERY TLC FHD",
-        "DISCOVERY TLC FHD H.265",
-        "DISCOVERY TLC HD",
         "Discovery TLC FHD [3]",
         "Discovery TLC HD [3]",
         "Discovery TLC [3]"
       ],
-      "tvg_ids_to_export": [
-        "TLC.br",
-        "tlc.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: DISCOVERY ✨"
+      "group": ""
     },
     {
       "id": "auto.discoveryturbo",
@@ -7753,12 +7639,10 @@
       "aliases": [
         "DISCOVERY TURBO",
         "DISCOVERY TURBO FHD",
-        "DISCOVERY TURBO FHD H.265",
         "DISCOVERY TURBO FHD*",
         "DISCOVERY TURBO HD",
-        "DISCOVERY TURBO HD ²",
-        "DISCOVERY TURBO HD ¹",
         "DISCOVERY TURBO HD*",
+        "DISCOVERY TURBO SD",
         "DISCOVERY TURBO SD*",
         "DISCOVERY TURBO 4K",
         "Discovery Turbo FHD",
@@ -7769,13 +7653,11 @@
         "Discovery Turbo [1]"
       ],
       "tvg_ids_to_export": [
-        "DiscoveryTurbo.br",
-        "discovery.turbo.br",
         "discoveryturbo.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: DISCOVERY ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.discoveryturbofhdr",
@@ -7792,12 +7674,6 @@
       "id": "auto.discoveryworld",
       "name": "Discovery World",
       "aliases": [
-        "DISCOVERY WORLD",
-        "DISCOVERY WORLD FHD",
-        "DISCOVERY WORLD FHD H.265",
-        "DISCOVERY WORLD HD",
-        "DISCOVERY WORLD HD ²",
-        "DISCOVERY WORLD HD ¹",
         "Discovery World",
         "Discovery World FHD",
         "Discovery World FHD [H265]",
@@ -7807,13 +7683,11 @@
         "Discovery World [1]"
       ],
       "tvg_ids_to_export": [
-        "DiscoveryWorld.br",
-        "discovery.world.br",
         "discoveryworld.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: DISCOVERY ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.discoveryworldfhdr",
@@ -9716,7 +9590,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | NOTICIARIO"
+      "group": ""
     },
     {
       "id": "auto.dwenglish",
@@ -9727,7 +9601,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | NOTICIARIO"
+      "group": ""
     },
     {
       "id": "auto.dwespanol",
@@ -9738,7 +9612,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | NOTICIARIO"
+      "group": ""
     },
     {
       "id": "auto.e",
@@ -9753,13 +9627,10 @@
         "E! SD",
         "E! [3]"
       ],
-      "tvg_ids_to_export": [
-        "EEntertainment.br",
-        "e.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: VARIEDADES ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.efhdr",
@@ -10352,24 +10223,20 @@
         "ESPN  SD²",
         "ESPN 4K",
         "ESPN FHD",
-        "ESPN FHD H.265",
         "ESPN FHD [H265]",
         "ESPN FHD*",
         "ESPN HD",
-        "ESPN HD ²",
-        "ESPN HD ¹",
         "ESPN HD*",
         "ESPN SD",
         "ESPN SD*"
       ],
       "tvg_ids_to_export": [
-        "espn.2.br",
         "espn.br",
         "espnbrasil.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: ESPN ⚽"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.espn11",
@@ -10381,12 +10248,10 @@
         "ESPN 1 [1]",
         "ESPN 1 [2]"
       ],
-      "tvg_ids_to_export": [
-        "ESPN.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | ⚽ ESPN"
+      "group": ""
     },
     {
       "id": "auto.espn2",
@@ -10394,7 +10259,6 @@
       "aliases": [
         "ESPN 2",
         "ESPN 2 FHD",
-        "ESPN 2 FHD H.265",
         "ESPN 2 FHD [1]",
         "ESPN 2 FHD [2]",
         "ESPN 2 FHD*",
@@ -10404,8 +10268,6 @@
         "ESPN 2 HD [1]",
         "ESPN 2 HD [2]",
         "ESPN 2 HD [H265]",
-        "ESPN 2 HD ²",
-        "ESPN 2 HD ¹",
         "ESPN 2 HD*",
         "ESPN 2 HD²",
         "ESPN 2 SD",
@@ -10415,22 +10277,18 @@
         "ESPN 2 [2]"
       ],
       "tvg_ids_to_export": [
-        "ESPN2.br",
-        "espn.2.br",
         "espn.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: ESPN ⚽"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.espn3",
       "name": "ESPN 3",
       "aliases": [
         "ESPN 3",
-        "ESPN 3 4K",
         "ESPN 3 FHD",
-        "ESPN 3 FHD H.265",
         "ESPN 3 FHD [H265]",
         "ESPN 3 FHD*",
         "ESPN 3 FHD²",
@@ -10438,8 +10296,6 @@
         "ESPN 3 HD",
         "ESPN 3 HD [1]",
         "ESPN 3 HD [2]",
-        "ESPN 3 HD ²",
-        "ESPN 3 HD ¹",
         "ESPN 3 HD*",
         "ESPN 3 HD²",
         "ESPN 3 SD",
@@ -10449,12 +10305,11 @@
         "ESPN 3 [2]"
       ],
       "tvg_ids_to_export": [
-        "espn.3.br",
         "espn2.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: ESPN ⚽"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.espn4",
@@ -10463,15 +10318,12 @@
         "ESPN 4",
         "ESPN 4 4K",
         "ESPN 4 FHD",
-        "ESPN 4 FHD H.265",
         "ESPN 4 FHD [H265]",
         "ESPN 4 FHD*",
         "ESPN 4 FHD²",
         "ESPN 4 HD",
         "ESPN 4 HD [1]",
         "ESPN 4 HD [2]",
-        "ESPN 4 HD ²",
-        "ESPN 4 HD ¹",
         "ESPN 4 HD*",
         "ESPN 4 HD²",
         "ESPN 4 SD",
@@ -10480,28 +10332,24 @@
         "ESPN 4 [2]"
       ],
       "tvg_ids_to_export": [
-        "espn.4.br",
         "espn4.br",
         "foxsports.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: ESPN ⚽"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.espn5",
       "name": "ESPN 5",
       "aliases": [
         "ESPN 5",
-        "ESPN 5  HD ¹",
         "ESPN 5 FHD",
-        "ESPN 5 FHD H.265",
         "ESPN 5 FHD [H265]",
         "ESPN 5 FHD*",
         "ESPN 5 FHD²",
         "ESPN 5 HD",
         "ESPN 5 HD [3]",
-        "ESPN 5 HD ²",
         "ESPN 5 HD*",
         "ESPN 5 HD²",
         "ESPN 5 SD",
@@ -10510,13 +10358,11 @@
         "ESPN 5 [3]"
       ],
       "tvg_ids_to_export": [
-        "FoxSports2.br",
-        "espn.5.br",
         "foxsports2.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: ESPN ⚽"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.espn5fhdr",
@@ -10534,14 +10380,11 @@
       "name": "ESPN 6",
       "aliases": [
         "ESPN 6",
-        "ESPN 6  HD",
         "ESPN 6 FHD",
-        "ESPN 6 FHD H.265",
         "ESPN 6 FHD*",
         "ESPN 6 FHD²",
         "ESPN 6 HD",
         "ESPN 6 HD [3]",
-        "ESPN 6 HD ¹",
         "ESPN 6 HD*",
         "ESPN 6 HD²",
         "ESPN 6 SD",
@@ -10550,13 +10393,11 @@
         "ESPN 6 [3]"
       ],
       "tvg_ids_to_export": [
-        "ESPNExtra.br",
-        "espn.6.br",
         "espnextra.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: ESPN ⚽"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.24hesquadraodemarte",
@@ -11000,13 +10841,13 @@
       "id": "auto.fashiontv",
       "name": "Fashion TV",
       "aliases": [
-        "FASHION TV",
         "FASHION TV FHD",
         "FASHION TV FHD*",
         "FASHION TV HD",
         "FASHION TV HD*",
         "FASHION TV SD",
         "FASHION TV SD*",
+        "Fashion TV",
         "Fashion TV Brasil",
         "Fashion TV HD [3]",
         "Fashion TV [3]",
@@ -11015,7 +10856,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | VARIEDADES"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.fashiontvfhdr",
@@ -11156,12 +10997,11 @@
         "Film&amp;Arts HD [3]"
       ],
       "tvg_ids_to_export": [
-        "FABB",
-        "FilmAndArts.mx"
+        "FABB"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | VARIEDADES"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.filmesacao",
@@ -11205,13 +11045,10 @@
         "Fish TV SD",
         "Fish TV [3]"
       ],
-      "tvg_ids_to_export": [
-        "FishTV.br",
-        "fishtv.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: VARIEDADES ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.fishtvfhdr",
@@ -11409,6 +11246,7 @@
       "id": "auto.foodnetwork",
       "name": "Food Network",
       "aliases": [
+        "FOOD NETWORK",
         "FOOD NETWORK FHD",
         "FOOD NETWORK FHD [H265]",
         "FOOD NETWORK FHD*",
@@ -11416,7 +11254,6 @@
         "FOOD NETWORK HD*",
         "FOOD NETWORK SD",
         "FOOD NETWORK SD*",
-        "Food Network",
         "Food Network FHD",
         "Food Network HD",
         "Food Network HD [1]",
@@ -11426,13 +11263,10 @@
         "US: FOOD Network",
         "US: FOOD Network HD"
       ],
-      "tvg_ids_to_export": [
-        "FoodNetwork.br",
-        "food.network.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: VARIEDADES ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.24hsforallmankind",
@@ -12397,13 +12231,12 @@
       "name": "GE TV",
       "aliases": [
         "GE TV",
-        "GE TV FHD",
         "GE TV*"
       ],
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: PPV / ESPORTES ⚽"
+      "group": ""
     },
     {
       "id": "auto.24hgeneretorrex",
@@ -12455,17 +12288,15 @@
       "id": "auto.globo",
       "name": "Globo",
       "aliases": [
-        "GLOBO 4K",
         "Globo",
         "Globo 4K"
       ],
       "tvg_ids_to_export": [
-        "globo.rj.br",
         "globosp.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: 4K ⭐"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.globoalagoas",
@@ -12590,15 +12421,12 @@
       "name": "GLOBO AMAZÔNICA MACAPÁ",
       "aliases": [
         "GLOBO AMAZÔNICA MACAPÁ",
-        "GLOBO AMAZÔNICA MACAPÁ HD",
         "GLOBO AMAZÔNICA MACAPÁ HD²"
       ],
-      "tvg_ids_to_export": [
-        "rede.amazonica.macapaglobo.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO CAPITAIS  - ✨"
+      "group": ""
     },
     {
       "id": "auto.globoamazonicamanaus",
@@ -12637,12 +12465,10 @@
         "GLOBO AMAZÔNICA RIO BRANCO HD²",
         "GLOBO AMAZÔNICA RIO BRANCO SD²"
       ],
-      "tvg_ids_to_export": [
-        "rede.amazonica.rio.branco.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO CAPITAIS  - ✨"
+      "group": ""
     },
     {
       "id": "auto.globoanhanguera",
@@ -12770,12 +12596,10 @@
       "aliases": [
         "Globo Asa Branca Caruaru PE [2]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORDESTE"
+      "group": ""
     },
     {
       "id": "auto.globobahia",
@@ -12893,13 +12717,12 @@
       "name": "GLOBO BOA VISTA RORAIMA",
       "aliases": [
         "GLOBO BOA VISTA RORAIMA",
-        "GLOBO BOA VISTA RORAIMA HD",
         "GLOBO BOA VISTA RORAIMA HD²"
       ],
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO CAPITAIS  - ✨"
+      "group": ""
     },
     {
       "id": "Globo Brasilia",
@@ -12922,7 +12745,6 @@
       "id": "auto.globobrasilia",
       "name": "GLOBO BRASÍLIA",
       "aliases": [
-        "GLOBO BRASILIA FHD",
         "GLOBO BRASÍLIA",
         "GLOBO BRASÍLIA FHD",
         "GLOBO BRASÍLIA FHD²",
@@ -12931,6 +12753,7 @@
         "GLOBO BRASÍLIA SD",
         "GLOBO BRASÍLIA SD²",
         "Globo Brasilia",
+        "Globo Brasilia FHD",
         "Globo Brasilia FHD [H265]",
         "Globo Brasilia HD",
         "Globo Brasilia SD",
@@ -12938,12 +12761,10 @@
         "Globo Brasília HD [1]",
         "Globo Brasília [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO CENTRO-OESTE"
+      "group": ""
     },
     {
       "id": "auto.globocabobranco",
@@ -12966,13 +12787,12 @@
       "name": "GLOBO CACOAL",
       "aliases": [
         "GLOBO CACOAL",
-        "GLOBO CACOAL H.265",
         "GLOBO CACOAL HD"
       ],
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globoceara",
@@ -13059,7 +12879,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globodiariofortaleza",
@@ -13152,7 +12972,6 @@
       "name": "Globo EPTV Campinas",
       "aliases": [
         "GLOBO EPTV CAMPINAS (BR2)",
-        "GLOBO EPTV CAMPINAS FHD",
         "GLOBO EPTV CAMPINAS FHD (BR2)",
         "GLOBO EPTV CAMPINAS HD",
         "GLOBO EPTV CAMPINAS HD (BR2)",
@@ -13164,13 +12983,11 @@
         "Globo EPTV Campinas [1]"
       ],
       "tvg_ids_to_export": [
-        "GloboRJ.br",
-        "eptv.campinas.e.regiao.br",
         "globosp.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.globoeptvcentral1",
@@ -13179,12 +12996,10 @@
         "Globo EPTV Central HD [1]",
         "Globo EPTV Central [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO SUDESTE"
+      "group": ""
     },
     {
       "id": "GLOBO EPTV CENTRAL SÃO CARLOS SP",
@@ -13222,28 +13037,22 @@
       "id": "auto.globoeptvribeiraopreto1",
       "name": "Globo EPTV Ribeirão Preto",
       "aliases": [
-        "GLOBO EPTV RIBEIRÃO PRETO HD",
         "Globo EPTV Ribeirão Preto HD [1]",
         "Globo EPTV Ribeirão Preto HD [2]",
         "Globo EPTV Ribeirão Preto [1]",
         "Globo EPTV Ribeirão Preto [2]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br",
-        "eptv.ribeirao.preto.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globoeptvsuldeminas",
       "name": "Globo EPTV Sul de Minas",
       "aliases": [
         "GLOBO EPTV SUL DE MINAS (BR2)",
-        "GLOBO EPTV SUL DE MINAS FHD",
         "GLOBO EPTV SUL DE MINAS FHD (BR2)",
-        "GLOBO EPTV SUL DE MINAS HD",
         "GLOBO EPTV SUL DE MINAS HD (BR2)",
         "Globo EPTV Sul de Minas",
         "Globo EPTV Sul de Minas FHD",
@@ -13252,13 +13061,11 @@
         "Globo EPTV Sul de Minas [1]"
       ],
       "tvg_ids_to_export": [
-        "GloboRJ.br",
-        "eptv.sul.de.minas.br",
         "globosp.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO CAPITAIS  - ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.globoeptvsaocarlos",
@@ -13298,12 +13105,10 @@
         "Globo Fronteira Paulista HD [1]",
         "Globo Fronteira Paulista [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO SUDESTE"
+      "group": ""
     },
     {
       "id": "auto.globogazetaalagoas",
@@ -13465,12 +13270,10 @@
       "aliases": [
         "Globo Integracao Juiz de Fora [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO SUDESTE"
+      "group": ""
     },
     {
       "id": "auto.globointegracaoaraxa1",
@@ -13479,12 +13282,10 @@
         "Globo Integração Araxa HD [1]",
         "Globo Integração Araxa [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO SUDESTE"
+      "group": ""
     },
     {
       "id": "auto.globointegracaoituiutabamg1",
@@ -13493,12 +13294,10 @@
         "Globo Integração Ituiutaba MG HD [1]",
         "Globo Integração Ituiutaba MG [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO SUDESTE"
+      "group": ""
     },
     {
       "id": "auto.globointegracaouberaba1",
@@ -13507,28 +13306,22 @@
         "Globo Integração Uberaba HD [1]",
         "Globo Integração Uberaba [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO SUDESTE"
+      "group": ""
     },
     {
       "id": "auto.globointegracaouberlandia1",
       "name": "Globo Integração Uberlândia",
       "aliases": [
-        "GLOBO INTEGRAÇÃO UBERLÂNDIA HD",
         "Globo Integração Uberlândia HD [1]",
         "Globo Integração Uberlândia [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br",
-        "tv.integracao.uberlandia.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globointeraltolitoral",
@@ -13554,12 +13347,10 @@
         "GLOBO INTER CABUGI HD",
         "GLOBO INTER CABUGI HD²"
       ],
-      "tvg_ids_to_export": [
-        "tv.inter.cabugi.hd.tv.globo.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "GLOBO INTER CABUGI RN",
@@ -13611,15 +13402,12 @@
       "aliases": [
         "GLOBO INTER PT",
         "GLOBO INTER PT FHD²",
-        "GLOBO INTER PT HD",
         "GLOBO INTER PT HD²"
       ],
-      "tvg_ids_to_export": [
-        "globo.tv.internacional.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globointertvaltolitoralbr2",
@@ -13643,12 +13431,10 @@
         "Globo Inter TV Alto Litoral RJ HD [1]",
         "Globo Inter TV Alto Litoral RJ [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO SUDESTE"
+      "group": ""
     },
     {
       "id": "auto.globointertvcabugi",
@@ -13672,12 +13458,10 @@
         "Globo Inter TV Cabugi Natal RN HD [3]",
         "Globo Inter TV Cabugi Natal RN [3]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORDESTE"
+      "group": ""
     },
     {
       "id": "GLOBO INTER TV CORONEL FABRICIANO",
@@ -13703,12 +13487,10 @@
         "GLOBO INTERTV COSTA BRANCA",
         "GLOBO INTERTV COSTA BRANCA HD"
       ],
-      "tvg_ids_to_export": [
-        "intertv.costa.branca.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globointertvcostabrancarn1",
@@ -13717,30 +13499,25 @@
         "Globo Inter TV Costa Branca RN HD [1]",
         "Globo Inter TV Costa Branca RN [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORDESTE"
+      "group": ""
     },
     {
       "id": "auto.globointertvdosvalesbr2",
       "name": "GLOBO INTER TV DOS VALES",
       "aliases": [
         "GLOBO INTER TV DOS VALES (BR2)",
-        "GLOBO INTER TV DOS VALES FHD",
         "GLOBO INTER TV DOS VALES FHD (BR2)",
-        "GLOBO INTER TV DOS VALES HD",
         "GLOBO INTER TV DOS VALES HD (BR2)"
       ],
       "tvg_ids_to_export": [
-        "globosp.br",
-        "inter.tv.dos.vales.br"
+        "globosp.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.globointertvdosvalesmg1",
@@ -13749,12 +13526,10 @@
         "Globo Inter TV dos Vales MG HD [1]",
         "Globo Inter TV dos Vales MG [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboNews.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO SUDESTE"
+      "group": ""
     },
     {
       "id": "GLOBO INTER TV GOVERNADOR VALADARES",
@@ -13773,8 +13548,6 @@
       "id": "auto.globointertvgrandeminas",
       "name": "Globo Inter TV Grande Minas",
       "aliases": [
-        "GLOBO INTER TV GRANDE MINAS FHD",
-        "GLOBO INTER TV GRANDE MINAS HD",
         "Globo Inter TV Grande Minas",
         "Globo Inter TV Grande Minas HD",
         "Globo Inter TV Grande Minas HD [1]",
@@ -13782,13 +13555,11 @@
         "Globo Inter TV Grande Minas [1]"
       ],
       "tvg_ids_to_export": [
-        "GloboRJ.br",
-        "globosp.br",
-        "intertv.grande.minas.br"
+        "globosp.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO CAPITAIS  - ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.globointertvgrandeminasmgbr2",
@@ -13812,12 +13583,10 @@
         "Globo Inter TV Planície RJ HD [1]",
         "Globo Inter TV Planície RJ [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO SUDESTE"
+      "group": ""
     },
     {
       "id": "auto.globointertvserramarrj1",
@@ -13826,12 +13595,10 @@
         "Globo Inter TV Serra Mar RJ HD [1]",
         "Globo Inter TV Serra Mar RJ [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO SUDESTE"
+      "group": ""
     },
     {
       "id": "auto.globointervalemg",
@@ -13941,7 +13708,6 @@
       "name": "GLOBO MINAS",
       "aliases": [
         "GLOBO MINAS",
-        "GLOBO MINAS FHD",
         "GLOBO MINAS FHD²",
         "GLOBO MINAS H265",
         "GLOBO MINAS HD",
@@ -13954,13 +13720,11 @@
         "Globo Minas [1]"
       ],
       "tvg_ids_to_export": [
-        "GloboRJ.br",
-        "globo.minas.br",
         "globosp.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO CAPITAIS  - ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.globomirantecocais",
@@ -14008,13 +13772,12 @@
       "name": "GLOBO NACIONAL",
       "aliases": [
         "GLOBO NACIONAL",
-        "GLOBO NACIONAL FHD",
         "GLOBO NACIONAL FHD²"
       ],
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globonatal",
@@ -14035,15 +13798,10 @@
       "aliases": [
         "GLOBO NEWS",
         "GLOBO NEWS FHD",
-        "GLOBO NEWS FHD H.265",
         "GLOBO NEWS FHD²",
-        "GLOBO NEWS HD",
-        "GLOBO NEWS HD ²",
-        "GLOBO NEWS HD ¹",
         "GLOBO NEWS HD²",
         "GLOBO NEWS SD",
         "GLOBO NEWS SD²",
-        "Globo News",
         "Globo News FHD",
         "Globo News FHD [H265]",
         "Globo News HD",
@@ -14054,24 +13812,19 @@
         "Globo News [2]"
       ],
       "tvg_ids_to_export": [
-        "GloboNews.br",
-        "globo.news.br",
         "globonews.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: NOTÍCIAS ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.globonordeste",
       "name": "GLOBO NORDESTE",
       "aliases": [
         "GLOBO NORDESTE  FHD",
-        "GLOBO NORDESTE FHD",
         "GLOBO NORDESTE FHD²",
-        "GLOBO NORDESTE HD",
         "GLOBO NORDESTE HD²",
-        "GLOBO NORDESTE SD",
         "GLOBO NORDESTE SD²",
         "Globo Nordeste",
         "Globo Nordeste FHD",
@@ -14081,13 +13834,11 @@
         "Globo Nordeste [3]"
       ],
       "tvg_ids_to_export": [
-        "GloboRJ.br",
-        "globo.nordeste.br",
         "globosp.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO CAPITAIS  - ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.globonovelas1",
@@ -14099,7 +13850,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | VARIEDADES"
+      "group": ""
     },
     {
       "id": "auto.globonow",
@@ -14107,12 +13858,10 @@
       "aliases": [
         "GLOBO NOW"
       ],
-      "tvg_ids_to_export": [
-        "globo.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globonscblumenaubr2",
@@ -14128,27 +13877,23 @@
         "Globo NSC Blumenau [1]"
       ],
       "tvg_ids_to_export": [
-        "GloboRJ.br",
         "globosp.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO SUL"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.globonsccentrooeste",
       "name": "GLOBO NSC CENTRO OESTE",
       "aliases": [
         "GLOBO NSC CENTRO OESTE",
-        "GLOBO NSC CENTRO OESTE FHD",
         "GLOBO NSC CENTRO OESTE FHD²"
       ],
-      "tvg_ids_to_export": [
-        "nsc.tv.centro.oeste.tv.globo.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globonscchapecobr2",
@@ -14176,12 +13921,10 @@
         "Globo NSC Chapecó HD [1]",
         "Globo NSC Chapecó [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO SUL"
+      "group": ""
     },
     {
       "id": "auto.globonsccriciumabr2",
@@ -14219,13 +13962,10 @@
         "Globo NSC Florianópolis [1]",
         "Globo NSC Florianópolis [2]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br",
-        "nsc.tv.florianopolis.tv.globo.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globonscjoinvillebr2",
@@ -14241,12 +13981,11 @@
         "Globo NSC Joinville [1]"
       ],
       "tvg_ids_to_export": [
-        "GloboRJ.br",
         "globosp.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO SUL"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "GLOBO NSC TV BLUMENAU",
@@ -14269,12 +14008,10 @@
         "Globo NSC TV Centro Oeste Joaçaba [2]",
         "Globo NSC TV Centro-Oeste Joaçaba [2]"
       ],
-      "tvg_ids_to_export": [
-        "GloboSP.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO SUL"
+      "group": ""
     },
     {
       "id": "GLOBO NSC TV CHAPECÓ",
@@ -14395,12 +14132,10 @@
         "Globo RBS Caxias do Sul HD [1]",
         "Globo RBS Caxias do Sul [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO SUL"
+      "group": ""
     },
     {
       "id": "auto.globorbscentrooeste1",
@@ -14409,12 +14144,10 @@
         "Globo RBS Centro Oeste [1]",
         "Globo RBS Centro-Oeste HD [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO SUL"
+      "group": ""
     },
     {
       "id": "auto.globorbscriciuma1",
@@ -14423,12 +14156,10 @@
         "Globo RBS Criciúma HD [1]",
         "Globo RBS Criciúma [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO SUL"
+      "group": ""
     },
     {
       "id": "auto.globorbspassofundo",
@@ -14441,12 +14172,10 @@
         "Globo RBS Passo Fundo HD [1]",
         "Globo RBS Passo Fundo [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globorbspelotas",
@@ -14458,12 +14187,10 @@
         "GLOBO RBS PELOTAS HD",
         "Globo RBS Pelotas [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO SUL"
+      "group": ""
     },
     {
       "id": "auto.globorbsportoalegre",
@@ -14483,12 +14210,11 @@
         "Globo RBS Porto Alegre [1]"
       ],
       "tvg_ids_to_export": [
-        "GloboRJ.br",
         "globosp.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO SUL"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "GLOBO RBS SANTA CRUZ",
@@ -14513,12 +14239,10 @@
         "Globo RBS Santa Maria HD [1]",
         "Globo RBS Santa Maria [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO SUL"
+      "group": ""
     },
     {
       "id": "auto.globorbstvbage",
@@ -14539,12 +14263,10 @@
       "aliases": [
         "Globo RBS TV Bagé [2]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO SUL"
+      "group": ""
     },
     {
       "id": "auto.globorbstvcaxiasdosulbr2",
@@ -14552,16 +14274,14 @@
       "aliases": [
         "GLOBO RBS TV CAXIAS DO SUL (BR2)",
         "GLOBO RBS TV CAXIAS DO SUL FHD (BR2)",
-        "GLOBO RBS TV CAXIAS DO SUL HD",
         "GLOBO RBS TV CAXIAS DO SUL HD (BR2)"
       ],
       "tvg_ids_to_export": [
-        "globosp.br",
-        "rbs.tv.caxias.do.sul.br"
+        "globosp.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.globorbstvcruzalta",
@@ -14571,13 +14291,10 @@
         "GLOBO RBS TV CRUZ ALTA HD",
         "Globo RBS TV Cruz Alta [2]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br",
-        "rbs.tv.cruz.alta.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globorbstvdosvalessantacruzdosul1",
@@ -14588,12 +14305,10 @@
         "Globo RBS TV dos Vales Santa Cruz do Sul [1]",
         "Globo RBS TV dos Vales Santa Cruz do Sul [2]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORDESTE"
+      "group": ""
     },
     {
       "id": "auto.globorbstverechim",
@@ -14603,13 +14318,10 @@
         "GLOBO RBS TV ERECHIM HD",
         "Globo RBS TV Erechim [2]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br",
-        "rbs.tv.erechim.tv.globo.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globorbstvpassofundobr2",
@@ -14631,38 +14343,33 @@
       "name": "GLOBO RBS TV PELOTAS",
       "aliases": [
         "GLOBO RBS TV PELOTAS (BR2)",
-        "GLOBO RBS TV PELOTAS FHD",
         "GLOBO RBS TV PELOTAS FHD (BR2)",
         "GLOBO RBS TV PELOTAS HD (BR2)",
         "Globo RBS TV Pelotas",
         "Globo RBS TV Pelotas FHD"
       ],
       "tvg_ids_to_export": [
-        "globosp.br",
-        "rbs.tv.pelotas.tv.globo.br"
+        "globosp.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.globorbstvportoalegre",
       "name": "Globo RBS TV Porto Alegre",
       "aliases": [
-        "GLOBO RBS TV PORTO ALEGRE FHD",
-        "GLOBO RBS TV PORTO ALEGRE HD",
         "Globo RBS TV Porto Alegre",
         "Globo RBS TV Porto Alegre FHD",
         "Globo RBS TV Porto Alegre HD",
         "Globo RBS TV Porto Alegre SD"
       ],
       "tvg_ids_to_export": [
-        "globosp.br",
-        "rbs.tv.porto.alegre.br"
+        "globosp.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.globorbstvsantamaria",
@@ -14672,12 +14379,11 @@
         "GLOBO RBS TV SANTA MARIA HD"
       ],
       "tvg_ids_to_export": [
-        "globosp.br",
-        "rbs.tv.santa.maria.br"
+        "globosp.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.globorbstvsantarosa",
@@ -14687,13 +14393,10 @@
         "GLOBO RBS TV SANTA ROSA HD",
         "Globo RBS TV Santa Rosa [2]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br",
-        "rbs.tv.santa.rosa.tv.globo.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globorbstvuruguaiana",
@@ -14703,13 +14406,10 @@
         "GLOBO RBS TV URUGUAIANA HD",
         "Globo RBS TV Uruguaiana [2]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br",
-        "rbs.tv.uruguaiana.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globorecife",
@@ -14731,12 +14431,10 @@
         "Globo Recife HD PE [2]",
         "Globo Recife PE [2]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORDESTE"
+      "group": ""
     },
     {
       "id": "auto.globoredeamazonasarquemes",
@@ -14834,7 +14532,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORTE"
+      "group": ""
     },
     {
       "id": "auto.globoredeamazonicaboavistarrhd1",
@@ -14845,7 +14543,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORTE"
+      "group": ""
     },
     {
       "id": "auto.globoredeamazonicacoacalro2",
@@ -14857,7 +14555,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORTE"
+      "group": ""
     },
     {
       "id": "auto.globoredeamazonicacoariam2",
@@ -14869,7 +14567,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORTE"
+      "group": ""
     },
     {
       "id": "auto.globoredeamazonicacruzeirodosulac2",
@@ -14880,7 +14578,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORTE"
+      "group": ""
     },
     {
       "id": "auto.globoredeamazonicahumaitaam2",
@@ -14892,7 +14590,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORTE"
+      "group": ""
     },
     {
       "id": "auto.globoredeamazonicaitacoatiaraam2",
@@ -14904,7 +14602,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORTE"
+      "group": ""
     },
     {
       "id": "auto.globoredeamazonicajiparanaro2",
@@ -14916,7 +14614,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORTE"
+      "group": ""
     },
     {
       "id": "auto.globoredeamazonicamacapaap1",
@@ -14928,7 +14626,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORTE"
+      "group": ""
     },
     {
       "id": "auto.globoredeamazonicamanacapuruam2",
@@ -14940,7 +14638,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORTE"
+      "group": ""
     },
     {
       "id": "auto.globoredeamazonicamanaus3",
@@ -14949,12 +14647,10 @@
         "Globo Rede Amazônica Manaus HD [3]",
         "Globo Rede Amazônica Manaus [3]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORTE"
+      "group": ""
     },
     {
       "id": "auto.globoredeamazonicaparintinsam1",
@@ -14966,7 +14662,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORTE"
+      "group": ""
     },
     {
       "id": "auto.globoredeamazonicaportovelhoro1",
@@ -14978,7 +14674,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORTE"
+      "group": ""
     },
     {
       "id": "auto.globoredeamazonicariobrancoac1",
@@ -14990,7 +14686,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORTE"
+      "group": ""
     },
     {
       "id": "auto.globoredeamazonicarorainopolisrr2",
@@ -15002,7 +14698,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORTE"
+      "group": ""
     },
     {
       "id": "auto.globoredeamazonicavilhenaro2",
@@ -15014,7 +14710,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORTE"
+      "group": ""
     },
     {
       "id": "auto.globoredebahia",
@@ -15161,12 +14857,10 @@
         "Globo Rio HD [1]",
         "Globo Rio [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO SUDESTE"
+      "group": ""
     },
     {
       "id": "auto.globoriosul",
@@ -15177,12 +14871,10 @@
         "Globo Rio Sul HD [1]",
         "Globo Rio Sul [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO SUDESTE"
+      "group": ""
     },
     {
       "id": "auto.globorj",
@@ -15198,22 +14890,18 @@
         "GLOBO  RJ UHD",
         "GLOBO RJ",
         "GLOBO RJ (BR2)",
-        "GLOBO RJ FHD",
         "GLOBO RJ FHD (BR2)",
-        "GLOBO RJ H.265",
-        "GLOBO RJ HD",
         "GLOBO RJ HD (BR2)",
         "Globo RJ FHD",
         "Globo RJ HD",
         "Globo RJ SD"
       ],
       "tvg_ids_to_export": [
-        "globo.rj.br",
         "globorj.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO CAPITAIS  - ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.globorjaltolitoral",
@@ -15258,13 +14946,12 @@
       "name": "GLOBO RJ INTERIOR",
       "aliases": [
         "GLOBO RJ INTERIOR",
-        "GLOBO RJ INTERIOR HD",
         "GLOBO RJ INTERIOR HD²"
       ],
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO CAPITAIS  - ✨"
+      "group": ""
     },
     {
       "id": "GLOBO RJ PLANÍCIE",
@@ -15296,20 +14983,16 @@
       "id": "auto.globorpccascavel",
       "name": "Globo RPC Cascavel",
       "aliases": [
-        "GLOBO RPC CASCAVEL HD",
         "GLOBO RPC CASCAVEL HD²",
         "Globo RPC Cascavel",
         "Globo RPC Cascavel HD",
         "Globo RPC Cascavel HD [1]",
         "Globo RPC Cascavel [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br",
-        "tv.globo.rpc.cascavel.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.globorpccuritiba",
@@ -15317,7 +15000,6 @@
       "aliases": [
         "GLOBO RPC CURITIBA",
         "GLOBO RPC CURITIBA (BR2)",
-        "GLOBO RPC CURITIBA FHD",
         "GLOBO RPC CURITIBA FHD (BR2)",
         "GLOBO RPC CURITIBA FHD²",
         "GLOBO RPC CURITIBA H265",
@@ -15331,13 +15013,11 @@
         "Globo RPC Curitiba [3]"
       ],
       "tvg_ids_to_export": [
-        "GloboRJ.br",
-        "globo.rpc.br",
         "globosp.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.globorpcfozdoiguacubr2",
@@ -15361,17 +15041,13 @@
       "id": "auto.globorpcfozdoiguacu1",
       "name": "Globo RPC Foz do Iguaçu",
       "aliases": [
-        "GLOBO RPC FOZ DO IGUAÇU FHD",
         "Globo RPC Foz do Iguaçu HD [1]",
         "Globo RPC Foz do Iguaçu [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br",
-        "rpc.foz.do.iguacu.hd.tv.globo.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globorpcguarapuava",
@@ -15381,31 +15057,24 @@
         "GLOBO RPC GUARAPUAVA HD",
         "Globo RPC Guarapuava [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br",
-        "rpc.guarapuava.hd.tv.globo.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globorpclondrina",
       "name": "GLOBO RPC LONDRINA",
       "aliases": [
         "GLOBO RPC LONDRINA",
-        "GLOBO RPC LONDRINA HD",
         "GLOBO RPC LONDRINA HD²",
         "Globo RPC Londrina HD [1]",
         "Globo RPC Londrina [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br",
-        "rpc.londrina.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globorpcmaringa",
@@ -15431,18 +15100,13 @@
       "id": "auto.globorpcmaringa1",
       "name": "Globo RPC Maringá",
       "aliases": [
-        "GLOBO RPC MARINGÁ FHD",
-        "GLOBO RPC MARINGÁ HD",
         "Globo RPC Maringá HD [1]",
         "Globo RPC Maringá [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br",
-        "rpc.maringa.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globorpcparanavaibr2",
@@ -15467,17 +15131,13 @@
       "id": "auto.globorpcparanavai1",
       "name": "Globo RPC Paranavaí",
       "aliases": [
-        "GLOBO RPC PARANAVAÍ HD",
         "Globo RPC Paranavaí HD [1]",
         "Globo RPC Paranavaí [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br",
-        "rpc.paranavai.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globorpcpontagrossa",
@@ -15490,13 +15150,10 @@
         "Globo RPC Ponta Grossa HD [1]",
         "Globo RPC Ponta Grossa [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br",
-        "rpc.ponta.grossa.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globorpctvcuritiba",
@@ -15721,21 +15378,17 @@
         "GLOBO  SP SD²",
         "GLOBO  SP UHD",
         "GLOBO SP",
-        "GLOBO SP FHD",
-        "GLOBO SP H.265",
         "GLOBO SP H265",
-        "GLOBO SP HD",
         "Globo SP FHD",
         "Globo SP HD",
         "Globo SP SD"
       ],
       "tvg_ids_to_export": [
-        "globo.sp.br",
         "globosp.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO CAPITAIS  - ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "GLOBO SÃO JOSÉ DO RIO PRETO",
@@ -15758,27 +15411,22 @@
         "Globo São Paulo HD [1]",
         "Globo São Paulo [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO SUDESTE"
+      "group": ""
     },
     {
       "id": "auto.globotapajospa",
       "name": "GLOBO TAPAJÓS PA",
       "aliases": [
         "GLOBO TAPAJÓS PA",
-        "GLOBO TAPAJÓS PA HD",
         "GLOBO TAPAJÓS PA HD²"
       ],
-      "tvg_ids_to_export": [
-        "tv.tapajos.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globotapajossantarem",
@@ -15787,12 +15435,10 @@
         "GLOBO TAPAJÓS SANTARÉM",
         "GLOBO TAPAJÓS SANTARÉM HD"
       ],
-      "tvg_ids_to_export": [
-        "tv.tapajos.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globotembauru",
@@ -15891,12 +15537,10 @@
         "GLOBO TV ALVORADA DO SUL HD",
         "GLOBO TV ALVORADA DO SUL SD"
       ],
-      "tvg_ids_to_export": [
-        "tv.alvorada.do.sul.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globotvalvoradadosulpi1",
@@ -15908,7 +15552,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORTE"
+      "group": ""
     },
     {
       "id": "auto.globotvanhangueraanapolis",
@@ -15945,7 +15589,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO CENTRO-OESTE"
+      "group": ""
     },
     {
       "id": "auto.globotvanhangueragoiania",
@@ -15957,28 +15601,22 @@
         "Globo TV Anhanguera Goiania HD [3]",
         "Globo TV Anhanguera Goiania [3]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO CENTRO-OESTE"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.globotvanhangueragoiania1",
       "name": "Globo TV Anhanguera Goiânia",
       "aliases": [
-        "GLOBO TV ANHANGUERA GOIÂNIA FHD",
-        "GLOBO TV ANHANGUERA GOIÂNIA HD",
         "Globo TV Anhanguera Goiânia HD [1]",
         "Globo TV Anhanguera Goiânia [1]"
       ],
-      "tvg_ids_to_export": [
-        "tv.anhanguera.goiania.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO CAPITAIS  - ✨"
+      "group": ""
     },
     {
       "id": "auto.globotvanhangueragurupito2",
@@ -15989,7 +15627,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO CENTRO-OESTE"
+      "group": ""
     },
     {
       "id": "auto.globotvanhangueragurupitocantins",
@@ -16054,7 +15692,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO CENTRO-OESTE"
+      "group": ""
     },
     {
       "id": "auto.globotvanhanguerapalmastocantins",
@@ -16115,12 +15753,10 @@
         "Globo TV Asa Branca PE HD [1]",
         "Globo TV Asa Branca PE [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORDESTE"
+      "group": ""
     },
     {
       "id": "auto.globotvbahia",
@@ -16131,12 +15767,11 @@
         "GLOBO TV BAHIA HD"
       ],
       "tvg_ids_to_export": [
-        "globo.tv.bahia.br",
         "globosp.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "GLOBO TV BELÉM",
@@ -16173,12 +15808,11 @@
         "GLOBO TV CABO BRANCO HD"
       ],
       "tvg_ids_to_export": [
-        "globosp.br",
-        "tv.cabo.branco.br"
+        "globosp.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO CAPITAIS  - ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.globotvcabobrancopb1",
@@ -16187,12 +15821,10 @@
         "Globo TV Cabo Branco PB HD [1]",
         "Globo TV Cabo Branco PB [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORDESTE"
+      "group": ""
     },
     {
       "id": "auto.globotvclubepi1",
@@ -16204,7 +15836,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORTE"
+      "group": ""
     },
     {
       "id": "GLOBO TV CLUBE PIAUÍ",
@@ -16281,16 +15913,12 @@
       "id": "auto.globotvdiariomogidascruzes2",
       "name": "Globo TV Diário Mogi das Cruzes",
       "aliases": [
-        "GLOBO TV DIÁRIO MOGI DAS CRUZES HD",
         "Globo TV Diário Mogi das Cruzes [2]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br",
-        "tv.diario.mogi.das.cruzes.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globotvfronteirabr2",
@@ -16326,18 +15954,15 @@
       "aliases": [
         "GLOBO TV GAZETA ALAGOAS",
         "GLOBO TV GAZETA ALAGOAS FHD",
-        "GLOBO TV GAZETA ALAGOAS HD",
         "Globo TV Gazeta Alagoas HD [1]",
         "Globo TV Gazeta Alagoas [1]"
       ],
       "tvg_ids_to_export": [
-        "GloboRJ.br",
-        "globosp.br",
-        "tv.gazeta.al.br"
+        "globosp.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO CAPITAIS  - ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "GLOBO TV GAZETA ES",
@@ -16382,12 +16007,11 @@
         "Globo TV Gazeta Vitoria [1]"
       ],
       "tvg_ids_to_export": [
-        "GloboRJ.br",
         "globosp.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO SUDESTE"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.globotvgazetavitoriaes",
@@ -16424,12 +16048,10 @@
         "Globo TV Grande Rio PE HD [1]",
         "Globo TV Grande Rio PE [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORDESTE"
+      "group": ""
     },
     {
       "id": "auto.globotvguajaramirim",
@@ -16438,12 +16060,10 @@
         "GLOBO TV GUAJARÁ MIRIM",
         "GLOBO TV GUAJARÁ MIRIM HD"
       ],
-      "tvg_ids_to_export": [
-        "tv.guajaramirim.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globotvintegaraxabr2",
@@ -16522,12 +16142,10 @@
         "GLOBO TV INTEGRAÇÃO ARAXÁ",
         "GLOBO TV INTEGRAÇÃO ARAXÁ HD"
       ],
-      "tvg_ids_to_export": [
-        "tv.integracao.araxa.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "GLOBO TV INTEGRAÇÃO ITUITABA",
@@ -16578,12 +16196,10 @@
         "GLOBO TV INTEGRAÇÃO UBERABA FHD",
         "GLOBO TV INTEGRAÇÃO UBERABA HD"
       ],
-      "tvg_ids_to_export": [
-        "tv.integracao.uberaba.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "GLOBO TV INTEGRAÇÃO UBERLANDIA",
@@ -16605,12 +16221,10 @@
         "GLOBO TV INTEGRAÇÃO UBERLÂNDIA",
         "GLOBO TV INTEGRAÇÃO UBERLÂNDIA HD"
       ],
-      "tvg_ids_to_export": [
-        "tv.integracao.uberlandia.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globotvitacotiara",
@@ -16619,12 +16233,10 @@
         "GLOBO TV ITACOTIARA",
         "GLOBO TV ITACOTIARA HD"
       ],
-      "tvg_ids_to_export": [
-        "tv.itacoatiara.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globotvjiparana",
@@ -16633,12 +16245,10 @@
         "GLOBO TV JI PARANA",
         "GLOBO TV JI-PARANA HD"
       ],
-      "tvg_ids_to_export": [
-        "tv.jiparana.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globotvliberalaltamira",
@@ -16647,12 +16257,10 @@
         "GLOBO TV LIBERAL ALTAMIRA",
         "GLOBO TV LIBERAL ALTAMIRA HD"
       ],
-      "tvg_ids_to_export": [
-        "tv.liberal.belem.hd.tv.globo.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globotvliberalaltamirapa2",
@@ -16663,7 +16271,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORTE"
+      "group": ""
     },
     {
       "id": "auto.globotvliberalbelem",
@@ -16704,12 +16312,10 @@
         "Globo TV Liberal Belém PA HD [3]",
         "Globo TV Liberal Belém PA [3]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORTE"
+      "group": ""
     },
     {
       "id": "auto.globotvliberalcastanhal",
@@ -16718,12 +16324,10 @@
         "GLOBO TV LIBERAL CASTANHAL",
         "GLOBO TV LIBERAL CASTANHAL HD"
       ],
-      "tvg_ids_to_export": [
-        "tv.liberal.castanhalglobo.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globotvliberalcastanhalpa2",
@@ -16734,7 +16338,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORTE"
+      "group": ""
     },
     {
       "id": "auto.globotvliberalmarabapa2",
@@ -16745,7 +16349,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORTE"
+      "group": ""
     },
     {
       "id": "auto.globotvliberalmaraba",
@@ -16757,7 +16361,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globotvliberalparagominas",
@@ -16766,12 +16370,10 @@
         "GLOBO TV LIBERAL PARAGOMINAS",
         "GLOBO TV LIBERAL PARAGOMINAS HD"
       ],
-      "tvg_ids_to_export": [
-        "tv.liberal.paragominas.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO CAPITAIS  - ✨"
+      "group": ""
     },
     {
       "id": "auto.globotvliberalparagominaspa2",
@@ -16782,7 +16384,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORTE"
+      "group": ""
     },
     {
       "id": "GLOBO TV LIBERAL PARAUABEBAS",
@@ -16818,7 +16420,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORTE"
+      "group": ""
     },
     {
       "id": "auto.globotvliberalredencao",
@@ -16827,12 +16429,10 @@
         "GLOBO TV LIBERAL REDENÇÃO",
         "GLOBO TV LIBERAL REDENÇÃO HD"
       ],
-      "tvg_ids_to_export": [
-        "tv.liberal.redencao.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globotvliberalredencaopa2",
@@ -16843,7 +16443,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORTE"
+      "group": ""
     },
     {
       "id": "auto.globotvmirante",
@@ -16868,7 +16468,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globotvmirantebalsasma1",
@@ -16880,7 +16480,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORTE"
+      "group": ""
     },
     {
       "id": "auto.globotvmirantebalsasmaranhao",
@@ -16905,12 +16505,11 @@
         "GLOBO TV MIRANTE COCAIS SD"
       ],
       "tvg_ids_to_export": [
-        "globosp.br",
-        "tv.mirante.cocais.br"
+        "globosp.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.globotvmirantecocaisma1",
@@ -16922,7 +16521,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORTE"
+      "group": ""
     },
     {
       "id": "auto.globotvmiranteimperatriz",
@@ -16931,12 +16530,10 @@
         "GLOBO TV MIRANTE IMPERATRIZ",
         "GLOBO TV MIRANTE IMPERATRIZ HD"
       ],
-      "tvg_ids_to_export": [
-        "tv.mirante.imperatriz.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globotvmiranteimperatrizma1",
@@ -16948,7 +16545,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORTE"
+      "group": ""
     },
     {
       "id": "auto.globotvmirantesaoluis",
@@ -16987,32 +16584,27 @@
         "Globo TV Mirante São Luís MA HD [1]",
         "Globo TV Mirante São Luís MA [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORTE"
+      "group": ""
     },
     {
       "id": "auto.globotvmorena",
       "name": "Globo TV Morena",
       "aliases": [
         "GLOBO TV MORENA (BR2)",
-        "GLOBO TV MORENA FHD",
         "GLOBO TV MORENA FHD (BR2)",
-        "GLOBO TV MORENA HD",
         "GLOBO TV MORENA HD (BR2)",
         "Globo TV Morena",
         "Globo TV Morena HD"
       ],
       "tvg_ids_to_export": [
-        "globosp.br",
-        "tv.morena.br"
+        "globosp.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.globotvmorenacampogrande1",
@@ -17021,12 +16613,10 @@
         "Globo TV Morena Campo Grande HD [1]",
         "Globo TV Morena Campo Grande [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO CENTRO-OESTE"
+      "group": ""
     },
     {
       "id": "auto.globotvmorenacorumba",
@@ -17035,12 +16625,10 @@
         "GLOBO TV MORENA CORUMBÁ",
         "GLOBO TV MORENA CORUMBÁ HD"
       ],
-      "tvg_ids_to_export": [
-        "tv.morena.corumba.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globotvmorenapontapora",
@@ -17049,12 +16637,10 @@
         "GLOBO TV MORENA PONTAPORÃ",
         "GLOBO TV MORENA PONTAPORÃ HD"
       ],
-      "tvg_ids_to_export": [
-        "tv.morena.ponta.pora.hd.tv.globo.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globotvnordeste",
@@ -17081,7 +16667,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globotvoesteba1",
@@ -17090,12 +16676,10 @@
         "Globo TV Oeste BA HD [1]",
         "Globo TV Oeste BA [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORDESTE"
+      "group": ""
     },
     {
       "id": "auto.globotvoestebahia",
@@ -17129,12 +16713,10 @@
         "Globo TV Paraíba HD [1]",
         "Globo TV Paraíba [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORDESTE"
+      "group": ""
     },
     {
       "id": "auto.globotvparintins",
@@ -17143,12 +16725,10 @@
         "GLOBO TV PARINTINS",
         "GLOBO TV PARINTINS HD"
       ],
-      "tvg_ids_to_export": [
-        "tv.parintins.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "GLOBO TV PORTO VELHO",
@@ -17168,12 +16748,10 @@
         "GLOBO TV RBS BAGÉ",
         "GLOBO TV RBS BAGÉ HD"
       ],
-      "tvg_ids_to_export": [
-        "rbs.tv.bage.globo.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "GLOBO TV RECIFE",
@@ -17195,7 +16773,6 @@
       "aliases": [
         "GLOBO TV RIO SUL (BR2)",
         "GLOBO TV RIO SUL FHD (BR2)",
-        "GLOBO TV RIO SUL HD",
         "GLOBO TV RIO SUL HD (BR2)",
         "Globo TV Rio Sul",
         "Globo TV Rio Sul FHD",
@@ -17203,12 +16780,11 @@
         "Globo TV Rio Sul SD"
       ],
       "tvg_ids_to_export": [
-        "globosp.br",
-        "tv.rio.sul.br"
+        "globosp.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.globotvsantacruzdosulitabunaba1",
@@ -17217,12 +16793,10 @@
         "Globo TV Santa Cruz do Sul Itabuna BA [1]",
         "Globo TV Santa Cruz do Sul Itabuna BA [2]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORDESTE"
+      "group": ""
     },
     {
       "id": "auto.globotvsantacruzitabunabahia",
@@ -17241,18 +16815,13 @@
       "id": "auto.globotvsergipe1",
       "name": "Globo TV Sergipe",
       "aliases": [
-        "GLOBO TV SERGIPE FHD",
-        "GLOBO TV SERGIPE HD",
         "Globo TV Sergipe HD [1]",
         "Globo TV Sergipe [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br",
-        "tv.sergipe.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globotvserramarbr2",
@@ -17260,7 +16829,6 @@
       "aliases": [
         "GLOBO TV SERRA MAR (BR2)",
         "GLOBO TV SERRA MAR FHD (BR2)",
-        "GLOBO TV SERRA MAR HD",
         "GLOBO TV SERRA MAR HD (BR2)"
       ],
       "tvg_ids_to_export": [
@@ -17268,7 +16836,7 @@
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.globotvsubae",
@@ -17288,31 +16856,24 @@
       "id": "auto.globotvsubaeba1",
       "name": "Globo TV Subaé BA",
       "aliases": [
-        "GLOBO TV SUBAÉ BA HD",
         "Globo TV Subaé BA HD [1]",
         "Globo TV Subaé BA [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br",
-        "tv.subae.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globotvsudoeste",
       "name": "GLOBO TV SUDOESTE",
       "aliases": [
-        "GLOBO TV SUDOESTE",
-        "GLOBO TV SUDOESTE FHD"
+        "GLOBO TV SUDOESTE"
       ],
-      "tvg_ids_to_export": [
-        "tv.sudoeste.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globotvsudoesteba1",
@@ -17321,12 +16882,10 @@
         "Globo TV Sudoeste BA HD [1]",
         "Globo TV Sudoeste BA [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORDESTE"
+      "group": ""
     },
     {
       "id": "auto.globotvsaofrancisco",
@@ -17338,7 +16897,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globotvsaofranciscoba1",
@@ -17347,12 +16906,10 @@
         "Globo TV São Francisco BA HD [1]",
         "Globo TV São Francisco BA [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORDESTE"
+      "group": ""
     },
     {
       "id": "auto.globotvtapajossantarempa2",
@@ -17363,7 +16920,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORTE"
+      "group": ""
     },
     {
       "id": "auto.globotvtembauru",
@@ -17380,28 +16937,23 @@
         "Globo TV TEM Bauru [3]"
       ],
       "tvg_ids_to_export": [
-        "GloboRJ.br",
         "globosp.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO SUDESTE"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.globotvtemitapetininga1",
       "name": "Globo TV TEM Itapetininga",
       "aliases": [
-        "GLOBO TV TEM ITAPETININGA HD",
         "Globo TV TEM Itapetininga HD [1]",
         "Globo TV TEM Itapetininga [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br",
-        "tv.tem.itapetininga.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globotvtemsaojosedoriopreto",
@@ -17425,7 +16977,6 @@
       "name": "GLOBO TV TEM SOROCABA",
       "aliases": [
         "GLOBO TV TEM SOROCABA (BR2)",
-        "GLOBO TV TEM SOROCABA FHD",
         "GLOBO TV TEM SOROCABA FHD (BR2)",
         "GLOBO TV TEM SOROCABA HD",
         "GLOBO TV TEM SOROCABA HD (BR2)",
@@ -17436,13 +16987,11 @@
         "Globo TV TEM Sorocaba [3]"
       ],
       "tvg_ids_to_export": [
-        "GloboRJ.br",
-        "globosp.br",
-        "tv.tem.sorocaba.br"
+        "globosp.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "GLOBO TV TEM TAUBATÉ",
@@ -17461,7 +17010,6 @@
       "aliases": [
         "GLOBO TV TRIBUNA SANTOS (BR2)",
         "GLOBO TV TRIBUNA SANTOS FHD (BR2)",
-        "GLOBO TV TRIBUNA SANTOS HD",
         "GLOBO TV TRIBUNA SANTOS HD (BR2)",
         "Globo TV Tribuna Santos",
         "Globo TV Tribuna Santos FHD [1]",
@@ -17470,13 +17018,11 @@
         "Globo TV Tribuna Santos [1]"
       ],
       "tvg_ids_to_export": [
-        "GloboRJ.br",
-        "globosp.br",
-        "tv.tribuna.santos.br"
+        "globosp.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.globotvvangsjcamposbr2",
@@ -17583,12 +17129,10 @@
         "GLOBO TV VANGUARDA TTE",
         "GLOBO TV VANGUARDA TTE HD"
       ],
-      "tvg_ids_to_export": [
-        "tv.vanguarda.taubate.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globotvverdesmares",
@@ -17612,15 +17156,15 @@
         "GLOBO TV VERDES MARES CARIRI",
         "GLOBO TV VERDES MARES CARIRI FHD",
         "GLOBO TV VERDES MARES CARIRI HD",
+        "GLOBO TV VERDES MARES CARIRI SD",
         "Globo TV Verdes Mares Cariri SD"
       ],
       "tvg_ids_to_export": [
-        "globosp.br",
-        "tv.verdes.mares.caririglobo.br"
+        "globosp.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "GLOBO TV VERDES MARES CE",
@@ -17646,7 +17190,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.globovangsjcampos",
@@ -17742,12 +17286,10 @@
         "Globo Vanguarda Taubaté HD [1]",
         "Globo Vanguarda Taubaté [1]"
       ],
-      "tvg_ids_to_export": [
-        "GloboRJ.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO SUDESTE"
+      "group": ""
     },
     {
       "id": "auto.globoverdesmares",
@@ -17780,7 +17322,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORTE"
+      "group": ""
     },
     {
       "id": "auto.globoverdesmaresfortaleza1",
@@ -17792,7 +17334,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | GLOBO NORTE"
+      "group": ""
     },
     {
       "id": "auto.globovitoria",
@@ -17811,9 +17353,7 @@
       "id": "auto.globoplaynovelas",
       "name": "GLOBOPLAY NOVELAS",
       "aliases": [
-        "GLOBOPLAY NOVELAS FHD",
         "GLOBOPLAY NOVELAS H265",
-        "GLOBOPLAY NOVELAS HD",
         "GLOBOPLAY NOVELAS SD",
         "Globoplay Novelas",
         "Globoplay Novelas FHD",
@@ -17832,13 +17372,10 @@
         "GLOOB FHD",
         "GLOOB FHD*",
         "GLOOB FHD²",
-        "GLOOB HD",
         "GLOOB HD*",
         "GLOOB HD²",
-        "GLOOB SD",
         "GLOOB SD*",
         "GLOOB SD²",
-        "Gloob",
         "Gloob FHD",
         "Gloob FHD [H265]",
         "Gloob HD",
@@ -17847,12 +17384,11 @@
         "Gloob [3]"
       ],
       "tvg_ids_to_export": [
-        "Gloob.br",
         "gloob.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: INFANTIS ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.gloobinho",
@@ -17872,13 +17408,11 @@
         "Gloobinho [3]"
       ],
       "tvg_ids_to_export": [
-        "Gloobinho.br",
-        "gloobinho.br",
         "gloobinho.bt"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: INFANTIS ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.gloobinhofhdr",
@@ -17898,24 +17432,18 @@
         "GNT",
         "GNT 4K",
         "GNT FHD",
-        "GNT FHD H.265",
         "GNT FHD*",
         "GNT HD",
         "GNT HD [1]",
-        "GNT HD ²",
-        "GNT HD ¹",
         "GNT HD*",
         "GNT SD",
         "GNT SD*",
         "GNT [1]"
       ],
-      "tvg_ids_to_export": [
-        "Gnt.br",
-        "gnt.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: VARIEDADES ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.gntfhdr",
@@ -18229,28 +17757,23 @@
         "HBO *",
         "HBO 4K",
         "HBO FHD",
-        "HBO FHD H.265",
         "HBO FHD [H265]",
         "HBO FHD [LEG]*",
         "HBO FHD*",
         "HBO HD",
         "HBO HD LEG",
-        "HBO HD [2]",
         "HBO HD [LEG]*",
-        "HBO HD ²",
-        "HBO HD ¹",
         "HBO HD*",
         "HBO SD",
         "HBO SD LEG",
         "HBO SD*"
       ],
       "tvg_ids_to_export": [
-        "HBO2.br",
         "hbo.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: HBO ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.hbo2",
@@ -18258,15 +17781,12 @@
       "aliases": [
         "HBO 2",
         "HBO 2 FHD",
-        "HBO 2 FHD H.265",
         "HBO 2 FHD [H265]",
         "HBO 2 FHD*",
         "HBO 2 FHD²",
         "HBO 2 H265",
         "HBO 2 HD",
         "HBO 2 HD [2]",
-        "HBO 2 HD ²",
-        "HBO 2 HD ¹",
         "HBO 2 HD*",
         "HBO 2 HD²",
         "HBO 2 SD",
@@ -18277,12 +17797,11 @@
         "HBO [2]"
       ],
       "tvg_ids_to_export": [
-        "HBO2.br",
         "hbo2.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: HBO ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.hbo2fhdr",
@@ -18301,17 +17820,13 @@
       "aliases": [
         "HBO FAMILY",
         "HBO FAMILY FHD",
-        "HBO FAMILY FHD H.265",
         "HBO FAMILY FHD [H265]",
         "HBO FAMILY FHD*",
         "HBO FAMILY FHD²",
         "HBO FAMILY H265",
         "HBO FAMILY HD",
-        "HBO FAMILY HD ²",
-        "HBO FAMILY HD ¹",
         "HBO FAMILY HD*",
         "HBO FAMILY HD²",
-        "HBO FAMILY SD",
         "HBO FAMILY SD*",
         "HBO FAMILY SD²",
         "HBO Family FHD",
@@ -18321,13 +17836,11 @@
         "HBO Family [2]"
       ],
       "tvg_ids_to_export": [
-        "HBOFamily.br",
-        "hbo.family.br",
         "hbofamily.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: HBO ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.hbofamilyfhdr",
@@ -18379,7 +17892,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: MAX - CHAMPIONS LEAGUE ⚽"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.hbomax02",
@@ -18391,7 +17904,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: MAX - CHAMPIONS LEAGUE ⚽"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.hbomax03",
@@ -18403,7 +17916,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: MAX - CHAMPIONS LEAGUE ⚽"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.hbomax04",
@@ -18415,7 +17928,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: MAX - CHAMPIONS LEAGUE ⚽"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.hbomax05",
@@ -18427,7 +17940,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: MAX - CHAMPIONS LEAGUE ⚽"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.hbomax06",
@@ -18439,7 +17952,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: MAX - CHAMPIONS LEAGUE ⚽"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.hbomax07",
@@ -18451,7 +17964,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: MAX - CHAMPIONS LEAGUE ⚽"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.hbomax08",
@@ -18463,7 +17976,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: MAX - CHAMPIONS LEAGUE ⚽"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.hbomax09",
@@ -18475,7 +17988,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: MAX - CHAMPIONS LEAGUE ⚽"
+      "group": ""
     },
     {
       "id": "auto.hbomax1",
@@ -18501,7 +18014,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: MAX - CHAMPIONS LEAGUE ⚽"
+      "group": ""
     },
     {
       "id": "auto.hbomax11",
@@ -18513,7 +18026,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: MAX - CHAMPIONS LEAGUE ⚽"
+      "group": ""
     },
     {
       "id": "auto.hbomax12",
@@ -18525,7 +18038,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: MAX - CHAMPIONS LEAGUE ⚽"
+      "group": ""
     },
     {
       "id": "auto.hbomax13",
@@ -18537,7 +18050,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: MAX - CHAMPIONS LEAGUE ⚽"
+      "group": ""
     },
     {
       "id": "auto.hbomax14",
@@ -18549,7 +18062,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: MAX - CHAMPIONS LEAGUE ⚽"
+      "group": ""
     },
     {
       "id": "auto.hbomax15",
@@ -18561,7 +18074,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: MAX - CHAMPIONS LEAGUE ⚽"
+      "group": ""
     },
     {
       "id": "auto.hbomax16",
@@ -18573,7 +18086,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: MAX - CHAMPIONS LEAGUE ⚽"
+      "group": ""
     },
     {
       "id": "auto.hbomax17",
@@ -18585,7 +18098,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: MAX - CHAMPIONS LEAGUE ⚽"
+      "group": ""
     },
     {
       "id": "auto.hbomax18",
@@ -18597,7 +18110,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: MAX - CHAMPIONS LEAGUE ⚽"
+      "group": ""
     },
     {
       "id": "auto.hbomax19",
@@ -18854,17 +18367,12 @@
       "aliases": [
         "HBO MUNDI",
         "HBO MUNDI *",
-        "HBO MUNDI FHD",
-        "HBO MUNDI FHD H.265",
         "HBO MUNDI FHD [H265]",
         "HBO MUNDI FHD [LEG]*",
         "HBO MUNDI FHD*",
         "HBO MUNDI FHD²",
         "HBO MUNDI H265",
-        "HBO MUNDI HD",
         "HBO MUNDI HD [LEG]*",
-        "HBO MUNDI HD ²",
-        "HBO MUNDI HD ¹",
         "HBO MUNDI HD*",
         "HBO MUNDI HD²",
         "HBO MUNDI SD",
@@ -18878,13 +18386,11 @@
         "HBO Mundi [2]"
       ],
       "tvg_ids_to_export": [
-        "HBOMundi.br",
-        "hbo.mundi.br",
         "hbomundi.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: HBO ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.hbomundifhdr",
@@ -18903,12 +18409,7 @@
       "aliases": [
         "HBO +",
         "HBO PLUS *",
-        "HBO PLUS FHD",
-        "HBO PLUS FHD H.265",
         "HBO PLUS FHD [H265]",
-        "HBO PLUS HD",
-        "HBO PLUS HD ²",
-        "HBO PLUS HD ¹",
         "HBO PLUS [2]",
         "HBO Plus",
         "HBO Plus FHD",
@@ -18928,12 +18429,11 @@
         "HBO+ SD*"
       ],
       "tvg_ids_to_export": [
-        "hbo.plus.br",
         "hboplusbrasil.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: HBO ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.hboplusfhdr",
@@ -18953,24 +18453,18 @@
       "aliases": [
         "HBO POP",
         "HBO POP *",
-        "HBO POP FHD",
-        "HBO POP FHD H.265",
         "HBO POP FHD [H265]",
         "HBO POP FHD [LEG]*",
         "HBO POP FHD*",
         "HBO POP FHD²",
         "HBO POP H265",
-        "HBO POP HD",
         "HBO POP HD LEG",
         "HBO POP HD [LEG]*",
-        "HBO POP HD ²",
-        "HBO POP HD ¹",
         "HBO POP HD*",
         "HBO POP HD²",
         "HBO POP SD LEG",
         "HBO POP SD*",
         "HBO POP SD²",
-        "HBO Pop",
         "HBO Pop FHD",
         "HBO Pop HD",
         "HBO Pop HD [2]",
@@ -18978,13 +18472,11 @@
         "HBO Pop [2]"
       ],
       "tvg_ids_to_export": [
-        "HBOPop.br",
-        "hbo.pop.br",
         "hbopop.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: HBO ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.hbopopfhdr",
@@ -19004,7 +18496,6 @@
         "HBO SIGNATURE",
         "HBO SIGNATURE *",
         "HBO SIGNATURE FHD",
-        "HBO SIGNATURE FHD H.265",
         "HBO SIGNATURE FHD [H265]",
         "HBO SIGNATURE FHD [LEG]*",
         "HBO SIGNATURE FHD*",
@@ -19012,11 +18503,8 @@
         "HBO SIGNATURE H265",
         "HBO SIGNATURE HD",
         "HBO SIGNATURE HD [LEG]*",
-        "HBO SIGNATURE HD ²",
-        "HBO SIGNATURE HD ¹",
         "HBO SIGNATURE HD*",
         "HBO SIGNATURE HD²",
-        "HBO SIGNATURE SD",
         "HBO SIGNATURE SD*",
         "HBO SIGNATURE SD²",
         "HBO Signature FHD",
@@ -19026,32 +18514,26 @@
         "HBO Signature [2]"
       ],
       "tvg_ids_to_export": [
-        "HBOSignature.br",
-        "hbo.signature.br",
         "hbosignature.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: HBO ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.hboxtreme",
       "name": "HBO XTREME",
       "aliases": [
-        "HBO XTREME",
         "HBO XTREME *",
         "HBO XTREME 4K",
-        "HBO XTREME FHD",
         "HBO XTREME FHD [H265]",
         "HBO XTREME FHD [LEG]*",
         "HBO XTREME FHD*",
         "HBO XTREME FHD²",
         "HBO XTREME H265",
         "HBO XTREME HD",
-        "HBO XTREME HD ¹",
         "HBO XTREME HD*",
         "HBO XTREME HD²",
-        "HBO XTREME SD",
         "HBO XTREME SD LEG",
         "HBO XTREME SD*",
         "HBO XTREME SD²",
@@ -19063,13 +18545,11 @@
         "HBO Xtreme [1]"
       ],
       "tvg_ids_to_export": [
-        "HBOXtreme.br",
-        "hbo.xtreme.br",
         "hboxtreme.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: HBO ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.hboxtremefhdr",
@@ -19233,7 +18713,6 @@
       "aliases": [
         "HGTV",
         "HGTV FHD",
-        "HGTV FHD H.265",
         "HGTV FHD*",
         "HGTV HD",
         "HGTV HD [1]",
@@ -19242,13 +18721,10 @@
         "HGTV SD*",
         "HGTV [1]"
       ],
-      "tvg_ids_to_export": [
-        "HGTV.br",
-        "hgtv.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: DOCUMENTÁRIOS ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.hgtvfhdr",
@@ -19309,14 +18785,10 @@
         "HISTORY CHANNEL HD²",
         "HISTORY CHANNEL SD",
         "HISTORY CHANNEL SD²",
-        "HISTORY FHD",
-        "HISTORY FHD H.265",
         "HISTORY FHD*",
         "HISTORY HD",
         "HISTORY HD*",
-        "HISTORY SD",
         "HISTORY SD*",
-        "History",
         "History Channel",
         "History FHD",
         "History FHD [H265]",
@@ -19327,13 +18799,11 @@
         "The History Channel"
       ],
       "tvg_ids_to_export": [
-        "HistoryChannel.br",
-        "history.br",
         "historychannel.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: DOCUMENTÁRIOS ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.history2",
@@ -19351,22 +18821,15 @@
         "H2 SD²",
         "H2 HD*",
         "H2 SD*",
-        "HISTORY 2",
-        "HISTORY 2 FHD",
-        "HISTORY 2 FHD H.265",
-        "HISTORY 2 HD",
         "History 2",
         "History 2 HD [1]",
         "History 2 [1]",
         "History2"
       ],
-      "tvg_ids_to_export": [
-        "History2.br",
-        "history.2.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: DOCUMENTÁRIOS ✨"
+      "group": ""
     },
     {
       "id": "auto.history2fhdr",
@@ -19587,21 +19050,13 @@
       "id": "auto.idinvestigacaodiscovery1",
       "name": "ID Investigação Discovery",
       "aliases": [
-        "ID - INVESTIGAÇÃO DISCOVERY FHD",
-        "ID - INVESTIGAÇÃO DISCOVERY FHD H.265",
-        "ID - INVESTIGAÇÃO DISCOVERY HD",
-        "ID - INVESTIGAÇÃO DISCOVERY HD ²",
-        "ID - INVESTIGAÇÃO DISCOVERY HD ³",
         "ID - Investigação Discovery HD [1]",
         "ID Investigação Discovery [1]"
       ],
-      "tvg_ids_to_export": [
-        "InvestigacaoDiscovery.br",
-        "investigacao.discovery.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: DISCOVERY ✨"
+      "group": ""
     },
     {
       "id": "auto.idealtv",
@@ -19629,7 +19084,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | RELIGIOSOS"
+      "group": ""
     },
     {
       "id": "auto.igrejamundialimpd",
@@ -19654,7 +19109,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | RELIGIOSOS"
+      "group": ""
     },
     {
       "id": "auto.24hilhadosdesafios",
@@ -20081,19 +19536,16 @@
         "JOVEM PAN",
         "JOVEM PAN FHD",
         "JOVEM PAN FHD [H265]",
-        "JOVEM PAN FHD ¹",
         "JOVEM PAN HD",
-        "JOVEM PAN HD ¹",
         "JOVEM PAN SD"
       ],
       "tvg_ids_to_export": [
         "globonews.br",
-        "jovem.pan.news.br",
         "jovempannews.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: NOTÍCIAS ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.jovempannews",
@@ -20107,12 +19559,10 @@
         "JOVEM PAN NEWS SD",
         "JOVEM PAN NEWS SD²"
       ],
-      "tvg_ids_to_export": [
-        "jovem.pan.news.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: NOTÍCIAS ✨"
+      "group": ""
     },
     {
       "id": "Jovem Pan SP",
@@ -20153,7 +19603,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | NOTICIARIO"
+      "group": ""
     },
     {
       "id": "auto.24hkickbuttowskiumprojetodedubl",
@@ -20696,22 +20146,20 @@
       "id": "auto.lifetime",
       "name": "LIFETIME",
       "aliases": [
-        "LIFETIME",
         "LIFETIME FHD",
         "LIFETIME FHD*",
         "LIFETIME HD",
         "LIFETIME HD*",
         "LIFETIME SD",
         "LIFETIME SD*",
+        "Lifetime",
         "Lifetime FHD",
         "Lifetime HD"
       ],
-      "tvg_ids_to_export": [
-        "lifetime.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: VARIEDADES ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.lifetimefhdr",
@@ -20827,7 +20275,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | VARIEDADES"
+      "group": ""
     },
     {
       "id": "auto.24hlilbush",
@@ -22067,13 +21515,10 @@
         "Modo Viagem HD [3]",
         "Modo Viagem [3]"
       ],
-      "tvg_ids_to_export": [
-        "MaisGlobosat.br",
-        "modo.viagem.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: VARIEDADES ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.modoviagemfhdr",
@@ -22208,8 +21653,6 @@
       "id": "auto.multishow",
       "name": "Multishow",
       "aliases": [
-        "MULTISHOW",
-        "MULTISHOW FHD",
         "MULTISHOW FHD*",
         "MULTISHOW FHD²",
         "MULTISHOW HD",
@@ -22228,12 +21671,11 @@
         "Multishow [1]"
       ],
       "tvg_ids_to_export": [
-        "Multishow.br",
         "multishow.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: MÚSICA ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.multishowfhdr",
@@ -22293,22 +21735,19 @@
         "Music Box Brasil HD [3]",
         "Music Box Brasil [3]"
       ],
-      "tvg_ids_to_export": [
-        "AandE.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | VARIEDADES"
+      "group": ""
     },
     {
       "id": "auto.musicboxbrazil",
       "name": "Music Box Brazil",
       "aliases": [
-        "MUSIC BOX BRAZIL",
-        "MUSIC BOX BRAZIL FHD",
         "MUSIC BOX BRAZIL FHD*",
         "MUSIC BOX BRAZIL HD*",
         "MUSIC BOX BRAZIL SD*",
+        "Music Box Brazil",
         "Music Box Brazil FHD",
         "Music Box Brazil HD",
         "Music Box Brazil SD"
@@ -23570,7 +23009,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: NBA / PPV ⛹️"
+      "group": ""
     },
     {
       "id": "NBA | League Pass 01",
@@ -24701,17 +24140,15 @@
       "id": "auto.novotempo",
       "name": "Novo Tempo",
       "aliases": [
-        "NOVO TEMPO",
         "Novo Tempo",
         "Novo Tempo HD"
       ],
       "tvg_ids_to_export": [
-        "Tvnovotempo.br",
-        "tv.novo.tempo.br"
+        "Tvnovotempo.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: RELIGIOSOS ⭐"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.nscblumenau",
@@ -24815,7 +24252,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | ⚽ ESPORTES"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.nsports1",
@@ -25247,22 +24684,16 @@
       "id": "auto.off3",
       "name": "Off",
       "aliases": [
-        "OFF",
-        "OFF FHD",
-        "OFF HD",
         "Off FHD",
         "Off FHD [3]",
         "Off HD",
         "Off HD [3]",
         "Off [3]"
       ],
-      "tvg_ids_to_export": [
-        "Off.br",
-        "off.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: VARIEDADES ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.24hoggyandasbaratas",
@@ -27382,32 +26813,24 @@
         "Premiere 1 [1]",
         "Premiere 1 [2]"
       ],
-      "tvg_ids_to_export": [
-        "PremiereClubes.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | ⚽ PREMIERE"
+      "group": ""
     },
     {
       "id": "auto.premiere2",
       "name": "PREMIERE 2",
       "aliases": [
-        "PREMIERE 2",
-        "PREMIERE 2 FHD",
-        "PREMIERE 2 FHD H.265",
-        "PREMIERE 2 FHD ²",
-        "PREMIERE 2 FHD ¹",
         "PREMIERE 2 FHD*",
         "PREMIERE 2 FHD²",
         "PREMIERE 2 H265",
         "PREMIERE 2 HD",
-        "PREMIERE 2 HD ¹",
         "PREMIERE 2 HD*",
         "PREMIERE 2 HD²",
-        "PREMIERE 2 SD",
         "PREMIERE 2 SD*",
         "PREMIERE 2 SD²",
+        "Premiere 2",
         "Premiere 2 FHD",
         "Premiere 2 FHD [1]",
         "Premiere 2 FHD [2]",
@@ -27423,13 +26846,10 @@
         "Premiere 2 [1]",
         "Premiere 2 [2]"
       ],
-      "tvg_ids_to_export": [
-        "Premiere2.br",
-        "premiere.2.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: PREMIERE ⚽"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.premiere3",
@@ -27437,14 +26857,9 @@
       "aliases": [
         "PREMIERE 3",
         "PREMIERE 3 FHD",
-        "PREMIERE 3 FHD H.265",
-        "PREMIERE 3 FHD ¹",
         "PREMIERE 3 FHD*",
         "PREMIERE 3 FHD²",
         "PREMIERE 3 H265",
-        "PREMIERE 3 HD",
-        "PREMIERE 3 HD ²",
-        "PREMIERE 3 HD ¹",
         "PREMIERE 3 HD*",
         "PREMIERE 3 HD²",
         "PREMIERE 3 SD*",
@@ -27464,32 +26879,24 @@
         "Premiere 3 [1]",
         "Premiere 3 [2]"
       ],
-      "tvg_ids_to_export": [
-        "Premiere3.br",
-        "premiere.3.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: PREMIERE ⚽"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.premiere4",
       "name": "PREMIERE 4",
       "aliases": [
-        "PREMIERE 4",
-        "PREMIERE 4 FHD",
-        "PREMIERE 4 FHD H.265",
-        "PREMIERE 4 FHD ¹",
         "PREMIERE 4 FHD*",
         "PREMIERE 4 FHD²",
         "PREMIERE 4 H265",
         "PREMIERE 4 HD",
-        "PREMIERE 4 HD ²",
-        "PREMIERE 4 HD ¹",
         "PREMIERE 4 HD*",
         "PREMIERE 4 HD²",
         "PREMIERE 4 SD*",
         "PREMIERE 4 SD²",
+        "Premiere 4",
         "Premiere 4 FHD",
         "Premiere 4 FHD [H265]",
         "Premiere 4 FHD ²",
@@ -27502,33 +26909,25 @@
         "Premiere 4 [1]",
         "Premiere 4 [2]"
       ],
-      "tvg_ids_to_export": [
-        "premiere.4.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: PREMIERE ⚽"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.premiere5",
       "name": "PREMIERE 5",
       "aliases": [
-        "PREMIERE 5",
         "PREMIERE 5 FHD",
-        "PREMIERE 5 FHD H.265",
-        "PREMIERE 5 FHD ²",
-        "PREMIERE 5 FHD ¹",
         "PREMIERE 5 FHD*",
         "PREMIERE 5 FHD²",
         "PREMIERE 5 H265",
         "PREMIERE 5 HD",
-        "PREMIERE 5 HD ²",
-        "PREMIERE 5 HD ¹",
         "PREMIERE 5 HD*",
         "PREMIERE 5 HD²",
-        "PREMIERE 5 SD",
         "PREMIERE 5 SD*",
         "PREMIERE 5 SD²",
+        "Premiere 5",
         "Premiere 5 FHD",
         "Premiere 5 FHD [2]",
         "Premiere 5 FHD [H265]",
@@ -27538,26 +26937,19 @@
         "Premiere 5 [1]",
         "Premiere 5 [2]"
       ],
-      "tvg_ids_to_export": [
-        "premiere.5.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: PREMIERE ⚽"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.premiere6",
       "name": "PREMIERE 6",
       "aliases": [
         "PREMIERE 6",
-        "PREMIERE 6 FHD",
-        "PREMIERE 6 FHD H.265",
-        "PREMIERE 6 FHD ¹",
         "PREMIERE 6 FHD*",
         "PREMIERE 6 FHD²",
         "PREMIERE 6 H265",
-        "PREMIERE 6 HD",
-        "PREMIERE 6 HD ¹",
         "PREMIERE 6 HD*",
         "PREMIERE 6 HD²",
         "PREMIERE 6 SD",
@@ -27572,31 +26964,24 @@
         "Premiere 6 [1]",
         "Premiere 6 [2]"
       ],
-      "tvg_ids_to_export": [
-        "premiere.6.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: PREMIERE ⚽"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.premiere7",
       "name": "PREMIERE 7",
       "aliases": [
-        "PREMIERE 7",
-        "PREMIERE 7 FHD",
-        "PREMIERE 7 FHD ²",
-        "PREMIERE 7 FHD ¹",
         "PREMIERE 7 FHD*",
         "PREMIERE 7 FHD²",
         "PREMIERE 7 H265",
-        "PREMIERE 7 HD",
-        "PREMIERE 7 HD ¹",
         "PREMIERE 7 HD*",
         "PREMIERE 7 HD²",
         "PREMIERE 7 SD",
         "PREMIERE 7 SD*",
         "PREMIERE 7 SD²",
+        "Premiere 7",
         "Premiere 7 FHD",
         "Premiere 7 FHD [H265]",
         "Premiere 7 HD",
@@ -27606,18 +26991,15 @@
         "Premiere 7 [1]",
         "Premiere 7 [2]"
       ],
-      "tvg_ids_to_export": [
-        "premiere.7.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: PREMIERE ⚽"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.premiere8",
       "name": "PREMIERE 8",
       "aliases": [
-        "PREMIERE 8",
         "PREMIERE 8 FHD",
         "PREMIERE 8 FHD*",
         "PREMIERE 8 HD",
@@ -27630,12 +27012,10 @@
         "Premiere 8 [1]",
         "Premiere 8 [2]"
       ],
-      "tvg_ids_to_export": [
-        "premiere.8.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: PREMIERE ⚽"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "PREMIERE 8 MOSAICO",
@@ -27662,16 +27042,13 @@
         "PREMIERE  CLUBES HD²",
         "PREMIERE  CLUBES SD",
         "PREMIERE  CLUBES SD²",
-        "PREMIERE CLUBES",
-        "PREMIERE CLUBES 4K",
         "PREMIERE CLUBES FHD",
-        "PREMIERE CLUBES FHD H.265",
-        "PREMIERE CLUBES FHD ²",
         "PREMIERE CLUBES FHD*",
         "PREMIERE CLUBES H265",
         "PREMIERE CLUBES HD",
         "PREMIERE CLUBES HD*",
         "PREMIERE CLUBES SD*",
+        "Premiere Clubes",
         "Premiere Clubes 4K",
         "Premiere Clubes FHD",
         "Premiere Clubes FHD [H265]",
@@ -27681,12 +27058,11 @@
         "Premiere Clubes SD"
       ],
       "tvg_ids_to_export": [
-        "premiere.clubes.br",
         "premiereclubes.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: PREMIERE ⚽"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.primeboxbrasil",
@@ -29310,20 +28686,17 @@
       "id": "auto.record",
       "name": "RECORD",
       "aliases": [
-        "RECORD",
-        "RECORD 4K",
-        "RECORD HD ¹",
         "RECORD SD",
         "RECORD SD³",
+        "Record",
         "Record 4K"
       ],
       "tvg_ids_to_export": [
-        "record.br",
         "recordtvbrasília.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: RECORD ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.recordbahia",
@@ -29332,15 +28705,12 @@
         "RECORD BAHIA",
         "RECORD BAHIA FHD",
         "RECORD BAHIA HD",
-        "RECORD BAHIA SD",
-        "RECORD BAHIA ¹"
+        "RECORD BAHIA SD"
       ],
-      "tvg_ids_to_export": [
-        "record.tv.bahia.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: RECORD ✨"
+      "group": ""
     },
     {
       "id": "auto.recordbelem",
@@ -29351,12 +28721,10 @@
         "RECORD BELEM HD²",
         "RECORD BELEM SD"
       ],
-      "tvg_ids_to_export": [
-        "record.tv.belem.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: RECORD ✨"
+      "group": ""
     },
     {
       "id": "auto.recordbrasilia",
@@ -29368,12 +28736,11 @@
         "RECORD BRASILIA SD"
       ],
       "tvg_ids_to_export": [
-        "record.brasilia.br",
         "recordtvbrasília.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: RECORD ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.recordcampinas",
@@ -29447,12 +28814,11 @@
         "RECORD GOIAS SD"
       ],
       "tvg_ids_to_export": [
-        "record.tv.goias.br",
         "recordtvbrasília.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: RECORD ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.recordinteriorsp",
@@ -29520,12 +28886,10 @@
         "RECORD MINAS HD²",
         "RECORD MINAS SD"
       ],
-      "tvg_ids_to_export": [
-        "record.tv.minas.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: RECORD ✨"
+      "group": ""
     },
     {
       "id": "auto.recordmt",
@@ -29555,14 +28919,12 @@
       "id": "auto.recordnews",
       "name": "RECORD NEWS",
       "aliases": [
-        "RECORD NEWS FHD",
+        "RECORD NEWS",
         "RECORD NEWS FHD [H265]",
         "RECORD NEWS FHD*",
-        "RECORD NEWS HD",
-        "RECORD NEWS HD ¹",
         "RECORD NEWS HD²",
+        "RECORD NEWS SD",
         "RECORD NEWS SD²",
-        "Record News",
         "Record News FHD",
         "Record News HD",
         "Record News HD [3]",
@@ -29570,13 +28932,11 @@
         "Record News [3]"
       ],
       "tvg_ids_to_export": [
-        "AandE.br",
-        "record.news.br",
         "recordnews.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: NOTÍCIAS ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "RECORD NSC SANTA CATARINA",
@@ -29711,17 +29071,15 @@
       "name": "RECORD RJ",
       "aliases": [
         "RECORD RJ",
-        "RECORD RJ FHD",
         "RECORD RJ HD",
         "RECORD RJ SD"
       ],
       "tvg_ids_to_export": [
-        "record.rio.br",
         "recordtvbrasília.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: RECORD ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.recordrn",
@@ -29742,17 +29100,14 @@
         "RECORD RS",
         "RECORD RS FHD",
         "RECORD RS HD",
-        "RECORD RS HD ¹",
         "RECORD RS HD²",
         "RECORD RS SD",
         "RECORD RS SD²"
       ],
-      "tvg_ids_to_export": [
-        "record.rs.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: RECORD ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "RECORD SANTA CATARINA",
@@ -29869,20 +29224,16 @@
         "RECORD  SP SD",
         "RECORD  SP SD²",
         "RECORD SP",
-        "RECORD SP FHD",
-        "RECORD SP FHD H.265",
         "RECORD SP H265",
         "RECORD SP HD",
-        "RECORD SP HD ¹",
         "RECORD SP SD"
       ],
       "tvg_ids_to_export": [
-        "record.br",
         "recordtvbrasília.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: RECORD ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.recordto",
@@ -29923,12 +29274,11 @@
         "Record TV Bahia [2]"
       ],
       "tvg_ids_to_export": [
-        "RecordTV.br",
         "recordtvbrasília.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | RECORD"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.recordtvbahiaitabuna1",
@@ -29937,12 +29287,10 @@
         "Record TV Bahia Itabuna HD [1]",
         "Record TV Bahia Itabuna [1]"
       ],
-      "tvg_ids_to_export": [
-        "RecordTV.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | RECORD"
+      "group": ""
     },
     {
       "id": "auto.recordtvbauru1",
@@ -29951,12 +29299,10 @@
         "Record TV Bauru HD [1]",
         "Record TV Bauru [1]"
       ],
-      "tvg_ids_to_export": [
-        "RecordTV.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | RECORD"
+      "group": ""
     },
     {
       "id": "auto.recordtvbelem",
@@ -29985,12 +29331,10 @@
         "Record TV Belém [1]",
         "Record TV Belém [2]"
       ],
-      "tvg_ids_to_export": [
-        "RecordTV.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | RECORD"
+      "group": ""
     },
     {
       "id": "auto.recordtvbrasilia",
@@ -30005,12 +29349,11 @@
         "Record TV Brasilia [2]"
       ],
       "tvg_ids_to_export": [
-        "RecordTV.br",
         "recordtvbrasília.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | RECORD"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.recordtvcampinas",
@@ -30027,12 +29370,11 @@
         "Record TV Campinas [2]"
       ],
       "tvg_ids_to_export": [
-        "RecordTV.br",
         "recordtvbrasília.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | RECORD"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.recordtvcamposdosgoytacazes1",
@@ -30041,12 +29383,10 @@
         "Record TV Campos dos Goytacazes HD [1]",
         "Record TV Campos dos Goytacazes [1]"
       ],
-      "tvg_ids_to_export": [
-        "RecordTV.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | RECORD"
+      "group": ""
     },
     {
       "id": "auto.recordtvcidadeceara",
@@ -30081,12 +29421,10 @@
         "Record TV Curitiba HD [1]",
         "Record TV Curitiba [1]"
       ],
-      "tvg_ids_to_export": [
-        "RecordTV.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | RECORD"
+      "group": ""
     },
     {
       "id": "auto.recordtvflorianopolis1",
@@ -30095,12 +29433,10 @@
         "Record TV Florianópolis HD [1]",
         "Record TV Florianópolis [1]"
       ],
-      "tvg_ids_to_export": [
-        "RecordTV.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | RECORD"
+      "group": ""
     },
     {
       "id": "auto.recordtvfortaleza1",
@@ -30109,12 +29445,10 @@
         "Record TV Fortaleza HD [1]",
         "Record TV Fortaleza [1]"
       ],
-      "tvg_ids_to_export": [
-        "RecordTV.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | RECORD"
+      "group": ""
     },
     {
       "id": "auto.recordtvgoias2",
@@ -30125,12 +29459,11 @@
         "Record TV Goias [2]"
       ],
       "tvg_ids_to_export": [
-        "RecordTV.br",
         "recordtvbrasília.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | RECORD"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.recordtvgoias1",
@@ -30139,12 +29472,10 @@
         "Record TV Goiás HD [1]",
         "Record TV Goiás [1]"
       ],
-      "tvg_ids_to_export": [
-        "RecordTV.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | RECORD"
+      "group": ""
     },
     {
       "id": "RECORD TV GUARARAPES",
@@ -30168,12 +29499,10 @@
         "Record TV Guaíba RS [1]",
         "Record TV Guaíba RS [2]"
       ],
-      "tvg_ids_to_export": [
-        "RecordTV.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | RECORD"
+      "group": ""
     },
     {
       "id": "auto.recordtvmanaus1",
@@ -30184,12 +29513,10 @@
         "Record TV Manaus [1]",
         "Record TV Manaus [2]"
       ],
-      "tvg_ids_to_export": [
-        "RecordTV.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | RECORD"
+      "group": ""
     },
     {
       "id": "auto.recordtvminas",
@@ -30204,13 +29531,11 @@
         "Record TV Minas [2]"
       ],
       "tvg_ids_to_export": [
-        "RecordTV.br",
-        "record.tv.minas.br",
         "recordtvbrasília.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: RECORD ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.recordtvnews",
@@ -30248,12 +29573,10 @@
         "Record TV Recife [1]",
         "Record TV Recife [2]"
       ],
-      "tvg_ids_to_export": [
-        "RecordTV.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | RECORD"
+      "group": ""
     },
     {
       "id": "auto.recordtvrio1",
@@ -30264,12 +29587,10 @@
         "Record TV Rio [1]",
         "Record TV Rio [2]"
       ],
-      "tvg_ids_to_export": [
-        "RecordTV.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | RECORD"
+      "group": ""
     },
     {
       "id": "auto.recordtvriopreto1",
@@ -30278,12 +29599,10 @@
         "Record TV Rio Preto HD [1]",
         "Record TV Rio Preto [1]"
       ],
-      "tvg_ids_to_export": [
-        "RecordTV.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | RECORD"
+      "group": ""
     },
     {
       "id": "auto.recordtvsantacatarina",
@@ -30305,12 +29624,10 @@
         "Record TV Santos e Vale HD [1]",
         "Record TV Santos e Vale [1]"
       ],
-      "tvg_ids_to_export": [
-        "RecordTV.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | RECORD"
+      "group": ""
     },
     {
       "id": "auto.recordtvsc2",
@@ -30319,12 +29636,10 @@
         "Record TV SC HD [2]",
         "Record TV SC [2]"
       ],
-      "tvg_ids_to_export": [
-        "RecordTV.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | RECORD"
+      "group": ""
     },
     {
       "id": "auto.recordtvsp2",
@@ -30340,12 +29655,11 @@
         "Record TV SP [2]"
       ],
       "tvg_ids_to_export": [
-        "RecordTV.br",
         "recordtvbrasília.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | RECORD"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.recordtvtropical",
@@ -30369,12 +29683,10 @@
         "Record TV Vitória [1]",
         "Record TV Vitória [2]"
       ],
-      "tvg_ids_to_export": [
-        "RecordTV.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | RECORD"
+      "group": ""
     },
     {
       "id": "auto.recordvilareal",
@@ -31111,16 +30423,13 @@
       "name": "REDE GOSPEL",
       "aliases": [
         "REDE GOSPEL",
-        "REDE GOSPEL FHD",
         "REDE GOSPEL HD",
         "Rede Gospel~"
       ],
-      "tvg_ids_to_export": [
-        "rede.gospel.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: RELIGIOSOS ⭐"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.redeminas",
@@ -31138,16 +30447,13 @@
       "id": "auto.redesuper",
       "name": "REDE SUPER",
       "aliases": [
-        "REDE SUPER",
         "REDE SUPER HD",
         "Rede Super"
       ],
-      "tvg_ids_to_export": [
-        "rede.super.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: RELIGIOSOS ⭐"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.redetv",
@@ -31203,12 +30509,10 @@
         "Rede Vida HD [3]",
         "Rede Vida [3]"
       ],
-      "tvg_ids_to_export": [
-        "rede.vida.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: RELIGIOSOS ⭐"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.redevidafhdr",
@@ -31258,12 +30562,10 @@
         "RedeTV! HD [3]",
         "RedeTV! [3]"
       ],
-      "tvg_ids_to_export": [
-        "SBT.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | ABERTOS"
+      "group": ""
     },
     {
       "id": "auto.24hrefugiomental",
@@ -31359,7 +30661,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: RELIGIOSOS ⭐"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.rockbrtv",
@@ -32372,7 +31674,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | VARIEDADES"
+      "group": ""
     },
     {
       "id": "auto.saborandarte",
@@ -32516,11 +31818,8 @@
         "SBT  SD",
         "SBT 4K",
         "SBT FHD",
-        "SBT FHD ²",
-        "SBT FHD ¹",
         "SBT H265",
         "SBT HD",
-        "SBT HD ¹",
         "SBT Nacional",
         "SBT SD"
       ],
@@ -32529,7 +31828,7 @@
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: SBT ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.sbtalagoas2",
@@ -32538,12 +31837,10 @@
         "SBT Alagoas FHD [2]",
         "SBT Alagoas [2]"
       ],
-      "tvg_ids_to_export": [
-        "SBT.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | ABERTOS"
+      "group": ""
     },
     {
       "id": "auto.sbtalagoastvpontaverde",
@@ -32588,12 +31885,10 @@
         "SBT AM HD [2]",
         "SBT AM [2]"
       ],
-      "tvg_ids_to_export": [
-        "SBT.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | ABERTOS"
+      "group": ""
     },
     {
       "id": "auto.sbtamazonas",
@@ -32611,15 +31906,12 @@
       "id": "auto.sbtaratubahia",
       "name": "SBT ARATU BAHIA",
       "aliases": [
-        "SBT ARATU BAHIA",
-        "SBT ARATU BAHIA HD"
+        "SBT ARATU BAHIA"
       ],
-      "tvg_ids_to_export": [
-        "tv.aratu.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: SBT ✨"
+      "group": ""
     },
     {
       "id": "auto.sbtba",
@@ -32630,12 +31922,10 @@
         "SBT BA HD [2]",
         "SBT BA [2]"
       ],
-      "tvg_ids_to_export": [
-        "SBT.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | ABERTOS"
+      "group": ""
     },
     {
       "id": "auto.sbtbrasilia",
@@ -32658,12 +31948,10 @@
       "aliases": [
         "SBT Brasília [2]"
       ],
-      "tvg_ids_to_export": [
-        "SBT.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | ABERTOS"
+      "group": ""
     },
     {
       "id": "auto.sbtcastanhaltvparaense",
@@ -32729,12 +32017,10 @@
         "SBT Difusora Caxias FHD [2]",
         "SBT Difusora Caxias [2]"
       ],
-      "tvg_ids_to_export": [
-        "SBT.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | ABERTOS"
+      "group": ""
     },
     {
       "id": "auto.sbtdifusorasaoluizdomaranhao",
@@ -32767,12 +32053,10 @@
         "SBT GO HD [2]",
         "SBT GO [2]"
       ],
-      "tvg_ids_to_export": [
-        "SBT.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | ABERTOS"
+      "group": ""
     },
     {
       "id": "auto.sbtinteriorsp",
@@ -32858,12 +32142,10 @@
         "SBT MG FHD [2]",
         "SBT MG [2]"
       ],
-      "tvg_ids_to_export": [
-        "SBT.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | ABERTOS"
+      "group": ""
     },
     {
       "id": "auto.sbtmgtvalterosa",
@@ -32888,12 +32170,10 @@
         "SBT MT HD [2]",
         "SBT MT [2]"
       ],
-      "tvg_ids_to_export": [
-        "SBT.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | ABERTOS"
+      "group": ""
     },
     {
       "id": "auto.sbtnacional2",
@@ -32901,12 +32181,10 @@
       "aliases": [
         "SBT Nacional [2]"
       ],
-      "tvg_ids_to_export": [
-        "SBT.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | ABERTOS"
+      "group": ""
     },
     {
       "id": "auto.sbtnews",
@@ -32914,18 +32192,15 @@
       "aliases": [
         "SBT NEWS",
         "SBT NEWS FHD",
-        "SBT NEWS FHD H.265",
         "SBT NEWS FHD [H265]",
         "SBT NEWS H265",
         "SBT NEWS HD",
         "SBT NEWS SD"
       ],
-      "tvg_ids_to_export": [
-        "sbt.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: NOTÍCIAS ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.sbtnovafriburgo",
@@ -33007,26 +32282,21 @@
         "SBT PI HD",
         "SBT PI [2]"
       ],
-      "tvg_ids_to_export": [
-        "SBT.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | ABERTOS"
+      "group": ""
     },
     {
       "id": "auto.sbtpiaui",
       "name": "SBT PIAUI",
       "aliases": [
-        "SBT PIAUI",
-        "SBT PIAUI HD"
+        "SBT PIAUI"
       ],
-      "tvg_ids_to_export": [
-        "sbt.piaui.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: SBT ✨"
+      "group": ""
     },
     {
       "id": "auto.sbtplusnovelas",
@@ -33110,12 +32380,10 @@
         "SBT Rede Massa PR HD [2]",
         "SBT Rede Massa PR [2]"
       ],
-      "tvg_ids_to_export": [
-        "SBT.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | ABERTOS"
+      "group": ""
     },
     {
       "id": "auto.sbtribeiraopreto",
@@ -33154,13 +32422,11 @@
         "SBT RJ [2]"
       ],
       "tvg_ids_to_export": [
-        "SBT.br",
-        "sbt.br",
-        "sbt.rio.br"
+        "sbt.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: SBT ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.sbtrn",
@@ -33173,7 +32439,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | ABERTOS"
+      "group": ""
     },
     {
       "id": "auto.sbtrs",
@@ -33185,13 +32451,10 @@
         "SBT RS HD²",
         "SBT RS [2]"
       ],
-      "tvg_ids_to_export": [
-        "SBT.br",
-        "sbt.rs.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: SBT ✨"
+      "group": ""
     },
     {
       "id": "auto.sbtsaoluiz",
@@ -33224,12 +32487,10 @@
         "SBT SC HD",
         "SBT SC [2]"
       ],
-      "tvg_ids_to_export": [
-        "SBT.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | ABERTOS"
+      "group": ""
     },
     {
       "id": "auto.sbtscc",
@@ -33291,12 +32552,11 @@
         "SBT SP [2]"
       ],
       "tvg_ids_to_export": [
-        "SBT.br",
         "sbt.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | ABERTOS"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.sbttambauparaiba",
@@ -33433,12 +32693,10 @@
         "SBT TV Jangadeiro CE FHD [2]",
         "SBT TV Jangadeiro CE [2]"
       ],
-      "tvg_ids_to_export": [
-        "SBT.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | ABERTOS"
+      "group": ""
     },
     {
       "id": "auto.sbttvjornalpe",
@@ -33462,13 +32720,12 @@
         "SBT TV Jornal Recife [2]"
       ],
       "tvg_ids_to_export": [
-        "SBT.br",
         "agromais.br",
         "sbt.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | ABERTOS"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.sbttvpiaui",
@@ -34666,6 +33923,7 @@
         "SPORTV  HD²",
         "SPORTV  SD",
         "SPORTV  SD²",
+        "SPORTV FHD",
         "SPORTV FHD*",
         "SPORTV H265",
         "SPORTV HD*",
@@ -34674,7 +33932,6 @@
         "SporTV",
         "SporTV 1",
         "SporTV 4K",
-        "SporTV FHD",
         "SporTV FHD H265",
         "SporTV HD",
         "Sportv.br"
@@ -34689,14 +33946,10 @@
       "name": "SPORTV 2",
       "aliases": [
         "SPORTV 2",
-        "SPORTV 2 FHD",
-        "SPORTV 2 FHD H.265",
         "SPORTV 2 FHD*",
         "SPORTV 2 FHD²",
         "SPORTV 2 H265",
         "SPORTV 2 HD",
-        "SPORTV 2 HD ²",
-        "SPORTV 2 HD ¹",
         "SPORTV 2 HD*",
         "SPORTV 2 HD²",
         "SPORTV 2 SD*",
@@ -34711,7 +33964,7 @@
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: SPORTV ⚽"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.sportv2fhdr",
@@ -34730,15 +33983,13 @@
       "aliases": [
         "SPORTV 3",
         "SPORTV 3 FHD",
-        "SPORTV 3 FHD H.265",
         "SPORTV 3 FHD*",
         "SPORTV 3 FHD²",
         "SPORTV 3 H265",
         "SPORTV 3 HD",
-        "SPORTV 3 HD ²",
-        "SPORTV 3 HD ¹",
         "SPORTV 3 HD*",
         "SPORTV 3 HD²",
+        "SPORTV 3 SD",
         "SPORTV 3 SD*",
         "SPORTV 3 SD²",
         "SporTV 3 FHD",
@@ -34750,7 +34001,7 @@
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: SPORTV ⚽"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.sportv3fhdr",
@@ -34768,15 +34019,12 @@
       "name": "SPORTV 4",
       "aliases": [
         "SPORTV 4",
-        "SPORTV 4 FHD",
         "SPORTV 4 HD"
       ],
-      "tvg_ids_to_export": [
-        "sportv.4.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: SPORTV ⚽"
+      "group": ""
     },
     {
       "id": "auto.sportv5",
@@ -34836,12 +34084,10 @@
         "SporTV1 [1]",
         "SporTV1 [2]"
       ],
-      "tvg_ids_to_export": [
-        "Sportv.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | ⚽ SPORTV"
+      "group": ""
     },
     {
       "id": "auto.sportv21",
@@ -34854,12 +34100,10 @@
         "SporTV2 [1]",
         "SporTV2 [2]"
       ],
-      "tvg_ids_to_export": [
-        "Sportv2.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | ⚽ SPORTV"
+      "group": ""
     },
     {
       "id": "auto.sportv31",
@@ -34872,12 +34116,10 @@
         "SporTV3 [1]",
         "SporTV3 [2]"
       ],
-      "tvg_ids_to_export": [
-        "SporTV3.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | ⚽ SPORTV"
+      "group": ""
     },
     {
       "id": "SPORTYNET",
@@ -35455,17 +34697,13 @@
       "id": "auto.telecineaction",
       "name": "TELECINE ACTION",
       "aliases": [
-        "TELECINE ACTION",
-        "TELECINE ACTION 4K",
         "TELECINE ACTION FHD",
-        "TELECINE ACTION FHD H.265",
         "TELECINE ACTION FHD²",
         "TELECINE ACTION H265",
         "TELECINE ACTION HD",
-        "TELECINE ACTION HD ²",
-        "TELECINE ACTION HD ¹",
         "TELECINE ACTION HD²",
         "TELECINE ACTION SD²",
+        "Telecine Action",
         "Telecine Action FHD",
         "Telecine Action FHD H265",
         "Telecine Action HD",
@@ -35474,13 +34712,11 @@
         "Telecine Action [2]"
       ],
       "tvg_ids_to_export": [
-        "TelecineAction.br",
-        "telecine.action.br",
         "telecineaction.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: TELECINE ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.telecinecult",
@@ -35488,16 +34724,11 @@
       "aliases": [
         "TELECINE CULT",
         "TELECINE CULT FHD",
-        "TELECINE CULT FHD H.265",
         "TELECINE CULT FHD²",
         "TELECINE CULT H265",
         "TELECINE CULT HD",
-        "TELECINE CULT HD ²",
-        "TELECINE CULT HD ¹",
         "TELECINE CULT HD²",
-        "TELECINE CULT SD",
         "TELECINE CULT SD²",
-        "Telecine Cult",
         "Telecine Cult FHD",
         "Telecine Cult FHD [H265]",
         "Telecine Cult HD",
@@ -35506,13 +34737,11 @@
         "Telecine Cult [2]"
       ],
       "tvg_ids_to_export": [
-        "TelecineCult.br",
-        "telecine.cult.br",
         "telecinecult.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: TELECINE ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.telecinefun",
@@ -35520,12 +34749,9 @@
       "aliases": [
         "TELECINE FUN",
         "TELECINE FUN FHD",
-        "TELECINE FUN FHD H.265",
         "TELECINE FUN FHD²",
         "TELECINE FUN H265",
         "TELECINE FUN HD",
-        "TELECINE FUN HD ²",
-        "TELECINE FUN HD ¹",
         "TELECINE FUN HD²",
         "TELECINE FUN SD²",
         "Telecine Fun FHD",
@@ -35536,13 +34762,11 @@
         "Telecine Fun [2]"
       ],
       "tvg_ids_to_export": [
-        "TelecineFun.br",
-        "telecine.fun.br",
         "telecinefun.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: TELECINE ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.telecinepipoca",
@@ -35551,13 +34775,10 @@
         "TELECINE PIPOCA",
         "TELECINE PIPOCA 4K",
         "TELECINE PIPOCA FHD",
-        "TELECINE PIPOCA FHD H.265",
         "TELECINE PIPOCA FHD²",
         "TELECINE PIPOCA H265",
-        "TELECINE PIPOCA HD",
-        "TELECINE PIPOCA HD ²",
-        "TELECINE PIPOCA HD ¹",
         "TELECINE PIPOCA HD²",
+        "TELECINE PIPOCA SD",
         "TELECINE PIPOCA SD²",
         "Telecine Pipoca FHD",
         "Telecine Pipoca FHD [H265]",
@@ -35567,26 +34788,21 @@
         "Telecine Pipoca [2]"
       ],
       "tvg_ids_to_export": [
-        "TelecinePipoca.br",
-        "telecine.pipoca.br",
         "telecinepipoca.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: TELECINE ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.telecinepremium",
       "name": "TELECINE PREMIUM",
       "aliases": [
         "TELECINE PREMIUM",
-        "TELECINE PREMIUM 4K",
         "TELECINE PREMIUM FHD",
-        "TELECINE PREMIUM FHD H.265",
         "TELECINE PREMIUM FHD²",
         "TELECINE PREMIUM H265",
         "TELECINE PREMIUM HD",
-        "TELECINE PREMIUM HD ¹",
         "TELECINE PREMIUM HD²",
         "TELECINE PREMIUM SD²",
         "Telecine Premium 4K",
@@ -35598,26 +34814,19 @@
         "Telecine Premium [2]"
       ],
       "tvg_ids_to_export": [
-        "TelecinePremium.br",
-        "telecine.premium.br",
         "telecinepremium.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: TELECINE ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.telecinetouch",
       "name": "TELECINE TOUCH",
       "aliases": [
-        "TELECINE TOUCH",
         "TELECINE TOUCH FHD",
-        "TELECINE TOUCH FHD H.265",
         "TELECINE TOUCH FHD²",
         "TELECINE TOUCH H265",
-        "TELECINE TOUCH HD",
-        "TELECINE TOUCH HD ²",
-        "TELECINE TOUCH HD ¹",
         "TELECINE TOUCH HD²",
         "TELECINE TOUCH SD²",
         "Telecine Touch",
@@ -35629,13 +34838,11 @@
         "Telecine Touch [2]"
       ],
       "tvg_ids_to_export": [
-        "TelecineTouch.br",
-        "telecine.touch.br",
         "telecinetouch.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: TELECINE ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.telemundomiami",
@@ -36913,7 +36120,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | NOTICIARIO"
+      "group": ""
     },
     {
       "id": "auto.timesexclusivocnbc2",
@@ -37165,12 +36372,12 @@
       "id": "auto.tooncast",
       "name": "TOONCAST",
       "aliases": [
+        "TOONCAST",
         "TOONCAST FHD",
         "TOONCAST FHD²",
         "TOONCAST HD",
         "TOONCAST HD²",
         "TOONCAST SD²",
-        "Tooncast",
         "Tooncast FHD",
         "Tooncast FHD [H265]",
         "Tooncast HD",
@@ -37179,12 +36386,11 @@
         "Tooncast [1]"
       ],
       "tvg_ids_to_export": [
-        "AandE.br",
         "tooncast.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: INFANTIS ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "TOONSCAST",
@@ -37248,12 +36454,11 @@
         "Travel Box Brazil [3]"
       ],
       "tvg_ids_to_export": [
-        "TravelBoxBrazil.br",
         "agromais.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | VARIEDADES"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.trutv",
@@ -37407,15 +36612,12 @@
         "TV APARECIDA HD",
         "TV APARECIDA HD*",
         "TV APARECIDA SD",
-        "TV APARECIDA SD*",
-        "TV Aparecida HD"
+        "TV APARECIDA SD*"
       ],
-      "tvg_ids_to_export": [
-        "tv.aparecida.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: RELIGIOSOS ⭐"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.tvasabranca",
@@ -37457,13 +36659,10 @@
         "TV Brasil HD [3]",
         "TV Brasil [3]"
       ],
-      "tvg_ids_to_export": [
-        "AandE.br",
-        "tv.brasil.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: ABERTOS ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.tvbrasil2",
@@ -37558,12 +36757,12 @@
       "id": "auto.tvcultura",
       "name": "TV CULTURA",
       "aliases": [
+        "TV CULTURA",
         "TV CULTURA FHD",
         "TV CULTURA FHD [H265]",
         "TV CULTURA FHD*",
         "TV CULTURA HD",
         "TV CULTURA SD",
-        "TV Cultura",
         "TV Cultura HD",
         "TV Cultura HD [3]",
         "TV Cultura [3]",
@@ -37571,12 +36770,11 @@
         "TV CULTURA SD*"
       ],
       "tvg_ids_to_export": [
-        "Cultura.br",
         "cultura.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | ABERTOS"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "TV CÂMARA",
@@ -37677,18 +36875,14 @@
       "name": "TV EVANGELIZAR",
       "aliases": [
         "TV EVANGELIZAR",
-        "TV EVANGELIZAR HD",
-        "TV EVANGELIZAR HD ¹",
         "TV EVANGELIZAR SD",
         "TV Evangelizar HD",
         "TV Evangelizar~"
       ],
-      "tvg_ids_to_export": [
-        "Boomerang.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: RELIGIOSOS ⭐"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.tvfronteira",
@@ -37725,12 +36919,10 @@
         "TV GAZETA FHD",
         "TV GAZETA HD"
       ],
-      "tvg_ids_to_export": [
-        "tv.gazeta.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: ABERTOS ✨"
+      "group": ""
     },
     {
       "id": "auto.tvgazetasp",
@@ -38190,7 +37382,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | RELIGIOSOS"
+      "group": ""
     },
     {
       "id": "auto.tvoeste",
@@ -38213,13 +37405,10 @@
         "TV Pai Eterno HD [3]",
         "TV Pai Eterno [3]"
       ],
-      "tvg_ids_to_export": [
-        "Tvpaieterno.br",
-        "tv.pai.eterno.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: RELIGIOSOS ⭐"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.tvpampa",
@@ -38270,7 +37459,6 @@
         "TV RA TIM BUM SD",
         "TV RA TIM BUM SD*",
         "TV RA TIM BUM SD²",
-        "TV Ra Tim Bum",
         "TV Ra Tim Bum FHD [H265]",
         "TV Ra Tim Bum HD [3]",
         "TV Ra Tim Bum [3]",
@@ -38281,13 +37469,11 @@
         "TV Rá Tim Bum! HD"
       ],
       "tvg_ids_to_export": [
-        "RaTimBum.br",
-        "ratimbum.br",
-        "tv.ra.tim.bum.br"
+        "ratimbum.br"
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: ABERTOS ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.tvriosul",
@@ -38301,12 +37487,10 @@
         "TV RIO SUL SD",
         "TV RIO SUL SD*"
       ],
-      "tvg_ids_to_export": [
-        "tv.rio.sul.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "TV Rá Tim Bum",
@@ -38385,12 +37569,10 @@
         "TV SENADO SD",
         "TV SENADO SD*"
       ],
-      "tvg_ids_to_export": [
-        "tv.senado.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: ABERTOS ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.tvsubae",
@@ -38444,12 +37626,10 @@
         "TV TEM BAURU SD",
         "TV TEM BAURU SD*"
       ],
-      "tvg_ids_to_export": [
-        "tv.tem.bauru.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: GLOBO REGIONAIS - ✨"
+      "group": ""
     },
     {
       "id": "auto.tvtemitapetininga",
@@ -41828,7 +41008,7 @@
       "id": "auto.usnflnetwork",
       "name": "US NFL Network",
       "aliases": [
-        "US NFL Network",
+        "US NFL NETWORK",
         "US: NFL Network HD"
       ],
       "tvg_ids_to_export": [],
@@ -42466,7 +41646,7 @@
       "id": "auto.ustastemade",
       "name": "US Tastemade",
       "aliases": [
-        "US Tastemade",
+        "US TASTEMADE",
         "US: Tastemade HD"
       ],
       "tvg_ids_to_export": [],
@@ -45263,7 +44443,7 @@
         "USA FHD [H265]",
         "USA HD",
         "USA HD*",
-        "USA NETWORK",
+        "USA Network",
         "USA SD"
       ],
       "tvg_ids_to_export": [],
@@ -46195,6 +45375,7 @@
       "aliases": [
         "VIVA",
         "VIVA 4K",
+        "VIVA FHD",
         "VIVA FHD*",
         "VIVA HD",
         "VIVA HD*",
@@ -46350,8 +45531,8 @@
         "X SPORTS HD",
         "X SPORTS SD",
         "XSPORTS",
+        "XSPORTS FHD",
         "XSPORTS HD*",
-        "Xsports FHD",
         "Xsports FHD [H265]",
         "Xsports HD",
         "Xsports SD"
@@ -46359,7 +45540,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: ESPORTES ⚽"
+      "group": ""
     },
     {
       "id": "auto.xsports1",
@@ -46375,7 +45556,7 @@
       "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | ⚽ ESPORTES"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.xxx21sextury18plus2",
@@ -48271,6 +47452,7 @@
       "aliases": [
         "ZOOMOO",
         "ZOOMOO HD",
+        "ZOOMOO SD",
         "ZooMoo FHD",
         "ZooMoo HD",
         "ZooMoo SD"
@@ -48280,7 +47462,7 @@
       ],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "CANAIS: INFANTIS ✨"
+      "group": "CANAIS COMPLETO(SD,HD,FHD,4K)"
     },
     {
       "id": "auto.zoomooo3",
@@ -48289,12 +47471,10 @@
         "Zoomooo HD [3]",
         "Zoomooo [3]"
       ],
-      "tvg_ids_to_export": [
-        "Zoomoo.br"
-      ],
+      "tvg_ids_to_export": [],
       "compatibility_ids": [],
       "source_ids": [],
-      "group": "TV | INFANTIL"
+      "group": ""
     },
     {
       "id": "auto.24hzorratoral2015",
