@@ -4,6 +4,7 @@
 - Consulta apenas a API leve de Canais ao Vivo (get_live_categories + get_live_streams) em ~2 segundos!
 - Gera 'xtream_map_X.json' com '__upstream_host__' e os TVG-IDs de alta precisão para o Cloudflare Worker.
 - Gera 'canais_X.m3u' e 'lista_X.m3u' (ambas enxutas, apenas com os canais ao vivo calibrados, < 1 MB).
+- Blindado contra colisão de numeração (HBO vs HBO 2), suporte total a FHD [H265] e canais de 1 letra (E!).
 """
 from __future__ import annotations
 
@@ -27,9 +28,15 @@ try:
 except ImportError:
     cloudscraper = None
 
-from merge_epg import name_key, normalizar_canal, strip_qualities_keep_case
+from merge_epg import (
+    extract_significant_digits,
+    has_conflicting_channel_number,
+    name_key,
+    normalizar_canal,
+    strip_qualities_keep_case,
+)
 
-EPG_GZ_PATH = Path("epg.xml.gz")
+EPG_GZ_CANDIDATES = [Path("output/epg.xml.gz"), Path("epg.xml.gz")]
 REMOVE_ADULT = os.environ.get("REMOVE_ADULT", "1").strip().lower() in {"1", "true", "yes"}
 
 BR_RESIDENTIAL_IPS = [
@@ -63,6 +70,9 @@ _RE_NO_EPG_CHANNEL = re.compile(
 
 # Sinônimos diretos: Nome limpo na lista -> Lista de candidatos de alta precisão no EPG
 CHANNEL_SYNONYMS: dict[str, list[str]] = {
+    "E": ["E!", "E! Entertainment", "E!.br", "e.br", "E"],
+    "E!": ["E!", "E! Entertainment", "E!.br", "e.br", "E"],
+    "A E": ["A&E", "A&E.br", "ae.br"],
     "HBO 2": ["HBO 2", "HBO2", "HBO2.br", "hbo2.br"],
     "HBO": ["HBO", "HBO.br", "hbo.br"],
     "HBO PLUS": ["HBO Plus", "HBOPlus.br", "hboplusbrasil.br"],
@@ -91,7 +101,8 @@ CHANNEL_SYNONYMS: dict[str, list[str]] = {
     "SPORTV 1": ["SporTV 1", "SporTV", "SporTV.br", "sportv.br"],
     "SPORTV 2": ["SPORTV 2", "SporTV 2", "SporTV2.br", "sportv2.br"],
     "SPORTV 3": ["SPORTV 3", "SporTV 3", "SporTV3.br", "sportv3.br"],
-    "PREMIERE CLUBES": ["PREMIERE CLUBES", "Premiere Clubes", "PremiereClubes.br", "premiereclubes.br"],
+    "PREMIERE CLUBES": ["PREMIERE CLUBES", "Premiere Clubes", "PremiereClubes.br", "premiereclubes.br", "Premiere 1"],
+    "PREMIERE 1": ["PREMIERE CLUBES", "Premiere Clubes", "PremiereClubes.br", "premiereclubes.br"],
     "JOVEM PAN": ["Jovem Pan News", "JOVEM PAN", "jovempannews.br"],
     "CNN BRASIL": ["cnn.brasil.br", "CNN Brasil", "cnnbrasil.br"],
     "GLOBO SP": ["GB SP", "Globo SP", "globosp.br"],
@@ -156,12 +167,14 @@ def norm_lookup_key(title: str) -> str:
 
 
 def clean_channel_title_for_epg(raw_name: str) -> str:
-    """Limpa todas as tags de resolução, codec, servidor (BR2), [P], (Eventos), ² do nome do canal."""
+    """Limpa todas as tags de resolução, codec, servidor (BR2), [P], (Eventos), ² do nome do canal, preservando [2] como número."""
     s = html.unescape(raw_name or "")
-    s = re.sub(r"\(\s*(?:BR\s*\d+|EVENTOS?|PPV|BACKUP|ALT)\s*\)", " ", s, flags=re.I)
-    s = re.sub(r"\[\s*(?:H\.?26[45]|HEVC|P|BR\s*\d+|FHD|HD|SD|4K|UHD)\s*\]", " ", s, flags=re.I)
-    s = re.sub(r"[¹²³]+", " ", s)
-    s = re.sub(r"\b(?:FHD|UHD|4K|HD|SD|H265|H264|HEVC|1080P|720P)\b", " ", s, flags=re.I)
+    s = re.sub(r"\(\s*(?:BR\s*\d+|EVENTOS?|PPV|BACKUP|ALT|FHD|HD|SD|4K|UHD|H\.?26[45]|HEVC)\s*\)", " ", s, flags=re.I)
+    s = re.sub(r"\[\s*(?:H\.?26[45]|HEVC|P|BR\s*\d+|FHD|HD|SD|4K|UHD|ALT|BACKUP)\s*\]", " ", s, flags=re.I)
+    # Se houver "[2]" (ex: HBO HD [2]), transforma em " 2 " antes de limpar
+    s = re.sub(r"\[\s*(\d+)\s*\]", r" \1 ", s)
+    s = re.sub(r"[¹²³⁴⁵⁶⁷⁸⁹⁰]+", " ", s)
+    s = re.sub(r"\b(?:FHD|UHD|4K|8K|HD|SD|H\.?265|H\.?264|HEVC|AVC|1080P|1080I|720P|60FPS)\b", " ", s, flags=re.I)
     return norm_lookup_key(s)
 
 
@@ -239,8 +252,15 @@ def infer_fallback_channel_group(channel_name: str, current_group: str) -> str:
     return "Canais ⫸ Variedades"
 
 
+def find_epg_gz_path() -> Path:
+    for p in EPG_GZ_CANDIDATES:
+        if p.exists() and p.stat().st_size > 100:
+            return p
+    return EPG_GZ_CANDIDATES[-1]
+
+
 def load_epg_id_index(epg_path: Path) -> dict[str, str]:
-    """Carrega o índice EPG em 2 fases para garantir que o ID primário nunca seja sobrescrito por um display-name secundário."""
+    """Carrega o índice EPG em 2 fases, bloqueando aliases com numeração divergente (ex: HBO vs HBO 2)."""
     primary_index: dict[str, str] = {}
     secondary_index: dict[str, str] = {}
 
@@ -268,6 +288,8 @@ def load_epg_id_index(epg_path: Path) -> dict[str, str]:
                     for child in elem:
                         if child.tag.rsplit("}", 1)[-1] == "display-name" and child.text:
                             dn = child.text.strip()
+                            if has_conflicting_channel_number(cid_no_br, dn):
+                                continue
                             dn_no_br = re.sub(r"\.br$", "", dn, flags=re.I)
                             for k_dn in (
                                 norm_lookup_key(dn),
@@ -280,16 +302,19 @@ def load_epg_id_index(epg_path: Path) -> dict[str, str]:
                 elem.clear()
 
     merged = {**secondary_index, **primary_index}
-    print(f"✓ Índice EPG de Alta Precisão carregado ({len(primary_index)} IDs primários, {len(merged)} chaves totais).")
+    print(f"✓ Índice EPG de Alta Precisão carregado de {epg_path} ({len(primary_index)} IDs primários, {len(merged)} chaves totais).")
     return merged
 
 
 def is_orig_tvg_id_poisoned(clean_ch_name: str, orig_id: str) -> bool:
-    """Detecta tvg-ids falsos que vêm de fábrica no servidor."""
+    """Detecta tvg-ids falsos ou com colisão de número (ex: hbo.br em HBO 2)."""
     oid = orig_id.lower().strip()
     if not oid:
         return True
     if re.match(r"^[0-9a-f]{8}-[0-9a-f]{4}-", oid):
+        return True
+    oid_no_br = re.sub(r"\.(?:br|bt)$", "", oid, flags=re.I)
+    if has_conflicting_channel_number(clean_ch_name, oid_no_br):
         return True
     if oid == "agromais.br" and "AGRO" not in clean_ch_name:
         return True
@@ -312,11 +337,19 @@ def resolve_best_tvg_id(channel_name: str, original_tvg_id: str, epg_index: dict
 
     clean_title = clean_channel_title_for_epg(channel_name)
 
+    def _valid_candidate_id(cand_id: str) -> bool:
+        if not cand_id:
+            return False
+        cand_no_br = re.sub(r"\.(?:br|bt)$", "", cand_id, flags=re.I)
+        return not has_conflicting_channel_number(clean_title, cand_no_br)
+
     if clean_title in CHANNEL_SYNONYMS:
         for syn in CHANNEL_SYNONYMS[clean_title]:
             for k_syn in (norm_lookup_key(syn), name_key(syn)):
                 if k_syn and k_syn in epg_index:
-                    return epg_index[k_syn]
+                    found_id = epg_index[k_syn]
+                    if _valid_candidate_id(found_id):
+                        return found_id
 
     no_tv_mid = re.sub(r"^(GLOBO|SBT|RECORD|BAND)\s+TV\s+", r"\1 ", clean_title)
 
@@ -329,13 +362,17 @@ def resolve_best_tvg_id(channel_name: str, original_tvg_id: str, epg_index: dict
     ):
         for k in (norm_lookup_key(candidate), name_key(candidate)):
             if k and k in epg_index:
-                return epg_index[k]
+                found_id = epg_index[k]
+                if _valid_candidate_id(found_id):
+                    return found_id
 
     if original_tvg_id and not is_orig_tvg_id_poisoned(clean_title, original_tvg_id):
         orig_no_br = re.sub(r"\.(?:br|bt)$", "", original_tvg_id.strip(), flags=re.I)
         for k_id in (norm_lookup_key(original_tvg_id), norm_lookup_key(orig_no_br), name_key(original_tvg_id), name_key(orig_no_br)):
             if k_id and k_id in epg_index:
-                return epg_index[k_id]
+                found_id = epg_index[k_id]
+                if _valid_candidate_id(found_id):
+                    return found_id
 
     return ""
 
@@ -366,7 +403,6 @@ def build_live_playlists_and_xtream_map(
     c_resp = request_with_bypass(
         f"{source_host}/player_api.php?username={user}&password={pwd}&action=get_live_categories", timeout=30
     )
-    # Se houve redirecionamento de domínio pelo servidor, captura o host final real
     if c_resp.url:
         real_parsed = urllib.parse.urlparse(c_resp.url)
         if real_parsed.netloc:
@@ -420,7 +456,6 @@ def build_live_playlists_and_xtream_map(
             if best_tvg_id:
                 matched_epg += 1
 
-            # Salva no mapa do Cloudflare Worker tanto pelo nome normalizado quanto pelo stream_id
             xtream_tvgid_map[norm_lookup_key(ch_name)] = best_tvg_id
             if sid:
                 xtream_tvgid_map[f"id:{sid}"] = best_tvg_id
@@ -437,10 +472,7 @@ def build_live_playlists_and_xtream_map(
             )
             live_count += 1
 
-    # Copia para lista_X.m3u para manter compatibilidade caso algum player chame /get.php
     shutil.copy2(live_only_out_path, full_out_path)
-
-    # Salva o JSON do Worker
     xtream_map_out_path.write_text(json.dumps(xtream_tvgid_map, ensure_ascii=False), encoding="utf-8")
     return live_count, matched_epg
 
@@ -466,7 +498,8 @@ def push_files_to_secret_gist_via_git(generated_files: list[Path], token: str, g
 
 def main() -> None:
     epg_public_url = os.environ.get("EPG_PUBLIC_URL", "").strip()
-    epg_index = load_epg_id_index(EPG_GZ_PATH)
+    epg_path = find_epg_gz_path()
+    epg_index = load_epg_id_index(epg_path)
 
     out_dir = Path("output_lists")
     out_dir.mkdir(parents=True, exist_ok=True)
