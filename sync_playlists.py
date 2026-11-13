@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-"""Sincronizador M3U + Mapa JSON para Servidor Xtream Proxy (Motor EPG de Alta Precisão + Auto-Host):
-- Salva '__upstream_host__' automaticamente no xtream_map_X.json para o Cloudflare Worker atualizar sozinho.
-- Corrige colisões como 'HBO 2' -> 'HBO' priorizando IDs exatos sobre display-names secundários.
-- Limpa sufixos de servidor como (BR2), [P], (Eventos), (PPV), ², H265, FHD/HD/SD/4K.
-- Converte sinônimos regionais e de canais (Discovery H&H, Band TV SP, SBT TV RJ, Globo BH, etc.).
-- Bloqueia tvg-ids falsos do servidor bruto (ex: agromais.br no Cartoonito e globosp.br em Globos regionais).
+"""Sincronizador Ultra-Rápido de Canais Ao Vivo + Mapa JSON para Servidor Xtream Proxy:
+- NÃO baixa mais o arquivo .m3u bruto de 70MB+ nem catálogos pesados de Filmes/Séries (que vêm direto pelo Worker).
+- Consulta apenas a API leve de Canais ao Vivo (get_live_categories + get_live_streams) em ~2 segundos!
+- Gera 'xtream_map_X.json' com '__upstream_host__' e os TVG-IDs de alta precisão para o Cloudflare Worker.
+- Gera 'canais_X.m3u' e 'lista_X.m3u' (ambas enxutas, apenas com os canais ao vivo calibrados, < 1 MB).
 """
 from __future__ import annotations
 
@@ -54,12 +53,6 @@ ADULT_FILTER_RE = re.compile(
     r"\bSEXY\s*HOT\b|\bPLAYBOY\b|\bSEX\s*PRIV[EÉ]\b|\bVENUS\b|\bBRAZZERS\b)",
     re.IGNORECASE,
 )
-
-VOD_URL_EXTENSIONS = (".mp4", ".mkv", ".avi", ".mov", ".wmv", ".flv", ".webm", ".mpg", ".mpeg", ".divx")
-_RE_TVG_ID = re.compile(r'tvg-id="[^"]*"', re.IGNORECASE)
-_RE_GROUP_TITLE = re.compile(r'group-title="([^"]*)"', re.IGNORECASE)
-_RE_STREAM_ID_FROM_URL = re.compile(r"/([^/?#]+?)(?:\.[a-z0-9]+)?(?:\?.*)?$", re.IGNORECASE)
-_RE_SERIES_EPISODE = re.compile(r"\b(?:S\d{1,2}\s*E\d{1,3}|T\d{1,2}\s*EP?\d{1,3})\b", re.IGNORECASE)
 
 # Canais informativos/24h que NUNCA devem receber tvg-id para não puxarem guia errado
 _RE_NO_EPG_CHANNEL = re.compile(
@@ -172,23 +165,6 @@ def clean_channel_title_for_epg(raw_name: str) -> str:
     return norm_lookup_key(s)
 
 
-def norm_movie_title(title: str) -> str:
-    s = html.unescape(title or "")
-    s = re.sub(r"^[+\-\*\s]+", "", s)
-    s = re.sub(r"\(\d{4}\)|\[\d{4}\]", " ", s)
-    s = re.sub(r"\b(FHD|HD|SD|4K|UHD|H265|LEG|DUB|DUBLADO|LEGENDADO|DUAL)\b", " ", s, flags=re.I)
-    return norm_lookup_key(s)
-
-
-def norm_series_base_title(title: str) -> str:
-    s = html.unescape(title or "")
-    s = re.sub(r"^[+\-\*\s]+", "", s)
-    s = re.split(r"\b(?:S\d{1,2}\s*E\d{1,3}|S\d{1,2}\b|T\d{1,2}\s*EP?\d{1,3}|TEMPORADA\s*\d+)", s, maxsplit=1, flags=re.I)[0]
-    s = re.sub(r"\(\d{4}\)|\[\d{4}\]", " ", s)
-    s = re.sub(r"\b(FHD|HD|SD|4K|UHD|H265|LEG|DUB|DUBLADO|LEGENDADO|DUAL)\b", " ", s, flags=re.I)
-    return norm_lookup_key(s)
-
-
 def build_br_headers(ua: str, host_url: str = "") -> dict[str, str]:
     fake_ip = random.choice(BR_RESIDENTIAL_IPS)
     headers = {
@@ -222,7 +198,7 @@ def create_http_client() -> requests.Session:
     return session
 
 
-def request_with_bypass(url: str, stream: bool = False, timeout: int = 90) -> requests.Response:
+def request_with_bypass(url: str, stream: bool = False, timeout: int = 45) -> requests.Response:
     session = create_http_client()
     last_err: Exception | None = None
 
@@ -237,116 +213,6 @@ def request_with_bypass(url: str, stream: bool = False, timeout: int = 90) -> re
             last_err = exc
 
     raise RuntimeError(f"Todas as tentativas de bypass falharam ({last_err})")
-
-
-def fetch_all_category_maps(url: str) -> dict[str, any]:
-    maps: dict[str, any] = {
-        "live_by_id": {},
-        "live_by_name": {},
-        "vod_by_id": {},
-        "vod_by_name": {},
-        "series_by_id": {},
-        "series_by_name": {},
-        "raw_live_streams": [],
-    }
-
-    parsed = urllib.parse.urlparse(url)
-    query = urllib.parse.parse_qs(parsed.query)
-    if "username" not in query or "password" not in query:
-        return maps
-
-    user = query["username"][0]
-    pwd = query["password"][0]
-    base_url = f"{parsed.scheme}://{parsed.netloc}"
-
-    try:
-        c_live = request_with_bypass(
-            f"{base_url}/player_api.php?username={user}&password={pwd}&action=get_live_categories", timeout=30
-        ).json()
-        live_cats = {
-            str(c.get("category_id", "")): html.unescape(str(c.get("category_name", "")).strip())
-            for c in (c_live if isinstance(c_live, list) else [])
-            if isinstance(c, dict) and c.get("category_name")
-        }
-        s_live = request_with_bypass(
-            f"{base_url}/player_api.php?username={user}&password={pwd}&action=get_live_streams", timeout=45
-        ).json()
-        if isinstance(s_live, list):
-            maps["raw_live_streams"] = s_live
-        for ch in (s_live if isinstance(s_live, list) else []):
-            if not isinstance(ch, dict):
-                continue
-            grp = live_cats.get(str(ch.get("category_id", "")), "")
-            if not grp or "COMPLETO" in grp.upper():
-                continue
-            if ch.get("stream_id"):
-                maps["live_by_id"][str(ch["stream_id"])] = grp
-            if ch.get("name"):
-                raw_n = str(ch["name"])
-                maps["live_by_name"][norm_lookup_key(raw_n)] = grp
-                maps["live_by_name"][name_key(raw_n)] = grp
-        print(f"  -> ✓ Categorias de Canais via API: {len(live_cats)} grupos ({len(maps['live_by_name'])} canais).")
-    except Exception as e:
-        print(f"  -> Nota: Mapa Live indisponível ({e}).")
-
-    try:
-        c_vod = request_with_bypass(
-            f"{base_url}/player_api.php?username={user}&password={pwd}&action=get_vod_categories", timeout=30
-        ).json()
-        vod_cats = {
-            str(c.get("category_id", "")): html.unescape(str(c.get("category_name", "")).strip())
-            for c in (c_vod if isinstance(c_vod, list) else [])
-            if isinstance(c, dict) and c.get("category_name")
-        }
-        s_vod = request_with_bypass(
-            f"{base_url}/player_api.php?username={user}&password={pwd}&action=get_vod_streams", timeout=60
-        ).json()
-        for v in (s_vod if isinstance(s_vod, list) else []):
-            if not isinstance(v, dict):
-                continue
-            grp = vod_cats.get(str(v.get("category_id", "")), "")
-            if not grp:
-                continue
-            if v.get("stream_id"):
-                maps["vod_by_id"][str(v["stream_id"])] = grp
-            if v.get("name"):
-                raw_v = str(v["name"])
-                maps["vod_by_name"][norm_lookup_key(raw_v)] = grp
-                maps["vod_by_name"][norm_movie_title(raw_v)] = grp
-        print(f"  -> ✓ Categorias de Filmes via API: {len(vod_cats)} grupos ({len(maps['vod_by_name'])} filmes).")
-    except Exception as e:
-        print(f"  -> Nota: Mapa VOD indisponível ({e}).")
-
-    try:
-        c_ser = request_with_bypass(
-            f"{base_url}/player_api.php?username={user}&password={pwd}&action=get_series_categories", timeout=30
-        ).json()
-        ser_cats = {
-            str(c.get("category_id", "")): html.unescape(str(c.get("category_name", "")).strip())
-            for c in (c_ser if isinstance(c_ser, list) else [])
-            if isinstance(c, dict) and c.get("category_name")
-        }
-        s_ser = request_with_bypass(
-            f"{base_url}/player_api.php?username={user}&password={pwd}&action=get_series", timeout=60
-        ).json()
-        for s in (s_ser if isinstance(s_ser, list) else []):
-            if not isinstance(s, dict):
-                continue
-            grp = ser_cats.get(str(s.get("category_id", "")), "")
-            if not grp:
-                continue
-            if s.get("series_id"):
-                maps["series_by_id"][str(s["series_id"])] = grp
-            if s.get("name"):
-                raw_s = str(s["name"])
-                maps["series_by_name"][norm_lookup_key(raw_s)] = grp
-                maps["series_by_name"][norm_movie_title(raw_s)] = grp
-                maps["series_by_name"][norm_series_base_title(raw_s)] = grp
-        print(f"  -> ✓ Categorias de Séries via API: {len(ser_cats)} grupos ({len(maps['series_by_name'])} séries).")
-    except Exception as e:
-        print(f"  -> Nota: Mapa Séries indisponível ({e}).")
-
-    return maps
 
 
 def infer_fallback_channel_group(channel_name: str, current_group: str) -> str:
@@ -419,7 +285,7 @@ def load_epg_id_index(epg_path: Path) -> dict[str, str]:
 
 
 def is_orig_tvg_id_poisoned(clean_ch_name: str, orig_id: str) -> bool:
-    """Detecta tvg-ids falsos que vêm de fábrica na lista bruta do servidor."""
+    """Detecta tvg-ids falsos que vêm de fábrica no servidor."""
     oid = orig_id.lower().strip()
     if not oid:
         return True
@@ -474,253 +340,109 @@ def resolve_best_tvg_id(channel_name: str, original_tvg_id: str, epg_index: dict
     return ""
 
 
-def replace_only_tvg_id_in_extinf(extinf_line: str, new_tvg_id: str) -> str:
-    safe_id = new_tvg_id.replace('"', "'")
-    if _RE_TVG_ID.search(extinf_line):
-        return _RE_TVG_ID.sub(f'tvg-id="{safe_id}"', extinf_line, count=1)
-    return re.sub(r"^(#EXTINF:[^\s,]+)", rf'\1 tvg-id="{safe_id}"', extinf_line, count=1)
-
-
-def set_group_title_in_extinf(extinf_line: str, new_group: str) -> str:
-    if not new_group:
-        return extinf_line
-    safe_grp = new_group.replace('"', "'")
-    if _RE_GROUP_TITLE.search(extinf_line):
-        return _RE_GROUP_TITLE.sub(f'group-title="{safe_grp}"', extinf_line, count=1)
-    return re.sub(r"^(#EXTINF:[^\s,]+)", rf'\1 group-title="{safe_grp}"', extinf_line, count=1)
-
-
-def classify_stream_type(stream_url: str, curr_grp: str, item_name: str) -> str:
-    clean_path = stream_url.split("?", 1)[0].lower()
-    grp_norm = norm_lookup_key(curr_grp)
-    name_upper = item_name.upper().strip()
-
-    if "/live/" in clean_path or name_upper.startswith("24H-") or grp_norm == "RADIOS":
-        return "live"
-    if "/series/" in clean_path or "SERIE" in grp_norm or _RE_SERIES_EPISODE.search(item_name):
-        return "series"
-    if "/movie/" in clean_path or "FILME" in grp_norm or clean_path.endswith(VOD_URL_EXTENSIONS):
-        return "movie"
-    return "live"
-
-
-def download_raw_m3u_exact_url(url: str, target_path: Path) -> bool:
-    br_proxy = os.environ.get("BR_PROXY", "").strip()
-    session = create_http_client()
-
-    for ua in IPTV_USER_AGENTS:
-        headers = build_br_headers(ua, url)
-        try:
-            with session.get(url, headers=headers, stream=True, timeout=240, allow_redirects=True) as resp:
-                if resp.status_code == 200:
-                    with target_path.open("wb") as out:
-                        for chunk in resp.iter_content(chunk_size=1024 * 1024):
-                            if chunk:
-                                out.write(chunk)
-                    if target_path.exists() and target_path.stat().st_size > 2048:
-                        with target_path.open("r", encoding="utf-8", errors="ignore") as f:
-                            head = f.read(8192)
-                            if "#EXTM3U" in head.upper() or "#EXTINF" in head.upper():
-                                return True
-        except Exception:
-            continue
-
-    cmd = [
-        "curl", "-sS", "-L", "--http1.1",
-        "--max-time", "300",
-        "--connect-timeout", "25",
-        "-A", IPTV_USER_AGENTS[0],
-        "-o", str(target_path),
-        url,
-    ]
-    if br_proxy:
-        cmd[1:1] = ["-x", br_proxy]
-
-    res = subprocess.run(cmd, capture_output=True, text=True)
-    if res.returncode == 0 and target_path.exists() and target_path.stat().st_size > 2048:
-        with target_path.open("r", encoding="utf-8", errors="ignore") as f:
-            head = f.read(8192)
-            if "#EXTM3U" in head.upper() or "#EXTINF" in head.upper():
-                return True
-
-    return False
-
-
-def build_calibrated_playlists(
+def build_live_playlists_and_xtream_map(
     url: str,
     epg_index: dict[str, str],
     epg_public_url: str,
     full_out_path: Path,
     live_only_out_path: Path,
     xtream_map_out_path: Path,
-) -> tuple[int, int, int, int]:
-    tmp_raw = tempfile.NamedTemporaryFile(delete=False, suffix=".raw.m3u")
-    tmp_raw_path = Path(tmp_raw.name)
-    tmp_raw.close()
+) -> tuple[int, int]:
+    """Consulta apenas a API de Canais Ao Vivo (sem baixar VODs nem o .m3u bruto de 70MB)."""
+    parsed = urllib.parse.urlparse(url)
+    query = urllib.parse.parse_qs(parsed.query)
+    if "username" not in query or "password" not in query:
+        raise ValueError("A URL configurada no Secret precisa conter username=... e password=...")
 
-    live_count = 0
-    matched_epg = 0
-    movie_count = 0
-    series_count = 0
+    user = query["username"][0]
+    pwd = query["password"][0]
+    source_host = f"{parsed.scheme}://{parsed.netloc}"
 
-    parsed_source = urllib.parse.urlparse(url)
-    source_host = f"{parsed_source.scheme}://{parsed_source.netloc}"
-
-    # Grava automaticamente o domínio no JSON para o Cloudflare Worker ler sozinho!
     xtream_tvgid_map: dict[str, str] = {
         "__upstream_host__": source_host,
     }
 
-    try:
-        maps = fetch_all_category_maps(url)
-        live_by_id = maps["live_by_id"]
-        live_by_name = maps["live_by_name"]
-        vod_by_id = maps["vod_by_id"]
-        vod_by_name = maps["vod_by_name"]
-        series_by_id = maps["series_by_id"]
-        series_by_name = maps["series_by_name"]
+    print(f"  -> Consultando API de Canais Ao Vivo em {source_host}...")
+    c_resp = request_with_bypass(
+        f"{source_host}/player_api.php?username={user}&password={pwd}&action=get_live_categories", timeout=30
+    )
+    # Se houve redirecionamento de domínio pelo servidor, captura o host final real
+    if c_resp.url:
+        real_parsed = urllib.parse.urlparse(c_resp.url)
+        if real_parsed.netloc:
+            source_host = f"{real_parsed.scheme}://{real_parsed.netloc}"
+            xtream_tvgid_map["__upstream_host__"] = source_host
 
-        for ch in maps.get("raw_live_streams", []):
+    c_live = c_resp.json()
+    live_cats = {
+        str(c.get("category_id", "")): html.unescape(str(c.get("category_name", "")).strip())
+        for c in (c_live if isinstance(c_live, list) else [])
+        if isinstance(c, dict) and c.get("category_name")
+    }
+
+    s_live = request_with_bypass(
+        f"{source_host}/player_api.php?username={user}&password={pwd}&action=get_live_streams", timeout=45
+    ).json()
+
+    if not isinstance(s_live, list):
+        raise RuntimeError("Resposta inválida de get_live_streams.")
+
+    print(f"  -> ✓ {len(live_cats)} categorias e {len(s_live)} canais recebidos via API em segundos!")
+
+    header = f'#EXTM3U url-tvg="{epg_public_url}" x-tvg-url="{epg_public_url}"\n' if epg_public_url else "#EXTM3U\n"
+    live_count = 0
+    matched_epg = 0
+
+    with live_only_out_path.open("w", encoding="utf-8") as live_out:
+        live_out.write(header)
+
+        for ch in s_live:
             if not isinstance(ch, dict):
                 continue
+
             ch_name = html.unescape(str(ch.get("name", "")).strip())
-            orig_id = str(ch.get("epg_channel_id", "")).strip()
-            sid = str(ch.get("stream_id", "")).strip()
-            if ch_name:
-                best_id = resolve_best_tvg_id(ch_name, orig_id, epg_index)
-                xtream_tvgid_map[norm_lookup_key(ch_name)] = best_id
-                if sid:
-                    xtream_tvgid_map[f"id:{sid}"] = best_id
+            if not ch_name:
+                continue
 
-        print("  -> Baixando arquivo .m3u original...")
-        if not download_raw_m3u_exact_url(url, tmp_raw_path):
-            raise RuntimeError("Falha ao baixar o arquivo .m3u bruto.")
+            cat_id = str(ch.get("category_id", ""))
+            grp = live_cats.get(cat_id, "")
+            if not grp or "COMPLETO" in grp.upper():
+                grp = infer_fallback_channel_group(ch_name, grp)
 
-        raw_size_mb = tmp_raw_path.stat().st_size / (1024 * 1024)
-        print(f"  -> ✓ Arquivo baixado ({raw_size_mb:.2f} MB). Processando Canais, Filmes e Séries...")
+            if REMOVE_ADULT and (ADULT_FILTER_RE.search(grp) or ADULT_FILTER_RE.search(ch_name)):
+                continue
 
-        header = f'#EXTM3U url-tvg="{epg_public_url}" x-tvg-url="{epg_public_url}"\n' if epg_public_url else "#EXTM3U\n"
+            orig_id = str(ch.get("epg_channel_id") or "").strip()
+            sid = str(ch.get("stream_id") or "").strip()
+            logo = str(ch.get("stream_icon") or "").strip()
 
-        with (
-            tmp_raw_path.open("r", encoding="utf-8", errors="ignore") as raw_in,
-            full_out_path.open("w", encoding="utf-8") as full_out,
-            live_only_out_path.open("w", encoding="utf-8") as live_only_out,
-        ):
-            full_out.write(header)
-            live_only_out.write(header)
-            pending_lines: list[str] = []
+            best_tvg_id = resolve_best_tvg_id(ch_name, orig_id, epg_index)
+            if best_tvg_id:
+                matched_epg += 1
 
-            for raw_line in raw_in:
-                line = raw_line.rstrip("\r\n")
-                if not line.strip() or line.strip().upper().startswith("#EXTM3U"):
-                    continue
+            # Salva no mapa do Cloudflare Worker tanto pelo nome normalizado quanto pelo stream_id
+            xtream_tvgid_map[norm_lookup_key(ch_name)] = best_tvg_id
+            if sid:
+                xtream_tvgid_map[f"id:{sid}"] = best_tvg_id
 
-                if line.lstrip().startswith("#"):
-                    pending_lines.append(line)
-                    continue
+            safe_id = best_tvg_id.replace('"', "'")
+            safe_name = ch_name.replace('"', "'")
+            safe_logo = logo.replace('"', "'")
+            safe_grp = grp.replace('"', "'")
 
-                if line.lstrip().startswith(("http://", "https://", "rtmp://", "rtsp://")) and pending_lines:
-                    extinf_idx = next((idx for idx, l in enumerate(pending_lines) if l.lstrip().upper().startswith("#EXTINF")), None)
-                    if extinf_idx is None:
-                        pending_lines.clear()
-                        continue
+            stream_url = f"{source_host}/live/{user}/{pwd}/{sid}.ts"
+            live_out.write(
+                f'#EXTINF:-1 tvg-id="{safe_id}" tvg-name="{safe_name}" tvg-logo="{safe_logo}" group-title="{safe_grp}",{ch_name}\n'
+                f"{stream_url}\n"
+            )
+            live_count += 1
 
-                    extinf_line = pending_lines[extinf_idx]
-                    grp_m = _RE_GROUP_TITLE.search(extinf_line)
-                    curr_grp = grp_m.group(1).strip() if grp_m else ""
-                    tvg_id_m = re.search(r'tvg-id="([^"]*)"', extinf_line, re.I)
-                    tvg_name_m = re.search(r'tvg-name="([^"]*)"', extinf_line, re.I)
-                    comma_name_m = re.search(r',([^,]*)$', extinf_line)
+    # Copia para lista_X.m3u para manter compatibilidade caso algum player chame /get.php
+    shutil.copy2(live_only_out_path, full_out_path)
 
-                    orig_tvg_id = tvg_id_m.group(1).strip() if tvg_id_m else ""
-                    item_name = html.unescape(
-                        (comma_name_m.group(1).strip() if comma_name_m else "")
-                        or (tvg_name_m.group(1).strip() if tvg_name_m else "")
-                    )
-
-                    if REMOVE_ADULT and (ADULT_FILTER_RE.search(curr_grp) or ADULT_FILTER_RE.search(item_name)):
-                        pending_lines.clear()
-                        continue
-
-                    stream_id_m = _RE_STREAM_ID_FROM_URL.search(line.strip())
-                    stream_id = stream_id_m.group(1) if stream_id_m else ""
-
-                    kind = classify_stream_type(line.strip(), curr_grp, item_name)
-
-                    if kind == "series":
-                        base_series_key = norm_series_base_title(item_name)
-                        real_ser_grp = (
-                            series_by_id.get(stream_id, "")
-                            or series_by_name.get(base_series_key, "")
-                            or series_by_name.get(norm_lookup_key(item_name), "")
-                        )
-                        if REMOVE_ADULT and real_ser_grp and ADULT_FILTER_RE.search(real_ser_grp):
-                            pending_lines.clear()
-                            continue
-
-                        if real_ser_grp:
-                            pending_lines[extinf_idx] = set_group_title_in_extinf(extinf_line, real_ser_grp)
-
-                        for pl in pending_lines:
-                            full_out.write(pl + "\n")
-                        full_out.write(line + "\n")
-                        series_count += 1
-
-                    elif kind == "movie":
-                        real_movie_grp = (
-                            vod_by_id.get(stream_id, "")
-                            or vod_by_name.get(norm_lookup_key(item_name), "")
-                            or vod_by_name.get(norm_movie_title(item_name), "")
-                        )
-                        if REMOVE_ADULT and real_movie_grp and ADULT_FILTER_RE.search(real_movie_grp):
-                            pending_lines.clear()
-                            continue
-
-                        if real_movie_grp:
-                            pending_lines[extinf_idx] = set_group_title_in_extinf(extinf_line, real_movie_grp)
-
-                        for pl in pending_lines:
-                            full_out.write(pl + "\n")
-                        full_out.write(line + "\n")
-                        movie_count += 1
-
-                    else:
-                        real_live_grp = (
-                            live_by_id.get(stream_id, "")
-                            or live_by_name.get(norm_lookup_key(item_name), "")
-                            or live_by_name.get(name_key(item_name), "")
-                        )
-                        if not real_live_grp or "COMPLETO" in real_live_grp.upper():
-                            real_live_grp = infer_fallback_channel_group(item_name, curr_grp)
-
-                        if REMOVE_ADULT and real_live_grp and ADULT_FILTER_RE.search(real_live_grp):
-                            pending_lines.clear()
-                            continue
-
-                        extinf_line = set_group_title_in_extinf(extinf_line, real_live_grp)
-
-                        best_tvg_id = resolve_best_tvg_id(item_name, orig_tvg_id, epg_index)
-                        if best_tvg_id:
-                            matched_epg += 1
-
-                        xtream_tvgid_map[norm_lookup_key(item_name)] = best_tvg_id
-
-                        pending_lines[extinf_idx] = replace_only_tvg_id_in_extinf(extinf_line, best_tvg_id)
-                        for pl in pending_lines:
-                            full_out.write(pl + "\n")
-                            live_only_out.write(pl + "\n")
-                        full_out.write(line + "\n")
-                        live_only_out.write(line + "\n")
-                        live_count += 1
-
-                    pending_lines.clear()
-
-        xtream_map_out_path.write_text(json.dumps(xtream_tvgid_map, ensure_ascii=False), encoding="utf-8")
-        return live_count, matched_epg, movie_count, series_count
-
-    finally:
-        if tmp_raw_path.exists():
-            tmp_raw_path.unlink()
+    # Salva o JSON do Worker
+    xtream_map_out_path.write_text(json.dumps(xtream_tvgid_map, ensure_ascii=False), encoding="utf-8")
+    return live_count, matched_epg
 
 
 def push_files_to_secret_gist_via_git(generated_files: list[Path], token: str, gist_id: str) -> None:
@@ -730,22 +452,12 @@ def push_files_to_secret_gist_via_git(generated_files: list[Path], token: str, g
         subprocess.run(["git", "init", "-b", "main"], cwd=work_dir, check=True, stdout=subprocess.DEVNULL)
         subprocess.run(["git", "config", "user.name", "github-actions[bot]"], cwd=work_dir, check=True)
         subprocess.run(["git", "config", "user.email", "github-actions[bot]@users.noreply.github.com"], cwd=work_dir, check=True)
-        subprocess.run(["git", "config", "http.postBuffer", "524288000"], cwd=work_dir, check=True)
 
         for fpath in generated_files:
-            target_file = work_dir / fpath.name
-            shutil.copy2(fpath, target_file)
-
-            if fpath.name.startswith("lista_"):
-                target_gz = work_dir / f"{fpath.name}.gz"
-                with fpath.open("rb") as f_in, gzip.open(target_gz, "wb", compresslevel=6) as f_out:
-                    shutil.copyfileobj(f_in, f_out, length=1024 * 1024)
-
-                if target_file.stat().st_size > 98 * 1024 * 1024:
-                    target_file.unlink()
+            shutil.copy2(fpath, work_dir / fpath.name)
 
         subprocess.run(["git", "add", "."], cwd=work_dir, check=True)
-        subprocess.run(["git", "commit", "-m", "Atualiza Listas M3U + Mapa Xtream (Alta Precisao EPG + Auto-Host)"], cwd=work_dir, check=True, stdout=subprocess.DEVNULL)
+        subprocess.run(["git", "commit", "-m", "Atualiza Canais + Mapa Xtream (Ultra-Rapido sem VOD)"], cwd=work_dir, check=True, stdout=subprocess.DEVNULL)
         subprocess.run(["git", "push", "--force", gist_repo_url, "HEAD:main"], cwd=work_dir, check=True)
         print(f"\n✓ Gist Secreto ({gist_id}) atualizado via Git Push com sucesso!")
     finally:
@@ -770,19 +482,18 @@ def main() -> None:
         live_file = out_dir / f"canais_{i}.m3u"
         map_file = out_dir / f"xtream_map_{i}.json"
         try:
-            live_cnt, matched_cnt, movie_cnt, series_cnt = build_calibrated_playlists(
+            live_cnt, matched_cnt = build_live_playlists_and_xtream_map(
                 url, epg_index, epg_public_url, full_file, live_file, map_file
             )
-            if live_cnt == 0 and movie_cnt == 0 and series_cnt == 0:
+            if live_cnt == 0:
                 print(f"  -> ⚠ M3U_URL_{i} retornou vazia. Pulando.")
                 continue
 
-            full_mb = full_file.stat().st_size / (1024 * 1024)
             live_mb = live_file.stat().st_size / (1024 * 1024)
+            map_kb = map_file.stat().st_size / 1024
             print(
-                f"  -> ✓ [lista_{i}.m3u] {live_cnt} Canais ({matched_cnt} com EPG exato) + {movie_cnt} Filmes + {series_cnt} Episódios de Séries ({full_mb:.2f} MB)\n"
-                f"  -> ✓ [canais_{i}.m3u] Só Canais: {live_cnt} Canais ({live_mb:.2f} MB)\n"
-                f"  -> ✓ [xtream_map_{i}.json] Mapa de TVG-IDs + Host para o Servidor Xtream atualizado!"
+                f"  -> ✓ [canais_{i}.m3u / lista_{i}.m3u] {live_cnt} Canais ({matched_cnt} com EPG exato) ({live_mb:.2f} MB)\n"
+                f"  -> ✓ [xtream_map_{i}.json] Mapa Xtream + Auto-Host gerado ({map_kb:.1f} KB)!"
             )
             generated_files.extend([full_file, live_file, map_file])
         except Exception as e:
