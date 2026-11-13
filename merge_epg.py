@@ -3,7 +3,7 @@
 - Integra as fontes diretas da Vivo Play (vivo_epg.xml.gz) e Claro TV+ (claro_epg.xml.gz).
 - Formata todas as descrições com: 🟢 LIVRE / 🔵 +10 / 🟡 +12 / 🟠 +14 / 🔴 +16 / ⚫ +18 | 📅 Ano | ⏱ X mins | 🎭 Categorias.
 - Exibe SOMENTE [T03E07] (sem espaço e sem tag <episode-num> para impedir o player de injetar S04E07 duplicado).
-- Remove qualquer repetição de temporada/episódio ou subtítulo duplicado na sinopse.
+- Remove qualquer repetição de temporada/episódio ou subtítulo duplicado no título e na sinopse.
 """
 from __future__ import annotations
 
@@ -133,29 +133,25 @@ IPTV_USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
 ]
 
-# Fontes atualizadas com Vivo Play API Direta e Claro TV+ API Direta em alta prioridade
+# Fontes enxutas e sem duplicatas (Vivo Play API e Claro no topo)
 EPG_SOURCES_CONFIG = [
     ("Afiliadas Locais", "epg_afiliadas.xml", "afiliadas_locais", 3.0),
-    ("Claro TV+ API", "claro_epg.xml.gz", "claro_api", 2.8),
     ("Vivo Play API", "vivo_epg.xml.gz", "vivo_api", 2.8),
+    ("Claro TV+ API", "claro_epg.xml.gz", "claro_api", 2.8),
+    ("Claro Git", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/claro.xml", "git_operadora", 2.6),
     ("GuiaDeTV", "epg_guiadetv.xml", "guiadetv", 2.5),
     ("Meu Guia", "epg_meuguia.xml", "meuguia", 2.5),
-    ("MiTV", "epg_mitv.xml", "mitv", 2.0),
+    ("MiTV", "epg_mitv.xml", "mitv", 2.2),
     ("TV Plus", "epg_tvplus.xml", "tvplus", 1.8),
     ("WebFinal", "epg_webfinal.xml", "webfinal", 1.8),
     ("Open-EPG BR", "https://www.open-epg.com/files/brazil.xml", "openepg", 1.5),
     ("Open-EPG BR 4", "https://www.open-epg.com/files/brazil4.xml", "openepg", 1.4),
-    ("Claro Git", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/claro.xml", "git_operadora", 1.5),
-    ("VivoPlay Git", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/vivoplay.xml", "git_operadora", 1.4),
-    ("Globo", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/globo.xml", "git_extra", 1.2),
-    ("Mais SBT", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/maissbt.xml", "git_extra", 1.0),
-    ("XSports", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/xsports.xml", "git_extra", 1.0),
+    ("Globo", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/globo.xml", "git_extra", 1.4),
+    ("Mais SBT", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/maissbt.xml", "git_extra", 1.2),
     ("EPGShare BR1", "https://epgshare01.online/epgshare01/epg_ripper_BR1.xml.gz", "epgshare", 1.5),
     ("EPGShare BR2", "https://epgshare01.online/epgshare01/epg_ripper_BR2.xml.gz", "epgshare", 1.3),
     ("IPTV-EPG BR", "https://iptv-epg.org/files/epg-br.xml", "iptvepg", 1.2),
-    ("TV Map", "epg_tvmap.xml", "tvmap", 1.0),
     ("Genius", os.environ.get("PRIMARY_EPG_URL", "https://github.com/ferteque/Curated-M3U-Repository/raw/refs/heads/main/epg13.xml.gz"), "genius", 1.0),
-    ("EPG pw BR", "https://epg.pw/xmltv/epg_BR.xml", "epgpw", 0.8),
 ]
 
 PLACEHOLDER_TITLES = {
@@ -482,6 +478,7 @@ def normalizar_canal(nome: str) -> str:
     nome = re.sub(r'\bHBO\s*\+\b', 'HBO PLUS', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bH2\b', 'HISTORY 2', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bDISCOVERY H&H\b', 'DISCOVERY HOME & HEALTH', nome, flags=re.IGNORECASE)
+    nome = re.sub(r'\bDISCOVERY HOME\s*(?:&|AND)?\s*HEALT\b', 'DISCOVERY HOME & HEALTH', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bDISCOVERY TLC\b', 'TLC', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bID\s+INVESTIGA[CÇ][AÃ]O DISCOVERY\b', 'INVESTIGACAO DISCOVERY', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bFOX PREMIUM\b', 'STAR PREMIUM', nome, flags=re.IGNORECASE)
@@ -659,7 +656,6 @@ def strip_se_tokens(text: str) -> str:
     """Remove qualquer S01E02, T01E02, [T03E07], Ep. 2 ou cabeçalhos antigos duplicados do texto."""
     if not text:
         return ""
-    # Remove linhas de cabeçalhos pré-formatados de fontes externas para não duplicar
     cleaned_lines = []
     for ln in text.splitlines():
         ln_s = ln.strip()
@@ -754,7 +750,6 @@ def extract_program_metadata(el: ET.Element, channel_name: str = "", duration_mi
                         season, episode = int(m.group(1)), int(m.group(2))
                         break
 
-    # Detecta classificação indicativa no texto da descrição caso não tenha vindo na tag <rating>
     if not rating_badge and desc:
         if "LIVRE" in desc.upper():
             rating_badge = "🟢 LIVRE"
@@ -763,11 +758,15 @@ def extract_program_metadata(el: ET.Element, channel_name: str = "", duration_mi
             if m_age:
                 rating_badge = RATING_SHORT_MAP.get(m_age.group(1), "")
 
+    # Limpa duplicidades como "Jogo X - Copa do Rei : Jogo X"
     if " : " in title and not sub_title:
         parts = [p.strip() for p in title.split(" : ", 1)]
         if len(parts) == 2 and parts[0] and parts[1]:
-            if parts[0].upper() == parts[1].upper() or parts[0].upper().endswith(parts[1].upper()):
+            p0_up, p1_up = parts[0].upper(), parts[1].upper()
+            if p0_up == p1_up or p1_up in p0_up:
                 title = parts[0]
+            elif p0_up in p1_up:
+                title = parts[1]
             else:
                 title, sub_title = parts[0], parts[1]
 
@@ -801,12 +800,11 @@ def extract_program_metadata(el: ET.Element, channel_name: str = "", duration_mi
 
     if sub_title and (
         sub_title.upper() == title.upper()
-        or title.upper().endswith(sub_title.upper())
+        or sub_title.upper() in title.upper()
         or _RE_TRAILING_FAKE_EP.fullmatch(sub_title)
     ):
         sub_title = ""
 
-    # Se a sinopse começa repetindo exatamente o sub_title, remove do início da sinopse
     if sub_title and desc and desc.lower().startswith(sub_title.lower()):
         desc = desc[len(sub_title):].lstrip(" -–—:|.,")
 
@@ -1464,14 +1462,15 @@ def schedule_health(source: EpgSource, channel_id: str, now: datetime) -> dict[s
         
     future_end = max((row.stop for row in rows if row.stop > now), default=None)
     future_hours = max(0.0, (future_end - now).total_seconds() / 3600) if future_end else 0.0
+    # Qualquer fonte com >= 20h futuras (como Vivo Play e Claro) atinge nota máxima de cobertura futura
     score = (
         (0.25 if current else 0.0)
         + (0.10 if next_item else 0.0)
         + (0.35 * near_coverage_ratio)
-        + (0.20 * min(future_hours / 36.0, 1.0))
+        + (0.20 * min(future_hours / 20.0, 1.0))
         + (0.10 * min(len(rows) / 12.0, 1.0))
     )
-    score -= min(0.35, invalid * 0.08 + overlaps * 0.02 + gaps * 0.03)
+    score -= min(0.25, invalid * 0.08 + overlaps * 0.02 + gaps * 0.02)
     if future_hours < 8.0:
         score = min(score, 0.35)
     result = {
@@ -1546,7 +1545,7 @@ def evaluate_candidates(matches: list[ChannelMatch], now: datetime, max_active_v
     def rank(ev: CandidateEvaluation) -> tuple:
         has_programmes = int(bool(ev.match.source.rows.get(ev.match.channel_id)))
         fut_h = float(ev.health.get("future_hours", 0.0))
-        is_healthy_full_day = int(fut_h >= 18.0 and ev.health_score >= 0.65)
+        is_healthy_full_day = int(fut_h >= 16.0 and ev.health_score >= 0.65)
         consensus_tier = round(ev.support_weight / 1.5)
         return (
             has_programmes,
@@ -1760,15 +1759,12 @@ def apply_rich_metadata_to_element(
     best_sub = strip_se_tokens(best_sub)
     best_desc = strip_se_tokens(best_desc)
 
-    if best_sub and (best_sub.upper() == clean_title.upper() or clean_title.upper().endswith(best_sub.upper())):
+    if best_sub and (best_sub.upper() == clean_title.upper() or best_sub.upper() in clean_title.upper()):
         best_sub = ""
 
-    # Se a sinopse começa repetindo o subtítulo, limpa da sinopse para não ficar redundante
     if best_sub and best_desc and best_desc.lower().startswith(best_sub.lower()):
         best_desc = best_desc[len(best_sub):].lstrip(" -–—:|.,")
 
-    # Remove <sub-title> separado do XML se já vamos mostrá-lo formatado na linha de episódio da descrição,
-    # evitando que players mostrem o subtítulo duas vezes seguidas!
     sub_node = el.find("sub-title")
     if sub_node is not None:
         el.remove(sub_node)
@@ -1820,7 +1816,6 @@ def apply_rich_metadata_to_element(
             desc_node = ET.SubElement(el, "desc", {"lang": "pt"})
         desc_node.text = final_desc
 
-    # Preserva pôster se veio de outra fonte mesclada (ex: Vivo ou Claro) e o elemento base não tinha
     if best_icon and el.find("icon") is None:
         ET.SubElement(el, "icon", {"src": best_icon})
 
@@ -2099,7 +2094,6 @@ def main() -> None:
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-    # Garante que os extratores da Claro e Vivo rodem antes de indexar as fontes
     ensure_operator_epgs_generated()
 
     stage_start = time.perf_counter()
@@ -2135,6 +2129,9 @@ def main() -> None:
             if s: rec["source_ids"].add(str(s).strip())
         if group and not rec["group"]:
             rec["group"] = group
+
+    def tvg_id_id_ok(m) -> bool:
+        return bool(m and m.group(1).strip())
 
     def parse_m3u_file_into_records(m3u_file: Path) -> int:
         count = 0
@@ -2187,9 +2184,6 @@ def main() -> None:
             )
             count += 1
         return count
-
-    def tvg_id_id_ok(m) -> bool:
-        return bool(m and m.group(1).strip())
 
     if CATALOG_PATH.exists():
         try:
