@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Sincronizador M3U + Mapa JSON para Servidor Xtream Proxy (Motor EPG de Alta Precisão):
+"""Sincronizador M3U + Mapa JSON para Servidor Xtream Proxy (Motor EPG de Alta Precisão + Auto-Host):
+- Salva '__upstream_host__' automaticamente no xtream_map_X.json para o Cloudflare Worker atualizar sozinho.
 - Corrige colisões como 'HBO 2' -> 'HBO' priorizando IDs exatos sobre display-names secundários.
 - Limpa sufixos de servidor como (BR2), [P], (Eventos), (PPV), ², H265, FHD/HD/SD/4K.
 - Converte sinônimos regionais e de canais (Discovery H&H, Band TV SP, SBT TV RJ, Globo BH, etc.).
@@ -85,7 +86,7 @@ CHANNEL_SYNONYMS: dict[str, list[str]] = {
     "SONY CHANNEL": ["Sony Channel", "Sony", "Sony.br", "sony.br"],
     "WARNER": ["Warner Channel", "Warner", "Warner.br", "warnerchannel.br"],
     "WARNER CHANNEL": ["Warner Channel", "Warner", "Warner.br", "warnerchannel.br"],
-    " TNT": ["TNT", "TNT.br", "tnt.br"],
+    "TNT": ["TNT", "TNT.br", "tnt.br"],
     "TNT SERIES": ["TNT Séries", "TNT Series", "TNTSeries.br", "tntseries.br"],
     "TNT NOVELAS": ["TNT Novelas", "TNTNovelas.br"],
     "H2": ["History 2", "H2", "History2.br", "history2.br"],
@@ -164,12 +165,9 @@ def norm_lookup_key(title: str) -> str:
 def clean_channel_title_for_epg(raw_name: str) -> str:
     """Limpa todas as tags de resolução, codec, servidor (BR2), [P], (Eventos), ² do nome do canal."""
     s = html.unescape(raw_name or "")
-    # Remove (BR1), (BR2), (Eventos), (PPV), [H265], [P], etc.
     s = re.sub(r"\(\s*(?:BR\s*\d+|EVENTOS?|PPV|BACKUP|ALT)\s*\)", " ", s, flags=re.I)
     s = re.sub(r"\[\s*(?:H\.?26[45]|HEVC|P|BR\s*\d+|FHD|HD|SD|4K|UHD)\s*\]", " ", s, flags=re.I)
-    # Remove expoentes de links alternativos (², ³, ¹)
     s = re.sub(r"[¹²³]+", " ", s)
-    # Remove qualidades soltas
     s = re.sub(r"\b(?:FHD|UHD|4K|HD|SD|H265|H264|HEVC|1080P|720P)\b", " ", s, flags=re.I)
     return norm_lookup_key(s)
 
@@ -390,7 +388,6 @@ def load_epg_id_index(epg_path: Path) -> dict[str, str]:
             if tag == "channel":
                 cid = (elem.attrib.get("id") or "").strip()
                 if cid:
-                    # 1. Chaves primárias (do próprio atributo id="...") têm prioridade máxima
                     cid_no_br = re.sub(r"\.br$", "", cid, flags=re.I)
                     for k in (
                         norm_lookup_key(cid),
@@ -402,7 +399,6 @@ def load_epg_id_index(epg_path: Path) -> dict[str, str]:
                         if k and k not in primary_index:
                             primary_index[k] = cid
 
-                    # 2. Chaves secundárias (display-name) só entram se não colidirem com um ID primário
                     for child in elem:
                         if child.tag.rsplit("}", 1)[-1] == "display-name" and child.text:
                             dn = child.text.strip()
@@ -417,7 +413,6 @@ def load_epg_id_index(epg_path: Path) -> dict[str, str]:
                                     secondary_index[k_dn] = cid
                 elem.clear()
 
-    # Mescla mantendo 100% de prioridade para primary_index
     merged = {**secondary_index, **primary_index}
     print(f"✓ Índice EPG de Alta Precisão carregado ({len(primary_index)} IDs primários, {len(merged)} chaves totais).")
     return merged
@@ -428,22 +423,16 @@ def is_orig_tvg_id_poisoned(clean_ch_name: str, orig_id: str) -> bool:
     oid = orig_id.lower().strip()
     if not oid:
         return True
-    # UUIDs de canais informativos
     if re.match(r"^[0-9a-f]{8}-[0-9a-f]{4}-", oid):
         return True
-    # agromais.br usado erroneamente no Cartoonito, Travel Box e SBT Recife
     if oid == "agromais.br" and "AGRO" not in clean_ch_name:
         return True
-    # globonews.br usado erroneamente na Jovem Pan
     if oid == "globonews.br" and "GLOBO NEWS" not in clean_ch_name and "GLOBONEWS" not in clean_ch_name:
         return True
-    # globosp.br usado em dezenas de afiliadas regionais (Bahia, Minas, Recife, etc.)
     if oid == "globosp.br" and clean_ch_name not in {"GLOBO SP", "GLOBO", "TV GLOBO"}:
         return True
-    # recordtvbrasília.br usado em Record SP, RJ, Minas, Goiás, Manaus
     if "recordtvbras" in oid and "BRASILIA" not in clean_ch_name:
         return True
-    # sbt.br ou band.br genérico usado em afiliadas regionais que têm guia próprio
     if oid == "sbt.br" and clean_ch_name not in {"SBT", "SBT SP", "SBT TV SP"}:
         return True
     if oid == "band.br" and clean_ch_name not in {"BAND", "BAND SP", "BAND TV SP"}:
@@ -452,23 +441,19 @@ def is_orig_tvg_id_poisoned(clean_ch_name: str, orig_id: str) -> bool:
 
 
 def resolve_best_tvg_id(channel_name: str, original_tvg_id: str, epg_index: dict[str, str]) -> str:
-    # 1. Canais 24h, Jogos do Dia, Programas 24h ficam SEMPRE com tvg-id=""
     if _RE_NO_EPG_CHANNEL.search(channel_name):
         return ""
 
     clean_title = clean_channel_title_for_epg(channel_name)
 
-    # 2. Verifica Tabela de Sinônimos Calibrados (Ex: HBO 2, Discovery H&H, Band TV SP, Globo BH, etc.)
     if clean_title in CHANNEL_SYNONYMS:
         for syn in CHANNEL_SYNONYMS[clean_title]:
             for k_syn in (norm_lookup_key(syn), name_key(syn)):
                 if k_syn and k_syn in epg_index:
                     return epg_index[k_syn]
 
-    # 3. Variações automáticas limpando "TV" intermediário (ex: "SBT TV CAMPINAS" -> "SBT CAMPINAS")
     no_tv_mid = re.sub(r"^(GLOBO|SBT|RECORD|BAND)\s+TV\s+", r"\1 ", clean_title)
 
-    # 4. Busca direta pelo nome limpo do canal no índice do EPG
     for candidate in (
         clean_title,
         no_tv_mid,
@@ -480,14 +465,12 @@ def resolve_best_tvg_id(channel_name: str, original_tvg_id: str, epg_index: dict
             if k and k in epg_index:
                 return epg_index[k]
 
-    # 5. Se não achou pelo nome, tenta pelo original_tvg_id APENAS se ele não for um ID envenenado
     if original_tvg_id and not is_orig_tvg_id_poisoned(clean_title, original_tvg_id):
         orig_no_br = re.sub(r"\.(?:br|bt)$", "", original_tvg_id.strip(), flags=re.I)
         for k_id in (norm_lookup_key(original_tvg_id), norm_lookup_key(orig_no_br), name_key(original_tvg_id), name_key(orig_no_br)):
             if k_id and k_id in epg_index:
                 return epg_index[k_id]
 
-    # 6. Se o canal realmente não existe no EPG (ex: PPV desligado), deixa vazio ou nome limpo sem lixo
     return ""
 
 
@@ -580,7 +563,13 @@ def build_calibrated_playlists(
     movie_count = 0
     series_count = 0
 
-    xtream_tvgid_map: dict[str, str] = {}
+    parsed_source = urllib.parse.urlparse(url)
+    source_host = f"{parsed_source.scheme}://{parsed_source.netloc}"
+
+    # Grava automaticamente o domínio no JSON para o Cloudflare Worker ler sozinho!
+    xtream_tvgid_map: dict[str, str] = {
+        "__upstream_host__": source_host,
+    }
 
     try:
         maps = fetch_all_category_maps(url)
@@ -756,7 +745,7 @@ def push_files_to_secret_gist_via_git(generated_files: list[Path], token: str, g
                     target_file.unlink()
 
         subprocess.run(["git", "add", "."], cwd=work_dir, check=True)
-        subprocess.run(["git", "commit", "-m", "Atualiza Listas M3U + Mapa Xtream (Alta Precisao EPG)"], cwd=work_dir, check=True, stdout=subprocess.DEVNULL)
+        subprocess.run(["git", "commit", "-m", "Atualiza Listas M3U + Mapa Xtream (Alta Precisao EPG + Auto-Host)"], cwd=work_dir, check=True, stdout=subprocess.DEVNULL)
         subprocess.run(["git", "push", "--force", gist_repo_url, "HEAD:main"], cwd=work_dir, check=True)
         print(f"\n✓ Gist Secreto ({gist_id}) atualizado via Git Push com sucesso!")
     finally:
@@ -793,7 +782,7 @@ def main() -> None:
             print(
                 f"  -> ✓ [lista_{i}.m3u] {live_cnt} Canais ({matched_cnt} com EPG exato) + {movie_cnt} Filmes + {series_cnt} Episódios de Séries ({full_mb:.2f} MB)\n"
                 f"  -> ✓ [canais_{i}.m3u] Só Canais: {live_cnt} Canais ({live_mb:.2f} MB)\n"
-                f"  -> ✓ [xtream_map_{i}.json] Mapa de TVG-IDs para o Servidor Xtream atualizado!"
+                f"  -> ✓ [xtream_map_{i}.json] Mapa de TVG-IDs + Host para o Servidor Xtream atualizado!"
             )
             generated_files.extend([full_file, live_file, map_file])
         except Exception as e:
