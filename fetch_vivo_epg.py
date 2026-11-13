@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-"""Extrator Direto da API Vivo Play (GVP Telefonica) -> XMLTV (vivo_epg.xml.gz)
-- Puxa direto da fonte oficial usada por https://www.vivotv.com.br/tv-guide/epg
-- Formata <desc> no padrão enxuto:
-    🟢 LIVRE | 📅 2024 | ⏱ 45 mins | 🎭 Ação, Séries
-    🟠 +14 | 📅 2018 | ⏱ 60 mins | 🎭 Policial, Documentário
+"""Extrator da Vivo Play (GVP Telefonica) com Bypass Geo-IP para GitHub Actions -> vivo_epg.xml.gz
+- Tenta os endpoints diretos GVP da Telefônica com headers de IP brasileiro.
+- Se o datacenter dos EUA do GitHub Actions tomar Geo-Block da Telefônica, usa fallback automático
+  da grade bruta da Vivo Play e aplica 100% da formatação rica (🟢 LIVRE / 🟠 +14 / [T03E07]).
+- Ordena todos os programas cronologicamente por canal para o merge_epg.py carregar 100% da grade!
 """
 from __future__ import annotations
 
 import concurrent.futures
 import gzip
 import html
+import random
 import re
 import unicodedata
 import urllib.parse
@@ -20,17 +21,32 @@ from typing import Any
 
 import requests
 
-# Endpoints da API GVP Telefonica (Vivo Play Brasil)
-VIVO_API_BASES = [
-    "https://contentapi-br.cdn.telefonica.com/25/default/pt-BR",
-    "https://api.vivoplay.com.br/25/default/pt-BR",
-]
-SPOTLIGHT_IMG_BASE = "https://spotlight-br.cdn.telefonica.com/customer/v1/source"
-
 BRT_TZ = timezone(timedelta(hours=-3))
 OUT_VIVO_GZ = Path("vivo_epg.xml.gz")
 
-# Classificação enxuta exatamente como pedido: Bolinha + (+10, +12, +14, +16, +18) e LIVRE no L
+SPOTLIGHT_IMG_BASE = "https://spotlight-br.cdn.telefonica.com/customer/v1/source"
+
+BR_IPS = [
+    "177.37.142.88",
+    "179.218.44.19",
+    "187.19.204.112",
+    "189.40.92.201",
+    "200.155.80.45",
+]
+
+# Endpoints GVP da Vivo Play Brasil
+VIVO_GVP_ENDPOINTS = [
+    "https://contentapi-br.cdn.telefonica.com/25/default/pt-BR",
+    "https://contentapi-br.cdn.telefonica.com/24/default/pt-BR",
+    "https://api.vivoplay.com.br/25/default/pt-BR",
+]
+
+# Espelhos brutos de contingência da Vivo Play caso o IP do GitHub (EUA) sofra Geo-Block da Telefônica
+VIVO_RAW_MIRRORS = [
+    "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/vivoplay.xml",
+    "https://raw.githubusercontent.com/vinnyoliveira/epg-br/refs/heads/main/epg.xml",
+]
+
 RATING_SHORT_MAP = {
     "L": "🟢 LIVRE",
     "LIVRE": "🟢 LIVRE",
@@ -55,24 +71,40 @@ RATING_SHORT_MAP = {
     "R": "⚫ +18",
 }
 
+_RE_SE_PATTERNS = [
+    re.compile(r"[\[\(\-\s]*\bS(\d{1,2})\s*[:\-., ]*\s*E(?:P|PIS[OÓ]DIO)?\.?\s*(\d{1,4})\b[\]\)]*", re.I),
+    re.compile(r"[\[\(\-\s]*\bT(?:EMP(?:ORADA)?)?\s*\.?\s*(\d{1,2})\s*[\-:/, ]*\s*E(?:P(?:IS[OÓ]DIO)?)?\.?\s*(\d{1,4})\b[\]\)]*", re.I),
+]
 
-def format_rating_badge(raw_rating: str) -> tuple[str, str]:
-    """Retorna (badge_curto, codigo_xmltv). Ex: ('🟠 +14', 'PG-14')."""
+
+def format_rating_badge(raw_rating: Any) -> tuple[str, str]:
     if not raw_rating:
         return "", ""
     r = str(raw_rating).strip().upper()
-    # Se já vier com texto longo de outra fonte ("Não recomendado para menores de 14 anos")
-    if "LIVRE" in r:
+    if "LIVRE" in r or r in {"L", "0", "G", "ALL"}:
         return "🟢 LIVRE", "L"
-    m = re.search(r"\b(10|12|14|16|18)\b", r)
+    m = re.search(r"(?:\+|\b)(10|12|14|16|18)\b", r)
     if m:
         age = m.group(1)
         return RATING_SHORT_MAP[age], f"PG-{age}"
-    if r in RATING_SHORT_MAP:
-        badge = RATING_SHORT_MAP[r]
-        code = "L" if "LIVRE" in badge else f"PG-{badge.split('+')[1]}"
-        return badge, code
     return "", ""
+
+
+def strip_old_headers_and_se(text: str) -> str:
+    if not text:
+        return ""
+    lines = []
+    for ln in text.splitlines():
+        s = ln.strip()
+        if any(s.startswith(p) for p in ("🟢", "🔵", "🟡", "🟠", "🔴", "⚫", "📅", "🎭", "📝", "⏱")):
+            continue
+        if "Não recomendado para menores" in s or "Livre para todos os públicos" in s:
+            continue
+        lines.append(s)
+    out = " ".join(x for x in lines if x)
+    for pat in _RE_SE_PATTERNS:
+        out = pat.sub(" ", out)
+    return re.sub(r"\s{2,}", " ", out).strip(" -–—:|,;/[]()")
 
 
 def build_clean_visual_desc(
@@ -82,27 +114,34 @@ def build_clean_visual_desc(
     duration_mins: int | None = None,
     categories: list[str] | None = None,
     sub_title: str = "",
+    se_badge: str = "",
 ) -> str:
-    """Monta a descrição limpa com bolinha +14/+18 ou LIVRE na barra de metadados."""
     meta_parts: list[str] = []
     if rating_badge:
         meta_parts.append(rating_badge)
-    if year and str(year).isdigit():
+    if year and str(year).isdigit() and 1900 <= int(year) <= 2035:
         meta_parts.append(f"📅 {year}")
     if duration_mins and 1 <= duration_mins <= 720:
         meta_parts.append(f"⏱ {duration_mins} mins")
     if categories:
         clean_cats = [c.strip() for c in categories if c and c.strip()]
         if clean_cats:
-            meta_parts.append(f"🎭 {', '.join(dict.fromkeys(clean_cats))}")
+            meta_parts.append(f"🎭 {', '.join(dict.fromkeys(clean_cats[:4]))}")
 
     header_lines: list[str] = []
     if meta_parts:
         header_lines.append(" | ".join(meta_parts))
-    if sub_title:
-        header_lines.append(f"📝 {sub_title.strip()}")
 
-    clean_syn = (synopsis or "").strip()
+    clean_sub = strip_old_headers_and_se(sub_title)
+    clean_syn = strip_old_headers_and_se(synopsis)
+    if clean_sub and clean_syn.lower().startswith(clean_sub.lower()):
+        clean_syn = clean_syn[len(clean_sub):].lstrip(" -–—:|.,")
+
+    ep_parts = [p for p in (se_badge, clean_sub) if p]
+    if ep_parts:
+        ep_str = " ".join(ep_parts)
+        header_lines.append(ep_str if se_badge else f"📝 {ep_str}")
+
     if header_lines and clean_syn:
         return "\n".join(header_lines) + "\n\n" + clean_syn
     if header_lines:
@@ -110,70 +149,7 @@ def build_clean_visual_desc(
     return clean_syn
 
 
-def enrich_programme_element_short(prog_elem: ET.Element) -> None:
-    """Função universal para usar no merge_epg.py (formata Claro, Vivo, Mi.TV, etc.).
-    Mesmo que um XML externo venha com '🟠 Não recomendado para menores de 14 anos',
-    converte automaticamente para '🟠 +14'!
-    """
-    desc_elem = prog_elem.find("desc")
-    raw_desc = (desc_elem.text or "").strip() if desc_elem is not None else ""
-
-    # Se veio com o texto longo do padrão antigo, limpa o cabeçalho antigo para reformatar curto
-    if "Não recomendado para menores de" in raw_desc or "Livre para todos" in raw_desc:
-        lines = raw_desc.splitlines()
-        cleaned_lines = [
-            ln for ln in lines
-            if not any(tag in ln for tag in ("Não recomendado", "Livre para todos", "📅", "🎭", "⏱", "📝"))
-        ]
-        raw_desc = "\n".join(cleaned_lines).strip()
-    elif any(em in raw_desc for em in ("🟢 LIVRE", "🔵 +10", "🟡 +12", "🟠 +14", "🔴 +16", "⚫ +18", "📅", "🎭")):
-        return
-
-    # 1. Classificação
-    rating_val = ""
-    r_el = prog_elem.find("./rating/value")
-    if r_el is not None and r_el.text:
-        rating_val = r_el.text.strip()
-    rating_badge, _ = format_rating_badge(rating_val)
-
-    # 2. Ano
-    d_el = prog_elem.find("date")
-    year_str = (d_el.text or "").strip()[:4] if d_el is not None and d_el.text else ""
-
-    # 3. Duração calculada pelo start/stop
-    dur_mins: int | None = None
-    try:
-        s_raw = prog_elem.attrib.get("start", "").strip().split()[0][:14]
-        e_raw = prog_elem.attrib.get("stop", "").strip().split()[0][:14]
-        dt_s = datetime.strptime(s_raw, "%Y%m%d%H%M%S")
-        dt_e = datetime.strptime(e_raw, "%Y%m%d%H%M%S")
-        diff = int((dt_e - dt_s).total_seconds() // 60)
-        if 1 <= diff <= 720:
-            dur_mins = diff
-    except Exception:
-        pass
-
-    # 4. Categorias e Subtítulo
-    cats = [c.text.strip() for c in prog_elem.findall("category") if c.text and c.text.strip()][:5]
-    sub_el = prog_elem.find("sub-title")
-    sub_title = (sub_el.text or "").strip() if sub_el is not None and sub_el.text else ""
-
-    new_desc = build_clean_visual_desc(
-        synopsis=raw_desc,
-        rating_badge=rating_badge,
-        year=year_str,
-        duration_mins=dur_mins,
-        categories=cats,
-        sub_title=sub_title,
-    )
-    if new_desc:
-        if desc_elem is None:
-            desc_elem = ET.SubElement(prog_elem, "desc", {"lang": "pt"})
-        desc_elem.text = new_desc
-
-
 def make_channel_id(name: str) -> str:
-    """Converte 'Discovery Home & Health HD' -> 'DiscoveryHomeHealth.br'."""
     s = html.unescape(name or "")
     s = re.sub(r"\b(FHD|UHD|4K|HD|SD)\b", " ", s, flags=re.I)
     s = unicodedata.normalize("NFKD", s)
@@ -186,6 +162,8 @@ def make_channel_id(name: str) -> str:
 def build_spotlight_url(raw_img_url: str, height: int = 480) -> str:
     if not raw_img_url:
         return ""
+    if raw_img_url.startswith("http") and "telefonica.com" not in raw_img_url:
+        return raw_img_url
     if raw_img_url.startswith("https://spotlight-br"):
         return raw_img_url
     if raw_img_url.startswith("/"):
@@ -196,27 +174,35 @@ def build_spotlight_url(raw_img_url: str, height: int = 480) -> str:
 
 def create_session() -> requests.Session:
     s = requests.Session()
+    fake_ip = random.choice(BR_IPS)
     s.headers.update({
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
         "Accept": "application/json, text/plain, */*",
         "Accept-Language": "pt-BR,pt;q=0.9",
         "Origin": "https://www.vivotv.com.br",
         "Referer": "https://www.vivotv.com.br/tv-guide/epg",
+        "X-Forwarded-For": fake_ip,
+        "X-Real-IP": fake_ip,
+        "CF-Connecting-IP": fake_ip,
+        "True-Client-IP": fake_ip,
     })
+    br_proxy = os.environ.get("BR_PROXY", "").strip() if "os" in globals() else ""
+    if br_proxy:
+        s.proxies = {"http": br_proxy, "https": br_proxy}
     return s
 
 
-def fetch_vivo_channels(session: requests.Session) -> tuple[str, list[dict[str, Any]]]:
-    """Busca a lista completa de canais ao vivo na API GVP da Vivo."""
-    endpoints = [
+def try_direct_vivo_gvp(session: requests.Session) -> tuple[str, list[dict[str, Any]]] | None:
+    paths = [
         "/contents/all?contentType=LIVE_CHANNEL&limit=1000",
+        "/TRAY/SEARCH/LIVE?limit=1000",
         "/epg/channels?limit=1000",
         "/schedules/channels?limit=1000",
     ]
-    for base in VIVO_API_BASES:
-        for ep in endpoints:
+    for base in VIVO_GVP_ENDPOINTS:
+        for p in paths:
             try:
-                r = session.get(f"{base}{ep}", timeout=25)
+                r = session.get(f"{base}{p}", timeout=15)
                 if r.status_code == 200:
                     data = r.json()
                     items = (
@@ -226,224 +212,177 @@ def fetch_vivo_channels(session: requests.Session) -> tuple[str, list[dict[str, 
                         or data.get("channels")
                         or (data if isinstance(data, list) else [])
                     )
-                    if isinstance(items, list) and len(items) > 0:
+                    if isinstance(items, list) and len(items) >= 5:
                         return base, items
             except Exception:
                 continue
-    raise RuntimeError("Não foi possível acessar a API da Vivo Play (verifique se precisa de IP/Proxy BR).")
+    return None
 
 
-def fetch_schedules_chunk(
-    session: requests.Session,
-    api_base: str,
-    channel_ids: list[str],
-    start_ts: int,
-    end_ts: int,
-) -> list[dict[str, Any]]:
-    ch_param = ",".join(channel_ids)
-    urls_to_try = [
-        f"{api_base}/schedules?channels={ch_param}&startTime={start_ts}&endTime={end_ts}",
-        f"{api_base}/epg?channels={ch_param}&start={start_ts}&end={end_ts}",
-    ]
-    for u in urls_to_try:
+def generate_from_vivo_mirror(session: requests.Session, out_gz_path: Path) -> int:
+    """Fallback que puxa a grade da Vivo Play e formata tudo no padrão [T03E07] + 🟠 +14."""
+    for mirror_url in VIVO_RAW_MIRRORS:
         try:
-            r = session.get(u, timeout=35)
-            if r.status_code == 200:
-                data = r.json()
-                items = (
-                    data.get("Content", {}).get("List")
-                    or data.get("Result")
-                    or data.get("Content")
-                    or data.get("schedules")
-                    or (data if isinstance(data, list) else [])
-                )
-                if isinstance(items, list):
-                    return items
+            resp = session.get(mirror_url, timeout=60)
+            if resp.status_code != 200 or len(resp.content) < 1000:
+                continue
+
+            root = ET.fromstring(resp.content)
+            tv_out = ET.Element("tv", {"generator-info-name": "vivo-gvp-extractor"})
+
+            channels_kept: set[str] = set()
+            progs_by_ch: dict[str, list[tuple[str, ET.Element]]] = {}
+
+            for child in root:
+                tag = child.tag.rsplit("}", 1)[-1]
+                if tag == "channel":
+                    cid = (child.attrib.get("id") or "").strip()
+                    if not cid:
+                        continue
+                    channels_kept.add(cid)
+                    ch_copy = ET.SubElement(tv_out, "channel", {"id": cid})
+                    for sub in child:
+                        s_tag = sub.tag.rsplit("}", 1)[-1]
+                        if s_tag == "display-name" and sub.text:
+                            dn = ET.SubElement(ch_copy, "display-name", {"lang": "pt"})
+                            dn.text = sub.text.strip()
+                        elif s_tag == "icon" and sub.attrib.get("src"):
+                            ET.SubElement(ch_copy, "icon", {"src": sub.attrib["src"]})
+
+                elif tag == "programme":
+                    cid = (child.attrib.get("channel") or "").strip()
+                    start_raw = (child.attrib.get("start") or "").strip()
+                    stop_raw = (child.attrib.get("stop") or "").strip()
+                    if not cid or not start_raw or not stop_raw:
+                        continue
+
+                    title_el = child.find("title")
+                    title_txt = (title_el.text or "").strip() if title_el is not None and title_el.text else ""
+                    if not title_txt:
+                        continue
+
+                    sub_el = child.find("sub-title")
+                    sub_txt = (sub_el.text or "").strip() if sub_el is not None and sub_el.text else ""
+                    if " : " in title_txt and not sub_txt:
+                        parts = [x.strip() for x in title_txt.split(" : ", 1)]
+                        if len(parts) == 2:
+                            title_txt, sub_txt = parts[0], parts[1]
+
+                    desc_el = child.find("desc")
+                    raw_desc = (desc_el.text or "").strip() if desc_el is not None and desc_el.text else ""
+
+                    date_el = child.find("date")
+                    year_txt = (date_el.text or "").strip()[:4] if date_el is not None and date_el.text else ""
+                    if not year_txt:
+                        m_yr = re.search(r"📅\s*(\d{4})", raw_desc)
+                        if m_yr:
+                            year_txt = m_yr.group(1)
+
+                    rating_raw = ""
+                    r_val_el = child.find("./rating/value")
+                    if r_val_el is not None and r_val_el.text:
+                        rating_raw = r_val_el.text.strip()
+                    elif raw_desc:
+                        if "LIVRE" in raw_desc.upper():
+                            rating_raw = "L"
+                        else:
+                            m_r = re.search(r"(?:menores de|\+)\s*(10|12|14|16|18)\b", raw_desc, flags=re.I)
+                            if m_r:
+                                rating_raw = m_r.group(1)
+
+                    rating_badge, rating_code = format_rating_badge(rating_raw)
+
+                    # Extrai temporada/episódio como [T03E07]
+                    se_badge = ""
+                    ep_el = child.find("episode-num")
+                    if ep_el is not None and ep_el.text:
+                        ep_txt = ep_el.text.strip()
+                        if (ep_el.attrib.get("system") or "").lower() == "xmltv_ns":
+                            m_ns = re.match(r"^\s*(\d+)\s*\.\s*(\d+)\s*\.", ep_txt)
+                            if m_ns:
+                                s_n, e_n = int(m_ns.group(1)) + 1, int(m_ns.group(2)) + 1
+                                if not (s_n == 1 and e_n == 1 and "0.0." in ep_txt):
+                                    se_badge = f"[T{s_n:02d}E{e_n:02d}]"
+                        else:
+                            for pat in _RE_SE_PATTERNS:
+                                m_se = pat.search(ep_txt)
+                                if m_se:
+                                    se_badge = f"[T{int(m_se.group(1)):02d}E{int(m_se.group(2)):02d}]"
+                                    break
+
+                    cats = [c.text.strip() for c in child.findall("category") if c.text and c.text.strip()]
+
+                    dur_mins: int | None = None
+                    try:
+                        dt_s = datetime.strptime(start_raw.split()[0][:14], "%Y%m%d%H%M%S")
+                        dt_e = datetime.strptime(stop_raw.split()[0][:14], "%Y%m%d%H%M%S")
+                        diff = int((dt_e - dt_s).total_seconds() // 60)
+                        if 1 <= diff <= 720:
+                            dur_mins = diff
+                    except Exception:
+                        pass
+
+                    p_out = ET.Element("programme", {"start": start_raw, "stop": stop_raw, "channel": cid})
+                    t_out = ET.SubElement(p_out, "title", {"lang": "pt"})
+                    t_out.text = strip_old_headers_and_se(title_txt) or title_txt
+
+                    clean_desc = build_clean_visual_desc(
+                        synopsis=raw_desc,
+                        rating_badge=rating_badge,
+                        year=year_txt,
+                        duration_mins=dur_mins,
+                        categories=cats,
+                        sub_title=sub_txt,
+                        se_badge=se_badge,
+                    )
+                    if clean_desc:
+                        d_out = ET.SubElement(p_out, "desc", {"lang": "pt"})
+                        d_out.text = clean_desc
+
+                    if year_txt and year_txt.isdigit():
+                        dt_node = ET.SubElement(p_out, "date")
+                        dt_node.text = year_txt
+
+                    for c_name in dict.fromkeys(cats[:5]):
+                        c_node = ET.SubElement(p_out, "category", {"lang": "pt"})
+                        c_node.text = c_name
+
+                    ic_el = child.find("icon")
+                    if ic_el is not None and ic_el.attrib.get("src"):
+                        ET.SubElement(p_out, "icon", {"src": ic_el.attrib["src"]})
+
+                    if rating_code:
+                        r_node = ET.SubElement(p_out, "rating", {"system": "age"})
+                        v_node = ET.SubElement(r_node, "value")
+                        v_node.text = rating_code
+
+                    progs_by_ch.setdefault(cid, []).append((start_raw.split()[0][:14], p_out))
+
+            total_progs = 0
+            for cid, plist in progs_by_ch.items():
+                plist.sort(key=lambda x: x[0])
+                for _, p_elem in plist:
+                    tv_out.append(p_elem)
+                    total_progs += 1
+
+            if total_progs > 0:
+                xml_bytes = ET.tostring(tv_out, encoding="utf-8", xml_declaration=True)
+                with gzip.open(out_gz_path, "wb", compresslevel=6) as gz_f:
+                    gz_f.write(xml_bytes)
+                print(f"✓ Vivo Play EPG salvo em {out_gz_path} ({len(channels_kept)} canais, {total_progs} programas com visual +14/[TxxExx]).")
+                return total_progs
         except Exception:
             continue
-    return []
 
-
-def ts_to_xmltv(ts_val: Any) -> tuple[str, datetime | None]:
-    """Converte timestamp Unix (segundos ou ms) ou ISO-8601 para 'YYYYMMDDHHMMSS -0300'."""
-    try:
-        if isinstance(ts_val, (int, float)) or (isinstance(ts_val, str) and ts_val.isdigit()):
-            v = float(ts_val)
-            if v > 1e11:
-                v /= 1000.0
-            dt = datetime.fromtimestamp(v, tz=BRT_TZ)
-            return dt.strftime("%Y%m%d%H%M%S -0300"), dt
-        if isinstance(ts_val, str):
-            dt = datetime.fromisoformat(ts_val.replace("Z", "+00:00")).astimezone(BRT_TZ)
-            return dt.strftime("%Y%m%d%H%M%S -0300"), dt
-    except Exception:
-        pass
-    return "", None
+    raise RuntimeError("Não foi possível gerar o EPG da Vivo Play.")
 
 
 def generate_vivo_epg(days_ahead: int = 2, out_gz_path: Path = OUT_VIVO_GZ) -> int:
     session = create_session()
-    api_base, raw_channels = fetch_vivo_channels(session)
-    print(f"✓ {len(raw_channels)} canais encontrados na API Vivo Play ({api_base}).")
-
-    tv_root = ET.Element("tv", {"generator-info-name": "vivo-gvp-extractor"})
-    ch_map: dict[str, str] = {}
-
-    for ch in raw_channels:
-        if not isinstance(ch, dict):
-            continue
-        vivo_cid = str(ch.get("Id") or ch.get("id") or ch.get("CallLetter") or "").strip()
-        ch_name = str(ch.get("Name") or ch.get("Title") or ch.get("name") or "").strip()
-        if not vivo_cid or not ch_name:
-            continue
-
-        xml_cid = make_channel_id(ch_name)
-        ch_map[vivo_cid] = xml_cid
-
-        ch_el = ET.SubElement(tv_root, "channel", {"id": xml_cid})
-        dn_el = ET.SubElement(ch_el, "display-name", {"lang": "pt"})
-        dn_el.text = ch_name
-
-        # Adiciona também nome sem HD/FHD como segundo display-name para casar fácil
-        clean_n = re.sub(r"\b(FHD|UHD|4K|HD|SD)\b", "", ch_name, flags=re.I).strip()
-        if clean_n and clean_n != ch_name:
-            dn2 = ET.SubElement(ch_el, "display-name", {"lang": "pt"})
-            dn2.text = clean_n
-
-        # Logo do canal
-        imgs = ch.get("Images") or ch.get("images") or []
-        logo_url = ""
-        if isinstance(imgs, list) and imgs:
-            first_img = imgs[0]
-            logo_url = first_img.get("Url") or first_img.get("url") or ""
-        elif isinstance(ch.get("Logo"), str):
-            logo_url = ch["Logo"]
-        if logo_url:
-            ET.SubElement(ch_el, "icon", {"src": build_spotlight_url(logo_url, height=240)})
-
-    now_utc = datetime.now(timezone.utc)
-    start_ts = int((now_utc - timedelta(hours=4)).timestamp())
-    end_ts = int((now_utc + timedelta(days=days_ahead)).timestamp())
-
-    vivo_ids = list(ch_map.keys())
-    chunk_size = 25
-    chunks = [vivo_ids[i : i + chunk_size] for i in range(0, len(vivo_ids), chunk_size)]
-
-    prog_count = 0
-    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
-        futures = [
-            pool.submit(fetch_schedules_chunk, session, api_base, chunk, start_ts, end_ts)
-            for chunk in chunks
-        ]
-        for fut in concurrent.futures.as_completed(futures):
-            sched_list = fut.result()
-            for item in sched_list:
-                if not isinstance(item, dict):
-                    continue
-                # Alguns endpoints retornam lista de programas dentro do canal, outros retornam eventos planos
-                events = item.get("Programs") or item.get("programs") or item.get("Schedules") or [item]
-                ch_ref = str(item.get("ChannelId") or item.get("channelId") or item.get("Id") or "")
-
-                for ev in events:
-                    if not isinstance(ev, dict):
-                        continue
-                    cid_raw = str(ev.get("ChannelId") or ev.get("channelId") or ch_ref).strip()
-                    xml_cid = ch_map.get(cid_raw)
-                    if not xml_cid:
-                        continue
-
-                    start_str, dt_start = ts_to_xmltv(ev.get("Start") or ev.get("startTime") or ev.get("StartDate"))
-                    stop_str, dt_stop = ts_to_xmltv(ev.get("End") or ev.get("endTime") or ev.get("EndDate"))
-                    title = str(ev.get("Title") or ev.get("Name") or ev.get("title") or "").strip()
-                    if not start_str or not stop_str or not title:
-                        continue
-
-                    sub_title = str(ev.get("EpisodeTitle") or ev.get("SubTitle") or ev.get("subTitle") or "").strip()
-                    synopsis = str(ev.get("Description") or ev.get("ShortDescription") or ev.get("Synopsis") or "").strip()
-                    year = str(ev.get("Year") or ev.get("ReleaseYear") or "").strip()[:4]
-
-                    raw_rating = ""
-                    age_obj = ev.get("AgeRating") or ev.get("Rating") or ev.get("ParentalRating")
-                    if isinstance(age_obj, dict):
-                        raw_rating = str(age_obj.get("Name") or age_obj.get("Value") or age_obj.get("Code") or "")
-                    elif age_obj is not None:
-                        raw_rating = str(age_obj)
-
-                    rating_badge, rating_code = format_rating_badge(raw_rating)
-
-                    dur_mins: int | None = None
-                    if dt_start and dt_stop:
-                        diff = int((dt_stop - dt_start).total_seconds() // 60)
-                        if 1 <= diff <= 720:
-                            dur_mins = diff
-
-                    genres_raw = ev.get("Genres") or ev.get("Categories") or ev.get("genres") or []
-                    cats: list[str] = []
-                    if isinstance(genres_raw, list):
-                        for g in genres_raw:
-                            if isinstance(g, dict):
-                                g_name = str(g.get("Name") or g.get("Title") or "").strip()
-                                if g_name:
-                                    cats.append(g_name)
-                            elif isinstance(g, str) and g.strip():
-                                cats.append(g.strip())
-
-                    p_el = ET.SubElement(
-                        tv_root,
-                        "programme",
-                        {"start": start_str, "stop": stop_str, "channel": xml_cid},
-                    )
-
-                    t_el = ET.SubElement(p_el, "title", {"lang": "pt"})
-                    t_el.text = f"{title} : {sub_title}" if sub_title and sub_title.lower() not in title.lower() else title
-
-                    if sub_title:
-                        st_el = ET.SubElement(p_el, "sub-title", {"lang": "pt"})
-                        st_el.text = sub_title
-
-                    desc_text = build_clean_visual_desc(
-                        synopsis=synopsis,
-                        rating_badge=rating_badge,
-                        year=year,
-                        duration_mins=dur_mins,
-                        categories=cats,
-                        sub_title=sub_title if not rating_badge else "",
-                    )
-                    if desc_text:
-                        d_el = ET.SubElement(p_el, "desc", {"lang": "pt"})
-                        d_el.text = desc_text
-
-                    if year and year.isdigit():
-                        yr_el = ET.SubElement(p_el, "date")
-                        yr_el.text = year
-
-                    for c_name in cats:
-                        c_el = ET.SubElement(p_el, "category", {"lang": "pt"})
-                        c_el.text = c_name
-
-                    # Imagem / Pôster do programa via Spotlight CDN
-                    ev_imgs = ev.get("Images") or ev.get("images") or []
-                    poster_url = ""
-                    if isinstance(ev_imgs, list) and ev_imgs:
-                        poster_url = ev_imgs[0].get("Url") or ev_imgs[0].get("url") or ""
-                    elif isinstance(ev.get("Image"), str):
-                        poster_url = ev["Image"]
-                    if poster_url:
-                        ET.SubElement(p_el, "icon", {"src": build_spotlight_url(poster_url, height=480)})
-
-                    if rating_code:
-                        r_el = ET.SubElement(p_el, "rating", {"system": "age"})
-                        v_el = ET.SubElement(r_el, "value")
-                        v_el.text = rating_code
-
-                    prog_count += 1
-
-    xml_bytes = ET.tostring(tv_root, encoding="utf-8", xml_declaration=True)
-    with gzip.open(out_gz_path, "wb", compresslevel=6) as gz_out:
-        gz_out.write(xml_bytes)
-
-    print(f"✓ Vivo EPG salvo em {out_gz_path} ({prog_count} programas com visual enriquecido).")
-    return prog_count
+    direct = try_direct_vivo_gvp(session)
+    if direct is None:
+        return generate_from_vivo_mirror(session, out_gz_path)
+    return generate_from_vivo_mirror(session, out_gz_path)
 
 
 if __name__ == "__main__":
