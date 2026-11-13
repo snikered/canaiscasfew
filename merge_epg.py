@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """EPG Universal Consolidado — 1 Canal Único por Emissora (Sem Clones/Variantes) + Vivo/Claro no Topo
 - Exporta estritamente 1 <channel> por emissora real (elimina a duplicação de exported_ids).
-- Unifica variantes de M3U (FHD, H265, BR2, Backup, Alternativo, Opção 1/2) num único canal base.
-- Remove a geração artificial de dezenas de sufixos de qualidade em <display-name>.
+- Mantém todos os aliases reais da M3U (incluindo FHD [H265], FHD H265, old_tvg_ids) em <display-name> para 100% de match.
+- Impede colisão entre canais numerados e canais base (ex: HBO vs HBO 2 / HBO [2]).
+- Suporta canais de 1 letra (ex: E!).
 - Corrige o health_score na janela de 36h para Vivo Play API e Claro assumirem a liderança.
 - Limpa títulos repetidos após ' : ' logo na leitura e mantém visual [T03E07] + 🟢 LIVRE / 🟠 +14.
 """
@@ -60,17 +61,44 @@ def name_key(value: str) -> str:
     return " ".join(s.split())
 
 
+def extract_significant_digits(text: str) -> list[str]:
+    """Extrai números significativos do nome do canal (ignorando H264, H265, 4K, 8K, 1080p, 720p, 60fps, 24h)."""
+    if not text:
+        return []
+    s = html.unescape(str(text)).upper()
+    s = re.sub(r"\b(?:H\.?264|H\.?265|1080[PI]?|720P?|60FPS|4K|8K|24H[S]?|24/7|BR\d+|SRV\d+|SERVER\s*\d+|OP[CÇ][AÃ]O\s*\d+)\b", " ", s)
+    s = re.sub(r"[¹²³⁴⁵⁶⁷⁸⁹⁰]+", " ", s)
+    return re.findall(r"\d+", s)
+
+
+def has_conflicting_channel_number(base_channel_name: str, candidate_text: str) -> bool:
+    """Evita que 'HBO [2]' ou 'HBO 2' colida com 'HBO' principal (e vice-versa)."""
+    base_digits = extract_significant_digits(base_channel_name)
+    cand_digits = extract_significant_digits(candidate_text)
+    if base_digits != cand_digits:
+        # Exceção para Premiere Clubes == Premiere 1, SporTV == SporTV 1, ESPN == ESPN 1, History 2 == H2
+        b_up = base_channel_name.upper()
+        c_up = candidate_text.upper()
+        if ("PREMIERE" in b_up or "SPORTV" in b_up or "ESPN" in b_up) and (
+            (not base_digits and cand_digits == ["1"]) or (base_digits == ["1"] and not cand_digits)
+        ):
+            return False
+        return True
+    return False
+
+
 def dedupe_display_names(
     names_by_id: dict[str, list[str]],
 ) -> dict[str, list[str]]:
-    """Devolve novo dict {id: [nomes]} em que cada name_key tem um único dono."""
+    """Devolve novo dict {id: [nomes]} em que cada name_key tem um único dono, mantendo variantes H265/FHD do vencedor."""
     owners: dict[str, list[str]] = {}
     bases_per_id: dict[str, set[str]] = {}
     for cid, names in names_by_id.items():
         bases = {name_key(n) for n in names if name_key(n)}
         bases_per_id[cid] = bases
         for b in bases:
-            owners.setdefault(b, []).append(cid)
+            if cid not in owners.setdefault(b, []):
+                owners[b].append(cid)
 
     winner: dict[str, str] = {}
     for base, ids in owners.items():
@@ -87,11 +115,14 @@ def dedupe_display_names(
     for cid, names in names_by_id.items():
         kept, seen = [], set()
         for n in names:
-            b = name_key(n)
+            n_clean = n.strip()
+            if not n_clean:
+                continue
+            b = name_key(n_clean)
             if not b or winner.get(b) == cid:
-                if n not in seen:
-                    kept.append(n)
-                    seen.add(n)
+                if n_clean.upper() not in seen:
+                    kept.append(n_clean)
+                    seen.add(n_clean.upper())
         out[cid] = kept
     return out
 
@@ -306,6 +337,8 @@ class CandidateEvaluation:
     richness_score: float; health: dict[str, object]; confidence: int; comparisons: list[dict[str, object]]
 
 CHANNEL_SYNONYMS = {
+    "E": ["E!", "E! ENTERTAINMENT", "E ENTERTAINMENT"],
+    "E!": ["E", "E! ENTERTAINMENT", "E ENTERTAINMENT"],
     "GLOBO SP": ["GLOBO SAO PAULO", "GLOBO SÃO PAULO", "TV GLOBO SP", "TV GLOBO SAO PAULO"],
     "GLOBO SAO PAULO": ["GLOBO SP", "GLOBO SÃO PAULO", "TV GLOBO SP"],
     "GLOBO RJ": ["GLOBO RIO DE JANEIRO", "GLOBO RIO", "TV GLOBO RJ", "TV GLOBO RIO"],
@@ -438,12 +471,19 @@ POISONED_OPEN_TV_IDS = {
 }
 
 def strip_qualities_keep_case(name: str) -> str:
-    """Remove todas as tags de qualidade/servidor/backup de listas M3U para não criar canais variantes duplicados."""
+    """Remove apenas tags de qualidade/codec (FHD, [H265], 4K, etc.), preservando numeração de canal como [2] se for número."""
     if not name: return ""
     s = html.unescape(name)
-    s = re.sub(r'\[.*?\]|\|.*?\|', ' ', s)
+    # Remove colchetes apenas quando contiverem tags de qualidade/codec/servidor, mantendo [2] se for canal 2
     s = re.sub(
-        r'\(\s*(?:SD|HD|FHD|UHD|4K|8K|H\.?264|H\.?265|HEVC|AVC|HDR\+?|BR\d*|SRV\d*|SERVER\s*\d*|OP[CÇ][AÃ]O\s*\d*|BACKUP|BKP|ALT|ALTERNATIVO|1080P|720P|60FPS|DUAL|LEG|DUB|\d+)\s*\)',
+        r'\[\s*(?:SD|HD|FHD|UHD|4K|8K|H\.?264|H\.?265|HEVC|AVC|HDR\+?|BR\d*|SRV\d*|SERVER\s*\d*|OP[CÇ][AÃ]O\s*\d*|BACKUP|BKP|ALT|ALTERNATIVO|1080P|720P|60FPS|DUAL|LEG|DUB)\s*\]',
+        ' ',
+        s,
+        flags=re.IGNORECASE,
+    )
+    s = re.sub(r'\|.*?\|', ' ', s)
+    s = re.sub(
+        r'\(\s*(?:SD|HD|FHD|UHD|4K|8K|H\.?264|H\.?265|HEVC|AVC|HDR\+?|BR\d*|SRV\d*|SERVER\s*\d*|OP[CÇ][AÃ]O\s*\d*|BACKUP|BKP|ALT|ALTERNATIVO|1080P|720P|60FPS|DUAL|LEG|DUB)\s*\)',
         ' ',
         s,
         flags=re.IGNORECASE,
@@ -453,6 +493,9 @@ def strip_qualities_keep_case(name: str) -> str:
     tags = r'\b(SD|HD|FHD|UHD|4K|8K|H\.?264|H\.?265|HEVC|AVC|HDR\+?|LEG|LEGENDADO|DUB|DUBLADO|DUAL|HQ|VIP|VOD|24H[S]?|24/7|1080P|1080I|720P|60FPS|PPV|EVENTOS?|ALTERNATIVO|ALT|BACKUP|BKP|BR\d+|SRV\d+|SERVER\s*\d+|OP[CÇ][AÃ]O\s*\d+)\b[\*\²\³\¹\⁴\+]*'
     s = re.sub(tags, ' ', s, flags=re.IGNORECASE)
     s = re.sub(r'\bH\s+D\b', ' ', s, flags=re.IGNORECASE)
+    # Converte "[2]" residual em "2" para que "HBO [2]" vire "HBO 2" e nunca colida com "HBO"
+    s = re.sub(r'\[\s*(\d+)\s*\]', r' \1 ', s)
+    s = re.sub(r'\[.*?\]', ' ', s)
     s = re.sub(r'[*=_\-–—/\\]', ' ', s)
     s = re.sub(r'\.\s*$', '', s)
     return ' '.join(s.split()).strip()
@@ -462,6 +505,7 @@ def normalizar_canal(nome: str) -> str:
     original_nome = html.unescape(nome)
     nome = strip_qualities_keep_case(original_nome)
     
+    nome = re.sub(r'^E!$', 'E!', nome.strip(), flags=re.IGNORECASE)
     nome = re.sub(r'\bADULT SWIN\b', 'ADULT SWIM', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bZOOMOOO\b', 'ZOOMOO', nome, flags=re.IGNORECASE)
     nome = re.sub(r'\bJP NEWS\b', 'JOVEM PAN NEWS', nome, flags=re.IGNORECASE)
@@ -505,7 +549,7 @@ def normalizar_canal(nome: str) -> str:
     nome = re.sub(r'\bSPORTTV\b', 'SPORTV', nome, flags=re.IGNORECASE)
     
     nome_limpo = ' '.join(nome.split()).strip().upper()
-    return nome_limpo if len(nome_limpo) > 1 else original_normalize_name(original_nome)
+    return nome_limpo if len(nome_limpo) >= 1 else original_normalize_name(original_nome)
 
 def normalize_name(value: str) -> str:
     return original_normalize_name(normalizar_canal(value))
@@ -545,7 +589,7 @@ def detect_poisoned_ids(pairs: Iterable[tuple[str, str]]) -> set[str]:
     return out
 
 def is_valid_provider_tvid(channel_name: str, tvid: str) -> bool:
-    if not tvid or len(tvid) < 2: return False
+    if not tvid or len(tvid) < 1: return False
     tvid_clean = re.sub(r'\.(br|us|uk|pt|ar|mx|cl|co|pe|latam|int|bt)$', '', tvid.lower())
     tvid_clean = re.sub(r'^(auto\.|yt\.|br\.|canais\.)', '', tvid_clean)
     tvid_clean = re.sub(r'[^a-z0-9]', '', tvid_clean)
@@ -1223,8 +1267,11 @@ def expand_open_tv_tiers(nome_limpo: str, grupo: str) -> tuple[list[str], list[s
     return tier1_local, tier2_state, tier3_national
 
 def aliases_tiers_for(entry: dict[str, object]) -> list[list[str]]:
-    values: list[str] = [str(entry.get("name", ""))]
-    values.extend(str(x) for x in entry.get("aliases", []) or [])
+    base_channel_name = str(entry.get("name", ""))
+    values: list[str] = [base_channel_name]
+    for x in entry.get("aliases", []) or []:
+        if not has_conflicting_channel_number(base_channel_name, str(x)):
+            values.append(str(x))
     grupo = str(entry.get("group", entry.get("group-title", entry.get("group_title", ""))))
 
     tier1, tier2, tier3 = [], [], []
@@ -1307,6 +1354,8 @@ def best_fuzzy(source: EpgSource, aliases: list[str]) -> tuple[str | None, float
 def find_match_in_tier(source: EpgSource, tier_aliases: list[str], source_ids: list[str] | None = None, tier_num: int = 1, entry_name: str = "") -> ChannelMatch | None:
     if tier_num == 1:
         for raw_sid in (source_ids or []):
+            if has_conflicting_channel_number(entry_name, raw_sid):
+                continue
             norm_sid = normalize_source_id(raw_sid)
             if norm_sid and norm_sid in source.normalized_id_index:
                 cands = source.normalized_id_index[norm_sid]
@@ -1472,7 +1521,6 @@ def schedule_health(source: EpgSource, channel_id: str, now: datetime) -> dict[s
         rich_points += min(1.0, pts)
     richness_score = round(rich_points / len(sample_rows), 4) if sample_rows else 0.0
 
-    # Avalia gaps/overlaps apenas nas próximas 36h para não punir operadoras que trazem 7 dias de guia
     eval_window_end = now + timedelta(hours=36)
     eval_rows = [r for r in rows if r.stop > now and r.start < eval_window_end]
     for row in eval_rows:
@@ -1632,19 +1680,21 @@ def make_validation(entry: dict[str, object], chosen: CandidateEvaluation, all_e
     }
 
 def get_clean_aliases(entry: dict[str, object]) -> list[str]:
-    """Retorna apenas os nomes reais e IDs de compatibilidade limpos, sem multiplicar dezenas de sufixos FHD/H265."""
+    """Retorna os nomes base, IDs de compatibilidade sincronizados e TODAS as variantes reais da M3U (incluindo FHD [H265])."""
     result = []
     seen = set()
+    raw_name = str(entry.get("name", "")).strip()
 
     def add_alias(val: str):
         v = html.unescape(str(val or "")).strip()
         if not v or len(v) > 100:
             return
+        if has_conflicting_channel_number(raw_name, v):
+            return
         if v.upper() not in seen:
             result.append(v)
             seen.add(v.upper())
 
-    raw_name = str(entry.get("name", "")).strip()
     clean_base = strip_qualities_keep_case(raw_name)
     norm_clean = normalizar_canal(raw_name)
 
@@ -1663,24 +1713,33 @@ def get_clean_aliases(entry: dict[str, object]) -> list[str]:
     for syn in CHANNEL_SYNONYMS.get(norm_clean, []):
         add_alias(syn)
 
-    for a in (entry.get("aliases", []) or [])[:8]:
-        a_clean = strip_qualities_keep_case(str(a))
+    # Inclui todos os aliases limpos e brutos reais da M3U (ex: "HBO FHD [H265]", "SporTV FHD H265")
+    for a in entry.get("aliases", []) or []:
+        a_str = str(a).strip()
+        a_clean = strip_qualities_keep_case(a_str)
         if a_clean:
             add_alias(a_clean)
+        if a_str:
+            add_alias(a_str)
+
+    for raw_a in entry.get("raw_aliases", []) or []:
+        raw_s = str(raw_a).strip()
+        if raw_s:
+            add_alias(raw_s)
 
     return result
 
 def get_primary_export_ids(entry: dict[str, object]) -> list[str]:
-    """Retorna ESTRITAMENTE 1 único ID por canal para nunca clonar a mesma emissora no XML."""
+    """Retorna ESTRITAMENTE 1 único ID por canal, priorizando o tvg-id sincronizado na M3U (ex: hbo.br, A&E)."""
     raw_name = str(entry.get("name", "")).strip()
     target_id = str(entry.get("id", "")).strip()
     clean_base = strip_qualities_keep_case(raw_name) or target_id
 
     for cid in entry.get("compatibility_ids", []) or []:
-        if is_valid_provider_tvid(raw_name, str(cid)):
+        if is_valid_provider_tvid(raw_name, str(cid)) and not has_conflicting_channel_number(raw_name, str(cid)):
             return [str(cid).strip()]
     for t_id in entry.get("tvg_ids_to_export", []) or []:
-        if is_valid_provider_tvid(raw_name, str(t_id)):
+        if is_valid_provider_tvid(raw_name, str(t_id)) and not has_conflicting_channel_number(raw_name, str(t_id)):
             return [str(t_id).strip()]
 
     return [clean_base]
@@ -2064,7 +2123,7 @@ def ensure_operator_epgs_generated() -> None:
             print(f"  -> Aviso ao extrair Vivo Play API: {e}")
 
 def main() -> None:
-    print("Iniciando geração de EPG (Sem Variantes Repetidas + Vivo/Claro Direto + Apenas [TxxExx])...")
+    print("Iniciando geração de EPG (Compatibilidade Total FHD [H265] + Vivo/Claro Direto + Apenas [TxxExx])...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -2081,34 +2140,49 @@ def main() -> None:
     def merge_channel_record(ch_id: str, name: str, aliases: Iterable[str] = (), tvg_ids: Iterable[str] = (), comp_ids: Iterable[str] = (), source_ids: Iterable[str] = (), group: str = "") -> None:
         base_name = html.unescape(name or ch_id).strip()
         if not base_name: return
-        # Usa normalizar_canal + inferir_emissora_pelo_grupo para fundir variantes do mesmo canal na raiz
         canon_name = inferir_emissora_pelo_grupo(normalizar_canal(base_name), group)
         norm_key = original_normalize_name(canon_name) or canon_name.strip().upper()
-        if not norm_key or len(norm_key) < 2:
+        if not norm_key:
             return
         if norm_key not in grouped_by_norm:
             grouped_by_norm[norm_key] = {
                 "id": ch_id or canon_name,
                 "name": strip_qualities_keep_case(base_name) or canon_name,
                 "aliases": set(),
+                "raw_aliases": set(),
                 "tvg_ids_to_export": set(),
                 "compatibility_ids": set(),
                 "source_ids": set(),
                 "group": group or "",
             }
         rec = grouped_by_norm[norm_key]
-        if base_name: rec["aliases"].add(strip_qualities_keep_case(base_name) or base_name)
+        rec_base_name = rec["name"]
+
+        if not has_conflicting_channel_number(rec_base_name, base_name):
+            rec["raw_aliases"].add(base_name)
+            rec["aliases"].add(strip_qualities_keep_case(base_name) or base_name)
+
         for a in aliases:
             if a:
-                a_clean = strip_qualities_keep_case(html.unescape(str(a)).strip())
+                a_raw = html.unescape(str(a)).strip()
+                if not a_raw or has_conflicting_channel_number(rec_base_name, a_raw):
+                    continue
+                rec["raw_aliases"].add(a_raw)
+                a_clean = strip_qualities_keep_case(a_raw)
                 if a_clean:
                     rec["aliases"].add(a_clean)
         for t in tvg_ids:
-            if t: rec["tvg_ids_to_export"].add(str(t).strip())
+            t_str = str(t).strip()
+            if t_str and not has_conflicting_channel_number(rec_base_name, t_str):
+                rec["tvg_ids_to_export"].add(t_str)
         for c in comp_ids:
-            if c: rec["compatibility_ids"].add(str(c).strip())
+            c_str = str(c).strip()
+            if c_str and not has_conflicting_channel_number(rec_base_name, c_str):
+                rec["compatibility_ids"].add(c_str)
         for s in source_ids:
-            if s: rec["source_ids"].add(str(s).strip())
+            s_str = str(s).strip()
+            if s_str and not has_conflicting_channel_number(rec_base_name, s_str):
+                rec["source_ids"].add(s_str)
         if group and not rec["group"]:
             rec["group"] = group
 
@@ -2177,8 +2251,13 @@ def main() -> None:
                 ch_groups = ch.get("groups", []) or []
                 grp_str = " | ".join(str(g) for g in ch_groups) if isinstance(ch_groups, list) else str(ch.get("group", ch.get("group-title", "")))
                 ch_name_val = str(ch.get("name", ch.get("id", ""))).strip()
-                for tid in (*(ch.get("tvg_ids_to_export") or []), *(ch.get("compatibility_ids") or [])):
-                    if tid and ch_name_val:
+                all_cat_tvg_ids = [
+                    *(ch.get("old_tvg_ids") or []),
+                    *(ch.get("tvg_ids_to_export") or []),
+                    *(ch.get("compatibility_ids") or []),
+                ]
+                for tid in all_cat_tvg_ids:
+                    if tid and ch_name_val and not has_conflicting_channel_number(ch_name_val, str(tid)):
                         id_observations.append((str(tid).strip(), ch_name_val))
                 merge_channel_record(
                     ch_id=str(ch.get("id", ch.get("name", ""))).strip(),
@@ -2189,9 +2268,9 @@ def main() -> None:
                         *(ch.get("original_names", []) or []),
                         *(ch.get("blank_tvg_id_names", []) or []),
                     ],
-                    tvg_ids=ch.get("tvg_ids_to_export", []) or [],
+                    tvg_ids=all_cat_tvg_ids,
                     comp_ids=ch.get("compatibility_ids", []) or [],
-                    source_ids=ch.get("source_ids", []) or [],
+                    source_ids=[*(ch.get("source_ids", []) or []), *(ch.get("old_tvg_ids", []) or [])],
                     group=grp_str,
                 )
             print(f"  -> {len(grouped_by_norm)} emissoras base carregadas do dicionário.")
@@ -2224,8 +2303,8 @@ def main() -> None:
                 merge_channel_record(
                     ch_id=str(ch.get("id", "")).strip(),
                     name=ch_name,
-                    aliases=ch.get("aliases", []) or [],
-                    tvg_ids=ch.get("tvg_ids_to_export", []) or [],
+                    aliases=[*(ch.get("aliases", []) or []), *(ch.get("raw_aliases", []) or [])],
+                    tvg_ids=[*(ch.get("tvg_ids_to_export", []) or []), *(ch.get("old_tvg_ids", []) or [])],
                     comp_ids=ch.get("compatibility_ids", []) or [],
                     source_ids=ch.get("source_ids", []) or [],
                     group=str(ch.get("group", "")),
@@ -2292,6 +2371,7 @@ def main() -> None:
 
     for v in grouped_by_norm.values():
         v["aliases"] = sorted(v["aliases"])
+        v["raw_aliases"] = sorted(v["raw_aliases"])
         v["tvg_ids_to_export"] = sorted(v["tvg_ids_to_export"])
         v["compatibility_ids"] = sorted(v["compatibility_ids"])
         v["source_ids"] = sorted(v["source_ids"])
@@ -2334,7 +2414,6 @@ def main() -> None:
     stage_start = time.perf_counter()
     selected, report_rows, validations = [], [], []
 
-    # Desduplicação também por (source_key, source_channel_id) caso duas variantes da lista apontem para o mesmo canal na fonte
     for entry in entries:
         target_id = str(entry.get("id", ""))
         visible_name = str(entry.get("name", ""))
