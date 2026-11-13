@@ -33,8 +33,6 @@ jobs:
           import glob, html, json, re, subprocess
           from pathlib import Path
 
-          # Se algum arquivo em learning/ foi esvaziado por engano no commit anterior do bot,
-          # tenta restaurar a versão original do histórico do git antes de processar!
           for p_str in glob.glob("learning/*.m3u") + glob.glob("learning/*.m3u8") + glob.glob("*.m3u"):
               p = Path(p_str)
               if p.exists() and p.stat().st_size < 50:
@@ -62,12 +60,33 @@ jobs:
               exit(0)
 
           VOD_BLACKLIST = {"VOD", "PLAYBACK", "XXX", "ADULTO", "EVENTO", "LANCAMENTO", "LANÇAMENTO", "FILMES", "SERIES", "SÉRIES", "24H", "24HS"}
-          
+
+          def extract_digits(text):
+              s = html.unescape(str(text or "")).upper()
+              s = re.sub(r"\b(?:H\.?264|H\.?265|1080[PI]?|720P?|60FPS|4K|8K|24H[S]?|24/7|BR\d+|SRV\d+|SERVER\s*\d+|OP[CÇ][AÃ]O\s*\d+)\b", " ", s)
+              s = re.sub(r"[¹²³⁴⁵⁶⁷⁸⁹⁰]+", " ", s)
+              return re.findall(r"\d+", s)
+
+          def conflicts_number(base_name, candidate):
+              bd = extract_digits(base_name)
+              cd = extract_digits(candidate)
+              if bd != cd:
+                  bu = base_name.upper()
+                  if ("PREMIERE" in bu or "SPORTV" in bu or "ESPN" in bu) and ((not bd and cd == ["1"]) or (bd == ["1"] and not cd)):
+                      return False
+                  return True
+              return False
+
           def strip_qualities(name):
               s = html.unescape(name or "")
-              s = re.sub(r'\[.*?\]|\(.*?\)|\|.*?\|', ' ', s)
-              s = re.sub(r'[\¹\²\³\⁴\~]', ' ', s)
-              tags = r'\b(SD|HD|FHD|UHD|4K|8K|H\.?264|H\.?265|HEVC|HDR\+?|LEG|LEGENDADO|DUB|DUBLADO|HQ|VIP|VOD|24H[S]?|24/7|1080P|720P|60FPS|PPV|EVENTOS?|ALTERNATIVO|BACKUP|BR2)\b[\*\²\³\¹\⁴\+]*'
+              # Remove apenas tags de qualidade entre colchetes/parênteses, preservando [2] como número de canal
+              s = re.sub(r'\[\s*(?:SD|HD|FHD|UHD|4K|8K|H\.?264|H\.?265|HEVC|AVC|HDR\+?|BR\d*|SRV\d*|SERVER\s*\d*|OP[CÇ][AÃ]O\s*\d*|BACKUP|BKP|ALT|ALTERNATIVO|1080P|720P|60FPS|DUAL|LEG|DUB|P)\s*\]', ' ', s, flags=re.I)
+              s = re.sub(r'\(\s*(?:SD|HD|FHD|UHD|4K|8K|H\.?264|H\.?265|HEVC|AVC|HDR\+?|BR\d*|SRV\d*|SERVER\s*\d*|OP[CÇ][AÃ]O\s*\d*|BACKUP|BKP|ALT|ALTERNATIVO|1080P|720P|60FPS|DUAL|LEG|DUB|EVENTOS?|PPV)\s*\)', ' ', s, flags=re.I)
+              s = re.sub(r'\|.*?\|', ' ', s)
+              s = re.sub(r'\[\s*(\d+)\s*\]', r' \1 ', s)
+              s = re.sub(r'\[.*?\]|\(.*?\)', ' ', s)
+              s = re.sub(r'[\¹\²\³\⁴\⁵\⁶\⁷\⁸\⁹\⁰\~]', ' ', s)
+              tags = r'\b(SD|HD|FHD|UHD|4K|8K|H\.?264|H\.?265|HEVC|AVC|HDR\+?|LEG|LEGENDADO|DUB|DUBLADO|HQ|VIP|VOD|24H[S]?|24/7|1080P|1080I|720P|60FPS|PPV|EVENTOS?|ALTERNATIVO|ALT|BACKUP|BKP|BR\d*)\b[\*\²\³\¹\⁴\+]*'
               s = re.sub(tags, ' ', s, flags=re.I)
               s = re.sub(r'\bH\s+D\b', ' ', s, flags=re.I)
               s = re.sub(r'[*=_\-–—]', ' ', s)
@@ -84,22 +103,28 @@ jobs:
                   for c in ch_list:
                       if isinstance(c, dict) and (c.get("id") or c.get("name")):
                           raw_n = html.unescape(str(c.get("name", c.get("id"))).strip())
-                          base_key = strip_qualities(raw_n).upper() or raw_n.upper()
+                          base_clean = strip_qualities(raw_n) or raw_n
+                          base_key = base_clean.upper()
+                          all_tvg = set(c.get("tvg_ids_to_export", []) or []) | set(c.get("old_tvg_ids", []) or [])
+                          valid_aliases = {a for a in (c.get("aliases", []) or []) if not conflicts_number(base_clean, a)}
+                          valid_tvg = {t for t in all_tvg if not conflicts_number(base_clean, t)}
+                          valid_comp = {cp for cp in (c.get("compatibility_ids", []) or []) if not conflicts_number(base_clean, cp)}
+                          valid_src = {sr for sr in (c.get("source_ids", []) or []) if not conflicts_number(base_clean, sr)}
                           if base_key not in out:
                               out[base_key] = {
-                                  "id": str(c.get("id", raw_n)).strip(),
-                                  "name": strip_qualities(raw_n) or raw_n,
-                                  "aliases": set(c.get("aliases", []) or []),
-                                  "tvg_ids_to_export": set(c.get("tvg_ids_to_export", []) or []),
-                                  "compatibility_ids": set(c.get("compatibility_ids", []) or []),
-                                  "source_ids": set(c.get("source_ids", []) or []),
+                                  "id": str(c.get("id", base_clean)).strip(),
+                                  "name": base_clean,
+                                  "aliases": valid_aliases,
+                                  "tvg_ids_to_export": valid_tvg,
+                                  "compatibility_ids": valid_comp,
+                                  "source_ids": valid_src,
                                   "group": str(c.get("group", c.get("group-title", ""))).strip()
                               }
                           else:
-                              out[base_key]["aliases"].update(c.get("aliases", []) or [])
-                              out[base_key]["tvg_ids_to_export"].update(c.get("tvg_ids_to_export", []) or [])
-                              out[base_key]["compatibility_ids"].update(c.get("compatibility_ids", []) or [])
-                              out[base_key]["source_ids"].update(c.get("source_ids", []) or [])
+                              out[base_key]["aliases"].update(valid_aliases)
+                              out[base_key]["tvg_ids_to_export"].update(valid_tvg)
+                              out[base_key]["compatibility_ids"].update(valid_comp)
+                              out[base_key]["source_ids"].update(valid_src)
                   return out
               except Exception as e:
                   print(f"Aviso ao ler {path_str}: {e}")
@@ -120,7 +145,6 @@ jobs:
               idx = 0
               while idx < len(raw_lines):
                   line = raw_lines[idx]
-                  # Aceita tanto #EXTINF: quanto linhas de listas .safe.m3u que tenham tvg-name/group-title
                   if line.upper().startswith("#EXTINF") or ('tvg-' in line.lower() and ',' in line):
                       extinf_line = line if line.upper().startswith("#EXTINF") else f"#EXTINF:-1 {line}"
                       next_line = raw_lines[idx + 1] if (idx + 1) < len(raw_lines) else ""
@@ -165,9 +189,12 @@ jobs:
                               "source_ids": set(),
                               "group": group
                           }
-                      if name: merged[base_key]["aliases"].add(name)
-                      if tvg_name: merged[base_key]["aliases"].add(tvg_name)
-                      if tvg_id: merged[base_key]["tvg_ids_to_export"].add(tvg_id)
+                      if name and not conflicts_number(base_clean, name):
+                          merged[base_key]["aliases"].add(name)
+                      if tvg_name and not conflicts_number(base_clean, tvg_name):
+                          merged[base_key]["aliases"].add(tvg_name)
+                      if tvg_id and not conflicts_number(base_clean, tvg_id):
+                          merged[base_key]["tvg_ids_to_export"].add(tvg_id)
                       if group and not merged[base_key]["group"]:
                           merged[base_key]["group"] = group
 
@@ -178,7 +205,6 @@ jobs:
                   else:
                       idx += 1
 
-              # TRAVA DE SEGURANÇA: Só sobrescreve o arquivo se realmente extraiu canais dele!
               if file_learned > 0:
                   p_obj.write_text("\n".join(sanitized_lines) + "\n", "utf-8")
                   print(f"  -> {file_learned} canais extraídos e higienizados de {m3u_path}.", flush=True)
@@ -188,11 +214,13 @@ jobs:
           final_list = []
           for k in sorted(merged.keys()):
               v = merged[k]
+              exported_tvg = sorted(v["tvg_ids_to_export"])
               final_list.append({
                   "id": v["id"],
                   "name": v["name"],
                   "aliases": sorted(v["aliases"]),
-                  "tvg_ids_to_export": sorted(v["tvg_ids_to_export"]),
+                  "old_tvg_ids": exported_tvg,
+                  "tvg_ids_to_export": exported_tvg,
                   "compatibility_ids": sorted(v.get("compatibility_ids", [])),
                   "source_ids": sorted(v.get("source_ids", [])),
                   "group": v["group"]
