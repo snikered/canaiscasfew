@@ -1,19 +1,21 @@
 #!/usr/bin/env python3
-"""Sincronizador 100% Fiel ao Arquivo .m3u Bruto:
-- Baixa o arquivo m3u_plus imitando o navegador do PC para receber a lista completa sem achatar grupos.
-- NÃO altera group-title, NÃO altera tvg-name e NÃO reconstrói linhas #EXTINF.
-- Copia Filmes e Séries 100% idênticos (caractere por caractere) ao arquivo bruto original.
-- Nos Canais ao Vivo: substitui EXCLUSIVAMENTE o valor dentro de tvg-id="..." pelo ID do epg.xml.gz.
+"""Sincronizador M3U Calibrado (Canais e Filmes com Categorias da API + Séries Nativas no TiviMate):
+- Canais ao Vivo: substitui 'CANAIS COMPLETO(SD,HD,FHD,4K)' pelas categorias reais da API + corrige tvg-id!
+- Filmes (/movie/): substitui 'FILMES' pelas categorias reais de Filmes da API!
+- Séries (/series/): mantém 100% o formato e group-title="SÉRIES" original para o TiviMate colocar na aba Séries!
+- Canais 24h (ex: 24H-FRIENDS S01): reconhecidos corretamente como Canais Ao Vivo (/live/) e não como VOD!
 """
 from __future__ import annotations
 
 import gzip
 import html
 import os
+import random
 import re
 import shutil
 import subprocess
 import tempfile
+import unicodedata
 import urllib.parse
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -29,6 +31,22 @@ from merge_epg import name_key, normalizar_canal, strip_qualities_keep_case
 EPG_GZ_PATH = Path("epg.xml.gz")
 REMOVE_ADULT = os.environ.get("REMOVE_ADULT", "1").strip().lower() in {"1", "true", "yes"}
 
+BR_RESIDENTIAL_IPS = [
+    "177.37.142.88",
+    "179.218.44.19",
+    "187.19.204.112",
+    "189.40.92.201",
+    "200.155.80.45",
+    "201.17.110.73",
+]
+
+IPTV_USER_AGENTS = [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    "TiviMate/4.7.0 (Android 12)",
+    "IPTVSmartersPlayer",
+    "VLC/3.0.20 LibVLC/3.0.20",
+]
+
 ADULT_FILTER_RE = re.compile(
     r"(\bADULTO[S]?\b|\bXXX\b|\bSEXO\b|\bPORN[OÔ]?\b|\b18\+\b|\+\s*18\b|\bONLYFANS\b|"
     r"\bSEXY\s*HOT\b|\bPLAYBOY\b|\bSEX\s*PRIV[EÉ]\b|\bVENUS\b|\bBRAZZERS\b)",
@@ -37,15 +55,176 @@ ADULT_FILTER_RE = re.compile(
 
 VOD_URL_EXTENSIONS = (".mp4", ".mkv", ".avi", ".mov", ".wmv", ".flv", ".webm", ".mpg", ".mpeg", ".divx")
 _RE_TVG_ID = re.compile(r'tvg-id="[^"]*"', re.IGNORECASE)
-_RE_SERIES_EP_DETECT = re.compile(r"\b(?:S\d{1,2}\s*E\d{1,3}|T\d{1,2}\s*EP?\d{1,3})\b", re.IGNORECASE)
+_RE_GROUP_TITLE = re.compile(r'group-title="([^"]*)"', re.IGNORECASE)
+_RE_STREAM_ID_FROM_URL = re.compile(r"/([^/?#]+?)(?:\.[a-z0-9]+)?(?:\?.*)?$", re.IGNORECASE)
 
-# Mesmo User-Agent de navegador Desktop que entrega o arquivo .m3u perfeito quando você baixa no PC
-BROWSER_HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
-    "Connection": "keep-alive",
-}
+
+def norm_lookup_key(title: str) -> str:
+    s = html.unescape(title or "")
+    s = unicodedata.normalize("NFKD", s)
+    s = "".join(c for c in s if not unicodedata.combining(c)).upper()
+    s = re.sub(r"[^A-Z0-9]+", " ", s)
+    return " ".join(s.split())
+
+
+def norm_movie_title(title: str) -> str:
+    s = html.unescape(title or "")
+    s = re.sub(r"\(\d{4}\)|\[\d{4}\]", " ", s)
+    return norm_lookup_key(s)
+
+
+def build_br_headers(ua: str, host_url: str = "") -> dict[str, str]:
+    fake_ip = random.choice(BR_RESIDENTIAL_IPS)
+    headers = {
+        "User-Agent": ua,
+        "Accept": "*/*",
+        "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8",
+        "X-Forwarded-For": fake_ip,
+        "X-Real-IP": fake_ip,
+        "CF-Connecting-IP": fake_ip,
+        "True-Client-IP": fake_ip,
+        "Client-IP": fake_ip,
+        "Connection": "keep-alive",
+    }
+    if host_url:
+        parsed = urllib.parse.urlparse(host_url)
+        headers["Referer"] = f"{parsed.scheme}://{parsed.netloc}/"
+    return headers
+
+
+def create_http_client() -> requests.Session:
+    if cloudscraper is not None:
+        session = cloudscraper.create_scraper(
+            browser={"browser": "chrome", "platform": "windows", "mobile": False}
+        )
+    else:
+        session = requests.Session()
+
+    br_proxy = os.environ.get("BR_PROXY", "").strip()
+    if br_proxy:
+        session.proxies = {"http": br_proxy, "https": br_proxy}
+    return session
+
+
+def request_with_bypass(url: str, stream: bool = False, timeout: int = 90) -> requests.Response:
+    session = create_http_client()
+    last_err: Exception | None = None
+
+    for ua in IPTV_USER_AGENTS:
+        headers = build_br_headers(ua, url)
+        try:
+            resp = session.get(url, headers=headers, stream=stream, timeout=timeout, allow_redirects=True)
+            if resp.status_code == 200:
+                return resp
+            last_err = RuntimeError(f"HTTP {resp.status_code}")
+        except Exception as exc:
+            last_err = exc
+
+    raise RuntimeError(f"Todas as tentativas de bypass falharam ({last_err})")
+
+
+def fetch_live_and_movie_category_maps(url: str) -> dict[str, dict[str, str]]:
+    """Busca na API Xtream os grupos reais de Canais Ao Vivo e de Filmes VOD (por Nome e por ID)."""
+    maps: dict[str, dict[str, str]] = {
+        "live_by_id": {},
+        "live_by_name": {},
+        "vod_by_id": {},
+        "vod_by_name": {},
+    }
+
+    parsed = urllib.parse.urlparse(url)
+    query = urllib.parse.parse_qs(parsed.query)
+    if "username" not in query or "password" not in query:
+        return maps
+
+    user = query["username"][0]
+    pwd = query["password"][0]
+    base_url = f"{parsed.scheme}://{parsed.netloc}"
+
+    # 1. Canais Ao Vivo
+    try:
+        c_live = request_with_bypass(
+            f"{base_url}/player_api.php?username={user}&password={pwd}&action=get_live_categories", timeout=30
+        ).json()
+        live_cats = {
+            str(c.get("category_id", "")): html.unescape(str(c.get("category_name", "")).strip())
+            for c in (c_live if isinstance(c_live, list) else [])
+            if isinstance(c, dict) and c.get("category_name")
+        }
+        s_live = request_with_bypass(
+            f"{base_url}/player_api.php?username={user}&password={pwd}&action=get_live_streams", timeout=45
+        ).json()
+        for ch in (s_live if isinstance(s_live, list) else []):
+            if not isinstance(ch, dict):
+                continue
+            grp = live_cats.get(str(ch.get("category_id", "")), "")
+            if not grp or "COMPLETO" in grp.upper():
+                continue
+            if ch.get("stream_id"):
+                maps["live_by_id"][str(ch["stream_id"])] = grp
+            if ch.get("name"):
+                raw_n = str(ch["name"])
+                maps["live_by_name"][norm_lookup_key(raw_n)] = grp
+                maps["live_by_name"][name_key(raw_n)] = grp
+        print(f"  -> ✓ Categorias de Canais mapeadas via API: {len(live_cats)} grupos ({len(maps['live_by_name'])} nomes).")
+    except Exception as e:
+        print(f"  -> Nota: Mapa Live indisponível ({e}).")
+
+    # 2. Filmes VOD
+    try:
+        c_vod = request_with_bypass(
+            f"{base_url}/player_api.php?username={user}&password={pwd}&action=get_vod_categories", timeout=30
+        ).json()
+        vod_cats = {
+            str(c.get("category_id", "")): html.unescape(str(c.get("category_name", "")).strip())
+            for c in (c_vod if isinstance(c_vod, list) else [])
+            if isinstance(c, dict) and c.get("category_name")
+        }
+        s_vod = request_with_bypass(
+            f"{base_url}/player_api.php?username={user}&password={pwd}&action=get_vod_streams", timeout=60
+        ).json()
+        for v in (s_vod if isinstance(s_vod, list) else []):
+            if not isinstance(v, dict):
+                continue
+            grp = vod_cats.get(str(v.get("category_id", "")), "")
+            if not grp:
+                continue
+            if v.get("stream_id"):
+                maps["vod_by_id"][str(v["stream_id"])] = grp
+            if v.get("name"):
+                raw_v = str(v["name"])
+                maps["vod_by_name"][norm_lookup_key(raw_v)] = grp
+                maps["vod_by_name"][norm_movie_title(raw_v)] = grp
+        print(f"  -> ✓ Categorias de Filmes mapeadas via API: {len(vod_cats)} grupos ({len(maps['vod_by_name'])} filmes).")
+    except Exception as e:
+        print(f"  -> Nota: Mapa VOD indisponível ({e}).")
+
+    return maps
+
+
+def infer_fallback_channel_group(channel_name: str, current_group: str) -> str:
+    """Caso a API do painel também devolva 'CANAIS COMPLETO', organiza os canais automaticamente por categoria!"""
+    if current_group and "COMPLETO" not in current_group.upper():
+        return current_group
+
+    n = norm_lookup_key(channel_name)
+    if channel_name.upper().strip().startswith("24H") or " 24H" in n:
+        return "Canais | 24 Horas"
+    if any(w in n for w in ("PREMIERE", "SPORTV", "ESPN", "COMBATE", "BANDSPORTS", "BAND SPORTS", "DAZN", "CAZE", "GOAT", "NOSSO FUTEBOL", "PARAMOUNT", "NBA", "NFL", "UFC", "FIGHT", "CONMEBOL", "PAULISTAO", "BRASILEIRAO", "LALIGA", "BUNDESLIGA", "SPORTYNET", "NSPORTS", "XSPORTS")):
+        return "Canais | Esportes & PPV"
+    if any(w in n for w in ("GLOBO ", "SBT", "RECORD", "BAND ", "REDETV", "REDE TV", "CULTURA", "TV BRASIL", "TV GAZETA", "TV DIARIO", "REDE VIDA", "APARECIDA", "CANCAO NOVA", "NOVO TEMPO", "EVANGELIZAR", "PAI ETERNO", "REDE GOSPEL", "RIT TV", "REDE CNT", "REDE SUPER", "RBS ", "RPC ")):
+        if "NEWS" not in n:
+            return "Canais | TV Aberta & Regionais"
+    if any(w in n for w in ("HBO", "TELECINE", "MEGAPIX", "TNT ", "SPACE", "CINEMAX", "WARNER", "SONY", "AXN", "UNIVERSAL", "STUDIO UNIVERSAL", "STAR ", "AMC", "PARAMOUNT", "TCM", "CINE SKY", "PRIME BOX", "CURTA", "FILME")):
+        if "NOVELA" not in n:
+            return "Canais | Filmes & Séries"
+    if any(w in n for w in ("CARTOON", "DISCOVERY KIDS", "GLOOB", "DISNEY", "NICK", "TOONCAST", "RA TIM BUM", "ZOOMOO", "DREAMWORKS", "ANIME", "INFANTIL")):
+        return "Canais | Infantil"
+    if any(w in n for w in ("NEWS", "CNN", "JOVEM PAN", "BLOOMBERG", "SENADO", "CAMARA", "JUSTICA", "ASSEMBLEIA")):
+        return "Canais | Notícias"
+    if any(w in n for w in ("DISCOVERY", "HISTORY", "H2", "ANIMAL PLANET", "NAT GEO", "NATIONAL GEOGRAPHIC", "LOVE NATURE", "SCIENCE", "THEATER", "TURBO", "WORLD", "INVESTIGACAO")):
+        return "Canais | Documentários"
+    return "Canais | Variedades & Música"
 
 
 def load_epg_id_index(epg_path: Path) -> dict[str, str]:
@@ -75,7 +254,8 @@ def load_epg_id_index(epg_path: Path) -> dict[str, str]:
 
 
 def resolve_best_tvg_id(channel_name: str, original_tvg_id: str, epg_index: dict[str, str]) -> str:
-    if re.search(r"\b24\s*H(?:S|ORAS)?\b", channel_name, re.I):
+    # Canais 24h (como 24H-THE FLASH S01) ficam com tvg-id="" para não puxarem EPG errado
+    if channel_name.upper().strip().startswith("24H") or re.search(r"\b24\s*H(?:S|ORAS)?\b", channel_name, re.I):
         return ""
 
     for candidate in (
@@ -96,70 +276,65 @@ def resolve_best_tvg_id(channel_name: str, original_tvg_id: str, epg_index: dict
 
 
 def replace_only_tvg_id_in_extinf(extinf_line: str, new_tvg_id: str) -> str:
-    """Altera EXCLUSIVAMENTE o conteúdo de tvg-id="..." sem tocar em mais nenhum caractere da linha."""
     safe_id = new_tvg_id.replace('"', "'")
     if _RE_TVG_ID.search(extinf_line):
         return _RE_TVG_ID.sub(f'tvg-id="{safe_id}"', extinf_line, count=1)
     return re.sub(r"^(#EXTINF:[^\s,]+)", rf'\1 tvg-id="{safe_id}"', extinf_line, count=1)
 
 
-def is_vod_stream(stream_url: str, extinf_line: str) -> bool:
+def set_group_title_in_extinf(extinf_line: str, new_group: str) -> str:
+    if not new_group:
+        return extinf_line
+    safe_grp = new_group.replace('"', "'")
+    if _RE_GROUP_TITLE.search(extinf_line):
+        return _RE_GROUP_TITLE.sub(f'group-title="{safe_grp}"', extinf_line, count=1)
+    return re.sub(r"^(#EXTINF:[^\s,]+)", rf'\1 group-title="{safe_grp}"', extinf_line, count=1)
+
+
+def classify_stream_type(stream_url: str, curr_grp: str, item_name: str) -> str:
+    """Classifica com 100% de precisão entre 'live', 'movie' e 'series'.
+    Importante: URLs com '/live/' (mesmo que sejam canais 24H-FRIENDS S01) são SEMPRE 'live'!"""
     clean_path = stream_url.split("?", 1)[0].lower()
-    if clean_path.endswith(VOD_URL_EXTENSIONS):
-        return True
-    if "/movie/" in clean_path or "/series/" in clean_path or "/vod/" in clean_path:
-        return True
-    if _RE_SERIES_EP_DETECT.search(extinf_line):
-        return True
-    return False
+    grp_upper = curr_grp.upper()
+
+    if "/live/" in clean_path or item_name.upper().strip().startswith("24H-"):
+        return "live"
+    if "/series/" in clean_path or grp_upper in {"SERIES", "SÉRIES"}:
+        return "series"
+    if "/movie/" in clean_path or grp_upper == "FILMES" or clean_path.endswith(VOD_URL_EXTENSIONS):
+        return "movie"
+    return "live"
 
 
-def download_raw_m3u_like_browser(url: str, target_path: Path) -> bool:
-    """Baixa o arquivo .m3u exatamente como o navegador do PC faz, garantindo type=m3u_plus."""
-    parsed = urllib.parse.urlparse(url)
-    q = urllib.parse.parse_qs(parsed.query, keep_blank_values=True)
-    if "get.php" in parsed.path:
-        q["type"] = ["m3u_plus"]
-        if "output" not in q:
-            q["output"] = ["ts"]
-    final_url = urllib.parse.urlunparse(parsed._replace(query=urllib.parse.urlencode(q, doseq=True)))
-
+def download_raw_m3u_exact_url(url: str, target_path: Path) -> bool:
+    """Baixa a URL exatamente como configurada no Secret (sem forçar output=ts para não trocar .m3u por .ts)."""
     br_proxy = os.environ.get("BR_PROXY", "").strip()
+    session = create_http_client()
 
-    # 1. Tenta via Cloudscraper / Requests com cabeçalho de Navegador Chrome Desktop
-    session = (
-        cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "windows", "mobile": False})
-        if cloudscraper is not None
-        else requests.Session()
-    )
-    if br_proxy:
-        session.proxies = {"http": br_proxy, "https": br_proxy}
+    for ua in IPTV_USER_AGENTS:
+        headers = build_br_headers(ua, url)
+        try:
+            with session.get(url, headers=headers, stream=True, timeout=240, allow_redirects=True) as resp:
+                if resp.status_code == 200:
+                    with target_path.open("wb") as out:
+                        for chunk in resp.iter_content(chunk_size=1024 * 1024):
+                            if chunk:
+                                out.write(chunk)
+                    if target_path.exists() and target_path.stat().st_size > 2048:
+                        with target_path.open("r", encoding="utf-8", errors="ignore") as f:
+                            head = f.read(8192)
+                            if "#EXTM3U" in head.upper() or "#EXTINF" in head.upper():
+                                return True
+        except Exception:
+            continue
 
-    try:
-        with session.get(final_url, headers=BROWSER_HEADERS, stream=True, timeout=240, allow_redirects=True) as resp:
-            if resp.status_code == 200:
-                with target_path.open("wb") as out:
-                    for chunk in resp.iter_content(chunk_size=1024 * 1024):
-                        if chunk:
-                            out.write(chunk)
-                if target_path.exists() and target_path.stat().st_size > 2048:
-                    with target_path.open("r", encoding="utf-8", errors="ignore") as f:
-                        head = f.read(8192)
-                        if "#EXTM3U" in head.upper() or "#EXTINF" in head.upper():
-                            return True
-    except Exception as e:
-        print(f"  -> Aviso no download via navegador Python ({e}). Tentando curl...")
-
-    # 2. Fallback via curl imitando Chrome Desktop
     cmd = [
         "curl", "-sS", "-L", "--http1.1",
         "--max-time", "300",
         "--connect-timeout", "25",
-        "-A", BROWSER_HEADERS["User-Agent"],
-        "-H", f"Accept: {BROWSER_HEADERS['Accept']}",
-        "-H", f"Accept-Language: {BROWSER_HEADERS['Accept-Language']}",
+        "-A", IPTV_USER_AGENTS[0],
         "-o", str(target_path),
-        final_url,
+        url,
     ]
     if br_proxy:
         cmd[1:1] = ["-x", br_proxy]
@@ -174,7 +349,7 @@ def download_raw_m3u_like_browser(url: str, target_path: Path) -> bool:
     return False
 
 
-def process_raw_m3u_only_fixing_tvgid(
+def build_calibrated_playlists(
     url: str,
     epg_index: dict[str, str],
     epg_public_url: str,
@@ -192,15 +367,20 @@ def process_raw_m3u_only_fixing_tvgid(
     live_count = 0
     matched_epg = 0
     vod_count = 0
-    groups_found: set[str] = set()
 
     try:
-        print("  -> Baixando arquivo .m3u bruto exatamente como no navegador...")
-        if not download_raw_m3u_like_browser(url, tmp_raw_path):
+        maps = fetch_live_and_movie_category_maps(url)
+        live_by_id = maps["live_by_id"]
+        live_by_name = maps["live_by_name"]
+        vod_by_id = maps["vod_by_id"]
+        vod_by_name = maps["vod_by_name"]
+
+        print("  -> Baixando arquivo .m3u original...")
+        if not download_raw_m3u_exact_url(url, tmp_raw_path):
             raise RuntimeError("Falha ao baixar o arquivo .m3u bruto.")
 
         raw_size_mb = tmp_raw_path.stat().st_size / (1024 * 1024)
-        print(f"  -> ✓ Arquivo bruto baixado ({raw_size_mb:.2f} MB). Trocando apenas o tvg-id dos canais...")
+        print(f"  -> ✓ Arquivo baixado ({raw_size_mb:.2f} MB). Processando Canais, Filmes e Séries...")
 
         header = f'#EXTM3U url-tvg="{epg_public_url}" x-tvg-url="{epg_public_url}"\n' if epg_public_url else "#EXTM3U\n"
 
@@ -230,33 +410,72 @@ def process_raw_m3u_only_fixing_tvgid(
                         continue
 
                     extinf_line = pending_lines[extinf_idx]
-                    grp_m = re.search(r'group-title="([^"]*)"', extinf_line, re.I)
+                    grp_m = _RE_GROUP_TITLE.search(extinf_line)
                     curr_grp = grp_m.group(1).strip() if grp_m else ""
-                    if curr_grp:
-                        groups_found.add(curr_grp)
+                    tvg_id_m = re.search(r'tvg-id="([^"]*)"', extinf_line, re.I)
+                    tvg_name_m = re.search(r'tvg-name="([^"]*)"', extinf_line, re.I)
+                    comma_name_m = re.search(r',([^,]*)$', extinf_line)
 
-                    if REMOVE_ADULT and ADULT_FILTER_RE.search(curr_grp):
+                    orig_tvg_id = tvg_id_m.group(1).strip() if tvg_id_m else ""
+                    item_name = html.unescape(
+                        (comma_name_m.group(1).strip() if comma_name_m else "")
+                        or (tvg_name_m.group(1).strip() if tvg_name_m else "")
+                    )
+
+                    if REMOVE_ADULT and (ADULT_FILTER_RE.search(curr_grp) or ADULT_FILTER_RE.search(item_name)):
                         pending_lines.clear()
                         continue
 
-                    if is_vod_stream(line.strip(), extinf_line):
-                        # É Filme ou Série: COPIA 100% IDÊNTICO AO ARQUIVO BRUTO ORIGINAL!
+                    stream_id_m = _RE_STREAM_ID_FROM_URL.search(line.strip())
+                    stream_id = stream_id_m.group(1) if stream_id_m else ""
+
+                    kind = classify_stream_type(line.strip(), curr_grp, item_name)
+
+                    if kind == "series":
+                        # SÉRIES: Copia 100% IDÊNTICO ao arquivo original (mantendo group-title="SÉRIES"),
+                        # pois é assim que o TiviMate joga automaticamente na aba 'Séries'!
                         for pl in pending_lines:
                             vod_out.write(pl + "\n")
                         vod_out.write(line + "\n")
                         vod_count += 1
-                    else:
-                        # É Canal ao Vivo: substitui SOMENTE o tvg-id="..." mantendo a linha original intacta!
-                        tvg_id_m = re.search(r'tvg-id="([^"]*)"', extinf_line, re.I)
-                        tvg_name_m = re.search(r'tvg-name="([^"]*)"', extinf_line, re.I)
-                        comma_name_m = re.search(r',([^,]*)$', extinf_line)
 
-                        orig_tvg_id = tvg_id_m.group(1).strip() if tvg_id_m else ""
-                        item_name = html.unescape(
-                            (comma_name_m.group(1).strip() if comma_name_m else "")
-                            or (tvg_name_m.group(1).strip() if tvg_name_m else "")
+                    elif kind == "movie":
+                        # FILMES: Aplica a categoria real do Filme via API (ex: 'Filmes | Lançamentos', 'Filmes | Ação')
+                        real_movie_grp = (
+                            vod_by_id.get(stream_id, "")
+                            or vod_by_name.get(norm_lookup_key(item_name), "")
+                            or vod_by_name.get(norm_movie_title(item_name), "")
                         )
+                        if REMOVE_ADULT and real_movie_grp and ADULT_FILTER_RE.search(real_movie_grp):
+                            pending_lines.clear()
+                            continue
 
+                        if real_movie_grp:
+                            pending_lines[extinf_idx] = set_group_title_in_extinf(extinf_line, real_movie_grp)
+
+                        for pl in pending_lines:
+                            vod_out.write(pl + "\n")
+                        vod_out.write(line + "\n")
+                        vod_count += 1
+
+                    else:
+                        # CANAIS AO VIVO (Incluindo canais 24H):
+                        # 1. Aplica a categoria real da API (ou categorizador inteligente se vier 'CANAIS COMPLETO')
+                        real_live_grp = (
+                            live_by_id.get(stream_id, "")
+                            or live_by_name.get(norm_lookup_key(item_name), "")
+                            or live_by_name.get(name_key(item_name), "")
+                        )
+                        if not real_live_grp or "COMPLETO" in real_live_grp.upper():
+                            real_live_grp = infer_fallback_channel_group(item_name, curr_grp)
+
+                        if REMOVE_ADULT and real_live_grp and ADULT_FILTER_RE.search(real_live_grp):
+                            pending_lines.clear()
+                            continue
+
+                        extinf_line = set_group_title_in_extinf(extinf_line, real_live_grp)
+
+                        # 2. Corrige o tvg-id com precisão usando o seu epg.xml.gz
                         best_tvg_id = resolve_best_tvg_id(item_name, orig_tvg_id, epg_index)
                         if best_tvg_id and name_key(best_tvg_id) in epg_index:
                             matched_epg += 1
@@ -270,11 +489,6 @@ def process_raw_m3u_only_fixing_tvgid(
                         live_count += 1
 
                     pending_lines.clear()
-
-        # Diagnóstico no log: mostra quantos group-titles diferentes vieram no arquivo bruto baixado!
-        sample_groups = sorted(groups_found)[:12]
-        print(f"  -> Diagnóstico do arquivo baixado: {len(groups_found)} grupos distintos encontrados na M3U.")
-        print(f"  -> Amostra dos grupos presentes no arquivo: {sample_groups}")
 
         if vod_count > 0:
             with full_out_path.open("ab") as full_append, tmp_vod_path.open("rb") as vod_in:
@@ -308,14 +522,10 @@ def push_files_to_secret_gist_via_git(generated_files: list[Path], token: str, g
                     shutil.copyfileobj(f_in, f_out, length=1024 * 1024)
 
                 if target_m3u.stat().st_size > 98 * 1024 * 1024:
-                    print(
-                        f"  -> Nota: {fpath.name} tem {target_m3u.stat().st_size / (1024*1024):.1f} MB (>98MB). "
-                        f"Subindo {target_gz.name} ({target_gz.stat().st_size / (1024*1024):.1f} MB) + canais_{fpath.name.split('_')[1]}!"
-                    )
                     target_m3u.unlink()
 
         subprocess.run(["git", "add", "."], cwd=work_dir, check=True)
-        subprocess.run(["git", "commit", "-m", "Atualiza Listas M3U (100% Bruto Original + TVG-ID)"], cwd=work_dir, check=True, stdout=subprocess.DEVNULL)
+        subprocess.run(["git", "commit", "-m", "Atualiza Listas M3U (Canais+Filmes Agrupados e Series Nativas)"], cwd=work_dir, check=True, stdout=subprocess.DEVNULL)
         subprocess.run(["git", "push", "--force", gist_repo_url, "HEAD:main"], cwd=work_dir, check=True)
         print(f"\n✓ Gist Secreto ({gist_id}) atualizado via Git Push com sucesso!")
     finally:
@@ -339,7 +549,7 @@ def main() -> None:
         full_file = out_dir / f"lista_{i}.m3u"
         live_file = out_dir / f"canais_{i}.m3u"
         try:
-            live_cnt, matched_cnt, vod_cnt = process_raw_m3u_only_fixing_tvgid(
+            live_cnt, matched_cnt, vod_cnt = build_calibrated_playlists(
                 url, epg_index, epg_public_url, full_file, live_file
             )
             if live_cnt == 0 and vod_cnt == 0:
