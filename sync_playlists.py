@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Sincronizador M3U Calibrado (Canais e Filmes com Categorias da API + Séries Nativas no TiviMate):
-- Canais ao Vivo: substitui 'CANAIS COMPLETO(SD,HD,FHD,4K)' pelas categorias reais da API + corrige tvg-id!
-- Filmes (/movie/): substitui 'FILMES' pelas categorias reais de Filmes da API!
-- Séries (/series/): mantém 100% o formato e group-title="SÉRIES" original para o TiviMate colocar na aba Séries!
-- Canais 24h (ex: 24H-FRIENDS S01): reconhecidos corretamente como Canais Ao Vivo (/live/) e não como VOD!
+"""Sincronizador M3U Definitivo (Canais + Filmes + Séries com Categorias da API):
+- Canais Ao Vivo: Categorias reais da API ('Canais ⫸ ...') + EPG tvg-id calibrado.
+- Filmes VOD: Categorias reais da API ('Filmes ⫸ ...').
+- Séries VOD: Categorias reais da API ('Séries ⫸ ...') limpando 'S01E01' na busca para separar todas as pastas!
+- Diagnóstico automático no log: mostra exemplos reais de linhas de Filmes e Séries do arquivo bruto.
 """
 from __future__ import annotations
 
@@ -58,6 +58,12 @@ _RE_TVG_ID = re.compile(r'tvg-id="[^"]*"', re.IGNORECASE)
 _RE_GROUP_TITLE = re.compile(r'group-title="([^"]*)"', re.IGNORECASE)
 _RE_STREAM_ID_FROM_URL = re.compile(r"/([^/?#]+?)(?:\.[a-z0-9]+)?(?:\?.*)?$", re.IGNORECASE)
 
+# Regex para identificar episódios de séries (ex: S01E01, S01 E01, T01E01, 1x01)
+_RE_SERIES_EPISODE = re.compile(
+    r"(?:\bS\d{1,2}\s*E\d{1,3}\b|\bT\d{1,2}\s*E\d{1,3}\b|\b\d{1,2}x\d{1,3}\b|\bEPIS[OÓ]DIO\s+\d+\b)",
+    re.IGNORECASE,
+)
+
 
 def norm_lookup_key(title: str) -> str:
     s = html.unescape(title or "")
@@ -70,6 +76,17 @@ def norm_lookup_key(title: str) -> str:
 def norm_movie_title(title: str) -> str:
     s = html.unescape(title or "")
     s = re.sub(r"\(\d{4}\)|\[\d{4}\]", " ", s)
+    s = re.sub(r"\b(FHD|HD|SD|4K|UHD|H265|LEG|DUB|DUBLADO|LEGENDADO|DUAL)\b", " ", s, flags=re.I)
+    return norm_lookup_key(s)
+
+
+def norm_series_base_title(title: str) -> str:
+    """Remove S01E01, Temporada, ano e tags de qualidade para achar o nome da Série na API."""
+    s = html.unescape(title or "")
+    # Corta tudo a partir de S01E01 / S01 / T01 / Temporada
+    s = re.split(r"\b(?:S\d{1,2}\s*E\d{1,3}|S\d{1,2}\b|T\d{1,2}\s*E\d{1,3}|TEMPORADA\s*\d+|\d{1,2}X\d{1,3})", s, maxsplit=1, flags=re.I)[0]
+    s = re.sub(r"\(\d{4}\)|\[\d{4}\]", " ", s)
+    s = re.sub(r"\b(FHD|HD|SD|4K|UHD|H265|LEG|DUB|DUBLADO|LEGENDADO|DUAL)\b", " ", s, flags=re.I)
     return norm_lookup_key(s)
 
 
@@ -123,13 +140,15 @@ def request_with_bypass(url: str, stream: bool = False, timeout: int = 90) -> re
     raise RuntimeError(f"Todas as tentativas de bypass falharam ({last_err})")
 
 
-def fetch_live_and_movie_category_maps(url: str) -> dict[str, dict[str, str]]:
-    """Busca na API Xtream os grupos reais de Canais Ao Vivo e de Filmes VOD (por Nome e por ID)."""
+def fetch_all_category_maps(url: str) -> dict[str, dict[str, str]]:
+    """Busca na API Xtream os grupos reais de Canais Ao Vivo, Filmes VOD e Séries."""
     maps: dict[str, dict[str, str]] = {
         "live_by_id": {},
         "live_by_name": {},
         "vod_by_id": {},
         "vod_by_name": {},
+        "series_by_id": {},
+        "series_by_name": {},
     }
 
     parsed = urllib.parse.urlparse(url)
@@ -166,7 +185,7 @@ def fetch_live_and_movie_category_maps(url: str) -> dict[str, dict[str, str]]:
                 raw_n = str(ch["name"])
                 maps["live_by_name"][norm_lookup_key(raw_n)] = grp
                 maps["live_by_name"][name_key(raw_n)] = grp
-        print(f"  -> ✓ Categorias de Canais mapeadas via API: {len(live_cats)} grupos ({len(maps['live_by_name'])} nomes).")
+        print(f"  -> ✓ Categorias de Canais via API: {len(live_cats)} grupos ({len(maps['live_by_name'])} canais).")
     except Exception as e:
         print(f"  -> Nota: Mapa Live indisponível ({e}).")
 
@@ -195,36 +214,65 @@ def fetch_live_and_movie_category_maps(url: str) -> dict[str, dict[str, str]]:
                 raw_v = str(v["name"])
                 maps["vod_by_name"][norm_lookup_key(raw_v)] = grp
                 maps["vod_by_name"][norm_movie_title(raw_v)] = grp
-        print(f"  -> ✓ Categorias de Filmes mapeadas via API: {len(vod_cats)} grupos ({len(maps['vod_by_name'])} filmes).")
+        print(f"  -> ✓ Categorias de Filmes via API: {len(vod_cats)} grupos ({len(maps['vod_by_name'])} filmes).")
     except Exception as e:
         print(f"  -> Nota: Mapa VOD indisponível ({e}).")
+
+    # 3. Séries
+    try:
+        c_ser = request_with_bypass(
+            f"{base_url}/player_api.php?username={user}&password={pwd}&action=get_series_categories", timeout=30
+        ).json()
+        ser_cats = {
+            str(c.get("category_id", "")): html.unescape(str(c.get("category_name", "")).strip())
+            for c in (c_ser if isinstance(c_ser, list) else [])
+            if isinstance(c, dict) and c.get("category_name")
+        }
+        s_ser = request_with_bypass(
+            f"{base_url}/player_api.php?username={user}&password={pwd}&action=get_series", timeout=60
+        ).json()
+        for s in (s_ser if isinstance(s_ser, list) else []):
+            if not isinstance(s, dict):
+                continue
+            grp = ser_cats.get(str(s.get("category_id", "")), "")
+            if not grp:
+                continue
+            if s.get("series_id"):
+                maps["series_by_id"][str(s["series_id"])] = grp
+            if s.get("name"):
+                raw_s = str(s["name"])
+                maps["series_by_name"][norm_lookup_key(raw_s)] = grp
+                maps["series_by_name"][norm_movie_title(raw_s)] = grp
+                maps["series_by_name"][norm_series_base_title(raw_s)] = grp
+        print(f"  -> ✓ Categorias de Séries via API: {len(ser_cats)} grupos ({len(maps['series_by_name'])} séries).")
+    except Exception as e:
+        print(f"  -> Nota: Mapa Séries indisponível ({e}).")
 
     return maps
 
 
 def infer_fallback_channel_group(channel_name: str, current_group: str) -> str:
-    """Caso a API do painel também devolva 'CANAIS COMPLETO', organiza os canais automaticamente por categoria!"""
     if current_group and "COMPLETO" not in current_group.upper():
         return current_group
 
     n = norm_lookup_key(channel_name)
     if channel_name.upper().strip().startswith("24H") or " 24H" in n:
-        return "Canais | 24 Horas"
+        return "Canais ⫸ 24 Horas"
     if any(w in n for w in ("PREMIERE", "SPORTV", "ESPN", "COMBATE", "BANDSPORTS", "BAND SPORTS", "DAZN", "CAZE", "GOAT", "NOSSO FUTEBOL", "PARAMOUNT", "NBA", "NFL", "UFC", "FIGHT", "CONMEBOL", "PAULISTAO", "BRASILEIRAO", "LALIGA", "BUNDESLIGA", "SPORTYNET", "NSPORTS", "XSPORTS")):
-        return "Canais | Esportes & PPV"
+        return "Canais ⫸ Esportes⚽"
     if any(w in n for w in ("GLOBO ", "SBT", "RECORD", "BAND ", "REDETV", "REDE TV", "CULTURA", "TV BRASIL", "TV GAZETA", "TV DIARIO", "REDE VIDA", "APARECIDA", "CANCAO NOVA", "NOVO TEMPO", "EVANGELIZAR", "PAI ETERNO", "REDE GOSPEL", "RIT TV", "REDE CNT", "REDE SUPER", "RBS ", "RPC ")):
         if "NEWS" not in n:
-            return "Canais | TV Aberta & Regionais"
+            return "Canais ⫸ Abertos"
     if any(w in n for w in ("HBO", "TELECINE", "MEGAPIX", "TNT ", "SPACE", "CINEMAX", "WARNER", "SONY", "AXN", "UNIVERSAL", "STUDIO UNIVERSAL", "STAR ", "AMC", "PARAMOUNT", "TCM", "CINE SKY", "PRIME BOX", "CURTA", "FILME")):
         if "NOVELA" not in n:
-            return "Canais | Filmes & Séries"
+            return "Canais ⫸ Filmes e Séries"
     if any(w in n for w in ("CARTOON", "DISCOVERY KIDS", "GLOOB", "DISNEY", "NICK", "TOONCAST", "RA TIM BUM", "ZOOMOO", "DREAMWORKS", "ANIME", "INFANTIL")):
-        return "Canais | Infantil"
+        return "Canais ⫸ Infantil"
     if any(w in n for w in ("NEWS", "CNN", "JOVEM PAN", "BLOOMBERG", "SENADO", "CAMARA", "JUSTICA", "ASSEMBLEIA")):
-        return "Canais | Notícias"
+        return "Canais ⫸ Noticias"
     if any(w in n for w in ("DISCOVERY", "HISTORY", "H2", "ANIMAL PLANET", "NAT GEO", "NATIONAL GEOGRAPHIC", "LOVE NATURE", "SCIENCE", "THEATER", "TURBO", "WORLD", "INVESTIGACAO")):
-        return "Canais | Documentários"
-    return "Canais | Variedades & Música"
+        return "Canais ⫸ Documentarios"
+    return "Canais ⫸ Variedades"
 
 
 def load_epg_id_index(epg_path: Path) -> dict[str, str]:
@@ -254,7 +302,6 @@ def load_epg_id_index(epg_path: Path) -> dict[str, str]:
 
 
 def resolve_best_tvg_id(channel_name: str, original_tvg_id: str, epg_index: dict[str, str]) -> str:
-    # Canais 24h (como 24H-THE FLASH S01) ficam com tvg-id="" para não puxarem EPG errado
     if channel_name.upper().strip().startswith("24H") or re.search(r"\b24\s*H(?:S|ORAS)?\b", channel_name, re.I):
         return ""
 
@@ -292,22 +339,27 @@ def set_group_title_in_extinf(extinf_line: str, new_group: str) -> str:
 
 
 def classify_stream_type(stream_url: str, curr_grp: str, item_name: str) -> str:
-    """Classifica com 100% de precisão entre 'live', 'movie' e 'series'.
-    Importante: URLs com '/live/' (mesmo que sejam canais 24H-FRIENDS S01) são SEMPRE 'live'!"""
+    """Classifica com precisão absoluta entre 'live', 'movie' e 'series'."""
     clean_path = stream_url.split("?", 1)[0].lower()
-    grp_upper = curr_grp.upper()
+    grp_norm = norm_lookup_key(curr_grp)
+    name_upper = item_name.upper().strip()
 
-    if "/live/" in clean_path or item_name.upper().strip().startswith("24H-"):
+    # 1. Canais ao vivo (/live/ ou 24H-) são SEMPRE live, mesmo que tenham S01 no nome
+    if "/live/" in clean_path or name_upper.startswith("24H-") or grp_norm == "RADIOS":
         return "live"
-    if "/series/" in clean_path or grp_upper in {"SERIES", "SÉRIES"}:
+
+    # 2. Séries: URL com /series/, ou group-title original SERIE/SERIES, ou padrão S01E01 em arquivo VOD
+    if "/series/" in clean_path or "SERIE" in grp_norm or _RE_SERIES_EPISODE.search(item_name):
         return "series"
-    if "/movie/" in clean_path or grp_upper == "FILMES" or clean_path.endswith(VOD_URL_EXTENSIONS):
+
+    # 3. Filmes: URL com /movie/, group-title FILMES, ou extensão de vídeo (.mp4, .mkv, etc.)
+    if "/movie/" in clean_path or "FILME" in grp_norm or clean_path.endswith(VOD_URL_EXTENSIONS):
         return "movie"
+
     return "live"
 
 
 def download_raw_m3u_exact_url(url: str, target_path: Path) -> bool:
-    """Baixa a URL exatamente como configurada no Secret (sem forçar output=ts para não trocar .m3u por .ts)."""
     br_proxy = os.environ.get("BR_PROXY", "").strip()
     session = create_http_client()
 
@@ -355,25 +407,28 @@ def build_calibrated_playlists(
     epg_public_url: str,
     full_out_path: Path,
     live_only_out_path: Path,
-) -> tuple[int, int, int]:
+) -> tuple[int, int, int, int]:
     tmp_raw = tempfile.NamedTemporaryFile(delete=False, suffix=".raw.m3u")
     tmp_raw_path = Path(tmp_raw.name)
     tmp_raw.close()
 
-    tmp_vod = tempfile.NamedTemporaryFile(delete=False, suffix=".vod.m3u")
-    tmp_vod_path = Path(tmp_vod.name)
-    tmp_vod.close()
-
     live_count = 0
     matched_epg = 0
-    vod_count = 0
+    movie_count = 0
+    series_count = 0
+    series_matched_cat = 0
+
+    sample_movies: list[str] = []
+    sample_series: list[str] = []
 
     try:
-        maps = fetch_live_and_movie_category_maps(url)
+        maps = fetch_all_category_maps(url)
         live_by_id = maps["live_by_id"]
         live_by_name = maps["live_by_name"]
         vod_by_id = maps["vod_by_id"]
         vod_by_name = maps["vod_by_name"]
+        series_by_id = maps["series_by_id"]
+        series_by_name = maps["series_by_name"]
 
         print("  -> Baixando arquivo .m3u original...")
         if not download_raw_m3u_exact_url(url, tmp_raw_path):
@@ -388,7 +443,6 @@ def build_calibrated_playlists(
             tmp_raw_path.open("r", encoding="utf-8", errors="ignore") as raw_in,
             full_out_path.open("w", encoding="utf-8") as full_out,
             live_only_out_path.open("w", encoding="utf-8") as live_only_out,
-            tmp_vod_path.open("w", encoding="utf-8") as vod_out,
         ):
             full_out.write(header)
             live_only_out.write(header)
@@ -432,15 +486,32 @@ def build_calibrated_playlists(
                     kind = classify_stream_type(line.strip(), curr_grp, item_name)
 
                     if kind == "series":
-                        # SÉRIES: Copia 100% IDÊNTICO ao arquivo original (mantendo group-title="SÉRIES"),
-                        # pois é assim que o TiviMate joga automaticamente na aba 'Séries'!
+                        if len(sample_series) < 3:
+                            sample_series.append(f"{extinf_line} -> {line.strip()}")
+
+                        base_series_key = norm_series_base_title(item_name)
+                        real_ser_grp = (
+                            series_by_id.get(stream_id, "")
+                            or series_by_name.get(base_series_key, "")
+                            or series_by_name.get(norm_lookup_key(item_name), "")
+                        )
+                        if REMOVE_ADULT and real_ser_grp and ADULT_FILTER_RE.search(real_ser_grp):
+                            pending_lines.clear()
+                            continue
+
+                        if real_ser_grp:
+                            series_matched_cat += 1
+                            pending_lines[extinf_idx] = set_group_title_in_extinf(extinf_line, real_ser_grp)
+
                         for pl in pending_lines:
-                            vod_out.write(pl + "\n")
-                        vod_out.write(line + "\n")
-                        vod_count += 1
+                            full_out.write(pl + "\n")
+                        full_out.write(line + "\n")
+                        series_count += 1
 
                     elif kind == "movie":
-                        # FILMES: Aplica a categoria real do Filme via API (ex: 'Filmes | Lançamentos', 'Filmes | Ação')
+                        if len(sample_movies) < 3:
+                            sample_movies.append(f"{extinf_line} -> {line.strip()}")
+
                         real_movie_grp = (
                             vod_by_id.get(stream_id, "")
                             or vod_by_name.get(norm_lookup_key(item_name), "")
@@ -454,13 +525,11 @@ def build_calibrated_playlists(
                             pending_lines[extinf_idx] = set_group_title_in_extinf(extinf_line, real_movie_grp)
 
                         for pl in pending_lines:
-                            vod_out.write(pl + "\n")
-                        vod_out.write(line + "\n")
-                        vod_count += 1
+                            full_out.write(pl + "\n")
+                        full_out.write(line + "\n")
+                        movie_count += 1
 
                     else:
-                        # CANAIS AO VIVO (Incluindo canais 24H):
-                        # 1. Aplica a categoria real da API (ou categorizador inteligente se vier 'CANAIS COMPLETO')
                         real_live_grp = (
                             live_by_id.get(stream_id, "")
                             or live_by_name.get(norm_lookup_key(item_name), "")
@@ -475,7 +544,6 @@ def build_calibrated_playlists(
 
                         extinf_line = set_group_title_in_extinf(extinf_line, real_live_grp)
 
-                        # 2. Corrige o tvg-id com precisão usando o seu epg.xml.gz
                         best_tvg_id = resolve_best_tvg_id(item_name, orig_tvg_id, epg_index)
                         if best_tvg_id and name_key(best_tvg_id) in epg_index:
                             matched_epg += 1
@@ -490,17 +558,15 @@ def build_calibrated_playlists(
 
                     pending_lines.clear()
 
-        if vod_count > 0:
-            with full_out_path.open("ab") as full_append, tmp_vod_path.open("rb") as vod_in:
-                shutil.copyfileobj(vod_in, full_append, length=1024 * 1024)
+        print(f"  -> Amostra FILMES bruto: {sample_movies[:2]}")
+        print(f"  -> Amostra SÉRIES bruto: {sample_series[:2]}")
+        print(f"  -> ✓ Séries mapeadas nas pastas da API: {series_matched_cat}/{series_count}")
 
-        return live_count, matched_epg, vod_count
+        return live_count, matched_epg, movie_count, series_count
 
     finally:
         if tmp_raw_path.exists():
             tmp_raw_path.unlink()
-        if tmp_vod_path.exists():
-            tmp_vod_path.unlink()
 
 
 def push_files_to_secret_gist_via_git(generated_files: list[Path], token: str, gist_id: str) -> None:
@@ -525,7 +591,7 @@ def push_files_to_secret_gist_via_git(generated_files: list[Path], token: str, g
                     target_m3u.unlink()
 
         subprocess.run(["git", "add", "."], cwd=work_dir, check=True)
-        subprocess.run(["git", "commit", "-m", "Atualiza Listas M3U (Canais+Filmes Agrupados e Series Nativas)"], cwd=work_dir, check=True, stdout=subprocess.DEVNULL)
+        subprocess.run(["git", "commit", "-m", "Atualiza Listas M3U (Canais+Filmes+Series Categorizadas)"], cwd=work_dir, check=True, stdout=subprocess.DEVNULL)
         subprocess.run(["git", "push", "--force", gist_repo_url, "HEAD:main"], cwd=work_dir, check=True)
         print(f"\n✓ Gist Secreto ({gist_id}) atualizado via Git Push com sucesso!")
     finally:
@@ -549,17 +615,17 @@ def main() -> None:
         full_file = out_dir / f"lista_{i}.m3u"
         live_file = out_dir / f"canais_{i}.m3u"
         try:
-            live_cnt, matched_cnt, vod_cnt = build_calibrated_playlists(
+            live_cnt, matched_cnt, movie_cnt, series_cnt = build_calibrated_playlists(
                 url, epg_index, epg_public_url, full_file, live_file
             )
-            if live_cnt == 0 and vod_cnt == 0:
+            if live_cnt == 0 and movie_cnt == 0 and series_cnt == 0:
                 print(f"  -> ⚠ M3U_URL_{i} retornou vazia. Pulando.")
                 continue
 
             full_mb = full_file.stat().st_size / (1024 * 1024)
             live_mb = live_file.stat().st_size / (1024 * 1024)
             print(
-                f"  -> ✓ [lista_{i}.m3u] {live_cnt} Canais ({matched_cnt} com EPG) + {vod_cnt} VODs ({full_mb:.2f} MB)\n"
+                f"  -> ✓ [lista_{i}.m3u] {live_cnt} Canais ({matched_cnt} com EPG) + {movie_cnt} Filmes + {series_cnt} Episódios de Séries ({full_mb:.2f} MB)\n"
                 f"  -> ✓ [canais_{i}.m3u] Só Canais: {live_cnt} Canais ({live_mb:.2f} MB)"
             )
             generated_files.extend([full_file, live_file])
