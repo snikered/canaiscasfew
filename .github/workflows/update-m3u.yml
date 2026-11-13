@@ -12,6 +12,7 @@ jobs:
   atualizar:
     runs-on: ubuntu-latest
     env:
+      TZ: "America/Sao_Paulo"
       PYTHONUNBUFFERED: "1"
       DOWNLOAD_WORKERS: "4"
       GZIP_LEVEL: "9"
@@ -28,22 +29,28 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: "pip"
 
       - name: Instalar dependências de Extração
         run: |
           pip install --upgrade pip
           pip install requests beautifulsoup4 lxml pytz cloudscraper urllib3
 
-      - name: Rodar Extratores (Em Paralelo)
+      - name: Recuperar Espelho e Cache de Metadados (da branch epg)
         run: |
-          set -e
-          for script in guiadetv.py meuguia.py tvmap.py tvplus.py mitv.py webfinal.py; do
+          git fetch origin epg:epg 2>/dev/null || true
+          git checkout epg -- espelho.json 2>/dev/null || true
+          git checkout epg -- metadata_cache.json 2>/dev/null || true
+
+      - name: Rodar Todos os Extratores (Em Paralelo + Tolerante a Falhas)
+        run: |
+          for script in fetch_claro_epg.py fetch_vivo_epg.py pull_afiliadas_locais.py guiadetv.py meuguia.py tvplus.py mitv.py webfinal.py; do
             if [ -f "$script" ]; then
-              python3 "$script" &
+              (python3 "$script" || echo "⚠ Aviso: $script terminou com erro, mas o pipeline continuará.") &
             fi
           done
           wait
-          echo "Todos os extratores locais foram finalizados."
+          echo "✓ Todos os extratores locais e de operadoras foram finalizados."
 
       - name: Compilar e Higienizar Dicionário (Preservando Esportes/PPV)
         run: |
@@ -106,14 +113,6 @@ jobs:
               print(f"Limpeza concluída: {removed} lixos/VODs removidos. {len(cleaned)} canais reais e esportivos mantidos!")
           EOF
 
-      - name: Recuperar Espelho e Cache de Metadados (da branch epg)
-        run: |
-          git fetch origin epg:epg 2>/dev/null || true
-          git checkout epg -- espelho.json 2>/dev/null || true
-          git checkout epg -- metadata_cache.json 2>/dev/null || true
-          
-          python3 pull_afiliadas_locais.py
-         
       - name: Gerar EPG Costurado e Consolidado
         run: |
           python3 merge_epg.py
