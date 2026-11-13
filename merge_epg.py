@@ -6,6 +6,7 @@
 - Filtra canais 24H, câmeras de reality e jogos avulsos herdados do dicionário antigo.
 - Impede colisão entre canais numerados e canais base (ex: HBO vs HBO 2 / HBO [2]).
 - Impede falsos positivos regionais (GLOBO RO vs GLOBO RIO, BAND SC vs BM&C, BAND PR vs SBT PR).
+- Bloqueia colisões entre canais estrangeiros (US/UK/CO) e redes brasileiras via fuzzy.
 - Empata health_score >= 0.80 para Vivo Play API e Claro assumirem a liderança.
 """
 from __future__ import annotations
@@ -391,12 +392,12 @@ CHANNEL_SYNONYMS = {
     "MUSIC BOX BRASIL": ["MUSIC BOX BRAZIL"],
     "CARTOONITO": ["CARTOONITO", "BOOMERANG"],
     "SPORTTV": ["SPORTV", "SPORTV 1"],
-    "SPORTV": ["SPORTTV", "SPORTV 1"],
+    "SPORTV": ["SPORTV", "SPORTV 1"],
     "SPORTV 1": ["SPORTV", "SPORTTV"],
-    "SPORTTV 2": ["SPORTV 2"],
-    "SPORTV 2": ["SPORTTV 2"],
-    "SPORTTV 3": ["SPORTV 3"],
-    "SPORTV 3": ["SPORTTV 3"],
+    "SPORTV 2": ["SPORTV 2"],
+    "SPORTV 2": ["SPORTV 2"],
+    "SPORTV 3": ["SPORTV 3"],
+    "SPORTV 3": ["SPORTV 3"],
     "ESPN": ["ESPN 1", "ESPN BRASIL"],
     "ESPN 1": ["ESPN", "ESPN BRASIL"],
     "ESPN 4": ["FOX SPORTS"],
@@ -929,7 +930,7 @@ def read_source_from_file(spec: SourceSpec, file_path: Path) -> EpgSource:
         if tag == "channel":
             channel_id = child.attrib.get("id", "").strip()
             if not channel_id: continue
-            if re.search(r'\.(pt|us|uk|ar|mx|cl|co|pe|es|fr|de|it)$', channel_id, flags=re.IGNORECASE):
+            if re.search(r'\.(us|uk|ar|mx|cl|co|pe|es|fr|de|it)$', channel_id, flags=re.IGNORECASE):
                 continue
             channels[channel_id] = child
             display_names = [(node.text or "").strip() for node in child if local_tag(node) == "display-name" and (node.text or "").strip()]
@@ -1060,9 +1061,18 @@ def _network_of_normalized(value: str) -> str:
 
 _GLOBO_BRAND_COMPACT = tuple(b.replace(" ", "") for b in _GLOBO_ONLY_BRANDS) + ("NSCTV",)
 
+def _is_foreign_prefix(alias: str) -> bool:
+    """Identifica se o canal começa com prefixos internacionais que não devem casar com canais do Brasil via fuzzy."""
+    a = alias.upper().strip()
+    return a.startswith(("US ", "USA ", "UK ", "CO ", "EC ", "MX ", "PY ", "DE ", "ES "))
+
 def _fuzzy_incompatible(alias: str, candidate: str) -> bool:
     if alias == candidate:
         return False
+    if _is_foreign_prefix(alias) and not _is_foreign_prefix(candidate):
+        return True
+    if ("SPORT TV" in alias or "SPORTTV" in alias) and ("SPORTV" in candidate and "SPORT TV" not in candidate):
+        return True
     if ("GLOOB" in alias) != ("GLOOB" in candidate):
         return True
     if ("NEWS" in alias) != ("NEWS" in candidate):
@@ -2168,6 +2178,8 @@ def main() -> None:
         u = text.upper().strip()
         if not u:
             return True
+        if re.search(r"^[\s⭐\-—=_.*]+$", u):
+            return True
         if re.match(r"^(?:24\s*H|\d{4}[A-Z])", u):
             return True
         if re.search(r"\bS\d{1,3}\s*E\d{1,3}\b|\bT\d{1,3}\s*EP?\d{1,3}\b|\b24HS?\b|^24\s*H\b", u):
@@ -2176,8 +2188,12 @@ def main() -> None:
             return True
         return False
 
+    def normalize_channel_number_zero(name_str: str) -> str:
+        """Normaliza zeros à esquerda em números de canais (ex: Paramount 01 -> Paramount 1, SportyNet + 01 -> SportyNet + 1)."""
+        return re.sub(r'\b(0)(\d+)\b', r'\2', name_str)
+
     def merge_channel_record(ch_id: str, name: str, aliases: Iterable[str] = (), tvg_ids: Iterable[str] = (), comp_ids: Iterable[str] = (), source_ids: Iterable[str] = (), group: str = "") -> None:
-        base_name = html.unescape(name or ch_id).strip()
+        base_name = normalize_channel_number_zero(html.unescape(name or ch_id).strip())
         if not base_name or is_junk_or_24h_channel(base_name):
             return
         canon_name = inferir_emissora_pelo_grupo(normalizar_canal(base_name), group)
@@ -2206,7 +2222,7 @@ def main() -> None:
 
         for a in aliases:
             if a:
-                a_raw = html.unescape(str(a)).strip()
+                a_raw = normalize_channel_number_zero(html.unescape(str(a)).strip())
                 if not a_raw or is_junk_or_24h_channel(a_raw) or has_conflicting_channel_number(rec_base_name, a_raw):
                     continue
                 rec["raw_aliases"].add(a_raw)
