@@ -1,13 +1,9 @@
 #!/usr/bin/env python3
-"""EPG Universal Consolidado — Busca em Camadas + Bloqueio de tvg-id Coringa + Sem Repetição TxxExx/SxxExx
-- Força o player IPTV a casar todos os canais abertos (Globo, Record, SBT, Band, RedeTV, Cultura)
-  estritamente pelo NOME DO CANAL (<display-name>), impedindo que globosp.br / RecordTV.br
-  joguem a grade de SP em cima das afiliadas da Bahia, Nordeste, Minas, Manaus, etc.
-- Mantém todos os tvg-ids normais dos canais fechados (HBO, SporTV, ESPN, Telecine, Discovery, etc.).
-- Preserva nomes de afiliadas entre parênteses como "GLOBO PE (ASA BRANCA) HD".
-- Bloqueia colisões entre Globo Aberta e Gloob/Gloobinho (infantil) ou Globo Internacional/Portugal/ON.
-- Evita repetição de temporada/episódio (T01E03 + S01E03) no TiviMate e no Televizo.
-- Lê arquivos .m3u e .safe.m3u locais mesmo quando não possuem linha http:// abaixo do #EXTINF.
+"""EPG Universal Consolidado — Busca em Camadas + Visual Rico (+14/+18/LIVRE) + Apenas [TxxExx] Sem Redundância
+- Integra as fontes diretas da Vivo Play (vivo_epg.xml.gz) e Claro TV+ (claro_epg.xml.gz).
+- Formata todas as descrições com: 🟢 LIVRE / 🔵 +10 / 🟡 +12 / 🟠 +14 / 🔴 +16 / ⚫ +18 | 📅 Ano | ⏱ X mins | 🎭 Categorias.
+- Exibe SOMENTE [T03E07] (sem espaço e sem tag <episode-num> para impedir o player de injetar S04E07 duplicado).
+- Remove qualquer repetição de temporada/episódio ou subtítulo duplicado na sinopse.
 """
 from __future__ import annotations
 
@@ -42,24 +38,18 @@ except ImportError:
     urllib.request.urlretrieve("https://raw.githubusercontent.com/Limaalef/M3uEpg/main/epg_utils.py", "epg_utils.py")
     from epg_utils import digit_signature, normalize_name as original_normalize_name, normalize_source_id
 
-# --- Deduplicação de nomes (embutida: não depende de arquivo extra) ---
-import unicodedata as _ud
 _QUALITY = re.compile(
     r"\b(SD|HD|FHD|UHD|4K|8K|H\.?264|H\.?265|HEVC|BR2|P)\b[\*\+]*", re.IGNORECASE
 )
 
 
 def name_key(value: str) -> str:
-    """Chave de comparação: sem acento, sem qualidade/tags, mantém o conteúdo de ( ).
-
-    Diferente de strip_qualities_keep_case(), NÃO apaga o texto entre parênteses:
-    "GLOBO PE (ASA BRANCA) HD" -> "GLOBO PE ASA BRANCA" (e não "GLOBO PE").
-    """
+    """Chave de comparação: sem acento, sem qualidade/tags, mantém o conteúdo de ( )."""
     s = html.unescape(str(value or ""))
-    s = re.sub(r"[¹²³⁴]+", " ", s)  # sobrescritos de variantes (ex.: "HD ²") antes do NFKD
+    s = re.sub(r"[¹²³⁴]+", " ", s)
     s = unicodedata.normalize("NFKD", s)
     s = "".join(c for c in s if not unicodedata.combining(c)).upper()
-    s = re.sub(r"\[[^\]]*\]", " ", s)          # [H265], [1], [P] ...
+    s = re.sub(r"\[[^\]]*\]", " ", s)
     s = re.sub(r"[¹²³⁴*]+", " ", s)
     s = s.replace("&", " AND ")
     s = re.sub(r"[()\-–—_./|,:;]", " ", s)
@@ -105,7 +95,6 @@ def dedupe_display_names(
 
 
 def name_collisions(names_by_id: dict[str, Iterable[str]]) -> dict[str, list[str]]:
-    """Diagnóstico: {name_key: [ids que o reivindicam]} só para os conflitantes."""
     owners: dict[str, set[str]] = {}
     for cid, names in names_by_id.items():
         for n in names:
@@ -144,8 +133,11 @@ IPTV_USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
 ]
 
+# Fontes atualizadas com Vivo Play API Direta e Claro TV+ API Direta em alta prioridade
 EPG_SOURCES_CONFIG = [
     ("Afiliadas Locais", "epg_afiliadas.xml", "afiliadas_locais", 3.0),
+    ("Claro TV+ API", "claro_epg.xml.gz", "claro_api", 2.8),
+    ("Vivo Play API", "vivo_epg.xml.gz", "vivo_api", 2.8),
     ("GuiaDeTV", "epg_guiadetv.xml", "guiadetv", 2.5),
     ("Meu Guia", "epg_meuguia.xml", "meuguia", 2.5),
     ("MiTV", "epg_mitv.xml", "mitv", 2.0),
@@ -153,8 +145,8 @@ EPG_SOURCES_CONFIG = [
     ("WebFinal", "epg_webfinal.xml", "webfinal", 1.8),
     ("Open-EPG BR", "https://www.open-epg.com/files/brazil.xml", "openepg", 1.5),
     ("Open-EPG BR 4", "https://www.open-epg.com/files/brazil4.xml", "openepg", 1.4),
-    ("Claro", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/claro.xml", "git_operadora", 1.5),
-    ("VivoPlay", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/vivoplay.xml", "git_operadora", 1.4),
+    ("Claro Git", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/claro.xml", "git_operadora", 1.5),
+    ("VivoPlay Git", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/vivoplay.xml", "git_operadora", 1.4),
     ("Globo", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/globo.xml", "git_extra", 1.2),
     ("Mais SBT", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/maissbt.xml", "git_extra", 1.0),
     ("XSports", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/xsports.xml", "git_extra", 1.0),
@@ -231,18 +223,6 @@ NON_SERIES_CATEGORY_KEYWORDS = (
     "CINEMA",
     "LONGA",
     "FEATURE FILM",
-    "ACAO",
-    "AÇÃO",
-    "COMEDIA",
-    "COMÉDIA",
-    "DRAMA",
-    "SUSPENSE",
-    "TERROR",
-    "FICCAO",
-    "FICÇÃO",
-    "ROMANCE",
-    "AVENTURA",
-    "FAROESTE",
     "ESPORTE",
     "SPORT",
     "FUTEBOL",
@@ -268,6 +248,43 @@ SERIES_CATEGORY_KEYWORDS = (
     "ANIME",
     "DESENHO",
 )
+
+# Mapa enxuto de classificação indicativa: apenas bolinha + (+10, +12, +14, +16, +18) e LIVRE para L
+RATING_SHORT_MAP = {
+    "L": "🟢 LIVRE",
+    "LIVRE": "🟢 LIVRE",
+    "0": "🟢 LIVRE",
+    "G": "🟢 LIVRE",
+    "ALL": "🟢 LIVRE",
+    "10": "🔵 +10",
+    "PG-10": "🔵 +10",
+    "A10": "🔵 +10",
+    "12": "🟡 +12",
+    "PG-12": "🟡 +12",
+    "A12": "🟡 +12",
+    "14": "🟠 +14",
+    "PG-14": "🟠 +14",
+    "A14": "🟠 +14",
+    "16": "🔴 +16",
+    "PG-16": "🔴 +16",
+    "A16": "🔴 +16",
+    "18": "⚫ +18",
+    "PG-18": "⚫ +18",
+    "A18": "⚫ +18",
+    "R": "⚫ +18",
+}
+
+def normalize_rating_badge(raw_val: str) -> str:
+    if not raw_val:
+        return ""
+    r = str(raw_val).strip().upper()
+    if "LIVRE" in r or r in {"L", "0", "G", "ALL"}:
+        return "🟢 LIVRE"
+    m = re.search(r"(?:\+|\b)(10|12|14|16|18)\b", r)
+    if m:
+        return RATING_SHORT_MAP[m.group(1)]
+    return RATING_SHORT_MAP.get(r, "")
+
 
 @dataclass(frozen=True)
 class SourceSpec:
@@ -435,8 +452,6 @@ POISONED_OPEN_TV_IDS = {
 }
 
 def strip_qualities_keep_case(name: str) -> str:
-    """Limpa tags de qualidade (SD/HD/FHD/4K/H265/[1]/(BR2)) MAS preserva nomes de afiliadas
-    ou cidades dentro de parênteses como 'GLOBO PE (ASA BRANCA)'."""
     if not name: return ""
     s = html.unescape(name)
     s = re.sub(r'\[.*?\]|\|.*?\|', ' ', s)
@@ -513,8 +528,6 @@ def clean_tvid_key(tvid: str) -> str:
     return re.sub(r'[^a-z0-9]', '', t)
 
 def detect_poisoned_ids(pairs: Iterable[tuple[str, str]]) -> set[str]:
-    """pairs = (tvg-id, nome do canal) lidos das listas. Devolve ids usados por >=2 canais
-    realmente distintos (nomes que não são subconjunto um do outro; SD/HD/FHD/[H265] não contam)."""
     bases: dict[str, set[frozenset]] = {}
     for tid, nm in pairs:
         k = clean_tvid_key(tid)
@@ -570,7 +583,7 @@ def is_meaningful_programme(norm_title: str) -> bool:
     return True
 
 def local_tag(element: ET.Element) -> str: return element.tag.rsplit("}", 1)[-1]
-def format_xmltv_datetime(dt: datetime) -> str: return dt.astimezone(timezone.utc).strftime("%Y%m%d%H%M%S +0000")
+def format_xmltv_datetime(dt: datetime) -> str: return dt.astimezone(timezone(timedelta(hours=-3))).strftime("%Y%m%d%H%M%S -0300")
 
 @lru_cache(maxsize=500000)
 def parse_xmltv_datetime(value: str, default_offset: str = "+0000") -> datetime | None:
@@ -631,7 +644,7 @@ def download_to_temp_file(url: str, attempts: int = 4) -> Path:
     raise RuntimeError(f"Falha ao baixar ({last_error})")
 
 # =====================================================================
-# EXTRAÇÃO E ENRIQUECIMENTO DE METADADOS (SEM REPETIÇÃO T01E03 / S01E03)
+# EXTRAÇÃO E ENRIQUECIMENTO DE METADADOS (APENAS [T03E07] + VISUAL RICO)
 # =====================================================================
 _RE_XMLTV_NS = re.compile(r"^\s*(\d+)\s*\.\s*(\d+)\s*\.")
 _RE_SE_PATTERNS = [
@@ -643,14 +656,23 @@ _RE_EXPLICIT_EPISODE = re.compile(r"[\[\(\-\s]*\b(?:EPIS[OÓ]DIO|EP\.?)\s*(\d{1,
 _RE_TRAILING_FAKE_EP = re.compile(r"(?:\s*[\-\|:]\s*|\s+)(?:\[|\()?E(?:P)?\.?\s*0*1(?:\]|\))?\s*$", re.IGNORECASE)
 
 def strip_se_tokens(text: str) -> str:
-    """Remove qualquer S01E02, T01E02, T1 Ep 2, [T01 E02] ou Ep. 2 duplicado do texto."""
+    """Remove qualquer S01E02, T01E02, [T03E07], Ep. 2 ou cabeçalhos antigos duplicados do texto."""
     if not text:
         return ""
-    s = text
+    # Remove linhas de cabeçalhos pré-formatados de fontes externas para não duplicar
+    cleaned_lines = []
+    for ln in text.splitlines():
+        ln_s = ln.strip()
+        if any(ln_s.startswith(p) for p in ("🟢", "🔵", "🟡", "🟠", "🔴", "⚫", "📅", "🎭", "📝", "⏱")):
+            continue
+        if "Não recomendado para menores" in ln_s or "Livre para todos os públicos" in ln_s:
+            continue
+        cleaned_lines.append(ln_s)
+    s = " ".join(x for x in cleaned_lines if x)
     for pat in _RE_SE_PATTERNS:
         s = pat.sub(" ", s)
     s = _RE_EXPLICIT_EPISODE.sub(" ", s)
-    s = re.sub(r"\s{2,}", " ", s).strip(" -:|,;/[]()")
+    s = re.sub(r"\s{2,}", " ", s).strip(" -–—:|,;/[]()")
     return s
 
 def is_non_series_channel(channel_name: str) -> bool:
@@ -683,6 +705,8 @@ def extract_program_metadata(el: ET.Element, channel_name: str = "", duration_mi
     sub_title = ""
     desc = ""
     date_str = ""
+    rating_badge = ""
+    poster_icon = ""
     categories: list[str] = []
     season: int | None = None
     episode: int | None = None
@@ -690,6 +714,18 @@ def extract_program_metadata(el: ET.Element, channel_name: str = "", duration_mi
     for child in el:
         tag = local_tag(child)
         txt = (child.text or "").strip()
+        if tag == "icon":
+            src_attr = (child.attrib.get("src") or "").strip()
+            if src_attr and not poster_icon:
+                poster_icon = src_attr
+            continue
+        if tag == "rating":
+            val_node = child.find("value")
+            if val_node is not None and val_node.text:
+                b = normalize_rating_badge(val_node.text)
+                if b:
+                    rating_badge = b
+            continue
         if not txt:
             continue
         if tag == "title" and not title:
@@ -717,6 +753,15 @@ def extract_program_metadata(el: ET.Element, channel_name: str = "", duration_mi
                     if m:
                         season, episode = int(m.group(1)), int(m.group(2))
                         break
+
+    # Detecta classificação indicativa no texto da descrição caso não tenha vindo na tag <rating>
+    if not rating_badge and desc:
+        if "LIVRE" in desc.upper():
+            rating_badge = "🟢 LIVRE"
+        else:
+            m_age = re.search(r"(?:menores de|\+)\s*(10|12|14|16|18)\b", desc, flags=re.I)
+            if m_age:
+                rating_badge = RATING_SHORT_MAP.get(m_age.group(1), "")
 
     if " : " in title and not sub_title:
         parts = [p.strip() for p in title.split(" : ", 1)]
@@ -761,6 +806,10 @@ def extract_program_metadata(el: ET.Element, channel_name: str = "", duration_mi
     ):
         sub_title = ""
 
+    # Se a sinopse começa repetindo exatamente o sub_title, remove do início da sinopse
+    if sub_title and desc and desc.lower().startswith(sub_title.lower()):
+        desc = desc[len(sub_title):].lstrip(" -–—:|.,")
+
     return {
         "title": title,
         "sub_title": sub_title,
@@ -769,12 +818,11 @@ def extract_program_metadata(el: ET.Element, channel_name: str = "", duration_mi
         "episode": episode,
         "categories": categories,
         "date": date_str,
+        "rating_badge": rating_badge,
+        "icon": poster_icon,
     }
 
 def extract_epgshare_compound_candidates(channel_id: str) -> list[str]:
-    """Desmembra IDs compostos do EPGShare BR1 como:
-    'Caruaru/PE..Globo.–.TV.Asa.Branca.br' -> ['Globo TV Asa Branca', 'TV Asa Branca', 'Globo Caruaru', 'Globo Caruaru PE']
-    """
     extras = []
     if ".." not in channel_id:
         return extras
@@ -947,7 +995,6 @@ def _network_of_normalized(value: str) -> str:
 _GLOBO_BRAND_COMPACT = tuple(b.replace(" ", "") for b in _GLOBO_ONLY_BRANDS) + ("NSCTV",)
 
 def _fuzzy_incompatible(alias: str, candidate: str) -> bool:
-    """True quando a aproximação cruzaria emissoras, UFs, cidades, Gloob/News/Estrangeiros ou 'BRASIL' x 'BRASÍLIA'."""
     if alias == candidate:
         return False
     if ("GLOOB" in alias) != ("GLOOB" in candidate):
@@ -983,8 +1030,6 @@ def _compact_upper(value: str) -> str:
     return re.sub(r"[^A-Z0-9 ]", " ", "".join(c for c in v if not unicodedata.combining(c)).upper())
 
 def match_conflicts_network(entry_name: str, source: "EpgSource", channel_id: str) -> bool:
-    """SBT/Record/Band não podem receber canal da fonte que é de outra emissora, da TV Brasil,
-    da Rede TV ou afiliada exclusiva da Globo (EPTV, NSC, TV Sergipe...)."""
     compact = re.sub(r"[^A-Z]", "", _compact_upper(entry_name))
     net = next((n for n in ("SBT", "RECORD", "BAND") if compact.startswith(n)), "")
     if not net:
@@ -1401,9 +1446,10 @@ def schedule_health(source: EpgSource, channel_id: str, now: datetime) -> dict[s
         dur_m = (r.stop - r.start).total_seconds() / 60.0
         meta = extract_program_metadata(r.element, channel_id, dur_m)
         pts = 0.0
-        if meta["desc"] and len(meta["desc"]) >= 30: pts += 0.55
-        if meta["sub_title"]: pts += 0.25
-        if meta["season"] is not None or meta["episode"] is not None: pts += 0.20
+        if meta["desc"] and len(meta["desc"]) >= 30: pts += 0.45
+        if meta["sub_title"]: pts += 0.20
+        if meta["season"] is not None or meta["episode"] is not None: pts += 0.15
+        if meta["rating_badge"] or meta["categories"]: pts += 0.20
         rich_points += min(1.0, pts)
     richness_score = round(rich_points / len(sample_rows), 4) if sample_rows else 0.0
 
@@ -1664,6 +1710,7 @@ def get_primary_export_ids(entry: dict[str, object]) -> list[str]:
 def apply_rich_metadata_to_element(
     el: ET.Element, meta_pool: list[dict[str, Any]], channel_name: str, duration_minutes: float
 ) -> None:
+    """Formata <programme> com visual rico enxuto (🟢 LIVRE / 🟠 +14) e SOMENTE [T03E07] sem duplicar S04E07."""
     base_meta = extract_program_metadata(el, channel_name, duration_minutes)
     all_metas = [base_meta, *(meta_pool or [])]
 
@@ -1672,6 +1719,8 @@ def apply_rich_metadata_to_element(
     best_season: int | None = None
     best_episode: int | None = None
     best_date = ""
+    best_rating_badge = ""
+    best_icon = ""
     merged_cats: list[str] = []
 
     for m in all_metas:
@@ -1685,8 +1734,12 @@ def apply_rich_metadata_to_element(
             best_episode = m["episode"]
         if not best_date and m.get("date"):
             best_date = m["date"]
+        if not best_rating_badge and m.get("rating_badge"):
+            best_rating_badge = m["rating_badge"]
+        if not best_icon and m.get("icon"):
+            best_icon = m["icon"]
         for c in m.get("categories", []):
-            if c not in merged_cats:
+            if c and c not in merged_cats:
                 merged_cats.append(c)
 
     is_movie_or_sport = is_likely_movie_or_sport(merged_cats, best_desc, duration_minutes, channel_name)
@@ -1694,6 +1747,7 @@ def apply_rich_metadata_to_element(
         best_season = None
         best_episode = None
 
+    # CRÍTICO: Remove TODAS as tags <episode-num> para impedir que o TiviMate/Televizo injete S04E07 duplicado!
     for old_ep in list(el.findall("episode-num")):
         el.remove(old_ep)
 
@@ -1706,52 +1760,69 @@ def apply_rich_metadata_to_element(
     best_sub = strip_se_tokens(best_sub)
     best_desc = strip_se_tokens(best_desc)
 
+    if best_sub and (best_sub.upper() == clean_title.upper() or clean_title.upper().endswith(best_sub.upper())):
+        best_sub = ""
+
+    # Se a sinopse começa repetindo o subtítulo, limpa da sinopse para não ficar redundante
+    if best_sub and best_desc and best_desc.lower().startswith(best_sub.lower()):
+        best_desc = best_desc[len(best_sub):].lstrip(" -–—:|.,")
+
+    # Remove <sub-title> separado do XML se já vamos mostrá-lo formatado na linha de episódio da descrição,
+    # evitando que players mostrem o subtítulo duas vezes seguidas!
+    sub_node = el.find("sub-title")
+    if sub_node is not None:
+        el.remove(sub_node)
+
+    # Formato estrito pedido: [T03E07] (sem espaço e sem SxxExx)
     se_badge = ""
     if not is_movie_or_sport:
         if best_season is not None and best_episode is not None:
-            se_badge = f"T{best_season:02d} E{best_episode:02d}"
+            se_badge = f"[T{best_season:02d}E{best_episode:02d}]"
         elif best_episode is not None and best_episode > 1:
-            se_badge = f"Ep. {best_episode}"
+            se_badge = f"[Ep.{best_episode:02d}]"
 
-    # No <sub-title>, gravamos APENAS o nome do episódio (sem o se_badge),
-    # pois a tag <episode-num system="xmltv_ns"> abaixo já faz o player exibir S01E03 / T01E03 uma única vez!
-    sub_node = el.find("sub-title")
-    if is_movie_or_sport or not best_sub or best_sub.upper() == clean_title.upper() or clean_title.upper().endswith(best_sub.upper()):
-        if sub_node is not None:
-            el.remove(sub_node)
-        best_sub = ""
-    else:
-        if sub_node is None:
-            sub_node = ET.SubElement(el, "sub-title")
-        sub_node.text = best_sub
+    # Linha 1: 🟠 +14 | 📅 2021 | ⏱ 45 mins | 🎭 Séries, Policial
+    meta_bar: list[str] = []
+    if best_rating_badge:
+        meta_bar.append(best_rating_badge)
+    if best_date and best_date.isdigit():
+        meta_bar.append(f"📅 {best_date}")
+    dur_int = int(round(duration_minutes))
+    if 1 <= dur_int <= 720:
+        meta_bar.append(f"⏱ {dur_int} mins")
+    if merged_cats:
+        meta_bar.append(f"🎭 {', '.join(merged_cats[:4])}")
 
-    header_parts = []
+    # Linha 2 (Séries/Episódios): [T03E07] Nome do Episódio
+    ep_line_parts: list[str] = []
     if se_badge:
-        header_parts.append(f"[{se_badge}]")
-    if best_sub and (not best_desc or best_sub.lower() not in best_desc.lower()):
-        header_parts.append(best_sub)
-    if best_date and (not best_desc or best_date not in best_desc):
-        header_parts.append(f"({best_date})")
+        ep_line_parts.append(se_badge)
+    if best_sub:
+        ep_line_parts.append(best_sub)
+    ep_line = " ".join(ep_line_parts).strip()
 
-    prefix_str = " ".join(header_parts).strip()
-    if prefix_str and best_desc:
-        final_desc = f"{prefix_str} — {best_desc}"
-    elif prefix_str:
-        final_desc = prefix_str
+    header_lines: list[str] = []
+    if meta_bar:
+        header_lines.append(" | ".join(meta_bar))
+    if ep_line:
+        header_lines.append(f"📝 {ep_line}" if not se_badge else ep_line)
+
+    if header_lines and best_desc:
+        final_desc = "\n".join(header_lines) + "\n\n" + best_desc
+    elif header_lines:
+        final_desc = "\n".join(header_lines)
     else:
         final_desc = best_desc
 
     if final_desc:
         desc_node = el.find("desc")
         if desc_node is None:
-            desc_node = ET.SubElement(el, "desc")
+            desc_node = ET.SubElement(el, "desc", {"lang": "pt"})
         desc_node.text = final_desc
 
-    if not is_movie_or_sport and best_season is not None and best_episode is not None:
-        s_idx = max(0, best_season - 1)
-        e_idx = max(0, best_episode - 1)
-        ep_ns = ET.SubElement(el, "episode-num", {"system": "xmltv_ns"})
-        ep_ns.text = f"{s_idx}.{e_idx}."
+    # Preserva pôster se veio de outra fonte mesclada (ex: Vivo ou Claro) e o elemento base não tinha
+    if best_icon and el.find("icon") is None:
+        ET.SubElement(el, "icon", {"src": best_icon})
 
 def stitch_multi_source_schedule(
     all_evaluations: list[CandidateEvaluation], target_channel_id: str, channel_name: str, cutoff: datetime, max_future: datetime, overrides: dict[str, object]
@@ -1897,7 +1968,17 @@ def stitch_multi_source_schedule(
 
         if not matching_time_metas and norm_title in metadata_by_norm_title:
             matching_time_metas = [
-                {"title": m["title"], "sub_title": "", "desc": m["desc"], "season": None, "episode": None, "categories": m["categories"], "date": m["date"]}
+                {
+                    "title": m["title"],
+                    "sub_title": "",
+                    "desc": m["desc"],
+                    "season": None,
+                    "episode": None,
+                    "categories": m["categories"],
+                    "date": m["date"],
+                    "rating_badge": m.get("rating_badge", ""),
+                    "icon": m.get("icon", ""),
+                }
                 for m in metadata_by_norm_title[norm_title]
             ]
 
@@ -1950,7 +2031,7 @@ def write_epg_stream(
                 gz.write(data)
                 if plain is not None: plain.write(data)
 
-            generator = "EPG Universal Otimizado (Afiliadas Locais por Nome + Sem Repetição SxxExx)"
+            generator = "EPG Universal Otimizado (Vivo/Claro Direto + [TxxExx] Limpo)"
             source_name = "Consolidado Inteligente de Múltiplas Fontes"
             emit((f"<?xml version='1.0' encoding='utf-8'?>\n<tv generator-info-name={quoteattr(generator)} source-info-name={quoteattr(source_name)}>\n").encode("utf-8"))
 
@@ -1994,11 +2075,33 @@ def write_epg_stream(
     print(f"Tamanho final do epg.xml.gz: {size_mb:.2f} MB (Limite do GitHub: 100 MB)")
     return programme_count, len(xml_id_to_data)
 
+def ensure_operator_epgs_generated() -> None:
+    """Executa automaticamente fetch_claro_epg.py e fetch_vivo_epg.py se ainda não tiverem gerado os .xml.gz."""
+    if not Path("claro_epg.xml.gz").exists() and Path("fetch_claro_epg.py").exists():
+        try:
+            print("\nGerando claro_epg.xml.gz direto da API da Claro TV+...")
+            from fetch_claro_epg import generate_claro_epg
+            generate_claro_epg()
+        except Exception as e:
+            print(f"  -> Aviso ao extrair Claro TV+ API: {e}")
+
+    if not Path("vivo_epg.xml.gz").exists() and Path("fetch_vivo_epg.py").exists():
+        try:
+            print("\nGerando vivo_epg.xml.gz direto da API da Vivo Play...")
+            from fetch_vivo_epg import generate_vivo_epg
+            generate_vivo_epg()
+        except Exception as e:
+            print(f"  -> Aviso ao extrair Vivo Play API: {e}")
+
 def main() -> None:
-    print("Iniciando geração de EPG (Afiliadas e Abertos Casados por Nome + Sem Repetição SxxExx)...")
+    print("Iniciando geração de EPG (Vivo/Claro Direto + Visual +14/+18/LIVRE + Apenas [TxxExx])...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+    # Garante que os extratores da Claro e Vivo rodem antes de indexar as fontes
+    ensure_operator_epgs_generated()
+
     stage_start = time.perf_counter()
     
     entries = []
@@ -2034,7 +2137,6 @@ def main() -> None:
             rec["group"] = group
 
     def parse_m3u_file_into_records(m3u_file: Path) -> int:
-        """Lê tanto arquivos .m3u completos (com URL) quanto arquivos .safe.m3u higienizados (apenas #EXTINF)."""
         count = 0
         raw_lines = m3u_file.read_text("utf-8", errors="ignore").splitlines()
         idx = 0
@@ -2059,7 +2161,7 @@ def main() -> None:
             group_match = re.search(r'group-title="(.*?)"', current_extinf, re.IGNORECASE)
             name_match = re.search(r',([^,]*?)$', current_extinf)
             
-            tvg_id = tvg_id_match.group(1).strip() if tvg_id_match else ""
+            tvg_id = tvg_id_match.group(1).strip() if tvg_id_id_ok(tvg_id_match) else ""
             tvg_name = html.unescape(tvg_name_match.group(1).strip()) if tvg_name_match else ""
             group = html.unescape(group_match.group(1).strip()) if group_match else ""
             name = html.unescape(name_match.group(1).strip()) if name_match else ""
@@ -2085,6 +2187,9 @@ def main() -> None:
             )
             count += 1
         return count
+
+    def tvg_id_id_ok(m) -> bool:
+        return bool(m and m.group(1).strip())
 
     if CATALOG_PATH.exists():
         try:
