@@ -70,12 +70,12 @@ _RE_NO_EPG_CHANNEL = re.compile(
 
 # Sinônimos diretos: Nome limpo na lista -> Lista de candidatos de alta precisão no EPG
 CHANNEL_SYNONYMS: dict[str, list[str]] = {
-    "E": ["E!", "E! Entertainment", "E!.br", "e.br", "E"],
-    "E!": ["E!", "E! Entertainment", "E!.br", "e.br", "E"],
+    "E": ["E!", "E! Entertainment", "eentertainment.br", "E!.br", "e.br", "E"],
+    "E!": ["E!", "E! Entertainment", "eentertainment.br", "E!.br", "e.br", "E"],
     "A E": ["A&E", "A&E.br", "ae.br"],
     "HBO 2": ["HBO 2", "HBO2", "HBO2.br", "hbo2.br"],
     "HBO": ["HBO", "HBO.br", "hbo.br"],
-    "HBO PLUS": ["HBO Plus", "HBOPlus.br", "hboplusbrasil.br"],
+    "HBO PLUS": ["HBO Plus", "HBOPlusBrasil.br", "HBOPlus.br", "hboplusbrasil.br"],
     "HBO FAMILY": ["HBOFamily.br", "HBO Family"],
     "HBO SIGNATURE": ["HBOSignature.br", "HBO Signature"],
     "HBO MUNDI": ["HBOMundi.br", "HBO Mundi"],
@@ -83,15 +83,18 @@ CHANNEL_SYNONYMS: dict[str, list[str]] = {
     "HBO XTREME": ["HBOXtreme.br", "HBO Xtreme"],
     "DISCOVERY H H": ["Discovery Home & Health", "DiscoveryHomeHealth.br", "discoveryhomehealth.br"],
     "DISCOVERY HOME HEALTH": ["Discovery Home & Health", "DiscoveryHomeHealth.br"],
-    "UNIVERSAL STUDIO": ["Studio Universal", "StudioUniversal.br", "studiouniversal.br", "Universal Studio"],
-    "STUDIO UNIVERSAL": ["Studio Universal", "StudioUniversal.br", "studiouniversal.br"],
+    "UNIVERSAL STUDIO": ["Studio Universal", "Studiouniversal.br", "studiouniversal.br", "Universal Studio"],
+    "STUDIO UNIVERSAL": ["Studio Universal", "Studiouniversal.br", "studiouniversal.br"],
     "UNIVERSAL CHANNEL": ["Universal TV", "Universal Channel", "Universal.br", "universal.br"],
     "SONY CHANNEL": ["Sony Channel", "Sony", "Sony.br", "sony.br"],
     "WARNER": ["Warner Channel", "Warner", "Warner.br", "warnerchannel.br"],
     "WARNER CHANNEL": ["Warner Channel", "Warner", "Warner.br", "warnerchannel.br"],
     "TNT": ["TNT", "TNT.br", "tnt.br"],
     "TNT SERIES": ["TNT Séries", "TNT Series", "TNTSeries.br", "tntseries.br"],
-    "TNT NOVELAS": ["TNT Novelas", "TNTNovelas.br"],
+    "TNT NOVELAS": ["TNT Novelas", "TNTNovelas.br", "auto.tntnovelas"],
+    "ADULT SWIM": ["Adult Swim", "Adult.Swim.HD.br", "auto.adultswim"],
+    "GLOBOPLAY NOVELAS": ["Globoplay Novelas", "VIVA", "Viva.br"],
+    "LOVE NATURE": ["Love Nature", "LoveNature.br", "lovenature.br"],
     "H2": ["History 2", "H2", "History2.br", "history2.br"],
     "HISTORY 2": ["History 2", "H2", "History2.br", "history2.br"],
     "HISTORY": ["HistoryChannel.br", "History Channel", "History"],
@@ -99,16 +102,16 @@ CHANNEL_SYNONYMS: dict[str, list[str]] = {
     "OFF": ["OFF", "Canal OFF", "Off.br"],
     "SPORTV": ["SporTV 1", "SporTV", "SporTV.br", "sportv.br"],
     "SPORTV 1": ["SporTV 1", "SporTV", "SporTV.br", "sportv.br"],
-    "SPORTV 2": ["SPORTV 2", "SporTV 2", "SporTV2.br", "sportv2.br"],
+    "SPORTV 2": ["SPORTV 2", "SporTV 2", "Sportv2.br", "sportv2.br"],
     "SPORTV 3": ["SPORTV 3", "SporTV 3", "SporTV3.br", "sportv3.br"],
     "PREMIERE CLUBES": ["PREMIERE CLUBES", "Premiere Clubes", "PremiereClubes.br", "premiereclubes.br", "Premiere 1"],
     "PREMIERE 1": ["PREMIERE CLUBES", "Premiere Clubes", "PremiereClubes.br", "premiereclubes.br"],
-    "JOVEM PAN": ["Jovem Pan News", "JOVEM PAN", "jovempannews.br"],
+    "JOVEM PAN": ["jovem.pan.news.br", "Jovem Pan News", "JOVEM PAN", "jovempannews.br"],
     "CNN BRASIL": ["cnn.brasil.br", "CNN Brasil", "cnnbrasil.br"],
     "GLOBO SP": ["GB SP", "Globo SP", "globosp.br"],
     "GLOBO RJ": ["GB RJ", "Globo RJ", "globorj.br"],
     "GLOBO MINAS": ["GB MINAS", "Globo Minas", "globominas.br"],
-    "GLOBO BELO HORIZONTE": ["GB MINAS", "Globo Minas", "GLOBO BELO HORIZONTE"],
+    "GLOBO BELO HORIZONTE": ["GB MINAS", "Globo Minas", "GLOBO BELO HORIZONTE", "auto.globobelohorizontebr2"],
     "GLOBO NORDESTE": ["GB NORDESTE", "GLOBO TV NORDESTE", "Globo Nordeste"],
     "GLOBO PERNAMBUCO": ["GB NORDESTE", "GLOBO TV NORDESTE", "GLOBO PERNAMBUCO"],
     "GLOBO TV NORDESTE": ["GB NORDESTE", "GLOBO TV NORDESTE"],
@@ -117,10 +120,12 @@ CHANNEL_SYNONYMS: dict[str, list[str]] = {
     "GLOBO TV BAHIA": ["GB TV BAHIA", "Globo Rede Bahia", "GLOBO TV BAHIA"],
     "GLOBO RBS PORTO ALEGRE": ["Globo RBS TV Porto Alegre", "GB RBS PORTO ALEGRE"],
     "GLOBO RBS TV PORTO ALEGRE": ["Globo RBS TV Porto Alegre", "GB RBS PORTO ALEGRE"],
-    "RBS PASSO FUNDO GLOBO": ["GLOBO RBS TV PASSO FUNDO", "RBS PASSO FUNDO GLOBO"],
-    "RBS CAXIAS": ["GLOBO RBS TV CAXIAS DO SUL", "RBS CAXIAS"],
+    "RBS PASSO FUNDO GLOBO": ["RBS TV PASSO FUNDO", "GLOBO RBS TV PASSO FUNDO", "RBS PASSO FUNDO GLOBO"],
+    "RBS CAXIAS": ["RBS TV CAXIAS DO SUL", "GLOBO RBS TV CAXIAS DO SUL", "RBS CAXIAS"],
     "GLOBO RPC CURITIBA": ["Globo RPC TV Curitiba", "GB RPC CURITIBA"],
     "GLOBO RPC TV CURITIBA": ["Globo RPC TV Curitiba", "GB RPC CURITIBA"],
+    "GLOBO TV DIARIO": ["tv.diario.mogi.das.cruzes.br", "auto.globotvdiariobr2", "GB SP", "Globo SP"],
+    "GLOBO TV DIARIO MOGI DAS CRUZES": ["tv.diario.mogi.das.cruzes.br", "auto.globotvdiariobr2", "GB SP", "Globo SP"],
     "GLOBO TV INTEG JUIZ DE FORA": ["Globo TV Integracao Juiz de Fora", "GLOBO TV INTEG JUIZ DE FORA"],
     "GLOBO TV INTEGRACAO JUIZ DE FORA": ["Globo TV Integracao Juiz de Fora", "GLOBO TV INTEG JUIZ DE FORA"],
     "GLOBO TV VANG S J CAMPOS": ["Globo TV Vanguarda S J dos Campos", "GLOBO TV VANG S J CAMPOS"],
@@ -136,7 +141,7 @@ CHANNEL_SYNONYMS: dict[str, list[str]] = {
     "RECORD GOIAS": ["RECORDTV GOIAS", "Record Goias"],
     "RECORD TV GOIAS": ["RECORDTV GOIAS", "Record Goias"],
     "RECORD MANAUS": ["RECORDTV MANAUS", "Record Manaus"],
-    "RECORD TV NEWS": ["RECORD NEWS", "Record News", "recordnews.br"],
+    "RECORD TV NEWS": ["Recordnews.br", "RECORD NEWS", "Record News", "recordnews.br"],
     "BAND TV SP": ["BAND SP", "Band SP", "band.br"],
     "BAND TV RJ": ["BAND RJ", "Band RJ"],
     "BAND TV RS": ["BAND RS", "Band RS"],
@@ -145,9 +150,9 @@ CHANNEL_SYNONYMS: dict[str, list[str]] = {
     "BAND TV MINAS": ["BAND TV MINAS", "Band Minas"],
     "BAND TV GOIANIA": ["BAND TV GOIANIA", "Band Goiania"],
     "BAND TV CAMPINAS": ["BAND CAMPINAS", "Band Campinas"],
-    "BAND TV NEWS": ["BAND NEWS", "Band News", "bandnews.br"],
-    "BAND TV SPORTS": ["BAND SPORTS", "BandSports", "bandsports.br"],
-    "BANDSPORTS": ["BAND SPORTS", "BandSports", "bandsports.br"],
+    "BAND TV NEWS": ["band.news.br", "BAND NEWS", "Band News", "bandnews.br"],
+    "BAND TV SPORTS": ["BandSports.br", "BAND SPORTS", "BandSports", "bandsports.br"],
+    "BANDSPORTS": ["BandSports.br", "BAND SPORTS", "BandSports", "bandsports.br"],
     "SBT TV SP": ["SBT SP", "SBT", "sbt.br"],
     "SBT TV RJ": ["SBT RJ", "SBT Rio"],
     "SBT TV RS": ["SBT RS", "SBT TV RBS"],
@@ -275,12 +280,15 @@ def load_epg_id_index(epg_path: Path) -> dict[str, str]:
                 cid = (elem.attrib.get("id") or "").strip()
                 if cid:
                     cid_no_br = re.sub(r"\.br$", "", cid, flags=re.I)
+                    cid_clean = clean_channel_title_for_epg(cid_no_br)
                     for k in (
                         norm_lookup_key(cid),
                         norm_lookup_key(cid_no_br),
+                        cid_clean,
                         name_key(cid),
                         name_key(cid_no_br),
-                        name_key(normalizar_canal(cid)),
+                        name_key(cid_clean),
+                        name_key(normalizar_canal(cid_clean)),
                     ):
                         if k and k not in primary_index:
                             primary_index[k] = cid
@@ -288,14 +296,17 @@ def load_epg_id_index(epg_path: Path) -> dict[str, str]:
                     for child in elem:
                         if child.tag.rsplit("}", 1)[-1] == "display-name" and child.text:
                             dn = child.text.strip()
-                            if has_conflicting_channel_number(cid_no_br, dn):
+                            dn_clean = clean_channel_title_for_epg(dn)
+                            if has_conflicting_channel_number(cid_clean, dn_clean):
                                 continue
                             dn_no_br = re.sub(r"\.br$", "", dn, flags=re.I)
                             for k_dn in (
                                 norm_lookup_key(dn),
                                 norm_lookup_key(dn_no_br),
+                                dn_clean,
                                 name_key(dn),
-                                name_key(normalizar_canal(dn)),
+                                name_key(dn_clean),
+                                name_key(normalizar_canal(dn_clean)),
                             ):
                                 if k_dn and k_dn not in secondary_index:
                                     secondary_index[k_dn] = cid
@@ -314,7 +325,8 @@ def is_orig_tvg_id_poisoned(clean_ch_name: str, orig_id: str) -> bool:
     if re.match(r"^[0-9a-f]{8}-[0-9a-f]{4}-", oid):
         return True
     oid_no_br = re.sub(r"\.(?:br|bt)$", "", oid, flags=re.I)
-    if has_conflicting_channel_number(clean_ch_name, oid_no_br):
+    oid_clean = clean_channel_title_for_epg(oid_no_br)
+    if has_conflicting_channel_number(clean_ch_name, oid_clean):
         return True
     if oid == "agromais.br" and "AGRO" not in clean_ch_name:
         return True
@@ -327,6 +339,10 @@ def is_orig_tvg_id_poisoned(clean_ch_name: str, orig_id: str) -> bool:
     if oid == "sbt.br" and clean_ch_name not in {"SBT", "SBT SP", "SBT TV SP"}:
         return True
     if oid == "band.br" and clean_ch_name not in {"BAND", "BAND SP", "BAND TV SP"}:
+        return True
+    if "tvescola" in oid and "ESCOLA" not in clean_ch_name:
+        return True
+    if "uberlandia" in oid and "UBERLANDIA" not in clean_ch_name:
         return True
     return False
 
@@ -341,11 +357,12 @@ def resolve_best_tvg_id(channel_name: str, original_tvg_id: str, epg_index: dict
         if not cand_id:
             return False
         cand_no_br = re.sub(r"\.(?:br|bt)$", "", cand_id, flags=re.I)
-        return not has_conflicting_channel_number(clean_title, cand_no_br)
+        cand_clean = clean_channel_title_for_epg(cand_no_br)
+        return not has_conflicting_channel_number(clean_title, cand_clean)
 
     if clean_title in CHANNEL_SYNONYMS:
         for syn in CHANNEL_SYNONYMS[clean_title]:
-            for k_syn in (norm_lookup_key(syn), name_key(syn)):
+            for k_syn in (norm_lookup_key(syn), name_key(syn), clean_channel_title_for_epg(syn)):
                 if k_syn and k_syn in epg_index:
                     found_id = epg_index[k_syn]
                     if _valid_candidate_id(found_id):
@@ -368,7 +385,13 @@ def resolve_best_tvg_id(channel_name: str, original_tvg_id: str, epg_index: dict
 
     if original_tvg_id and not is_orig_tvg_id_poisoned(clean_title, original_tvg_id):
         orig_no_br = re.sub(r"\.(?:br|bt)$", "", original_tvg_id.strip(), flags=re.I)
-        for k_id in (norm_lookup_key(original_tvg_id), norm_lookup_key(orig_no_br), name_key(original_tvg_id), name_key(orig_no_br)):
+        for k_id in (
+            norm_lookup_key(original_tvg_id),
+            norm_lookup_key(orig_no_br),
+            clean_channel_title_for_epg(orig_no_br),
+            name_key(original_tvg_id),
+            name_key(orig_no_br),
+        ):
             if k_id and k_id in epg_index:
                 found_id = epg_index[k_id]
                 if _valid_candidate_id(found_id):
