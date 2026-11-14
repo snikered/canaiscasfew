@@ -126,8 +126,8 @@ CHANNEL_SYNONYMS: dict[str, list[str]] = {
     "GLOBO RPC TV CURITIBA": ["Globo RPC TV Curitiba", "GB RPC CURITIBA"],
     "GLOBO TV DIARIO": ["tv.diario.mogi.das.cruzes.br", "auto.globotvdiariobr2", "GB SP", "Globo SP"],
     "GLOBO TV DIARIO MOGI DAS CRUZES": ["tv.diario.mogi.das.cruzes.br", "auto.globotvdiariobr2", "GB SP", "Globo SP"],
-    "GLOBO TV INTEG JUIZ DE FORA": ["Globo TV Integracao Juiz de Fora", "GLOBO TV INTEG JUIZ DE FORA"],
-    "GLOBO TV INTEGRACAO JUIZ DE FORA": ["Globo TV Integracao Juiz de Fora", "GLOBO TV INTEG JUIZ DE FORA"],
+    "GLOBO TV INTEG JUIZ DE FORA": ["Globo TV Integracao Juiz de Fora", "GLOBO TV INTEG JUIZ DE FORA", "GB MINAS"],
+    "GLOBO TV INTEGRACAO JUIZ DE FORA": ["Globo TV Integracao Juiz de Fora", "GLOBO TV INTEG JUIZ DE FORA", "GB MINAS"],
     "GLOBO TV VANG S J CAMPOS": ["Globo TV Vanguarda S J dos Campos", "GLOBO TV VANG S J CAMPOS"],
     "GLOBO TV VANGUARDA S J DOS CAMPOS": ["Globo TV Vanguarda S J dos Campos", "GLOBO TV VANG S J CAMPOS"],
     "GLOBO VERDES MARES": ["GB TV VERDES MARES", "GLOBO VERDES MARES", "Globo TV Verdes Mares"],
@@ -353,11 +353,13 @@ def resolve_best_tvg_id(channel_name: str, original_tvg_id: str, epg_index: dict
 
     clean_title = clean_channel_title_for_epg(channel_name)
 
-def _valid_candidate_id(cand_id: str) -> bool:
+    def _valid_candidate_id(cand_id: str) -> bool:
         if not cand_id:
             return False
         cid_low = cand_id.lower()
         if "tvescola" in cid_low and "ESCOLA" not in clean_title:
+            return False
+        if "uberlandia" in cid_low and "UBERLANDIA" not in clean_title:
             return False
         cand_no_br = re.sub(r"\.(?:br|bt)$", "", cand_id, flags=re.I)
         cand_clean = clean_channel_title_for_epg(cand_no_br)
