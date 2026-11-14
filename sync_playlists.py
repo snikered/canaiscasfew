@@ -73,6 +73,7 @@ CHANNEL_SYNONYMS: dict[str, list[str]] = {
     "E": ["E!", "E! Entertainment", "eentertainment.br", "E!.br", "e.br", "E"],
     "E!": ["E!", "E! Entertainment", "eentertainment.br", "E!.br", "e.br", "E"],
     "A E": ["A&E", "A&E.br", "ae.br"],
+    "TVE": ["TVE Bahia", "TVE BAHIA", "tve.bahia.br", "TV BRASIL", "tvbrasil.br"],
     "HBO 2": ["HBO 2", "HBO2", "HBO2.br", "hbo2.br"],
     "HBO": ["HBO", "HBO.br", "hbo.br"],
     "HBO PLUS": ["HBO Plus", "HBOPlusBrasil.br", "HBOPlus.br", "hboplusbrasil.br"],
