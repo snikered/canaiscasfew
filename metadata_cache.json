@@ -1,0 +1,4802 @@
+{
+  "M:DEVORADOR": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:GUERRA": {
+    "year": "1997",
+    "rating": "",
+    "genre": "Guerra",
+    "desc": ""
+  },
+  "S:MORTE E MISTERIO NA AMAZONIA": {
+    "year": "",
+    "rating": "",
+    "genre": "Mistério",
+    "desc": ""
+  },
+  "S:CARLINHOS BROWN EM MEIA LUA INTEIRA": {
+    "year": "2010",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:LAST WEEK TONIGHT WITH JOHN OLIVER": {
+    "year": "",
+    "rating": "",
+    "genre": "Talk Show",
+    "desc": ""
+  },
+  "M:INVOCACAO DO MAL 3 A ORDEM DO DEMONIO": {
+    "year": "",
+    "rating": "",
+    "genre": "Terror",
+    "desc": ""
+  },
+  "M:MADAME DUROCHER": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CIDADE DE DEUS A LUTA NAO PARA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:NARRATIVAS NEGRAS NAO CONTADAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:DUNA PARTE DOIS": {
+    "year": "",
+    "rating": "",
+    "genre": "Ficção Científica/Ficção",
+    "desc": ""
+  },
+  "M:EXTERMINIO A EVOLUCAO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:STATE OF PLAY": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:A IDADE DOURADA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:INVOCACAO DO MAL 4 O ULTIMO RITUAL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:DUNA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:UM TANTO FAMILIAR COM PEDRO ANDRADE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:TWINLESS UM GEMEO A MENOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:PADRINHOS LTDA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:OS QUERIDINHOS DA AMERICA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:SARAH SILVERMAN ALGUEM QUE VOCE AMA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:GAROTA INTERROMPIDA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:BURLESQUE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:RAZAO E SENSIBILIDADE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:SUPER MAN A HISTORIA DE CHRISTOPHER REEVE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:AS TRAMBIQUEIRAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:TUDO PARA FICAR COM ELE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:NAO E MAIS UM BESTEIROL AMERICANO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:NUA NA REDE A VERDADE SOBRE ROSE LEONEL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PILULA DE FARINHA O ESCANDALO QUE GEROU VIDAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:LENDAS DOS HEROIS DO CONDOR OS VALENTES": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:QUESTAO DE HONRA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:O TORMENTO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:OI SUMIDO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:ME CHAME PELO SEU NOME": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:FERIAS FORCADAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:O SUSSURRO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:BLADE RUNNER O CACADOR DE ANDROIDES VERSAO FINAL DO DIRETOR": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:THE TORMENT": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:A OUTRA HISTORIA AMERICANA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:O REBELDE NO CAMPO DE CENTEIO A VIDA DE J D SALINGER": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:BATEAU MOUCHE O NAUFRAGIO DA JUSTICA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:O ESQUADRAO SUICIDA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:JASON X": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:O DEMONIO DOS MARES": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:FUNK DOC": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:COVIL DE LADROES 2": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:GOLPE DUPLO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:O CARA PERFEITO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:NUNCA MAIS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:PAIXAO OBSESSIVA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MONSTERS OF GOD": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:BEAST OF WAR": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:SNIPER NO NATION": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:VETERINARIOS DO TEXAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PATRULHEIROS DA NATUREZA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CASAS NA ARVORE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:UM LAR PARA PETS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:O AQUARIO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:VETERINARIO DAS MONTANHAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:O VINCULO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MINHA VIDA ANIMAL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:ANIMAIS EM RISCO HOUSTON": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:BICHOS MALCRIADOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:A GUERRA DOS TUBAROES": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:OPERACAO TANZANIA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:LENDAS SELVAGENS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:EXTINTO OU NAO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:TUBAROES EM RISCO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PESCA MORTAL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:A FAMILIA IRWIN MORDIDAS EXTRAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:TUBAROES EM RISCO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:OS 7 PECADOS ANIMAIS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:EVEREST AIR": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CELEBRIDADE ANIMAL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CACADORES DE PITONS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PERDIDO NA AFRICA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:LENDAS DA NATUREZA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MONSTROS DE DEUS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:VIVA O CINEMA UMA HISTORIA DA MOSTRA DE SAO PAULO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:O PALACIO DE JOE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:DEADWOOD O FILME": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:NA CORRIDA COM BETO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:537 VOTOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:A MESSIAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CAMERA ENTRE BALAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:OSLO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:A VERDADE SOBRE ROBOS ASSASSINOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:QUAL O MEU NOME MUHAMMAD ALI": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:O DIA EM QUE O ESPORTE PAROU": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:MOEDA DIGITAL O MISTERIO DO BITCOIN": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PERRY MASON": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:RECONTAGEM": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:LOUCO NAO DOIDO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:CUIDADO COM O SLENDERMAN": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:TONY HAWK ATE AS RODINHAS CAIREM": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:VIDA NA AGUA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PESQUEIROS DO BRASIL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:DESTINOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PESCA GOIAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:SLOW FISHING": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:ALTA PERFORMANCE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:FAMILIA NAKAMURA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:NA PEGADA DO FLY": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:TV SHOPPING BRASIL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PURA PESCA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:YGARAPE CAMINHO DAS AGUAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:REMOS E RUMOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MOVIDOS PELA PESCA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:ALMA DE GIGANTE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:BIOPESCA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:NATUREZA URBANA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:ELAS NA PESCA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:A META": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:FISH NEWS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PESCA E RANCHO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PROVAS E TORNEIOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MAIS PRAIA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:A GUERRA DOS BOLOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:RECEITAS DE HUMOR DA DAPHNE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:DUELO COM BOBBY FLAY": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:KITCHEN BOSS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:DEU BOLO COM BUDDY VALASTRO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:A GUERRA DOS CUPCAKES": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:COMIDAS DE PRAIA COM KATIE LEE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:FOOD TRUCK A GRANDE CORRIDA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PEQUENOS CONFEITEIROS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:DESAFIO NO GRILL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CONFEITEIRO NUMERO 1 A COMPETICAO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:BOBBY FLAY AMEACA TRIPLA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CHEF ALEX CONTRA TODOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:LANCHONETES CLASSICAS COM GUY FIERI": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:SABORES DA FAZENDA COM MOLLY": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CHOPPED JUNIOR": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:SABORES DA ITALIA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:SELENA RESTAURANTE": {
+    "year": "2009",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:HOMEM VS COMIDA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:O GENIO DA CONFEITARIA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:DRINQUES PELO MUNDO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CIAO HOUSE A COMPETICAO": {
+    "year": "1996",
+    "rating": "",
+    "genre": "Comédia",
+    "desc": ""
+  },
+  "S:COMIDAS EXOTICAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:TUDO SOBRE CHURRASCO": {
+    "year": "2010",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:BUDDY VS DUFF O DUELO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:BOLO PERFEITO A COMPETICAO": {
+    "year": "2019",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:AVENTURA CULINARIA COM ROGER MOOKING": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:RECEITAS CASEIRAS DA VALERIE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:SCOOBY O FILME": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:OS SMURFS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:ZOOM ACADEMIA DE SUPER HEROIS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:DC LIGA DOS SUPERPETS": {
+    "year": "",
+    "rating": "",
+    "genre": "Aventura/História",
+    "desc": ""
+  },
+  "M:DC LIGA DOS SUPERPETS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:O BICHO VAI PEGAR 2": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CEGONHAS A HISTORIA QUE NAO TE CONTARAM": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:TA DANDO ONDA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:TOM JERRY O FILME": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:HAPPY FEET 2 O PINGUIM": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:LINGUAS DA NOSSA LINGUA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:HOTEL TRANSYLVANIA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:TITIO NOEL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:HOTEL TRANSILVANIA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MINHA VIDA E UM CIRCO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:OS JOVENS TITAS EM ACAO NOS CINEMAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:TA CHOVENDO HAMBURGUER 2": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:ANGRY BIRDS O FILME": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:AS MENINAS SUPER PODEROSAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:LEGO NINJAGO O FILME": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:O SEGREDO DO RANCHO SKINWALKER": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MISTERIOS REVELADOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:GRANDES MISTERIOS DA HISTORIA COM LAURENCE FISHBURNE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:INEXPLICAVEL COM WILLIAM SHATNER": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MISTERIOS INEXPLORADOS COM DANNY TREJO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PARADOS NA FRONTEIRA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:O MELHOR DE TRATO FEITO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:ABERTO PARA COMPRAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:TRATO FEITO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:EU ESTAVA LA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CACADORES DE RELIQUIAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:ALIENIGENAS DO PASSADO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:AQUI TEM HISTORIA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:M E N T E S HEROIS DA CIENCIA E TECNOLOGIA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:INACREDITAVEL COM DAN AYKROYD": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:OS JOVENS TITAS EM ACAO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:ILHA DOS DESAFIOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:LOONEY TUNES APRESENTA SIMPLIFICANDO OS ESPORTES": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:O MUNDO SEM FILTRO DE ANY MALU": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:IRMAO DO JOREL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:URSOS SEM CURSO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:HORA DE AVENTURA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CLARENCIO O OTIMISTA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:TOM JERRY GOKKO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:O MUNDO MARAVILHOSAMENTE ESTRANHO DE GUMBALL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:BATWHEELS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:APENAS UM SHOW AS FITAS PERDIDAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:APENAS UM SHOW": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:STEVEN UNIVERSO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:O INCRIVEL MUNDO DE GUMBALL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:STEVEN UNIVERSO FUTURO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:O MUNDO DE GREG": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:KRYPTO SALVA O DIA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:THE WONDERFULLY WEIRD WORLD OF GUMBALL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:UM TIO QUASE PERFEITO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:A KILLER STORY": {
+    "year": "",
+    "rating": "",
+    "genre": "Drama/Terror",
+    "desc": ""
+  },
+  "S:A BUSSOLA DE OURO": {
+    "year": "",
+    "rating": "",
+    "genre": "Fantasia/Romance",
+    "desc": ""
+  },
+  "M:O FLASH": {
+    "year": "2014",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:AQUAMAN 2 O REINO PERDIDO": {
+    "year": "2023",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:HOMEM ARANHA": {
+    "year": "",
+    "rating": "",
+    "genre": "História",
+    "desc": ""
+  },
+  "S:MARAVILHAS SOMBRIAS": {
+    "year": "2010",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MARAVILHAS SAGRADAS COM DENNIS QUAID": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:JURASSIC WORLD REINO AMEACADO": {
+    "year": "2018",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:ALEM DA MORTE": {
+    "year": "2001",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:O LIVRO DE ELI": {
+    "year": "2010",
+    "rating": "",
+    "genre": "Ficção Científica/Ficção",
+    "desc": ""
+  },
+  "M:JACK O CACADOR DE GIGANTES": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:BESOURO AZUL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:300": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:ASTRONAUTA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:BOB BURNQUIST A LENDA DO SKATE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:INVENTOS DA ANTIGUIDADE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:COLISEU": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:LEGADOS DA ANTIGUIDADE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CONSTRUINDO UM IMPERIO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:AS MEGAMARCAS QUE MUDARAM O MUNDO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:GIGANTES DOS ALIMENTOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:A MOEDA QUE VINGOU COMO O REAL TRANSFORMOU O BRASIL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:APOCALIPSES DA ANTIGUIDADE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:LUGARES MISTERIOSOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CONSTRUTORES DE IMPERIOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:A 2A GUERRA MUNDIAL VISTA DO ESPACO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:NIKOLA TESLA ARQUIVOS PERDIDOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:UMA BREVE HISTORIA DE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CACADORES DE DITADORES": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:IDEIAS SINISTRAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:FILHOS DA PISTA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:HISTORIAS SECRETAS DA SEGUNDA GUERRA MUNDIAL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:DECIFRANDO MILAGRES": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CIDADES OCULTAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:O PEREGRINO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MUNDOS PERDIDOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:SOLDADOS NISSEI DA 2A GUERRA MUNDIAL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:O OURO PERDIDO DA SEGUNDA GUERRA MUNDIAL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CUQUIN": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:BRINCANDO DE APRENDER NUMEROS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:BOOBA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MUNDO BITA IMAGINE SE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MUNDO BITA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PERNINHA EM OBRAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:GRIZZY E OS LEMMINGS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:LU E SEUS AMIGOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:POCOYO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:A CASA MAGICA DA GABBY": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CRESCENDO COM A GALINHA PINTADINHA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:OI DUGGEE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:LUCAS A ARANHA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:NUMBERBLOCKS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:POCOYO MUSICAS INFANTIS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:GRIZZY AND THE LEMMINGS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PEPPA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MIRACULOUS AS AVENTURAS DE LADYBUG": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:TARA DUNCAN": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:D P A DETETIVES DO PREDIO AZUL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:ALVINNN E OS ESQUILOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MEU MALVADO FAVORITO 2": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:GORMITI": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:AS AVENTURAS DO GATO DE BOTAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:DRAGOES PILOTOS DE BERK": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:A ARVORE FAMILIAR DOS CROODS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:BOLETIM EXTRAORDINARIO DO TOBBY": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MADAGASCAR PEQUENOS SELVAGENS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:BISBILHOTICES DA BRISA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:ZATHURA UMA AVENTURA ESPACIAL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:FICA COM A GENTE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:BOLA NA REDE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:IGREJA UNIVERSAL DO REINO DE DEUS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:A TARDE E SUA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:IGREJA UNIVERSAL DO REINO DE DEUS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:REDETV NOTICIAS 2A EDICAO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:BRASIL DO POVO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:REDETV NEWS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:IGREJA INTERNACIONAL DA GRACA DE DEUS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:RAPIDINHAS DA FAMA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:TV FAMA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:SENSACIONAL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:LEITURA DINAMICA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:MADRUGADA ANIMADA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:IGREJA DA GRACA NO SEU LAR": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:IGREJA INTERNACIONAL DA GRACA DE DEUS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:REDETV NOTICIAS 1A EDICAO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:REDETV NOTICIAS 1A EDICAO NACIONAL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:E NOTICIA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:O GRANDE VENCEDOR": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:SUPERPOP": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:JEFF BECK AT THE HOLLYWOOD BOWL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:HIP HOP MACHINE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:EXPERIMENTE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:VAMOS TOCAR": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:THE GREAT SONGWRITERS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:SETLIST": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:INESQUECIVEIS BOSSA NOVA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:SHAKIRA IN CONCERT EL DORADO WORLD TOUR": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:MULTISHOW IVETE SANGALO 20 ANOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:ATENCAO PARA O REFRAO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:VERSOES": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:NESSE CANTO EU CONTO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:RIHANNA LOUD TOUR AT THE O2": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:BLACK EYED PEAS FROM SYDNEY TO VEGAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MULTISHOW IVETE SANGALO 20 ANOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:5 SECONDS OF SUMMER THE FEELING OF FALLING UPWARDS FROM ROYAL ALBERT HALL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CHITAOZINHO E XORORO UMA HISTORIA DE SUCESSO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CLASSIC ALBUMS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:SHAKIRA IN CONCERT EL DORADO WORLD TOUR": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:SOM SERTANEJO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:DEPOIS DAQUELE ALBUM": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:DA SAMBA A FANTASTICA HISTORIA DE BIRA PRESIDENTE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:HANGOUT MUSIC FESTIVAL 2016": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:ELVIS PRESLEY 56 SPECIAL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:CAETANO E BETHANIA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:NA VOZ DELAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:ROCK ESTUDIO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:ALERTA SESSIONS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:JUDAS PRIEST EPITAPH": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MICHAEL JACKSON A HISTORIA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:HUNGRIA HIP HOP ATMOSFERA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PEPPA PIG": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:O SHOW DA LUNA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:ACADEMIA UNICORNIO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:SHASHA MILO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:TRES ESPIAS DEMAIS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:WINX CLUB A MAGIA ESTA DE VOLTA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:POLLY POCKET": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:HELLO KITTY SUPER STYLE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:LEGO DREAMZZZ AS PROVAS DOS CACADORES DE SONHOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:TALKING TOM HEROES AMIGOS COM SUPERPODERES": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MINI BEAT POWER ROCKERS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MOJO SWOPTOPS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:ZOUK A BRUXINHA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:SUPER WISH": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:TURMA DA MONICA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MERMICORNO A QUEDA DAS ESTRELAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:44 GATOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:THE DOG PONY SHOW": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:100 LOBO O LIVRO DE HATH": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MEIO IRMAOS MEIO HEROIS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:BA DA BEAN": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:TOPO GIGIO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:UNDERDOGS UNITED": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MUNDO DO BARNEY": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:AGENTE BINKY AO RESGATE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:IRMAOS CONSTRUTORES E A FABRICA DE SONHOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:GEORGE O CURIOSO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:BARBIE UM TOQUE DE MAGICA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CHAPOLIN": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:TO DE GRACA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:VAI QUE COLA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:TAPAS BEIJOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:TOMA LA DA CA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:A GRANDE FAMILIA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:VOLTE SEMPRE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:O DONO DO LAR": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:OS SUBURBANOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CHAVES": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:BLOGUEIRINHA ENTREVISTA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:TVZ": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:VOZ DA CONSCIENCIA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:NO CORRE PARTIU ENTREGA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:TVZ TEMPORADA WANESSA CAMARGO E GOMINHO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:A VILA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:TOP TVZ": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:DESAPEGA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:RECLAME": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:WEME E A NATUREZA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:QUINTAL DA CULTURA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:COCORICO NA CIDADE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:COCORICO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:JACARELVIS E AMIGOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:LEO O CAMINHAO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PORTAO MAGICO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:BINO E FINO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MILO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MEU AMIGAOZAO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MASHA E O URSO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:NINHOS EM MOVIMENTO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:QUINTAL TV": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:GILDO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:BLUEY": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:IURI UDI": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:A CAVERNA DE PETRA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:OSMAR A PRIMEIRA FATIA DO PAO DE FORMA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:O MUNDO DE BEAKMAN": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:SHAUN O CARNEIRO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:ANTIMATERIA ENERGIA GEEK": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:CARTAO VERDE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:RODA VIVA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:METROPOLIS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PERSONA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:ARQUIVO SP": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:INGLES COM MUSICA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:NOSSA LINGUA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:LUPITA NO PLANETA DE GENTE GRANDE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:TURBOSSAUROS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PARQUINHO JURASSICO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:COCORICO CONTA CLASSICOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PARAMIGOS IMPARAVEIS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:AMIZADE COLORIDA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PJ MASKS HEROIS DE PIJAMA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:OS OCULOS MAGICOS DE CHARLOTTE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:HISTORIAS ATRAS DA PORTA": {
+    "year": "2026",
+    "rating": "",
+    "genre": "Futebol",
+    "desc": ""
+  },
+  "S:ESSE E O BICHO": {
+    "year": "",
+    "rating": "",
+    "genre": "Guerra",
+    "desc": ""
+  },
+  "S:MORGANA CELESTE": {
+    "year": "2023",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:REPORTER ECO": {
+    "year": "2000",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PROVOCA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:O NOVO SEMPRE VEM": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:VITRINE": {
+    "year": "2026",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CAFE FILOSOFICO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:BRASIL JAZZ SINFONICA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:ENERGIA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:MATERIA DE CAPA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:BOAS PRATICAS ESCOLARES": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:TRAVESSIAS DESIGUAIS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CLASSICOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:ENTRELINHAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:NEGROS EM FOCO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:DO VELHO AO NOVO BEM VINDO AO LAR": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:IRMAOS A OBRA LAR SEMPRE LAR": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:TE DEVO ESSA REFORMA DAS ESTRELAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:100 DIAS PARA MORAR COMECANDO DO ZERO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:90 DIAS PARA CASAR": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MASTERCHEF PROFISSIONAIS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:S O S RESTAURANTE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PESADELO NA COZINHA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CHEFS DE ALTO NIVEL COM GORDON RAMSAY": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PESADELO NA COZINHA COM GORDON RAMSAY": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:O SOCIO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:90 DIAS NA CAMA DO OUTRO LADO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:SOBRE ESSA PELE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:QUILOS MORTAIS COMO ELES ESTAO AGORA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:COZINHA DOS SONHOS COM JOHN E ANTHONY": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:NATE E JEREMIAH BEM VINDO AO LAR": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:A PEQUENA GRANDE FAMILIA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:OS PEQUENOS JOHNSTONS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:90 DIAS PARA CASAR FELIZES PARA SEMPRE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:90 DIAS NA CAMA FELIZES PARA SEMPRE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:QUILOS MORTAIS ITALIA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:DRA SANDRA LEE A RAINHA DOS CRAVOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:A RAINHA DO BISTURI COM A DRA CAROL BRANDAO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:KEITH EVAN REFORMANDO COM O CORACAO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MISSAO FAXINA COM ELLEN MILGRAU": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:IRMAOS A OBRA SOB PRESSAO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CHARLIE PAU PRA TODA OBRA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:QUILOS MORTAIS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:VINICOLAS AO REDOR DO MUNDO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:LAVANDO A ALMA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:BRASIL VISTO DE CIMA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MUNDO VISTO DE CIMA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:VIAGEM VINHO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:UVAS E VINHEDOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:HEY HO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:DESTINO CERTO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:A VIDA E UMA PASSAGEM": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:DESTINOS DO SABOR": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CASAS QUE VALEM A VIAGEM": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:RUAS MUNDO AFORA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PARAISOS NO CARIBE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:HOTEIS INCRIVEIS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:BRASIL VISTO DE CIMA A NOITE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MUNDO MUYLOCO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:EUCEANO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:RESTAURANTES INESQUECIVEIS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:SINGULARES": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:HOTEIS INCRIVEIS ESPECIAL FERIAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PARTIU CAMPING": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:SABORES DO MUNDO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:VIAGEM A QUALQUER CUSTO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:BIOMAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:TA NA HORA DO CAFE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:NALU E ZAY PELO MUNDO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:FERNANDO FERNANDES ENTRE O CEU E O INFERNO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:A VIDA E IRADA VAMOS CURTIR": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:KAIAK": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MAR E MUSICA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:BRAVA MENTE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:7 CUMES": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:AFRICA 360": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:HISTORIAS DO COLETIVO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:NINGUEM ME DOMINA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:ROTEIRO DAS ONDAS PORTUGAL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:SKATE THE WORLD": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:LA FAMILIA MUNIZ": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:SKATE A MAIS DE 100": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:VISAO DE RUA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:VENTOS DO MEDITERRANEO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:SKATE EM PARTES": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CALIFORFUN": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:GUATO UMA REMADA NO TEMPO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:E TUDO DELAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:NAUFRAGIOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:SKATE TALES": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:AVENTURA EM FOCO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:DISCONNECTED": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:RESPIRAESEINSPIRANOOFF": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:BICO BRANCO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MORANDO NA ESTRADA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:YOGA EM TODO LUGAR": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MESTRES DO MOVIMENTO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:BIKE UNDER THE LIGHTS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:LATITUDE 70": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:JANAINAS DEUSAS DO MAR": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CACADORES DE MARES": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:LIFE OF KAI": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:BONO O CAO SURFISTA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:7 LICOES DO JAPAO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:LITTLE ANGEL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:AS AVENTURAS DO BOB ZOOM": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:ALICE LEWIS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CONTA COMIGO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:SENNINHA NA PISTA MALUCA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MYA GO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:VERA E O REINO DO ARCO IRIS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:VOVO TATA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:VAMOS BRINCAR COM A TURMA DA MONICA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:S O S FADA MANU": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PEQUENO PRINCIPE E SEUS AMIGOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:URSINHOS CARINHOSOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:D P A MINI": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PIPAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:BOOKABOO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:COCOMELON": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:AS AVENTURAS DE SUNNY BUNNIES": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:LEO O GUARDA DA FLORESTA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:DUPLA DO BARULHO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:OVERHAULIN OS SUPERCARROS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:INVASAO DE GARAGENS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:TEXAS METAL ALTO E BOM SOM": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:OFICINACO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:AMERICAN CHOPPER": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:VIDA AUTOMOTIVA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CARROS IRADOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CARROS IRADOS A DISPUTA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:OFICINA RMD": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:OS REIS DA SUCATA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:ACUMULADORES DE CARROS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:TEXAS METAL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CARROS DOS SONHOS COM ROBERT DOWNEY JR": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CUSTOM CLUB ARGENTINA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MEXICANICOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:DUPLA DO BARULHO AO RESGATE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:OFICINA DO BARULHO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:VICIADO EM MOTORES GOBLIN GARAGE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MESTRES DA MECANICA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CORRIDAS PROIBIDAS REIS DAS PISTAS DISPUTA DE EQUIPES": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CHEF DE ALTO NIVEL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:COZINHA DE ALTO NIVEL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:QUE HISTORIA E ESSA PORCHAT": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:DOG HOUSE BRASIL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:QUE MARRAVILHA REVANCHE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:TEMPERO DE FAMILIA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:QUE MARRAVILHA MINHA PRIMEIRA VEZ NA COZINHA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:COZINHA PRATICA COM RITA LOBO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:QUE SEJA DOCE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:AVISA LA QUE EU VOU": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PODEROSAS DO CERRADO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:NO FOGO COM BRONZE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PERTO DO FOGO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:SANTA AJUDA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:FOOD TRUCK A BATALHA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:SUA MARAVILHOSA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:FAZENDO A FESTA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:DECORA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MAIS COR POR FAVOR": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MORAR": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:BOAS VINDAS NASCE UM IRMAO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:ALMA DE COZINHEIRA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:QUE MARRAVILHA CHEFINHOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PAPO DE SEGUNDA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:DANI SE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:ANGELICA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:QUE MARRAVILHA DELIVERY": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:GELADEIRAS EM ACAO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:EM FAMILIA COM ELIANA PODE ENTRAR": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:DIOGO NA COZINHA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:QUE MARRAVILHA CHATO PRA COMER": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CASAS MUITO LOUCAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:STRIPPERS A OBRA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:UMA MULHER DE PESO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:AMY E TAMMY IRMAS CONTRA O PESO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:OS BUSBYS 5": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:O VESTIDO IDEAL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:O VESTIDO IDEAL MADRINHAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:O VESTIDO IDEAL REINO UNIDO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:90 DIAS PARA CASAR REINO UNIDO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:O PARAISO DAS PLUS SIZE ABUSOS E MENTIRAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MAMA JUNE VIDA NOVA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CHANTEL E PEDRO EM FAMILIA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:90 DIAS NA CAMA CHANTEL E PEDRO EM FAMILIA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:EU NAO SABIA QUE ESTAVA GRAVIDA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CAKE BOSS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MEU GRANDE CASAMENTO CIGANO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:IRMAS CIGANAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:AI AI AI DO SEXO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:POLIAMOR A PROXIMA ESPOSA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:4 MULHERES E 1 MARIDO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MAPA DO POP": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PASSEIO COMPLETO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:SEMPRE LUIS": {
+    "year": "1957",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:NESHA E JAZ CONTRA O PESO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CUPOM MANIA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:POLIAMOR A PROCURA DE MAIS UM MARIDO": {
+    "year": "2013",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:AMOR FORA DAS GRADES": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:BEM VINDO A FAMILIA PLATH": {
+    "year": "2012",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:AMOR FORA DAS GRADES COMO ELES ESTAO AGORA": {
+    "year": "2026",
+    "rating": "",
+    "genre": "Novela",
+    "desc": ""
+  },
+  "S:AMOR NA GRINGA": {
+    "year": "2021",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:SCOOBY DOO CADE VOCE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:SCOOBY DOO MISTERIO S A": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MANDA CHUVA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:OS FLINTSTONES": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CORRIDA MALUCA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:THUNDERCATS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:A MANSAO FOSTER PARA AMIGOS IMAGINARIOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:O ACAMPAMENTO DE LAZLO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MEU AMIGO DA ESCOLA E UM MACACO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:HI HI PUFFY AMIYUMI": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MIKE LU OG": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:SHEEP NA CIDADE GRANDE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:ESQUADRAO DO TEMPO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:AS TRAPALHADAS DE FLAPJACK": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:BABY LOONEY TUNES": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:NASCAR CUP SERIES CHAMPIONSHIP RACE HOMESTEAD MIAMI SPEEDWAY": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:MUNDO EM FOCO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:DIAMOND LEAGUE ETAPA DE SILESIA POLONIA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:BUNDESLIGA CLUBS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:RODADA XSPORTS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:O MELHOR DA XSPORTS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:MARATONA DE MALAGA PROVA DE 2026": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:DIAMOND LEAGUE DECIMA QUARTA ETAPA ZURIQUE SUICA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:SHOW DA RODADA DO ALEMAO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CENTRAL XSPORTS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:BUNDESLIGA CLUBS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:MARATONA DE MALAGA 2026": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:DIAMOND LEAGUE DECIMA QUINTA ETAPA BRUXELAS BELGICA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:JOGO ABERTO DEBATE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:OS DONOS DA BOLA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:MELHOR DA TARDE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:BRASIL URGENTE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:A TRAICAO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:GUERRA DAS ROSAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:SHOW DA FE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:APITO FINAL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:ESPORTE TOTAL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:AGRO BAND": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:BANDSPORTS NEWS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:BORA BRASIL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:JOGO ABERTO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:JOGO ABERTO DEBATE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:A PREVIA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CINE CLUBE O DUELO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:VIAGEM APOSTOLICA DO PAPA LEAO XIV A ARGENTINA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:VIAGEM APOSTOLICA DO PAPA LEAO XIV A ARGENTINA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:JUNTOS SOMOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:BOLETIM DE NOTICIA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PODER DA PALAVRA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:TERCO DA MISERICORDIA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:SANTA MISSA PELAS FAMILIAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CANTINHO DA CRIANCA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:A BIBLIA NO MEU DIA A DIA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:TERCO MARIANO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:ANCORA DO JORNALISMO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:CANCAO NOVA NOTICIAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:DEUS PROVERA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:BUSCAI AS COISAS DO ALTO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:REVOLUCAO JESUS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:NA ESCOLA DOS APOSTOLOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:SORRINDO PRA VIDA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:O TEMPO E BREVE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:NO COLO DA MAE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PALAVRA DE DEUS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:SHOWS CANCAO NOVA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:LEO FROM CHICAGO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CAMINHOS DE UNIDADE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PALAVRA DE VIDA ETERNA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:SANTA MISSA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PAI DAS MISERICORDIAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:O AMOR VENCERA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:LEONE A ROMA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:NOSSA MISSAO E EVANGELIZAR": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:ESCOLA DA FE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:AJUDA A IGREJA QUE SOFRE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:VITRINE CN": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:PHN": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:ROSARIO DA MADRUGADA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:SORRINDO PRA VIDA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:LEON DE PERU": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MINHA FAMILIA E ASSIM": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:FAZENDO ESPERANCA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:CLUBE DA EVANGELIZACAO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:DIRECAO ESPIRITUAL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:TROCANDO IDEIAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CELEBRANDO PENTECOSTES": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:INSTITUCIONAL CANCAO NOVA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CANCAO NOVA NOTICIAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PARABOLAS DE CORACOES ESPECIAIS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:BOLETIM DO JORNALISMO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:QUINTA FEIRA DE ADORACAO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MAIS SAUDE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PROJETO DAI ME ALMAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:SOB O MANTO DE MARIA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:CAPITALISMO AMERICANO O CULTO A RIQUEZA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:IEMEN NA ENCRUZILHADA DAS GUERRAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:COMO NASCEM OS HEROIS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:LEOPOLDINA DO BRASIL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:CIDADES POSSIVEIS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:IMPRESSOES DO BRASIL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:OS OLIGARCAS DE PUTIN": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:101 CANCOES QUE TOCARAM O BRASIL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:OS IMPARES": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:NA TRILHA DO SOM": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:COM A PALAVRA ARNALDO ANTUNES": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:INSTANTES CRUZADOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:POTENCIAS DA IMAGEM": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:ONDE NASCEM AS IDEIAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:VAN GOGH A CRIACAO DE UM MESTRE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:AS AVENTURAS DA ARTE MODERNA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:PALMARES CORACAO BRASILEIRO ALMA AFRICANA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:FLUXO AZUL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:GRANDES MITOS A ILIADA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:CAQUINHOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:CINETICAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:COMPANHIAS DO TEATRO BRASILEIRO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:GRANDES CENAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:CINEASTAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:O CINEMA DE SPIKE LEE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:MOTO CONTINUO UMA IMERSAO NA SAO PAULO COMPANHIA DE DANCA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:AGBARA DUDU NARRATIVAS NEGRAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:PARA COMPREENDER O SECULO 21": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:INCERTEZAS CRITICAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:CAIXA POSTAL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:ARTERIA POESIA EM REVISTA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:HISTORIA DO ANARQUISMO SEM DEUSES SEM MESTRES": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:OS MANUSCRITOS SECRETOS DA HISTORIA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:IDEIAS PARA O MUNDO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:LUZES CAMERAS NATAL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:UM REENCONTRO NATALINO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:UM SUETER PARA O NATAL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:UM NATAL ESTRELADO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:UM CONTO DE NATAL COUNTRY": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:UM NATAL SEM PRECO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:AVIOES TRENS E ARVORES DE NATAL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:ALEM DAS NOTICIAS A SERIE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:LEGENDS OF THE FORK COM BUDDY VALASTRO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:NATAL EM SANTA FE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:UMA VOLTA PARA A VITORIA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:NATAL NO CHALE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:O NATAL REAL DOS CORGI": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:NATAL COM SABOR DE AMOR": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:ARQUITETANDO O AMOR NO NATAL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "M:O VOO ANTES DO NATAL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:ESQUADRAO DO MAR AZUL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PATRULHA DO FUTURO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:QUINTAL NO ZOO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:RUBRA EM FAMILIA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MUSICAL RA TIM BUM VAI TER SHOW DO BADULAQUE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:TCHIBUM TV": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:COMO CUIDAR DO SEU MELHOR AMIGO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:YOGA COM HISTORIAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:COCORICO EDUCACAO FINANCEIRA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:ASTRO NAO MIA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:EU E O QUARTETO APAVORANTE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:TRACANDO ARTE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:PRATINHO DA IAIA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:QUAL E BICHO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:ISSO DISSO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:RECREIO DO JACARELVIS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:A ARCA DO ZIRALDO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MUSICAL RA TIM BUM": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:QUINTAL DA CULTURA NA MISSAO DO DIA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:CONTOS RA TIM BUM": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:O MAGO DAS FORMAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:A MANSAO MALUCA DO PROFESSOR AMBROSIO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:NILBA E OS DESASTRONAUTAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:ME LIGA NA LATA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:DJ CAO E A LOJA DE DISCOS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:SIDNEY": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:BLOG DO GENINHO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:REPORTER RA TEEN BUM": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:MUNDO DA LUA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:ERA UMA VEZ NO QUINTAL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:OS CUPINS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:QUE MONSTRO TE MORDEU": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:VIOLA E TAMBOR": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:T R EX C I": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:RUBRA E AS CRIATURAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:SHOW DO DJ CAO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:O QUE EU VOU SER QUANDO CRESCER": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:X TUDO": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:SIMAO E BARTOLOMEU": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:TEATRO RA TIM BUM": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:BAU DE HISTORIAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:REFORMA RELAMPAGO BANHEIROS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:REFORMAR PARA LUCRAR": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:A BATALHA DOS DECORADORES": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:DAVINA KRISTIN CASAS COM POTENCIAL": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:VIDA NO PARAISO CARIBE": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:EM BUSCA DA CASA DE PRAIA": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  },
+  "S:RESTAURANDO CASAS HISTORICAS": {
+    "year": "",
+    "rating": "",
+    "genre": "",
+    "desc": ""
+  }
+}
