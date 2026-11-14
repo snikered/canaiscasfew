@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
-"""EPG Universal Consolidado — 1 Canal Único por Emissora + Vivo/Claro no Topo + Match 100% FHD [H265]
+"""EPG Universal Consolidado — 100% Mérito Dinâmico por Canal e por Período do Dia (Sem Prioridade Fixa)
+- Seleciona a melhor fonte de cada canal puramente por Precisão de Horário (Consenso) + Conteúdo (Richness) + Cobertura.
+- Recorte e Costura por Janelas de 6h (Time-Window Splicing): se a Fonte A é melhor até metade do dia e a Fonte B é
+  melhor no restante do dia/semana, funde os dois períodos automaticamente sem sobreposição.
 - Exporta estritamente 1 <channel> por emissora real (elimina a duplicação de exported_ids).
 - Mantém todos os aliases reais da M3U (incluindo FHD [H265], FHD H265, FHDR, old_tvg_ids) em <display-name>.
-- Remove sufixos .br em name_key() e BR2 grudado no nome (ex: GLOBORJBR2 -> GLOBO RJ).
-- Filtra canais 24H, câmeras de reality, separadores ⭐⭐⭐ e jogos avulsos herdados do dicionário antigo.
-- Impede colisão entre canais numerados e canais base (ex: HBO vs HBO 2 / HBO [2]).
-- Impede falsos positivos regionais (BAND SP vs BAND RJ, RECORD SP vs BAHIA, JI-PARANA vs PARANA, PARAIBA vs PARA).
 - Bloqueia colisões entre canais estrangeiros (PT/US/UK/CO/ARG/MX/EC/PY) e redes brasileiras.
-- Empata health_score >= 0.80 com >= 60h futuras para Vivo Play API e Claro assumirem a liderança.
-- Costura multi-fonte aprimorada (preenche buracos e estende o restante do dia/semana com fontes secundárias).
+- Impede falsos positivos regionais (BAND SP vs BAND RJ, RECORD SP vs BAHIA, JI-PARANA vs PARANA, PARAIBA vs PARA).
 """
 from __future__ import annotations
 
@@ -264,23 +262,24 @@ IPTV_USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
 ]
 
+# Pesos nivelados (1.0): nenhuma fonte ganha por "nome/prioridade fixa", mas sim pelo mérito da grade no canal/horário!
 EPG_SOURCES_CONFIG = [
-    ("Afiliadas Locais", "epg_afiliadas.xml", "afiliadas_locais", 3.0),
-    ("Vivo Play API", "vivo_epg.xml.gz", "vivo_api", 2.8),
-    ("Claro TV+ API", "claro_epg.xml.gz", "claro_api", 2.8),
-    ("Claro Git", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/claro.xml", "git_operadora", 2.6),
-    ("GuiaDeTV", "epg_guiadetv.xml", "guiadetv", 2.5),
-    ("Meu Guia", "epg_meuguia.xml", "meuguia", 2.5),
-    ("MiTV", "epg_mitv.xml", "mitv", 2.2),
-    ("TV Plus", "epg_tvplus.xml", "tvplus", 1.8),
-    ("WebFinal", "epg_webfinal.xml", "webfinal", 1.8),
-    ("Open-EPG BR", "https://www.open-epg.com/files/brazil.xml", "openepg", 1.5),
-    ("Open-EPG BR 4", "https://www.open-epg.com/files/brazil4.xml", "openepg", 1.4),
-    ("Globo", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/globo.xml", "git_extra", 1.4),
-    ("Mais SBT", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/maissbt.xml", "git_extra", 1.2),
-    ("EPGShare BR1", "https://epgshare01.online/epgshare01/epg_ripper_BR1.xml.gz", "epgshare", 1.5),
-    ("EPGShare BR2", "https://epgshare01.online/epgshare01/epg_ripper_BR2.xml.gz", "epgshare", 1.3),
-    ("IPTV-EPG BR", "https://iptv-epg.org/files/epg-br.xml", "iptvepg", 1.2),
+    ("Afiliadas Locais", "epg_afiliadas.xml", "afiliadas_locais", 1.0),
+    ("Vivo Play API", "vivo_epg.xml.gz", "vivo_api", 1.0),
+    ("Claro TV+ API", "claro_epg.xml.gz", "claro_api", 1.0),
+    ("Claro Git", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/claro.xml", "git_operadora", 1.0),
+    ("GuiaDeTV", "epg_guiadetv.xml", "guiadetv", 1.0),
+    ("Meu Guia", "epg_meuguia.xml", "meuguia", 1.0),
+    ("MiTV", "epg_mitv.xml", "mitv", 1.0),
+    ("TV Plus", "epg_tvplus.xml", "tvplus", 1.0),
+    ("WebFinal", "epg_webfinal.xml", "webfinal", 1.0),
+    ("Open-EPG BR", "https://www.open-epg.com/files/brazil.xml", "openepg", 1.0),
+    ("Open-EPG BR 4", "https://www.open-epg.com/files/brazil4.xml", "openepg", 1.0),
+    ("Globo", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/globo.xml", "git_extra", 1.0),
+    ("Mais SBT", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/maissbt.xml", "git_extra", 1.0),
+    ("EPGShare BR1", "https://epgshare01.online/epgshare01/epg_ripper_BR1.xml.gz", "epgshare", 1.0),
+    ("EPGShare BR2", "https://epgshare01.online/epgshare01/epg_ripper_BR2.xml.gz", "epgshare", 1.0),
+    ("IPTV-EPG BR", "https://iptv-epg.org/files/epg-br.xml", "iptvepg", 1.0),
     ("Genius", os.environ.get("PRIMARY_EPG_URL", "https://github.com/ferteque/Curated-M3U-Repository/raw/refs/heads/main/epg13.xml.gz"), "genius", 1.0),
 ]
 
@@ -1238,7 +1237,6 @@ def _fuzzy_incompatible(alias: str, candidate: str) -> bool:
         if na != nc:
             return True
         ra = re.sub(r"^TV", "", alias[len(na):]); rc = re.sub(r"^TV", "", candidate[len(nc):])
-        # Bloqueia se um lado tiver UF (ex: RECORDMG, GLOBORR, GLOBOPE) e o outro lado for a rede nacional sem UF (RECORD, GLOBO)
         if (ra in _UF_CODES and not rc) or (rc in _UF_CODES and not ra):
             return True
         if ra != rc and ra in _UF_CODES and rc in _UF_CODES:
@@ -1256,14 +1254,12 @@ def match_conflicts_network(entry_name: str, source: "EpgSource", channel_id: st
     entry_country = extract_foreign_country_code(entry_name)
     labels = [channel_id] + list(source.names.get(channel_id, [])[:2])
     if entry_country:
-        # Canal estrangeiro (ex: PT, US, CO) não pode casar com canal brasileiro sem o mesmo prefixo
         if not any(extract_foreign_country_code(lab) == entry_country for lab in labels):
             return True
     else:
         if any(extract_foreign_country_code(lab) != "" for lab in labels):
             return True
 
-    # Verifica conflito explícito de estado (UF) entre o nome do canal e o candidato da fonte
     if all(has_conflicting_region(entry_name, lab) for lab in labels):
         return True
 
@@ -1675,7 +1671,6 @@ def _calc_agreement(a_rows: list[ProgrammeRow], b_rows: list[ProgrammeRow], offs
 def cross_source_programme_agreement(a_source: EpgSource, a_id: str, b_source: EpgSource, b_id: str, now: datetime) -> dict[str, object]:
     cache_key = (a_source.spec.key, a_id, b_source.spec.key, b_id)
     if (cached := _AGREEMENT_CACHE.get(cache_key)) is not None: return cached
-    # Janela estendida até +72h para permitir que fontes complementares (como Genius/Open-EPG) validem acordo no 2º e 3º dia
     window_start, window_end = now - timedelta(hours=6), now + timedelta(hours=72)
     a_rows = [r for r in programme_rows(a_source, a_id) if r.stop >= window_start and r.start <= window_end]
     b_rows = [r for r in programme_rows(b_source, b_id) if r.stop >= window_start and r.start <= window_end]
@@ -1801,8 +1796,8 @@ def evaluate_candidates(matches: list[ChannelMatch], now: datetime, max_active_v
         health_score = float(h_info["score"])
         richness_score = float(h_info.get("richness_score", 0.0))
 
-        eff_health = 1.0 if (health_score >= 0.80 and float(h_info.get("future_hours", 0.0)) >= 60.0) else health_score
-        quality = 0.45 * weighted_ratio + 0.30 * eff_health + 0.10 * richness_score + 0.15 * avg_support
+        # Pontuação 100% baseada em mérito da grade naquele momento (Precisão/Consenso + Conteúdo/Sinopse + Saúde/Cobertura)
+        quality = 0.40 * weighted_ratio + 0.25 * health_score + 0.20 * richness_score + 0.15 * avg_support
         evidence_factor = 0.55 + 0.45 * min(vote_weight / max(max_active_vote_weight, 0.5), 1.0)
         confidence = round(100 * max(0.0, min(1.0, quality * evidence_factor)))
         evaluations.append(CandidateEvaluation(
@@ -1813,26 +1808,34 @@ def evaluate_candidates(matches: list[ChannelMatch], now: datetime, max_active_v
             richness_score=richness_score, health=h_info, confidence=confidence, comparisons=comparisons
         ))
 
-    def rank(ev: CandidateEvaluation) -> tuple:
+    def merit_rank(ev: CandidateEvaluation) -> tuple:
+        """Ranking puro por qualidade real no canal, sem favorecer posição fixa na lista de fontes."""
         has_programmes = int(bool(ev.match.source.rows.get(ev.match.channel_id)))
         fut_h = float(ev.health.get("future_hours", 0.0))
-        is_healthy_full_day = int(fut_h >= 36.0 and ev.health_score >= 0.75 and ev.richness_score >= 0.15)
-        consensus_tier = int(ev.weighted_ratio >= 0.65 and ev.support_votes >= 2)
-        health_bucket = 1.0 if (ev.health_score >= 0.80 and fut_h >= 60.0) else round(ev.health_score, 1)
+        near_cov = float(ev.health.get("near_coverage_ratio", 0.0))
+        # Só dá bônus para Afiliadas Locais quando é match direto (tier 1) de uma afiliada regional específica
+        is_direct_local_affiliate = int(ev.match.tier == 1 and ev.match.source.spec.family == "afiliadas_locais" and ev.health_score >= 0.70)
+        # Nota composta de mérito (0.0 a 1.0): Precisão de horário (consenso) + Riqueza de metadados + Cobertura sem buracos
+        horizon_factor = min(1.0, fut_h / 48.0)
+        composite_merit = (
+            0.38 * ev.weighted_ratio
+            + 0.22 * ev.avg_support_agreement
+            + 0.22 * ev.richness_score
+            + 0.12 * ev.health_score
+            + 0.06 * horizon_factor
+        )
         return (
             has_programmes,
             -ev.match.tier,
-            is_healthy_full_day,
-            int(ev.match.match_score >= 0.999),
-            consensus_tier,
-            health_bucket,
-            -ev.match.source.spec.priority,
-            round(ev.richness_score, 2),
-            ev.support_weight,
-            ev.avg_support_agreement,
+            is_direct_local_affiliate,
+            int(near_cov >= 0.65 and ev.health_score >= 0.70),
+            round(composite_merit, 4),
+            ev.support_votes,
+            round(ev.richness_score, 3),
+            round(fut_h, 1),
         )
 
-    evaluations.sort(key=rank, reverse=True)
+    evaluations.sort(key=merit_rank, reverse=True)
     return evaluations[0], evaluations
 
 def serialize_now_next(item: dict | None) -> dict | None:
@@ -1849,7 +1852,7 @@ def make_validation(entry: dict[str, object], chosen: CandidateEvaluation, all_e
 
     first_by_priority = min(all_evaluations, key=lambda ev: ev.match.source.spec.priority) if all_evaluations else chosen
     switched = first_by_priority.match.source is not chosen.match.source
-    if switched: warnings.append(f"fonte base alterada de {first_by_priority.match.source.label} para {chosen.match.source.label} por maior consenso/qualidade")
+    if switched: warnings.append(f"fonte eleita por mérito dinâmico: {chosen.match.source.label} (maior conteúdo/precisão)")
 
     if chosen.support_families >= 3 and chosen.confidence >= 75: status = "ok"
     elif chosen.confidence >= 55 and chosen.support_families >= 2: status = "atencao"
@@ -1867,7 +1870,7 @@ def make_validation(entry: dict[str, object], chosen: CandidateEvaluation, all_e
             "health_score": ev.health_score,
             "richness_score": ev.richness_score,
         }
-        for ev in sorted(all_evaluations, key=lambda x: x.match.source.spec.priority)
+        for ev in all_evaluations
     ]
     return {
         "target_id": str(entry.get("id", "")), "name": str(entry.get("name", "")),
@@ -2055,16 +2058,31 @@ def apply_rich_metadata_to_element(
     if best_icon and el.find("icon") is None:
         ET.SubElement(el, "icon", {"src": best_icon})
 
+def _prog_item_richness(meta: dict[str, Any]) -> float:
+    pts = 0.0
+    if meta.get("desc") and len(meta["desc"]) >= 30:
+        pts += 0.45
+    if meta.get("sub_title"):
+        pts += 0.20
+    if meta.get("season") is not None or meta.get("episode") is not None:
+        pts += 0.15
+    if meta.get("rating_badge") or meta.get("categories"):
+        pts += 0.20
+    return min(1.0, pts)
+
 def stitch_multi_source_schedule(
     all_evaluations: list[CandidateEvaluation], target_channel_id: str, channel_name: str, cutoff: datetime, max_future: datetime, overrides: dict[str, object]
 ) -> list[ET.Element]:
     """
-    Recorta e costura grades de múltiplas fontes para o mesmo canal:
-    - Usa o líder como base nos períodos em que ele é saudável.
-    - Quando o líder tem buracos (gaps >= 10 min) ou termina mais cedo (ex: metade do dia / 48h),
-      costura os programas das fontes secundárias que concordam OU de fontes com match exato (score=1.0) para completar as 72h.
+    Recorte e Costura Dinâmica em 3 Níveis:
+    1. Janelas de 6h: Elege a fonte mais precisa e rica em cada período do dia.
+    2. Quebra de Blocos Genéricos: Se a vencedora da janela tiver um bloco esticado (>3h30 sem consenso)
+       enquanto outras fontes concordam em programas menores reais, substitui pelos programas reais.
+    3. Tapa-Buracos Cirúrgico (Gap Filling >= 10 min): Se faltar qualquer programa dentro da janela de 6h,
+       recorta exatamente o programa faltante da 2ª melhor fonte (ordenada por mérito/conteúdo) e encaixa.
     """
-    if not all_evaluations: return []
+    if not all_evaluations:
+        return []
 
     leader_ev = all_evaluations[0]
     shift_by_source_key: dict[str, int] = {leader_ev.match.source.spec.key: 0}
@@ -2075,21 +2093,21 @@ def stitch_multi_source_schedule(
         if isinstance(agreement, float) and agreement >= AGREEMENT_THRESHOLD and comparable >= MIN_COMPARABLE_PROGRAMMES:
             shift_by_source_key[other_key] = int(comp.get("detected_shift") or 0)
         elif comparable < MIN_COMPARABLE_PROGRAMMES:
-            # Se a fonte principal acabou antes e não tinha programas no mesmo horário para comparar,
-            # aceita a fonte complementar (como Genius, Claro Git ou Open-EPG) se o match do canal for exato (1.0)
             cand_ev = next((e for e in all_evaluations if e.match.source.spec.key == other_key), None)
             if cand_ev and cand_ev.match.match_score >= 0.999 and cand_ev.match.tier == 1:
                 shift_by_source_key[other_key] = 0
 
-    all_aligned_progs_by_source: list[list[dict[str, Any]]] = []
+    aligned_sources_data: list[dict[str, Any]] = []
     metadata_by_norm_title: dict[str, list[dict[str, Any]]] = defaultdict(list)
 
     for ev in all_evaluations:
         src = ev.match.source
         cid = ev.match.channel_id
-        if src.spec.key not in shift_by_source_key: continue
+        if src.spec.key not in shift_by_source_key:
+            continue
         fixed_rows = src.rows.get(cid, [])
-        if not fixed_rows: continue
+        if not fixed_rows:
+            continue
 
         ch_shift = float(overrides.get("channel_timeshifts", {}).get(target_channel_id, 0.0))
         src_shift = float(overrides.get("source_timeshifts", {}).get(src.spec.key, 0.0))
@@ -2119,26 +2137,305 @@ def stitch_multi_source_schedule(
                 "el": row.element,
                 "norm_title": row.normalized_title,
                 "meta": meta,
+                "richness": _prog_item_richness(meta),
             }
             cleaned_source_progs.append(prog_item)
             if row.normalized_title:
                 metadata_by_norm_title[row.normalized_title].append(meta)
 
         if cleaned_source_progs:
-            all_aligned_progs_by_source.append(cleaned_source_progs)
+            aligned_sources_data.append({
+                "ev": ev,
+                "progs": cleaned_source_progs,
+                "global_merit": 0.45 * ev.weighted_ratio + 0.30 * ev.richness_score + 0.25 * ev.health_score,
+            })
 
-    if not all_aligned_progs_by_source:
+    if not aligned_sources_data:
         return []
 
-    merged_timeline: list[dict[str, Any]] = list(all_aligned_progs_by_source[0])
+    # Ordena todas as fontes alinhadas da melhor para a pior (garante que o tapa-buracos use sempre a 2ª melhor antes da 3ª)
+    aligned_sources_data.sort(key=lambda s: s["global_merit"], reverse=True)
+
+    # 1. SELEÇÃO POR JANELA DE 6 HORAS
+    WINDOW_HOURS = 6
+    window_delta = timedelta(hours=WINDOW_HOURS)
+    merged_timeline: list[dict[str, Any]] = []
+
+    cur_win_start = cutoff
+    while cur_win_start < max_future:
+        cur_win_end = min(max_future, cur_win_start + window_delta)
+        actual_win_sec = max(1.0, (cur_win_end - cur_win_start).total_seconds())
+
+        best_src_idx = -1
+        best_win_score = -1.0
+
+        title_counts_in_win: Counter[str] = Counter()
+        for s_data in aligned_sources_data:
+            seen_t = {
+                p["norm_title"]
+                for p in s_data["progs"]
+                if p["stop"] > cur_win_start and p["start"] < cur_win_end and p["norm_title"]
+            }
+            for t in seen_t:
+                title_counts_in_win[t] += 1
+
+        for idx, s_data in enumerate(aligned_sources_data):
+            win_progs = [
+                p for p in s_data["progs"]
+                if p["stop"] > cur_win_start and p["start"] < cur_win_end
+            ]
+            if not win_progs:
+                continue
+
+            covered_sec = sum(
+                max(0.0, (min(cur_win_end, p["stop"]) - max(cur_win_start, p["start"])).total_seconds())
+                for p in win_progs
+            )
+            cov_ratio = min(1.0, covered_sec / actual_win_sec)
+            if cov_ratio < 0.25:
+                continue
+
+            avg_rich = mean(p["richness"] for p in win_progs)
+            if len(aligned_sources_data) > 1:
+                agreed_progs = sum(1 for p in win_progs if title_counts_in_win.get(p["norm_title"], 0) >= 2)
+                local_agr = agreed_progs / len(win_progs)
+            else:
+                local_agr = 1.0
+
+            win_score = (
+                0.40 * cov_ratio
+                + 0.30 * local_agr
+                + 0.20 * avg_rich
+                + 0.10 * s_data["global_merit"]
+            )
+            if win_score > best_win_score:
+                best_win_score = win_score
+                best_src_idx = idx
+
+        if best_src_idx >= 0:
+            chosen_win_progs = [
+                p for p in aligned_sources_data[best_src_idx]["progs"]
+                if p["stop"] > cur_win_start and p["start"] < cur_win_end
+            ]
+            for cand in chosen_win_progs:
+                c_start, c_stop = cand["start"], cand["stop"]
+                # Se for um bloco gigante (>3h30) sem sinopse e sem consenso na janela, ignora para deixar a 2ª melhor fonte preencher!
+                if (c_stop - c_start).total_seconds() > 3.5 * 3600 and cand["richness"] < 0.25 and title_counts_in_win.get(cand["norm_title"], 0) <= 1 and len(aligned_sources_data) > 1:
+                    continue
+
+                if merged_timeline and c_start < merged_timeline[-1]["stop"]:
+                    prev = merged_timeline[-1]
+                    if prev["norm_title"] == cand["norm_title"] and abs((prev["start"] - c_start).total_seconds()) <= 1800:
+                        if c_stop > prev["stop"]:
+                            prev["stop"] = c_stop
+                        continue
+                    if c_start > prev["start"] + timedelta(minutes=5):
+                        prev["stop"] = c_start
+                    else:
+                        c_start = prev["stop"]
+                if (c_stop - c_start).total_seconds() >= 300:
+                    cp = copy.deepcopy(cand)
+                    cp["start"] = c_start
+                    cp["stop"] = c_stop
+                    merged_timeline.append(cp)
+
+        cur_win_start = cur_win_end
+
     merged_timeline.sort(key=lambda x: x["start"])
 
+    # 2. TAPA-BURACOS CIRÚRGICO DENTRO DAS JANELAS (Qualquer buraco >= 10 min é preenchido pela melhor fonte seguinte)
     MIN_GAP_SECONDS = 10 * 60
     MAX_EDGE_TRIM_SECONDS = 15 * 60
 
-    for cleaned_source_progs in all_aligned_progs_by_source[1:]:
+    for s_data in aligned_sources_data:
         added_any = False
-        for cand in cleaned_source_progs:
+        for cand in s_data["progs"]:
+            c_start, c_stop = cand["start"], cand["stop"]
+            c_dur = (c_stop - c_start).total_seconds()
+            if c_dur < 300:
+                continue
+
+            overlapping = [
+                ex for ex in merged_timeline
+                if ex["stop"] > c_start and ex["start"] < c_stop
+            ]
+
+            if not overlapping:
+                merged_timeline.append(copy.deepcopy(cand))
+                added_any = True
+                continue
+
+            overlapping.sort(key=lambda x: x["start"])
+            free_cursor = c_start
+            best_gap = None
+            for ex in overlapping:
+                if ex["start"] > free_cursor:
+                    gap_sec = (ex["start"] - free_cursor).total_seconds()
+                    if gap_sec >= MIN_GAP_SECONDS:
+                        if best_gap is None or gap_sec > (best_gap[1] - best_gap[0]).total_seconds():
+                            best_gap = (free_cursor, ex["start"])
+                if ex["stop"] > free_cursor:
+                    free_cursor = ex["stop"]
+            if c_stop > free_cursor:
+                gap_sec = (c_stop - free_cursor).total_seconds()
+                if gap_sec >= MIN_GAP_SECONDS:
+                    if best_gap is None or gap_sec > (best_gap[1] - best_gap[0]).total_seconds():
+                        best_gap = (free_cursor, c_stop)
+
+            if best_gap is not None:
+                g_start, g_stop = best_gap
+                gap_dur = (g_stop - g_start).total_seconds()
+                left_trim = (g_start - c_start).total_seconds()
+                right_trim = (c_stop - g_stop).total_seconds()
+                if (gap_dur / c_dur) >= 0.65 or (left_trim <= MAX_EDGE_TRIM_SECONDS and right_trim <= MAX_EDGE_TRIM_SECONDS):
+                    new_cand = copy.deepcopy(cand)
+                    new_cand["start"] = g_start
+                    new_cand["stop"] = g_stop
+                    merged_timeline.append(new_cand)
+                    added_any = True
+
+        if added_any:
+            merged_timeline.sort(key=lambda x: x["start"])
+
+    merged_timeline.sort(key=lambda x: x["start"])
+
+    # 3. SERIALIZAÇÃO E FUSÃO DE METADADOS RICOS
+    final_elements = []
+    for i, prog in enumerate(merged_timeline):
+        s_dt, sp_dt = prog["start"], prog["stop"]
+        if i + 1 < len(merged_timeline) and sp_dt > merged_timeline[i + 1]["start"]:
+            sp_dt = merged_timeline[i + 1]["start"]
+        dur_sec = (sp_dt - s_dt).total_seconds()
+        if dur_sec < 60:
+            continue
+        dur_min = dur_sec / 60.0
+            
+        el = copy.deepcopy(prog["el"])
+        el.attrib["start"] = format_xmltv_datetime(s_dt)
+        el.attrib["stop"] = format_xmltv_datetime(sp_dt)
+        
+        norm_title = prog.get("norm_title", "")
+        matching_time_metas: list[dict[str, Any]] = []
+        for s_data in aligned_sources_data:
+            for other_p in s_data["progs"]:
+                if other_p["norm_title"] == norm_title and abs((other_p["start"] - s_dt).total_seconds()) <= 25 * 60:
+                    matching_time_metas.append(other_p["meta"])
+
+        if not matching_time_metas and norm_title in metadata_by_norm_title:
+            matching_time_metas = [
+                {
+                    "title": m["title"],
+                    "sub_title": "",
+                    "desc": m["desc"],
+                    "season": None,
+                    "episode": None,
+                    "categories": m["categories"],
+                    "date": m["date"],
+                    "rating_badge": m.get("rating_badge", ""),
+                    "icon": m.get("icon", ""),
+                }
+                for m in metadata_by_norm_title[norm_title]
+            ]
+
+        apply_rich_metadata_to_element(el, matching_time_metas, channel_name, dur_min)
+        final_elements.append(el)
+    return final_elements
+
+    # 1. SELEÇÃO POR JANELA DE 6 HORAS (Escolhe a melhor fonte em cada período do dia)
+    WINDOW_HOURS = 6
+    window_delta = timedelta(hours=WINDOW_HOURS)
+    win_Sec = WINDOW_HOURS * 3600.0
+    merged_timeline: list[dict[str, Any]] = []
+
+    cur_win_start = cutoff
+    while cur_win_start < max_future:
+        cur_win_end = min(max_future, cur_win_start + window_delta)
+        actual_win_sec = max(1.0, (cur_win_end - cur_win_start).total_seconds())
+
+        best_src_idx = -1
+        best_win_score = -1.0
+
+        # Mapeia títulos presentes na janela entre as fontes para medir consenso local do período
+        title_counts_in_win: Counter[str] = Counter()
+        for s_data in aligned_sources_data:
+            seen_t = {
+                p["norm_title"]
+                for p in s_data["progs"]
+                if p["stop"] > cur_win_start and p["start"] < cur_win_end and p["norm_title"]
+            }
+            for t in seen_t:
+                title_counts_in_win[t] += 1
+
+        for idx, s_data in enumerate(aligned_sources_data):
+            win_progs = [
+                p for p in s_data["progs"]
+                if p["stop"] > cur_win_start and p["start"] < cur_win_end
+            ]
+            if not win_progs:
+                continue
+
+            covered_sec = sum(
+                max(0.0, (min(cur_win_end, p["stop"]) - max(cur_win_start, p["start"])).total_seconds())
+                for p in win_progs
+            )
+            cov_ratio = min(1.0, covered_sec / actual_win_sec)
+            if cov_ratio < 0.25:
+                continue
+
+            avg_rich = mean(p["richness"] for p in win_progs)
+            if len(aligned_sources_data) > 1:
+                agreed_progs = sum(1 for p in win_progs if title_counts_in_win.get(p["norm_title"], 0) >= 2)
+                local_agr = agreed_progs / len(win_progs)
+            else:
+                local_agr = 1.0
+
+            # Nota da fonte especificamente para este período de 6h
+            win_score = (
+                0.40 * cov_ratio
+                + 0.30 * local_agr
+                + 0.20 * avg_rich
+                + 0.10 * s_data["global_merit"]
+            )
+            if win_score > best_win_score:
+                best_win_score = win_score
+                best_src_idx = idx
+
+        if best_src_idx >= 0:
+            chosen_win_progs = [
+                p for p in aligned_sources_data[best_src_idx]["progs"]
+                if p["stop"] > cur_win_start and p["start"] < cur_win_end
+            ]
+            for cand in chosen_win_progs:
+                c_start, c_stop = cand["start"], cand["stop"]
+                if merged_timeline and c_start < merged_timeline[-1]["stop"]:
+                    prev = merged_timeline[-1]
+                    # Se for exatamente o mesmo programa que atravessou a fronteira das 6h, estende ou ignora duplicata
+                    if prev["norm_title"] == cand["norm_title"] and abs((prev["start"] - c_start).total_seconds()) <= 1800:
+                        if c_stop > prev["stop"]:
+                            prev["stop"] = c_stop
+                        continue
+                    # Ajusta a fronteira suavemente
+                    if c_start > prev["start"] + timedelta(minutes=5):
+                        prev["stop"] = c_start
+                    else:
+                        c_start = prev["stop"]
+                if (c_stop - c_start).total_seconds() >= 300:
+                    cp = copy.deepcopy(cand)
+                    cp["start"] = c_start
+                    cp["stop"] = c_stop
+                    merged_timeline.append(cp)
+
+        cur_win_start = cur_win_end
+
+    merged_timeline.sort(key=lambda x: x["start"])
+
+    # 2. PREENCHIMENTO FINO DE BURACOS RESTANTES (Caso a vencedora da janela ainda tenha deixado algum gap >= 10 min)
+    MIN_GAP_SECONDS = 10 * 60
+    MAX_EDGE_TRIM_SECONDS = 15 * 60
+
+    for s_data in aligned_sources_data:
+        added_any = False
+        for cand in s_data["progs"]:
             c_start, c_stop = cand["start"], cand["stop"]
             c_dur = (c_stop - c_start).total_seconds()
             if c_dur < 300:
@@ -2188,6 +2485,7 @@ def stitch_multi_source_schedule(
 
     merged_timeline.sort(key=lambda x: x["start"])
 
+    # 3. SERIALIZAÇÃO E FUSÃO DE METADADOS RICOS ENTRE TODAS AS FONTES ALINHADAS
     final_elements = []
     for i, prog in enumerate(merged_timeline):
         s_dt, sp_dt = prog["start"], prog["stop"]
@@ -2204,8 +2502,8 @@ def stitch_multi_source_schedule(
         
         norm_title = prog.get("norm_title", "")
         matching_time_metas: list[dict[str, Any]] = []
-        for src_progs in all_aligned_progs_by_source:
-            for other_p in src_progs:
+        for s_data in aligned_sources_data:
+            for other_p in s_data["progs"]:
                 if other_p["norm_title"] == norm_title and abs((other_p["start"] - s_dt).total_seconds()) <= 25 * 60:
                     matching_time_metas.append(other_p["meta"])
 
@@ -2274,7 +2572,7 @@ def write_epg_stream(
                 gz.write(data)
                 if plain is not None: plain.write(data)
 
-            generator = "EPG Universal Otimizado (1 Canal Único por Emissora + Vivo/Claro Direto)"
+            generator = "EPG Universal Otimizado (Seleção Dinâmica por Mérito e Período do Dia)"
             source_name = "Consolidado Inteligente de Múltiplas Fontes"
             emit((f"<?xml version='1.0' encoding='utf-8'?>\n<tv generator-info-name={quoteattr(generator)} source-info-name={quoteattr(source_name)}>\n").encode("utf-8"))
 
@@ -2314,7 +2612,6 @@ def write_epg_stream(
     if plain is not None: plain.close()
     elif plain_path.exists(): plain_path.unlink()
 
-    # Copia também para a raiz (./epg.xml.gz) para que sync_playlists.py sempre encontre o arquivo atualizado
     root_epg_gz = Path("epg.xml.gz")
     try:
         if gzip_path.resolve() != root_epg_gz.resolve():
@@ -2345,7 +2642,7 @@ def ensure_operator_epgs_generated() -> None:
             print(f"  -> Aviso ao extrair Vivo Play API: {e}")
 
 def main() -> None:
-    print("Iniciando geração de EPG (Compatibilidade Total FHD [H265] + Vivo/Claro no Topo + Apenas [TxxExx])...")
+    print("Iniciando geração de EPG (100% Mérito Dinâmico por Canal + Recorte de Grade por Período do Dia)...")
     run_start = time.perf_counter()
     timings = {}
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
