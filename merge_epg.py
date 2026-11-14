@@ -6,7 +6,7 @@
 - Exporta estritamente 1 <channel> por emissora real (elimina a duplicação de exported_ids).
 - Mantém todos os aliases reais da M3U (incluindo FHD [H265], FHD H265, FHDR, old_tvg_ids) em <display-name>.
 - Bloqueia colisões entre canais estrangeiros (PT/US/UK/CO/ARG/MX/EC/PY) e redes brasileiras.
-- Impede falsos positivos regionais (BAND SP vs BAND RJ, RECORD SP vs BAHIA, JI-PARANA vs PARANA, PARAIBA vs PARA).
+- Impede falsos positivos regionais (BAND SP vs BAND RJ, RECORD SP vs BAHIA, JI-PARANA vs PARANA, RIO PRETO vs RJ).
 """
 from __future__ import annotations
 
@@ -117,42 +117,56 @@ def has_conflicting_channel_number(base_channel_name: str, candidate_text: str) 
 
 
 _STATE_TOKEN_MAP = {
-    "SP": "SP", "SAOPAULO": "SP", "CAMPINAS": "SP", "RIBEIRAOPRETO": "SP", "BAURU": "SP", "SOROCABA": "SP", "SANTOS": "SP", "TAUBATE": "SP", "SJCAMPOS": "SP",
+    "SP": "SP", "SAOPAULO": "SP", "CAMPINAS": "SP", "RIBEIRAOPRETO": "SP", "BAURU": "SP", "SOROCABA": "SP", "SANTOS": "SP", "TAUBATE": "SP", "SJCAMPOS": "SP", "RIOPRETO": "SP", "SJRIOPRETO": "SP", "SAOJOSEDORIOPRETO": "SP", "MOGIDASCRUZES": "SP", "ITAPETININGA": "SP", "PRUDENTE": "SP", "FRANCA": "SP", "ARARAQUARA": "SP", "SAOCARLOS": "SP",
     "RJ": "RJ", "RIO": "RJ", "RIODEJANEIRO": "RJ", "RIOSUL": "RJ", "SERRAMAR": "RJ",
-    "MG": "MG", "MINAS": "MG", "BELOHORIZONTE": "MG", "JUIZDEFORA": "MG", "UBERLANDIA": "MG", "UBERABA": "MG", "ARAXA": "MG", "ALTEROSA": "MG",
-    "RS": "RS", "RIOGRANDEDOSUL": "RS", "PORTOALEGRE": "RS", "POA": "RS", "PELOTAS": "RS", "CAXIAS": "RS", "PASSOFUNDO": "RS", "PAMPA": "RS",
+    "MG": "MG", "MINAS": "MG", "BELOHORIZONTE": "MG", "JUIZDEFORA": "MG", "UBERLANDIA": "MG", "UBERABA": "MG", "ARAXA": "MG", "ALTEROSA": "MG", "SULDEMINAS": "MG", "GRANDEMINAS": "MG",
+    "RS": "RS", "RIOGRANDEDOSUL": "RS", "PORTOALEGRE": "RS", "POA": "RS", "PELOTAS": "RS", "CAXIAS": "RS", "PASSOFUNDO": "RS", "PAMPA": "RS", "SANTAMARIA": "RS", "BAGE": "RS",
     "PR": "PR", "PARANA": "PR", "CURITIBA": "PR", "LONDRINA": "PR", "MARINGA": "PR", "CASCAVEL": "PR", "FOZDOIGUACU": "PR", "PARANAVAI": "PR", "PONTAGROSSA": "PR", "REDEMASSA": "PR",
     "SC": "SC", "SANTACATARINA": "SC", "FLORIANOPOLIS": "SC", "JOINVILLE": "SC", "BLUMENAU": "SC", "CHAPECO": "SC", "CRICIUMA": "SC",
     "BA": "BA", "BAHIA": "BA", "SALVADOR": "BA", "ITAPOAN": "BA", "ARATU": "BA", "SANTACRUZ": "BA", "SUBAE": "BA", "SUDOESTE": "BA",
-    "PE": "PE", "PERNAMBUCO": "PE", "RECIFE": "PE", "ASABRANCA": "PE", "GRANDERIO": "PE", "GUARARAPES": "PE",
+    "PE": "PE", "PERNAMBUCO": "PE", "RECIFE": "PE", "ASABRANCA": "PE", "GRANDERIO": "PE", "GUARARAPES": "PE", "PETROLINA": "PE", "CARUARU": "PE",
     "CE": "CE", "CEARA": "CE", "FORTALEZA": "CE", "VERDESMARES": "CE", "JANGADEIRO": "CE", "CARIRI": "CE",
-    "GO": "GO", "GOIAS": "GO", "GOIANIA": "GO", "ANHANGUERA": "GO", "SERRADOURADA": "GO",
+    "GO": "GO", "GOIAS": "GO", "GOIANIA": "GO", "ANHANGUERA": "GO", "SERRADOURADA": "GO", "RIOVERDE": "GO", "ANAPOLIS": "GO", "CATALAO": "GO", "ITUMBIARA": "GO", "JATAI": "GO", "LUZIANIA": "GO", "PORANGATU": "GO",
     "DF": "DF", "BRASILIA": "DF",
     "ES": "ES", "ESPIRITOSANTO": "ES", "VITORIA": "ES", "GAZETASUL": "ES",
     "PA": "PA", "PARA": "PA", "BELEM": "PA", "LIBERAL": "PA", "TAPAJOS": "PA",
     "AM": "AM", "AMAZONAS": "AM", "MANAUS": "AM",
-    "MA": "MA", "MARANHAO": "MA", "SAOLUIS": "MA", "SAOLUIZ": "MA", "MIRANTE": "MA", "DIFUSORA": "MA",
-    "MT": "MT", "MATOGROSSO": "MT", "CUIABA": "MT", "CENTROAMERICA": "MT",
-    "MS": "MS", "MATOGROSSODOSUL": "MS", "CAMPOGRANDE": "MS", "MORENA": "MS",
-    "PB": "PB", "PARAIBA": "PB", "JOAOPESSOA": "PB", "CABOBRANCO": "PB", "TAMBAU": "PB", "CORREIO": "PB",
+    "MA": "MA", "MARANHAO": "MA", "SAOLUIS": "MA", "SAOLUIZ": "MA", "MIRANTE": "MA", "DIFUSORA": "MA", "BALSAS": "MA", "IMPERATRIZ": "MA",
+    "MT": "MT", "MATOGROSSO": "MT", "CUIABA": "MT", "CENTROAMERICA": "MT", "TANGARADASERRA": "MT",
+    "MS": "MS", "MATOGROSSODOSUL": "MS", "CAMPOGRANDE": "MS", "MORENA": "MS", "CORUMBA": "MS", "PONTAPORA": "MS",
+    "PB": "PB", "PARAIBA": "PB", "JOAOPESSOA": "PB", "CABOBRANCO": "PB", "TAMBAU": "PB", "CORREIO": "PB", "MANAIRA": "PB",
     "RN": "RN", "RIOGRANDEDONORTE": "RN", "NATAL": "RN", "CABUGI": "RN", "TROPICAL": "RN",
     "AL": "AL", "ALAGOAS": "AL", "MACEIO": "AL", "PONTAVERDE": "AL",
     "SE": "SE", "SERGIPE": "SE", "ARACAJU": "SE", "ATALAIA": "SE",
-    "PI": "PI", "PIAUI": "PI", "TERESINA": "PI", "CIDADEVERDE": "PI",
+    "PI": "PI", "PIAUI": "PI", "TERESINA": "PI", "CIDADEVERDE": "PI", "PICOS": "PI",
     "TO": "TO", "TOCANTINS": "TO", "PALMAS": "TO", "ARAGUAINA": "TO", "GURUPI": "TO",
     "RO": "RO", "RONDONIA": "RO", "PORTOVELHO": "RO", "JIPARANA": "RO", "ARIQUEMES": "RO", "ARQUEMES": "RO", "CACOAL": "RO", "VILHENA": "RO",
     "AC": "AC", "ACRE": "AC", "RIOBRANCO": "AC", "CRUZEIRODOSUL": "AC",
     "AP": "AP", "AMAPA": "AP", "MACAPA": "AP",
-    "RR": "RR", "RORAIMA": "RR", "BOAVISTA": "RR",
+    "RR": "RR", "RORAIMA": "RR", "BOAVISTA": "RR", "RORAINOPOLIS": "RR",
 }
 
 
 def extract_state_ufs(text: str) -> set[str]:
-    """Identifica a(s) UF(s) explícita(s) de um nome de canal regional para evitar mistura de estados (ex: SP vs RJ/BA/PR, JI-PARANA vs PR)."""
+    """Identifica a(s) UF(s) explícita(s) de um nome de canal regional para evitar mistura de estados (ex: SP vs RJ/BA/PR, JI-PARANA vs PR, RIO PRETO vs RJ)."""
     nk = name_key(text)
     words = nk.split()
     joined = "".join(words)
     ufs: set[str] = set()
+
+    # Cidades/Estados compostos com "RIO" que NÃO pertencem ao RJ
+    if "RIOPRETO" in joined or "SJRIOPRETO" in joined:
+        ufs.add("SP")
+    if "RIOVERDE" in joined:
+        ufs.add("GO")
+    if "RIOBRANCO" in joined:
+        ufs.add("AC")
+    if "RIOGRANDEDOSUL" in joined:
+        ufs.add("RS")
+    if "RIOGRANDEDONORTE" in joined:
+        ufs.add("RN")
+    if "GRANDERIO" in joined:
+        ufs.add("PE")
 
     if "JIPARANA" in joined:
         ufs.add("RO")
@@ -168,6 +182,8 @@ def extract_state_ufs(text: str) -> set[str]:
 
     for w in words:
         if w in {"PARA", "PARANA"}:
+            continue
+        if w == "RIO" and any(x in joined for x in ("RIOPRETO", "RIOVERDE", "RIOBRANCO", "RIOGRANDE", "GRANDERIO")):
             continue
         if w in _STATE_TOKEN_MAP:
             ufs.add(_STATE_TOKEN_MAP[w])
@@ -449,10 +465,16 @@ CHANNEL_SYNONYMS = {
     "HOME & HEALTH": ["DISCOVERY HOME & HEALTH", "DISCOVERY HOME AND HEALTH"],
     "HOME AND HEALTH": ["DISCOVERY HOME & HEALTH", "DISCOVERY HOME AND HEALTH"],
     "DISCOVERY HOME & HEALTH": ["HOME & HEALTH", "HOME AND HEALTH"],
-    "DISNEY PLUS 1": ["DISNEY PLUS ESPN", "DISNEY PLUS ESPN 1", "DISNEY+ 1"],
+    "DISNEY PLUS 1": ["DISNEY PLUS ESPN", "DISNEY PLUS ESPN 1", "DISNEY+ 1", "DISNEY+ ESPN 1"],
+    "DISNEY PLUS 2": ["DISNEY PLUS ESPN 2", "DISNEY+ 2", "DISNEY+ ESPN 2"],
+    "DISNEY PLUS 3": ["DISNEY PLUS ESPN 3", "DISNEY+ 3", "DISNEY+ ESPN 3"],
+    "DISNEY PLUS 4": ["DISNEY PLUS ESPN 4", "DISNEY+ 4", "DISNEY+ ESPN 4"],
+    "DISNEY PLUS 5": ["DISNEY PLUS ESPN 5", "DISNEY+ 5", "DISNEY+ ESPN 5"],
+    "DISNEY PLUS 6": ["DISNEY PLUS ESPN 6", "DISNEY+ 6", "DISNEY+ ESPN 6"],
+    "DISNEY PLUS 7": ["DISNEY PLUS ESPN 7", "DISNEY+ 7", "DISNEY+ ESPN 7"],
     "RBS CAXIAS": ["RBS CAXIAS DO SUL", "RBS TV CAXIAS DO SUL", "GLOBO RBS TV POA"],
     "RBS PASSO FUNDO GLOBO": ["RBS TV PASSO FUNDO", "GLOBO RBS PASSO FUNDO", "GLOBO RBS TV POA"],
-    "TV FRONTEIRA": ["TV FRONTEIRA P PRUDENTE", "GLOBO FRONTEIRA PAULISTA", "GLOBO TV FRONTEIRA"],
+    "TV FRONTEIRA": ["TV FRONTEIRA P PRUDENTE", "GLOBO FRONTEIRA PAULISTA", "GLOBO TV FRONTEIRA", "GLOBO SP"],
     "TV SANTA CRUZ BAHIA": ["TV SANTA CRUZ", "GLOBO SANTA CRUZ", "GLOBO TV SANTA CRUZ ITABUNA BAHIA"],
     "WOHOO": ["WOOHOO", "CANAL WOOHOO"],
     "WOOHOO": ["WOHOO", "CANAL WOOHOO"],
@@ -728,6 +750,12 @@ def is_valid_provider_tvid(channel_name: str, tvid: str) -> bool:
         return False
 
     base_clean = normalizar_canal(channel_name)
+    # Bloqueia IDs legados de canais que mudaram de programação (TruTV -> Adult Swim e TBS -> TNT Novelas)
+    if "ADULT SWIM" in base_clean and "trutv" in tvid_clean:
+        return False
+    if "TNT NOVELAS" in base_clean and "tbs" in tvid_clean:
+        return False
+
     if base_clean.startswith(("GLOBO ", "TV GLOBO", "RECORD ", "SBT ", "BAND ", "TV BAHIA", "TV ASA BRANCA", "TV VERDES MARES", "TV GAZETA", "TV ANHANGUERA", "TV LIBERAL", "TV MIRANTE", "RBS ", "RPC ", "NSC ", "EPTV")):
         if "NEWS" not in base_clean and "SPORTS" not in base_clean and "NOVELAS" not in base_clean:
             return False
@@ -1204,6 +1232,12 @@ def _fuzzy_incompatible(alias: str, candidate: str) -> bool:
         return True
     if ("UNIVERSO" in alias and "UNIVERSAL" in candidate) or ("UNIVERSAL" in alias and "UNIVERSO" in candidate):
         return True
+    if ("UNIVERSO" in alias and "UNIVESP" in candidate) or ("UNIVESP" in alias and "UNIVERSO" in candidate):
+        return True
+    if ("DIARIO" in alias and "DIARIO" not in candidate) or ("DIARIO" in candidate and "DIARIO" not in alias):
+        return True
+    if ("GAZETAES" in alias or "GAZETAVITORIA" in alias or "GAZETASUL" in alias or "GAZETAALAGOAS" in alias) and candidate in {"TVGAZETA", "GAZETA", "REDEGAZETA"}:
+        return True
     if ("WSBRASIL" in alias and "WSBRASIL" not in candidate) or ("WSBRASIL" in candidate and "WSBRASIL" not in alias):
         return True
     if ("JIPARANA" in alias and "JIPARANA" not in candidate) or ("JIPARANA" in candidate and "JIPARANA" not in alias):
@@ -1304,10 +1338,9 @@ def expand_open_tv_tiers(nome_limpo: str, grupo: str) -> tuple[list[str], list[s
     if without_net and without_net != nome_limpo:
         tier1_local.append(f"{network} {without_net}")
         if network == "GLOBO":
-            tier1_local.append(without_net)
-            if not without_net.startswith("TV ") and not without_net.startswith("REDE "):
-                tier1_local.append(f"TV {without_net}")
-                tier1_local.append(f"{network} TV {without_net}")
+            tier1_local.append(f"{network} TV {without_net}")
+            if without_net.startswith(_GLOBO_ONLY_BRANDS):
+                tier1_local.append(without_net)
 
     city_only = re.sub(_AFFILIATE_PATTERNS, ' ', without_net, flags=re.IGNORECASE)
     city_only = ' '.join(city_only.split()).strip()
@@ -1373,12 +1406,13 @@ def expand_open_tv_tiers(nome_limpo: str, grupo: str) -> tuple[list[str], list[s
         elif "CENTRAL" in nome_limpo or "SAO CARLOS" in nome_limpo:
             tier1_local.extend(["EPTV CENTRAL", "GLOBO SAO CARLOS"])
         tier2_state.extend(["EPTV CAMPINAS", "EPTV SUL DE MINAS", "EPTV"])
-    if "TV TEM" in nome_limpo:
+    if "TV TEM" in nome_limpo or "SJRP" in nome_limpo or "RIO PRETO" in nome_limpo or "MOGI DAS CRUZES" in nome_limpo or "FRONTEIRA" in nome_limpo:
         tier1_local.extend(["TV TEM", "GLOBO BAURU", "GLOBO SOROCABA", "GLOBO SAO JOSE DO RIO PRETO", "GLOBO ITAPETININGA"])
+        tier2_state.extend(["GLOBO SP", "GLOBO SAO PAULO"])
     if "VANGUARDA" in nome_limpo:
         tier1_local.extend(["TV VANGUARDA", "REDE VANGUARDA", "GLOBO SAO JOSE DOS CAMPOS", "GLOBO TAUBATE"])
-    if "INTEGRACAO" in nome_limpo:
-        tier1_local.extend(["TV INTEGRACAO", "GLOBO UBERLANDIA", "GLOBO JUIZ DE FORA", "GLOBO DIVINOPOLIS", "GLOBO ARAXA"])
+    if "INTEGRACAO" in nome_limpo or "INTEG " in nome_limpo or "BELOHORIZONTE" in nome_limpo.replace(" ", ""):
+        tier1_local.extend(["TV INTEGRACAO", "GLOBO MINAS", "GLOBO BELO HORIZONTE", "GLOBO UBERLANDIA", "GLOBO JUIZ DE FORA", "GLOBO DIVINOPOLIS", "GLOBO ARAXA"])
         tier2_state.extend(["GLOBO MINAS", "GLOBO BELO HORIZONTE", "GLOBO MG"])
     if "INTER TV" in nome_limpo or "INTERTV" in nome_limpo or "INTER VALE" in nome_limpo:
         if "CABUGI" in nome_limpo or "RN" in nome_limpo or "NATAL" in nome_limpo:
@@ -1458,8 +1492,8 @@ def aliases_tiers_for(entry: dict[str, object]) -> list[list[str]]:
     tier1, tier2, tier3 = [], [], []
     seen = set()
 
-    def add_to(target_list: list[str], val: str):
-        if has_conflicting_region(base_channel_name, val):
+    def add_to(target_list: list[str], val: str, allow_national_fallback: bool = False):
+        if not allow_national_fallback and has_conflicting_region(base_channel_name, val):
             return
         n = original_normalize_name(val)
         if n and n not in seen:
@@ -1495,16 +1529,16 @@ def aliases_tiers_for(entry: dict[str, object]) -> list[list[str]]:
             for a in t2_ext:
                 add_to(tier2, a)
             for a in t3_ext:
-                add_to(tier3, a)
+                add_to(tier3, a, allow_national_fallback=True)
 
     return [t for t in (tier1, tier2, tier3) if t]
 
-def choose_exact(source: EpgSource, aliases: Iterable[str], entry_name: str = "") -> tuple[str | None, str]:
+def choose_exact(source: EpgSource, aliases: Iterable[str], entry_name: str = "", allow_national_fallback: bool = False) -> tuple[str | None, str]:
     for alias in aliases:
         candidates = source.exact_index.get(alias, set())
         valid_cands = [
             cid for cid in candidates
-            if not match_conflicts_network(entry_name, source, cid)
+            if (allow_national_fallback or not match_conflicts_network(entry_name, source, cid))
             and not has_conflicting_channel_number(entry_name, cid)
         ] if entry_name else list(candidates)
         if valid_cands:
@@ -1549,6 +1583,8 @@ def best_fuzzy(source: EpgSource, aliases: list[str], entry_name: str = "") -> t
 def find_match_in_tier(source: EpgSource, tier_aliases: list[str], source_ids: list[str] | None = None, tier_num: int = 1, entry_name: str = "") -> ChannelMatch | None:
     if tier_num == 1:
         for raw_sid in (source_ids or []):
+            if not is_valid_provider_tvid(entry_name, raw_sid):
+                continue
             if has_conflicting_channel_number(entry_name, raw_sid) or has_conflicting_region(entry_name, raw_sid):
                 continue
             norm_sid = normalize_source_id(raw_sid)
@@ -1558,14 +1594,15 @@ def find_match_in_tier(source: EpgSource, tier_aliases: list[str], source_ids: l
                 if not match_conflicts_network(entry_name, source, best_cid):
                     return ChannelMatch(source, best_cid, f"id do dicionário: {raw_sid}", 1.0, tier=1)
 
-    exact_id, reason = choose_exact(source, tier_aliases, entry_name=entry_name)
+    exact_id, reason = choose_exact(source, tier_aliases, entry_name=entry_name, allow_national_fallback=(tier_num >= 3))
     if exact_id:
         return ChannelMatch(source, exact_id, reason if tier_num == 1 else f"{reason} (camada {tier_num})", 1.0, tier=tier_num)
     
-    fuzzy_id, best_score, second_score, fuzzy_reason = best_fuzzy(source, tier_aliases, entry_name=entry_name)
-    if fuzzy_id and best_score >= FUZZY_THRESHOLD and (best_score - second_score) >= FUZZY_MARGIN \
-            and not match_conflicts_network(entry_name, source, fuzzy_id):
-        return ChannelMatch(source, fuzzy_id, fuzzy_reason if tier_num == 1 else f"{fuzzy_reason} (camada {tier_num})", best_score, tier=tier_num)
+    if tier_num <= 2:
+        fuzzy_id, best_score, second_score, fuzzy_reason = best_fuzzy(source, tier_aliases, entry_name=entry_name)
+        if fuzzy_id and best_score >= FUZZY_THRESHOLD and (best_score - second_score) >= FUZZY_MARGIN \
+                and not match_conflicts_network(entry_name, source, fuzzy_id):
+            return ChannelMatch(source, fuzzy_id, fuzzy_reason if tier_num == 1 else f"{fuzzy_reason} (camada {tier_num})", best_score, tier=tier_num)
         
     return None
 
@@ -1795,9 +1832,13 @@ def evaluate_candidates(matches: list[ChannelMatch], now: datetime, max_active_v
         h_info = health_by_source[match.source.spec.key]
         health_score = float(h_info["score"])
         richness_score = float(h_info.get("richness_score", 0.0))
+        fut_h = float(h_info.get("future_hours", 0.0))
+
+        # Saúde efetiva: se tem >= 0.80 de saúde e >= 48h de grade futura, considera saúde plena (1.0)
+        eff_health = 1.0 if (health_score >= 0.80 and fut_h >= 48.0) else health_score
 
         # Pontuação 100% baseada em mérito da grade naquele momento (Precisão/Consenso + Conteúdo/Sinopse + Saúde/Cobertura)
-        quality = 0.40 * weighted_ratio + 0.25 * health_score + 0.20 * richness_score + 0.15 * avg_support
+        quality = 0.40 * weighted_ratio + 0.25 * eff_health + 0.20 * richness_score + 0.15 * avg_support
         evidence_factor = 0.55 + 0.45 * min(vote_weight / max(max_active_vote_weight, 0.5), 1.0)
         confidence = round(100 * max(0.0, min(1.0, quality * evidence_factor)))
         evaluations.append(CandidateEvaluation(
@@ -1813,6 +1854,7 @@ def evaluate_candidates(matches: list[ChannelMatch], now: datetime, max_active_v
         has_programmes = int(bool(ev.match.source.rows.get(ev.match.channel_id)))
         fut_h = float(ev.health.get("future_hours", 0.0))
         near_cov = float(ev.health.get("near_coverage_ratio", 0.0))
+        eff_h = 1.0 if (ev.health_score >= 0.80 and fut_h >= 48.0) else ev.health_score
         # Só dá bônus para Afiliadas Locais quando é match direto (tier 1) de uma afiliada regional específica
         is_direct_local_affiliate = int(ev.match.tier == 1 and ev.match.source.spec.family == "afiliadas_locais" and ev.health_score >= 0.70)
         # Nota composta de mérito (0.0 a 1.0): Precisão de horário (consenso) + Riqueza de metadados + Cobertura sem buracos
@@ -1820,8 +1862,8 @@ def evaluate_candidates(matches: list[ChannelMatch], now: datetime, max_active_v
         composite_merit = (
             0.38 * ev.weighted_ratio
             + 0.22 * ev.avg_support_agreement
-            + 0.22 * ev.richness_score
-            + 0.12 * ev.health_score
+            + 0.24 * ev.richness_score
+            + 0.10 * eff_h
             + 0.06 * horizon_factor
         )
         return (
@@ -2144,10 +2186,12 @@ def stitch_multi_source_schedule(
                 metadata_by_norm_title[row.normalized_title].append(meta)
 
         if cleaned_source_progs:
+            fut_h = float(ev.health.get("future_hours", 0.0))
+            eff_h = 1.0 if (ev.health_score >= 0.80 and fut_h >= 48.0) else ev.health_score
             aligned_sources_data.append({
                 "ev": ev,
                 "progs": cleaned_source_progs,
-                "global_merit": 0.45 * ev.weighted_ratio + 0.30 * ev.richness_score + 0.25 * ev.health_score,
+                "global_merit": 0.45 * ev.weighted_ratio + 0.35 * ev.richness_score + 0.20 * eff_h,
             })
 
     if not aligned_sources_data:
@@ -2300,192 +2344,6 @@ def stitch_multi_source_schedule(
     merged_timeline.sort(key=lambda x: x["start"])
 
     # 3. SERIALIZAÇÃO E FUSÃO DE METADADOS RICOS
-    final_elements = []
-    for i, prog in enumerate(merged_timeline):
-        s_dt, sp_dt = prog["start"], prog["stop"]
-        if i + 1 < len(merged_timeline) and sp_dt > merged_timeline[i + 1]["start"]:
-            sp_dt = merged_timeline[i + 1]["start"]
-        dur_sec = (sp_dt - s_dt).total_seconds()
-        if dur_sec < 60:
-            continue
-        dur_min = dur_sec / 60.0
-            
-        el = copy.deepcopy(prog["el"])
-        el.attrib["start"] = format_xmltv_datetime(s_dt)
-        el.attrib["stop"] = format_xmltv_datetime(sp_dt)
-        
-        norm_title = prog.get("norm_title", "")
-        matching_time_metas: list[dict[str, Any]] = []
-        for s_data in aligned_sources_data:
-            for other_p in s_data["progs"]:
-                if other_p["norm_title"] == norm_title and abs((other_p["start"] - s_dt).total_seconds()) <= 25 * 60:
-                    matching_time_metas.append(other_p["meta"])
-
-        if not matching_time_metas and norm_title in metadata_by_norm_title:
-            matching_time_metas = [
-                {
-                    "title": m["title"],
-                    "sub_title": "",
-                    "desc": m["desc"],
-                    "season": None,
-                    "episode": None,
-                    "categories": m["categories"],
-                    "date": m["date"],
-                    "rating_badge": m.get("rating_badge", ""),
-                    "icon": m.get("icon", ""),
-                }
-                for m in metadata_by_norm_title[norm_title]
-            ]
-
-        apply_rich_metadata_to_element(el, matching_time_metas, channel_name, dur_min)
-        final_elements.append(el)
-    return final_elements
-
-    # 1. SELEÇÃO POR JANELA DE 6 HORAS (Escolhe a melhor fonte em cada período do dia)
-    WINDOW_HOURS = 6
-    window_delta = timedelta(hours=WINDOW_HOURS)
-    win_Sec = WINDOW_HOURS * 3600.0
-    merged_timeline: list[dict[str, Any]] = []
-
-    cur_win_start = cutoff
-    while cur_win_start < max_future:
-        cur_win_end = min(max_future, cur_win_start + window_delta)
-        actual_win_sec = max(1.0, (cur_win_end - cur_win_start).total_seconds())
-
-        best_src_idx = -1
-        best_win_score = -1.0
-
-        # Mapeia títulos presentes na janela entre as fontes para medir consenso local do período
-        title_counts_in_win: Counter[str] = Counter()
-        for s_data in aligned_sources_data:
-            seen_t = {
-                p["norm_title"]
-                for p in s_data["progs"]
-                if p["stop"] > cur_win_start and p["start"] < cur_win_end and p["norm_title"]
-            }
-            for t in seen_t:
-                title_counts_in_win[t] += 1
-
-        for idx, s_data in enumerate(aligned_sources_data):
-            win_progs = [
-                p for p in s_data["progs"]
-                if p["stop"] > cur_win_start and p["start"] < cur_win_end
-            ]
-            if not win_progs:
-                continue
-
-            covered_sec = sum(
-                max(0.0, (min(cur_win_end, p["stop"]) - max(cur_win_start, p["start"])).total_seconds())
-                for p in win_progs
-            )
-            cov_ratio = min(1.0, covered_sec / actual_win_sec)
-            if cov_ratio < 0.25:
-                continue
-
-            avg_rich = mean(p["richness"] for p in win_progs)
-            if len(aligned_sources_data) > 1:
-                agreed_progs = sum(1 for p in win_progs if title_counts_in_win.get(p["norm_title"], 0) >= 2)
-                local_agr = agreed_progs / len(win_progs)
-            else:
-                local_agr = 1.0
-
-            # Nota da fonte especificamente para este período de 6h
-            win_score = (
-                0.40 * cov_ratio
-                + 0.30 * local_agr
-                + 0.20 * avg_rich
-                + 0.10 * s_data["global_merit"]
-            )
-            if win_score > best_win_score:
-                best_win_score = win_score
-                best_src_idx = idx
-
-        if best_src_idx >= 0:
-            chosen_win_progs = [
-                p for p in aligned_sources_data[best_src_idx]["progs"]
-                if p["stop"] > cur_win_start and p["start"] < cur_win_end
-            ]
-            for cand in chosen_win_progs:
-                c_start, c_stop = cand["start"], cand["stop"]
-                if merged_timeline and c_start < merged_timeline[-1]["stop"]:
-                    prev = merged_timeline[-1]
-                    # Se for exatamente o mesmo programa que atravessou a fronteira das 6h, estende ou ignora duplicata
-                    if prev["norm_title"] == cand["norm_title"] and abs((prev["start"] - c_start).total_seconds()) <= 1800:
-                        if c_stop > prev["stop"]:
-                            prev["stop"] = c_stop
-                        continue
-                    # Ajusta a fronteira suavemente
-                    if c_start > prev["start"] + timedelta(minutes=5):
-                        prev["stop"] = c_start
-                    else:
-                        c_start = prev["stop"]
-                if (c_stop - c_start).total_seconds() >= 300:
-                    cp = copy.deepcopy(cand)
-                    cp["start"] = c_start
-                    cp["stop"] = c_stop
-                    merged_timeline.append(cp)
-
-        cur_win_start = cur_win_end
-
-    merged_timeline.sort(key=lambda x: x["start"])
-
-    # 2. PREENCHIMENTO FINO DE BURACOS RESTANTES (Caso a vencedora da janela ainda tenha deixado algum gap >= 10 min)
-    MIN_GAP_SECONDS = 10 * 60
-    MAX_EDGE_TRIM_SECONDS = 15 * 60
-
-    for s_data in aligned_sources_data:
-        added_any = False
-        for cand in s_data["progs"]:
-            c_start, c_stop = cand["start"], cand["stop"]
-            c_dur = (c_stop - c_start).total_seconds()
-            if c_dur < 300:
-                continue
-
-            overlapping = [
-                ex for ex in merged_timeline
-                if ex["stop"] > c_start and ex["start"] < c_stop
-            ]
-
-            if not overlapping:
-                merged_timeline.append(copy.deepcopy(cand))
-                added_any = True
-                continue
-
-            overlapping.sort(key=lambda x: x["start"])
-            free_cursor = c_start
-            best_gap = None
-            for ex in overlapping:
-                if ex["start"] > free_cursor:
-                    gap_sec = (ex["start"] - free_cursor).total_seconds()
-                    if gap_sec >= MIN_GAP_SECONDS:
-                        if best_gap is None or gap_sec > (best_gap[1] - best_gap[0]).total_seconds():
-                            best_gap = (free_cursor, ex["start"])
-                if ex["stop"] > free_cursor:
-                    free_cursor = ex["stop"]
-            if c_stop > free_cursor:
-                gap_sec = (c_stop - free_cursor).total_seconds()
-                if gap_sec >= MIN_GAP_SECONDS:
-                    if best_gap is None or gap_sec > (best_gap[1] - best_gap[0]).total_seconds():
-                        best_gap = (free_cursor, c_stop)
-
-            if best_gap is not None:
-                g_start, g_stop = best_gap
-                gap_dur = (g_stop - g_start).total_seconds()
-                left_trim = (g_start - c_start).total_seconds()
-                right_trim = (c_stop - g_stop).total_seconds()
-                if (gap_dur / c_dur) >= 0.70 or (left_trim <= MAX_EDGE_TRIM_SECONDS and right_trim <= MAX_EDGE_TRIM_SECONDS):
-                    new_cand = copy.deepcopy(cand)
-                    new_cand["start"] = g_start
-                    new_cand["stop"] = g_stop
-                    merged_timeline.append(new_cand)
-                    added_any = True
-
-        if added_any:
-            merged_timeline.sort(key=lambda x: x["start"])
-
-    merged_timeline.sort(key=lambda x: x["start"])
-
-    # 3. SERIALIZAÇÃO E FUSÃO DE METADADOS RICOS ENTRE TODAS AS FONTES ALINHADAS
     final_elements = []
     for i, prog in enumerate(merged_timeline):
         s_dt, sp_dt = prog["start"], prog["stop"]
@@ -2713,15 +2571,15 @@ def main() -> None:
                     rec["aliases"].add(a_clean)
         for t in tvg_ids:
             t_str = str(t).strip()
-            if t_str and not has_conflicting_channel_number(rec_base_name, t_str) and not has_conflicting_region(rec_base_name, t_str):
+            if t_str and is_valid_provider_tvid(rec_base_name, t_str) and not has_conflicting_channel_number(rec_base_name, t_str) and not has_conflicting_region(rec_base_name, t_str):
                 rec["tvg_ids_to_export"].add(t_str)
         for c in comp_ids:
             c_str = str(c).strip()
-            if c_str and not has_conflicting_channel_number(rec_base_name, c_str) and not has_conflicting_region(rec_base_name, c_str):
+            if c_str and is_valid_provider_tvid(rec_base_name, c_str) and not has_conflicting_channel_number(rec_base_name, c_str) and not has_conflicting_region(rec_base_name, c_str):
                 rec["compatibility_ids"].add(c_str)
         for s in source_ids:
             s_str = str(s).strip()
-            if s_str and not has_conflicting_channel_number(rec_base_name, s_str) and not has_conflicting_region(rec_base_name, s_str):
+            if s_str and is_valid_provider_tvid(rec_base_name, s_str) and not has_conflicting_channel_number(rec_base_name, s_str) and not has_conflicting_region(rec_base_name, s_str):
                 rec["source_ids"].add(s_str)
         if group and not rec["group"]:
             rec["group"] = group
