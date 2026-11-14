@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """EPG Universal Consolidado — 1 Canal Único por Emissora + Vivo/Claro no Topo + Match 100% FHD [H265]
 - Exporta estritamente 1 <channel> por emissora real (elimina a duplicação de exported_ids).
-- Mantém todos os aliases reais da M3U (incluindo FHD [H265], FHD H265, old_tvg_ids) em <display-name>.
+- Mantém todos os aliases reais da M3U (incluindo FHD [H265], FHD H265, FHDR, old_tvg_ids) em <display-name>.
 - Remove sufixos .br em name_key() e BR2 grudado no nome (ex: GLOBORJBR2 -> GLOBO RJ).
-- Filtra canais 24H, câmeras de reality e jogos avulsos herdados do dicionário antigo.
+- Filtra canais 24H, câmeras de reality, separadores ⭐⭐⭐ e jogos avulsos herdados do dicionário antigo.
 - Impede colisão entre canais numerados e canais base (ex: HBO vs HBO 2 / HBO [2]).
-- Impede falsos positivos regionais (GLOBO RO vs GLOBO RIO, BAND SC vs BM&C, BAND PR vs SBT PR).
-- Bloqueia colisões entre canais estrangeiros (US/UK/CO) e redes brasileiras via fuzzy.
-- Empata health_score >= 0.80 para Vivo Play API e Claro assumirem a liderança.
+- Impede falsos positivos regionais (BAND SP vs BAND RJ, RECORD SP vs BAHIA, JI-PARANA vs PARANA, PARAIBA vs PARA).
+- Bloqueia colisões entre canais estrangeiros (PT/US/UK/CO/ARG/MX/EC/PY) e redes brasileiras.
+- Empata health_score >= 0.80 com >= 60h futuras para Vivo Play API e Claro assumirem a liderança.
+- Costura multi-fonte aprimorada (preenche buracos e estende o restante do dia/semana com fontes secundárias).
 """
 from __future__ import annotations
 
@@ -44,9 +45,33 @@ except ImportError:
     from epg_utils import digit_signature, normalize_name as original_normalize_name, normalize_source_id
 
 _QUALITY = re.compile(
-    r"\b(SD|HD|FHD|UHD|4K|8K|H\.?264|H\.?265|HEVC|AVC|1080P|1080I|720P|60FPS|BR\d*|SRV\d*|SERVER\s*\d*|OP[CÇ][AÃ]O\s*\d*|ALT|ALTERNATIVO|BACKUP|BKP|LOW|MED|HIGH|PLUS\s*HD|P)\b[\*\+]*",
+    r"\b(SD|HD|FHD|FHDR|HDR|UHD|4K|8K|H\.?264|H\.?265|HEVC|AVC|1080P|1080I|720P|60FPS|BR\d*|SRV\d*|SERVER\s*\d*|OP[CÇ][AÃ]O\s*\d*|ALT|ALTERNATIVO|BACKUP|BKP|LOW|MED|HIGH|PLUS\s*HD|HQ|P)\b[\*\+]*",
     re.IGNORECASE,
 )
+
+_FOREIGN_COUNTRY_PREFIX_RE = re.compile(
+    r"^(?:PT|US|USA|UK|CO|ARG|AR|MX|EC|PY|UY|CL|PE|BOL|VEN|DE|ES|FR|IT|CA|JP)\b",
+    re.IGNORECASE,
+)
+
+
+def extract_foreign_country_code(text: str) -> str:
+    """Retorna o prefixo de país estrangeiro (ex: PT, US, CO, ARG) ou string vazia se for canal brasileiro/geral."""
+    if not text:
+        return ""
+    s = html.unescape(str(text)).strip().upper()
+    s = re.sub(r"^[^A-Z0-9]+", "", s)
+    if s.startswith(("USA NETWORK", "USA HD", "USA FHD", "GB USA")):
+        return ""
+    m = _FOREIGN_COUNTRY_PREFIX_RE.match(s)
+    if not m:
+        return ""
+    code = m.group(0).upper()
+    if code == "USA":
+        return "US"
+    if code == "AR":
+        return "ARG"
+    return code
 
 
 def name_key(value: str) -> str:
@@ -64,6 +89,7 @@ def name_key(value: str) -> str:
     s = re.sub(r"[()\-–—_./|,:;]", " ", s)
     s = _QUALITY.sub(" ", s)
     s = re.sub(r"[^A-Z0-9+ ]", " ", s)
+    s = re.sub(r"\b0+(\d+)\b", r"\1", s)
     return " ".join(s.split())
 
 
@@ -75,7 +101,7 @@ def extract_significant_digits(text: str) -> list[str]:
     s = re.sub(r"(?<=[A-Z0-9])(?:BR\d+|SRV\d+)\b", " ", s)
     s = re.sub(r"\b(?:H\.?264|H\.?265|1080[PI]?|720P?|60FPS|4K|8K|24H[S]?|24/7|BR\d+|SRV\d+|SERVER\s*\d+|OP[CÇ][AÃ]O\s*\d+)\b", " ", s)
     s = re.sub(r"[¹²³⁴⁵⁶⁷⁸⁹⁰]+", " ", s)
-    return re.findall(r"\d+", s)
+    return [str(int(d)) for d in re.findall(r"\d+", s)]
 
 
 def has_conflicting_channel_number(base_channel_name: str, candidate_text: str) -> bool:
@@ -88,6 +114,83 @@ def has_conflicting_channel_number(base_channel_name: str, candidate_text: str) 
             (not base_digits and cand_digits == ["1"]) or (base_digits == ["1"] and not cand_digits)
         ):
             return False
+        return True
+    return False
+
+
+_STATE_TOKEN_MAP = {
+    "SP": "SP", "SAOPAULO": "SP", "CAMPINAS": "SP", "RIBEIRAOPRETO": "SP", "BAURU": "SP", "SOROCABA": "SP", "SANTOS": "SP", "TAUBATE": "SP", "SJCAMPOS": "SP",
+    "RJ": "RJ", "RIO": "RJ", "RIODEJANEIRO": "RJ", "RIOSUL": "RJ", "SERRAMAR": "RJ",
+    "MG": "MG", "MINAS": "MG", "BELOHORIZONTE": "MG", "JUIZDEFORA": "MG", "UBERLANDIA": "MG", "UBERABA": "MG", "ARAXA": "MG", "ALTEROSA": "MG",
+    "RS": "RS", "RIOGRANDEDOSUL": "RS", "PORTOALEGRE": "RS", "POA": "RS", "PELOTAS": "RS", "CAXIAS": "RS", "PASSOFUNDO": "RS", "PAMPA": "RS",
+    "PR": "PR", "PARANA": "PR", "CURITIBA": "PR", "LONDRINA": "PR", "MARINGA": "PR", "CASCAVEL": "PR", "FOZDOIGUACU": "PR", "PARANAVAI": "PR", "PONTAGROSSA": "PR", "REDEMASSA": "PR",
+    "SC": "SC", "SANTACATARINA": "SC", "FLORIANOPOLIS": "SC", "JOINVILLE": "SC", "BLUMENAU": "SC", "CHAPECO": "SC", "CRICIUMA": "SC",
+    "BA": "BA", "BAHIA": "BA", "SALVADOR": "BA", "ITAPOAN": "BA", "ARATU": "BA", "SANTACRUZ": "BA", "SUBAE": "BA", "SUDOESTE": "BA",
+    "PE": "PE", "PERNAMBUCO": "PE", "RECIFE": "PE", "ASABRANCA": "PE", "GRANDERIO": "PE", "GUARARAPES": "PE",
+    "CE": "CE", "CEARA": "CE", "FORTALEZA": "CE", "VERDESMARES": "CE", "JANGADEIRO": "CE", "CARIRI": "CE",
+    "GO": "GO", "GOIAS": "GO", "GOIANIA": "GO", "ANHANGUERA": "GO", "SERRADOURADA": "GO",
+    "DF": "DF", "BRASILIA": "DF",
+    "ES": "ES", "ESPIRITOSANTO": "ES", "VITORIA": "ES", "GAZETASUL": "ES",
+    "PA": "PA", "PARA": "PA", "BELEM": "PA", "LIBERAL": "PA", "TAPAJOS": "PA",
+    "AM": "AM", "AMAZONAS": "AM", "MANAUS": "AM",
+    "MA": "MA", "MARANHAO": "MA", "SAOLUIS": "MA", "SAOLUIZ": "MA", "MIRANTE": "MA", "DIFUSORA": "MA",
+    "MT": "MT", "MATOGROSSO": "MT", "CUIABA": "MT", "CENTROAMERICA": "MT",
+    "MS": "MS", "MATOGROSSODOSUL": "MS", "CAMPOGRANDE": "MS", "MORENA": "MS",
+    "PB": "PB", "PARAIBA": "PB", "JOAOPESSOA": "PB", "CABOBRANCO": "PB", "TAMBAU": "PB", "CORREIO": "PB",
+    "RN": "RN", "RIOGRANDEDONORTE": "RN", "NATAL": "RN", "CABUGI": "RN", "TROPICAL": "RN",
+    "AL": "AL", "ALAGOAS": "AL", "MACEIO": "AL", "PONTAVERDE": "AL",
+    "SE": "SE", "SERGIPE": "SE", "ARACAJU": "SE", "ATALAIA": "SE",
+    "PI": "PI", "PIAUI": "PI", "TERESINA": "PI", "CIDADEVERDE": "PI",
+    "TO": "TO", "TOCANTINS": "TO", "PALMAS": "TO", "ARAGUAINA": "TO", "GURUPI": "TO",
+    "RO": "RO", "RONDONIA": "RO", "PORTOVELHO": "RO", "JIPARANA": "RO", "ARIQUEMES": "RO", "ARQUEMES": "RO", "CACOAL": "RO", "VILHENA": "RO",
+    "AC": "AC", "ACRE": "AC", "RIOBRANCO": "AC", "CRUZEIRODOSUL": "AC",
+    "AP": "AP", "AMAPA": "AP", "MACAPA": "AP",
+    "RR": "RR", "RORAIMA": "RR", "BOAVISTA": "RR",
+}
+
+
+def extract_state_ufs(text: str) -> set[str]:
+    """Identifica a(s) UF(s) explícita(s) de um nome de canal regional para evitar mistura de estados (ex: SP vs RJ/BA/PR, JI-PARANA vs PR)."""
+    nk = name_key(text)
+    words = nk.split()
+    joined = "".join(words)
+    ufs: set[str] = set()
+
+    if "JIPARANA" in joined:
+        ufs.add("RO")
+    elif "PARANAIBA" in joined:
+        ufs.add("MG")
+    elif "PARANAVAI" in joined or "PARANA" in words:
+        ufs.add("PR")
+
+    if "PARAIBA" in joined:
+        ufs.add("PB")
+    elif "PARAUAPEBAS" in joined or "PARAGOMINAS" in joined or "PARA" in words:
+        ufs.add("PA")
+
+    for w in words:
+        if w in {"PARA", "PARANA"}:
+            continue
+        if w in _STATE_TOKEN_MAP:
+            ufs.add(_STATE_TOKEN_MAP[w])
+
+    for k, uf_val in _STATE_TOKEN_MAP.items():
+        if len(k) >= 6 and k in joined:
+            if k == "PARANA" and ("JIPARANA" in joined or "PARANAIBA" in joined):
+                continue
+            ufs.add(uf_val)
+    return ufs
+
+
+def has_conflicting_region(base_channel_name: str, candidate_text: str) -> bool:
+    """Retorna True se o canal base e o alias/candidato tiverem estados (UFs) conflitantes ou países diferentes."""
+    c_base = extract_foreign_country_code(base_channel_name)
+    c_cand = extract_foreign_country_code(candidate_text)
+    if c_base != c_cand and (c_base or c_cand):
+        return True
+    uf_base = extract_state_ufs(base_channel_name)
+    uf_cand = extract_state_ufs(candidate_text)
+    if uf_base and uf_cand and uf_base.isdisjoint(uf_cand):
         return True
     return False
 
@@ -344,6 +447,17 @@ class CandidateEvaluation:
 CHANNEL_SYNONYMS = {
     "E": ["E!", "E! ENTERTAINMENT", "E ENTERTAINMENT"],
     "E!": ["E", "E! ENTERTAINMENT", "E ENTERTAINMENT"],
+    "HOME & HEALTH": ["DISCOVERY HOME & HEALTH", "DISCOVERY HOME AND HEALTH"],
+    "HOME AND HEALTH": ["DISCOVERY HOME & HEALTH", "DISCOVERY HOME AND HEALTH"],
+    "DISCOVERY HOME & HEALTH": ["HOME & HEALTH", "HOME AND HEALTH"],
+    "DISNEY PLUS 1": ["DISNEY PLUS ESPN", "DISNEY PLUS ESPN 1", "DISNEY+ 1"],
+    "RBS CAXIAS": ["RBS CAXIAS DO SUL", "RBS TV CAXIAS DO SUL", "GLOBO RBS TV POA"],
+    "RBS PASSO FUNDO GLOBO": ["RBS TV PASSO FUNDO", "GLOBO RBS PASSO FUNDO", "GLOBO RBS TV POA"],
+    "TV FRONTEIRA": ["TV FRONTEIRA P PRUDENTE", "GLOBO FRONTEIRA PAULISTA", "GLOBO TV FRONTEIRA"],
+    "TV SANTA CRUZ BAHIA": ["TV SANTA CRUZ", "GLOBO SANTA CRUZ", "GLOBO TV SANTA CRUZ ITABUNA BAHIA"],
+    "WOHOO": ["WOOHOO", "CANAL WOOHOO"],
+    "WOOHOO": ["WOHOO", "CANAL WOOHOO"],
+    "CANAL WOOHOO": ["WOOHOO", "WOHOO"],
     "GLOBO SP": ["GLOBO SAO PAULO", "GLOBO SÃO PAULO", "TV GLOBO SP", "TV GLOBO SAO PAULO"],
     "GLOBO SAO PAULO": ["GLOBO SP", "GLOBO SÃO PAULO", "TV GLOBO SP"],
     "GLOBO RJ": ["GLOBO RIO DE JANEIRO", "GLOBO RIO", "TV GLOBO RJ", "TV GLOBO RIO"],
@@ -395,8 +509,6 @@ CHANNEL_SYNONYMS = {
     "SPORTV": ["SPORTV", "SPORTV 1"],
     "SPORTV 1": ["SPORTV", "SPORTTV"],
     "SPORTV 2": ["SPORTV 2"],
-    "SPORTV 2": ["SPORTV 2"],
-    "SPORTV 3": ["SPORTV 3"],
     "SPORTV 3": ["SPORTV 3"],
     "ESPN": ["ESPN 1", "ESPN BRASIL"],
     "ESPN 1": ["ESPN", "ESPN BRASIL"],
@@ -420,6 +532,7 @@ CHANNEL_SYNONYMS = {
     "REDE VIDA": ["REDEVIDA", "TV VIDA"],
     "REDE GOSPEL": ["TV GOSPEL"],
     "TV PAI ETERNO": ["PAI ETERNO"],
+    "PAI ETERNO": ["TV PAI ETERNO"],
     "TV NOVO TEMPO": ["NOVO TEMPO"],
     "NOVO TEMPO": ["TV NOVO TEMPO"],
     "TV EVANGELIZAR": ["EVANGELIZAR", "REDE EVANGELIZAR"],
@@ -427,7 +540,7 @@ CHANNEL_SYNONYMS = {
     "REDE CNT": ["CNT", "TV CNT"],
     "REDE BRASIL": ["RBTV", "REDE BRASIL DE TELEVISAO"],
     "REDE SUPER": ["TV SUPER"],
-    "TVE": ["TVE RS", "TVE BAHIA", "TV CULTURA"],
+    "TVE": ["TVE RS", "TVE BAHIA"],
     "TIMES BRASIL": ["TIMES BRASIL CNBC", "CNBC", "CNBC BRASIL"],
     "TIMES BRASIL CNBC": ["TIMES BRASIL", "CNBC", "CNBC BRASIL"],
     "ADULT SWIM": ["ADULT SWIN"],
@@ -476,18 +589,18 @@ POISONED_OPEN_TV_IDS = {
 }
 
 def strip_qualities_keep_case(name: str) -> str:
-    """Remove apenas tags de qualidade/codec (FHD, [H265], 4K, BR2 grudado, etc.), preservando numeração de canal como [2]."""
+    """Remove apenas tags de qualidade/codec (FHD, FHDR, [H265], 4K, BR2 grudado, etc.), preservando numeração de canal como [2]."""
     if not name: return ""
     s = html.unescape(name)
     s = re.sub(
-        r'\[\s*(?:SD|HD|FHD|UHD|4K|8K|H\.?264|H\.?265|HEVC|AVC|HDR\+?|BR\d*|SRV\d*|SERVER\s*\d*|OP[CÇ][AÃ]O\s*\d*|BACKUP|BKP|ALT|ALTERNATIVO|1080P|720P|60FPS|DUAL|LEG|DUB|P)\s*\]',
+        r'\[\s*(?:SD|HD|FHD|FHDR|UHD|4K|8K|H\.?264|H\.?265|HEVC|AVC|HDR\+?|BR\d*|SRV\d*|SERVER\s*\d*|OP[CÇ][AÃ]O\s*\d*|BACKUP|BKP|ALT|ALTERNATIVO|1080P|720P|60FPS|DUAL|LEG|DUB|P)\s*\]',
         ' ',
         s,
         flags=re.IGNORECASE,
     )
     s = re.sub(r'\|.*?\|', ' ', s)
     s = re.sub(
-        r'\(\s*(?:SD|HD|FHD|UHD|4K|8K|H\.?264|H\.?265|HEVC|AVC|HDR\+?|BR\d*|SRV\d*|SERVER\s*\d*|OP[CÇ][AÃ]O\s*\d*|BACKUP|BKP|ALT|ALTERNATIVO|1080P|720P|60FPS|DUAL|LEG|DUB|EVENTOS?|PPV)\s*\)',
+        r'\(\s*(?:SD|HD|FHD|FHDR|UHD|4K|8K|H\.?264|H\.?265|HEVC|AVC|HDR\+?|BR\d*|SRV\d*|SERVER\s*\d*|OP[CÇ][AÃ]O\s*\d*|BACKUP|BKP|ALT|ALTERNATIVO|1080P|720P|60FPS|DUAL|LEG|DUB|EVENTOS?|PPV)\s*\)',
         ' ',
         s,
         flags=re.IGNORECASE,
@@ -496,7 +609,7 @@ def strip_qualities_keep_case(name: str) -> str:
     s = re.sub(r'[\¹\²\³\⁴\⁵\⁶\⁷\⁸\⁹\⁰\~]', ' ', s)
     # Remove BR2/SRV2 mesmo quando estiver colado no final da palavra (ex: GLOBORJBR2)
     s = re.sub(r'(?<=[A-Za-z0-9])(?:BR\d+|SRV\d+)\b', ' ', s, flags=re.IGNORECASE)
-    tags = r'\b(SD|HD|FHD|UHD|4K|8K|H\.?264|H\.?265|HEVC|AVC|HDR\+?|LEG|LEGENDADO|DUB|DUBLADO|DUAL|HQ|VIP|VOD|24H[S]?|24/7|1080P|1080I|720P|60FPS|PPV|EVENTOS?|ALTERNATIVO|ALT|BACKUP|BKP|BR\d+|SRV\d+|SERVER\s*\d+|OP[CÇ][AÃ]O\s*\d+)\b[\*\²\³\¹\⁴\+]*'
+    tags = r'\b(SD|HD|FHD|FHDR|UHD|4K|8K|H\.?264|H\.?265|HEVC|AVC|HDR\+?|LEG|LEGENDADO|DUB|DUBLADO|DUAL|HQ|VIP|VOD|24H[S]?|24/7|1080P|1080I|720P|60FPS|PPV|EVENTOS?|ALTERNATIVO|ALT|BACKUP|BKP|BR\d+|SRV\d+|SERVER\s*\d+|OP[CÇ][AÃ]O\s*\d+)\b[\*\²\³\¹\⁴\+]*'
     s = re.sub(tags, ' ', s, flags=re.IGNORECASE)
     s = re.sub(r'\bH\s+D\b', ' ', s, flags=re.IGNORECASE)
     s = re.sub(r'\[\s*(\d+)\s*\]', r' \1 ', s)
@@ -508,51 +621,57 @@ def strip_qualities_keep_case(name: str) -> str:
 def normalizar_canal(nome: str) -> str:
     if not nome: return ""
     original_nome = html.unescape(nome)
+    foreign_code = extract_foreign_country_code(original_nome)
     nome = strip_qualities_keep_case(original_nome)
-    
-    nome = re.sub(r'^E!$', 'E!', nome.strip(), flags=re.IGNORECASE)
-    nome = re.sub(r'\bADULT SWIN\b', 'ADULT SWIM', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bZOOMOOO\b', 'ZOOMOO', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bJP NEWS\b', 'JOVEM PAN NEWS', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bJOVEM PAN\b(?! NEWS)', 'JOVEM PAN NEWS', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bFOX SPORTS 2\b', 'ESPN 5', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bFOX SPORTS\b', 'ESPN 4', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bESPN EXTRA\b', 'ESPN 6', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bESPN BRASIL\b', 'ESPN', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bESPN 1\b', 'ESPN', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bSPORTV 1\b', 'SPORTV', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bPREMIERE 1\b', 'PREMIERE CLUBES', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'^PREMIERE$', 'PREMIERE CLUBES', nome.strip(), flags=re.IGNORECASE)
-    nome = re.sub(r'\bBOOMERANG\b', 'CARTOONITO', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bMAX PRIME\b', 'HBO POP', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bMAX UP\b', 'HBO POP', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bMAX\b(?!\s+PRIME)', 'HBO MUNDI', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bHBO\s*\+\b', 'HBO PLUS', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bH2\b', 'HISTORY 2', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bHISTORY CHANNEL\b', 'HISTORY', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bDISCOVERY H&H\b', 'DISCOVERY HOME & HEALTH', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bDISCOVERY HOME\s*(?:&|AND)?\s*HEALT[H]?\b', 'DISCOVERY HOME & HEALTH', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bDISCOVERY TLC\b', 'TLC', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bID\s+INVESTIGA[CÇ][AÃ]O DISCOVERY\b', 'INVESTIGACAO DISCOVERY', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bDISCOVERY ID\b', 'INVESTIGACAO DISCOVERY', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bFOX PREMIUM\b', 'STAR PREMIUM', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bFOX CHANNEL\b', 'STAR CHANNEL', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bFOX LIFE\b', 'STAR LIFE', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bTC\s+ACTION\b', 'TELECINE ACTION', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bTC\s+PREMIUM\b', 'TELECINE PREMIUM', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bTC\s+PIPOCA\b', 'TELECINE PIPOCA', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bTC\s+TOUCH\b', 'TELECINE TOUCH', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bTC\s+FUN\b', 'TELECINE FUN', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bTC\s+CULT\b', 'TELECINE CULT', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'^GB\b', 'GLOBO', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'^RECORDTV\b', 'RECORD', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bRECORD\s+TV\b', 'RECORD', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bSBT\s+TV\b', 'SBT', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bBAND\s+TV\b', 'BAND', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bREDE\s+TV!?\b', 'REDETV', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bAGRO\s*\+\b', 'AGROMAIS', nome, flags=re.IGNORECASE)
-    nome = re.sub(r'\bSPORTTV\b', 'SPORTV', nome, flags=re.IGNORECASE)
-    
+
+    # Se o canal for estrangeiro (ex: PT, US, CO, ARG), não aplica substituições exclusivas de canais BR
+    if not foreign_code:
+        nome = re.sub(r'^E!$', 'E!', nome.strip(), flags=re.IGNORECASE)
+        nome = re.sub(r'\bADULT SWIN\b', 'ADULT SWIM', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bZOOMOOO\b', 'ZOOMOO', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bWOHOO\b', 'WOOHOO', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bJP NEWS\b', 'JOVEM PAN NEWS', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bJOVEM PAN\b(?! NEWS)', 'JOVEM PAN NEWS', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bFOX SPORTS 2\b', 'ESPN 5', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bFOX SPORTS\b', 'ESPN 4', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bESPN EXTRA\b', 'ESPN 6', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bESPN BRASIL\b', 'ESPN', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bESPN 1\b', 'ESPN', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bSPORTV 1\b', 'SPORTV', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bPREMIERE 1\b', 'PREMIERE CLUBES', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'^PREMIERE$', 'PREMIERE CLUBES', nome.strip(), flags=re.IGNORECASE)
+        nome = re.sub(r'\bBOOMERANG\b', 'CARTOONITO', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bMAX PRIME\b', 'HBO POP', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bMAX UP\b', 'HBO POP', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bMAX\b(?!\s*(?:PRIME|\d))', 'HBO MUNDI', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bHBO\s*\+\b', 'HBO PLUS', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bH2\b', 'HISTORY 2', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bHISTORY CHANNEL\b', 'HISTORY', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bDISCOVERY H&H\b', 'DISCOVERY HOME & HEALTH', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'^HOME\s*(?:&|AND)\s*HEALTH$', 'DISCOVERY HOME & HEALTH', nome.strip(), flags=re.IGNORECASE)
+        nome = re.sub(r'\bDISCOVERY HOME\s*(?:&|AND)?\s*HEALT[H]?\b', 'DISCOVERY HOME & HEALTH', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bDISCOVERY TLC\b', 'TLC', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bID\s+INVESTIGA[CÇ][AÃ]O DISCOVERY\b', 'INVESTIGACAO DISCOVERY', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bDISCOVERY ID\b', 'INVESTIGACAO DISCOVERY', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bFOX PREMIUM\b', 'STAR PREMIUM', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bFOX CHANNEL\b', 'STAR CHANNEL', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bFOX LIFE\b', 'STAR LIFE', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bTC\s+ACTION\b', 'TELECINE ACTION', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bTC\s+PREMIUM\b', 'TELECINE PREMIUM', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bTC\s+PIPOCA\b', 'TELECINE PIPOCA', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bTC\s+TOUCH\b', 'TELECINE TOUCH', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bTC\s+FUN\b', 'TELECINE FUN', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bTC\s+CULT\b', 'TELECINE CULT', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'^GB\s+USA$', 'USA NETWORK', nome.strip(), flags=re.IGNORECASE)
+        nome = re.sub(r'^GB\b', 'GLOBO', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'^RECORDTV\b', 'RECORD', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bRECORD\s+TV\b', 'RECORD', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bSBT\s+TV\b', 'SBT', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bBAND\s+TV\b', 'BAND', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bREDE\s+TV!?\b', 'REDETV', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bAGRO\s*\+\b', 'AGROMAIS', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bSPORTTV\b', 'SPORTV', nome, flags=re.IGNORECASE)
+
     nome_limpo = ' '.join(nome.split()).strip().upper()
     return nome_limpo if len(nome_limpo) >= 1 else original_normalize_name(original_nome)
 
@@ -561,6 +680,8 @@ def normalize_name(value: str) -> str:
 
 def inferir_emissora_pelo_grupo(nome_normalizado: str, nome_grupo: str) -> str:
     if not nome_grupo: return nome_normalizado
+    if extract_foreign_country_code(nome_normalizado):
+        return nome_normalizado
     grupo = nome_grupo.upper()
     if "GLOBO" in grupo and not nome_normalizado.startswith("GLOBO") and " NEWS" not in nome_normalizado and "GLOOB" not in nome_normalizado:
         return f"GLOBO {nome_normalizado}"
@@ -595,6 +716,10 @@ def detect_poisoned_ids(pairs: Iterable[tuple[str, str]]) -> set[str]:
 
 def is_valid_provider_tvid(channel_name: str, tvid: str) -> bool:
     if not tvid or len(tvid) < 1: return False
+    if extract_foreign_country_code(channel_name) and str(tvid).lower().endswith(".br"):
+        return False
+    if has_conflicting_region(channel_name, tvid):
+        return False
     tvid_clean = re.sub(r'\.(br|us|uk|pt|ar|mx|cl|co|pe|latam|int|bt)$', '', tvid.lower())
     tvid_clean = re.sub(r'^(auto\.|yt\.|br\.|canais\.)', '', tvid_clean)
     tvid_clean = re.sub(r'[^a-z0-9]', '', tvid_clean)
@@ -1062,16 +1187,29 @@ def _network_of_normalized(value: str) -> str:
 _GLOBO_BRAND_COMPACT = tuple(b.replace(" ", "") for b in _GLOBO_ONLY_BRANDS) + ("NSCTV",)
 
 def _is_foreign_prefix(alias: str) -> bool:
-    """Identifica se o canal começa com prefixos internacionais que não devem casar com canais do Brasil via fuzzy."""
+    """Identifica se o canal começa com prefixos internacionais (tanto espaçados quanto compactos) que não devem casar com canais do Brasil."""
     a = alias.upper().strip()
-    return a.startswith(("US ", "USA ", "UK ", "CO ", "EC ", "MX ", "PY ", "DE ", "ES "))
+    if a.startswith(("PT ", "US ", "USA ", "UK ", "CO ", "ARG ", "AR ", "EC ", "MX ", "PY ", "DE ", "ES ")):
+        return True
+    if not a.startswith(("USANETWORK", "USAHD", "USAFHD")):
+        if re.match(r"^(?:PT|US|USA|UK|CO|ARG|MX|EC|PY|DE|ES)(?:CARTOON|DISCOVERY|DISNEY|FOX|STAR|GLOBO|HISTORIA|HISTORY|HOLLYWOOD|IDINVESTIGATION|NATGEO|NATIONAL|NICK|RTP|SIC|SPORT|TVI|TLC|ANIMAL|LIFETIME|ESPN|H2|CANAL|CARACOL|RCN)", a):
+            return True
+    return False
 
 def _fuzzy_incompatible(alias: str, candidate: str) -> bool:
     if alias == candidate:
         return False
-    if _is_foreign_prefix(alias) and not _is_foreign_prefix(candidate):
+    if _is_foreign_prefix(alias) != _is_foreign_prefix(candidate):
         return True
-    if ("SPORT TV" in alias or "SPORTTV" in alias) and ("SPORTV" in candidate and "SPORT TV" not in candidate):
+    if ("SPORT TV" in alias or "SPORTTV" in alias or "PTSPORT" in alias) and ("SPORTV" in candidate and "SPORT TV" not in candidate):
+        return True
+    if ("UNIVERSO" in alias and "UNIVERSAL" in candidate) or ("UNIVERSAL" in alias and "UNIVERSO" in candidate):
+        return True
+    if ("WSBRASIL" in alias and "WSBRASIL" not in candidate) or ("WSBRASIL" in candidate and "WSBRASIL" not in alias):
+        return True
+    if ("JIPARANA" in alias and "JIPARANA" not in candidate) or ("JIPARANA" in candidate and "JIPARANA" not in alias):
+        return True
+    if ("PARAIBA" in alias and "PARAIBA" not in candidate) or ("PARAIBA" in candidate and "PARAIBA" not in alias):
         return True
     if ("GLOOB" in alias) != ("GLOOB" in candidate):
         return True
@@ -1100,6 +1238,9 @@ def _fuzzy_incompatible(alias: str, candidate: str) -> bool:
         if na != nc:
             return True
         ra = re.sub(r"^TV", "", alias[len(na):]); rc = re.sub(r"^TV", "", candidate[len(nc):])
+        # Bloqueia se um lado tiver UF (ex: RECORDMG, GLOBORR, GLOBOPE) e o outro lado for a rede nacional sem UF (RECORD, GLOBO)
+        if (ra in _UF_CODES and not rc) or (rc in _UF_CODES and not ra):
+            return True
         if ra != rc and ra in _UF_CODES and rc in _UF_CODES:
             return True
         if ra and rc and ra != rc and ra not in rc and rc not in ra and ra[:4] != rc[:4] \
@@ -1112,11 +1253,24 @@ def _compact_upper(value: str) -> str:
     return re.sub(r"[^A-Z0-9 ]", " ", "".join(c for c in v if not unicodedata.combining(c)).upper())
 
 def match_conflicts_network(entry_name: str, source: "EpgSource", channel_id: str) -> bool:
+    entry_country = extract_foreign_country_code(entry_name)
+    labels = [channel_id] + list(source.names.get(channel_id, [])[:2])
+    if entry_country:
+        # Canal estrangeiro (ex: PT, US, CO) não pode casar com canal brasileiro sem o mesmo prefixo
+        if not any(extract_foreign_country_code(lab) == entry_country for lab in labels):
+            return True
+    else:
+        if any(extract_foreign_country_code(lab) != "" for lab in labels):
+            return True
+
+    # Verifica conflito explícito de estado (UF) entre o nome do canal e o candidato da fonte
+    if all(has_conflicting_region(entry_name, lab) for lab in labels):
+        return True
+
     compact = re.sub(r"[^A-Z]", "", _compact_upper(entry_name))
     net = next((n for n in ("SBT", "RECORD", "BAND") if compact.startswith(n)), "")
     if not net:
         return False
-    labels = [channel_id] + list(source.names.get(channel_id, [])[:1])
     for lab in labels:
         n = " ".join(_compact_upper(lab).split())
         for other, prefixes in _NETWORK_PREFIXES.items():
@@ -1133,6 +1287,9 @@ def expand_open_tv_tiers(nome_limpo: str, grupo: str) -> tuple[list[str], list[s
     tier1_local: list[str] = []
     tier2_state: list[str] = []
     tier3_national: list[str] = []
+
+    if extract_foreign_country_code(nome_limpo):
+        return tier1_local, tier2_state, tier3_national
 
     network = ""
     if (nome_limpo.startswith("GLOBO") or "GLOBO" in grupo.upper()) and "NEWS" not in nome_limpo and "NOVELAS" not in nome_limpo and "GLOOB" not in nome_limpo:
@@ -1185,10 +1342,10 @@ def expand_open_tv_tiers(nome_limpo: str, grupo: str) -> tuple[list[str], list[s
         tier1_local.extend(["TV GAZETA ES", "TV GAZETA VITORIA", "GLOBO VITORIA", "GLOBO ESPIRITO SANTO", "GLOBO ES"])
     if "VERDES MARES" in nome_limpo or "FORTALEZA" in nome_limpo or "CEARA" in nome_limpo:
         tier1_local.extend(["TV VERDES MARES", "GLOBO TV VERDES MARES", "GLOBO FORTALEZA", "GLOBO CEARA", "GLOBO CE"])
-    if "REDE AMAZONICA" in nome_limpo or "AMAZONICA" in nome_limpo or "MANAUS" in nome_limpo:
+    if "REDE AMAZONICA" in nome_limpo or "AMAZONICA" in nome_limpo or "MANAUS" in nome_limpo or "JI PARANA" in nome_limpo:
         if "RIO BRANCO" in nome_limpo or "ACRE" in nome_limpo or " AC" in nome_limpo:
             tier1_local.extend(["REDE AMAZONICA RIO BRANCO", "GLOBO RIO BRANCO", "GLOBO ACRE", "GLOBO AC"])
-        elif "PORTO VELHO" in nome_limpo or "RONDONIA" in nome_limpo or " RO" in nome_limpo:
+        elif "PORTO VELHO" in nome_limpo or "RONDONIA" in nome_limpo or "JI PARANA" in nome_limpo or "ARIQUEMES" in nome_limpo or " RO" in nome_limpo:
             tier1_local.extend(["REDE AMAZONICA PORTO VELHO", "GLOBO PORTO VELHO", "GLOBO RONDONIA"])
         elif "MACAPA" in nome_limpo or "AMAPA" in nome_limpo or " AP" in nome_limpo:
             tier1_local.extend(["REDE AMAZONICA MACAPA", "GLOBO MACAPA", "GLOBO AMAPA", "GLOBO AP"])
@@ -1294,16 +1451,20 @@ def expand_open_tv_tiers(nome_limpo: str, grupo: str) -> tuple[list[str], list[s
 
 def aliases_tiers_for(entry: dict[str, object]) -> list[list[str]]:
     base_channel_name = str(entry.get("name", ""))
+    foreign_code = extract_foreign_country_code(base_channel_name)
     values: list[str] = [base_channel_name]
     for x in entry.get("aliases", []) or []:
-        if not has_conflicting_channel_number(base_channel_name, str(x)):
-            values.append(str(x))
+        x_str = str(x)
+        if not has_conflicting_channel_number(base_channel_name, x_str) and not has_conflicting_region(base_channel_name, x_str):
+            values.append(x_str)
     grupo = str(entry.get("group", entry.get("group-title", entry.get("group_title", ""))))
 
     tier1, tier2, tier3 = [], [], []
     seen = set()
 
     def add_to(target_list: list[str], val: str):
+        if has_conflicting_region(base_channel_name, val):
+            return
         n = original_normalize_name(val)
         if n and n not in seen:
             target_list.append(n)
@@ -1320,30 +1481,38 @@ def aliases_tiers_for(entry: dict[str, object]) -> list[list[str]]:
         add_to(tier1, nome_com_grupo)
         add_to(tier1, nome_limpo)
 
-        for syn in CHANNEL_SYNONYMS.get(nome_limpo, []):
-            add_to(tier1, syn)
-
-        sem_uf = re.sub(r'\s+(SP|RJ|RS|MG|BA|PR|PE|CE|PA|MA|SC|GO|PB|ES|AM|RN|AL|PI|MT|DF|MS|SE|RO|TO|AC|AP|RR)$', '', nome_limpo)
-        if sem_uf != nome_limpo and sem_uf not in {"GLOBO", "SBT", "RECORD", "BAND"}:
-            add_to(tier1, sem_uf)
-            for syn in CHANNEL_SYNONYMS.get(sem_uf, []):
+        if not foreign_code:
+            for syn in CHANNEL_SYNONYMS.get(nome_limpo, []):
                 add_to(tier1, syn)
 
-    for base_cl in cleaned_pairs:
-        t1_ext, t2_ext, t3_ext = expand_open_tv_tiers(base_cl, grupo)
-        for a in t1_ext:
-            add_to(tier1, a)
-        for a in t2_ext:
-            add_to(tier2, a)
-        for a in t3_ext:
-            add_to(tier3, a)
+            sem_uf = re.sub(r'\s+(SP|RJ|RS|MG|BA|PR|PE|CE|PA|MA|SC|GO|PB|ES|AM|RN|AL|PI|MT|DF|MS|SE|RO|TO|AC|AP|RR)$', '', nome_limpo)
+            if sem_uf != nome_limpo and sem_uf not in {"GLOBO", "SBT", "RECORD", "BAND"}:
+                add_to(tier2, sem_uf)
+                for syn in CHANNEL_SYNONYMS.get(sem_uf, []):
+                    add_to(tier2, syn)
+
+    if not foreign_code:
+        for base_cl in cleaned_pairs:
+            t1_ext, t2_ext, t3_ext = expand_open_tv_tiers(base_cl, grupo)
+            for a in t1_ext:
+                add_to(tier1, a)
+            for a in t2_ext:
+                add_to(tier2, a)
+            for a in t3_ext:
+                add_to(tier3, a)
 
     return [t for t in (tier1, tier2, tier3) if t]
 
-def choose_exact(source: EpgSource, aliases: Iterable[str]) -> tuple[str | None, str]:
+def choose_exact(source: EpgSource, aliases: Iterable[str], entry_name: str = "") -> tuple[str | None, str]:
     for alias in aliases:
         candidates = source.exact_index.get(alias, set())
-        if candidates: return max(candidates, key=lambda cid: len(source.rows.get(cid, []))), f"nome exato: {alias}"
+        valid_cands = [
+            cid for cid in candidates
+            if not match_conflicts_network(entry_name, source, cid)
+            and not has_conflicting_channel_number(entry_name, cid)
+        ] if entry_name else list(candidates)
+        if valid_cands:
+            return max(valid_cands, key=lambda cid: len(source.rows.get(cid, []))), f"nome exato: {alias}"
     return None, ""
 
 def _sequence_ratio_upper_bound(left: str, right: str, left_counter: Counter[str] | None = None) -> float:
@@ -1355,12 +1524,14 @@ def _sequence_ratio_upper_bound(left: str, right: str, left_counter: Counter[str
     common = sum(min(count, rc.get(ch, 0)) for ch, count in lc.items())
     return min(length_bound, (2.0 * common) / (len(left) + len(right)))
 
-def best_fuzzy(source: EpgSource, aliases: list[str]) -> tuple[str | None, float, float, str]:
+def best_fuzzy(source: EpgSource, aliases: list[str], entry_name: str = "") -> tuple[str | None, float, float, str]:
     if not aliases: return None, 0.0, 0.0, ""
+    if entry_name and extract_foreign_country_code(entry_name):
+        return None, 0.0, 0.0, ""
     relevant_floor = FUZZY_THRESHOLD - FUZZY_MARGIN
     best_by_channel: dict[str, tuple[float, str, str]] = {}
     for alias in aliases:
-        if len(alias) < 2: continue 
+        if len(alias) < 4 or _is_foreign_prefix(alias): continue
         alias_counter = Counter(alias)
         bucket = source.fuzzy_index.get(digit_signature(alias), {})
         for normalized_candidate, channel_ids in bucket.items():
@@ -1369,6 +1540,8 @@ def best_fuzzy(source: EpgSource, aliases: list[str]) -> tuple[str | None, float
             ratio = SequenceMatcher(None, alias, normalized_candidate).ratio()
             if ratio < relevant_floor: continue
             for channel_id in channel_ids:
+                if entry_name and (match_conflicts_network(entry_name, source, channel_id) or has_conflicting_channel_number(entry_name, channel_id)):
+                    continue
                 old = best_by_channel.get(channel_id)
                 if old is None or ratio > old[0]: best_by_channel[channel_id] = (ratio, alias, normalized_candidate)
     if not best_by_channel: return None, 0.0, 0.0, ""
@@ -1380,7 +1553,7 @@ def best_fuzzy(source: EpgSource, aliases: list[str]) -> tuple[str | None, float
 def find_match_in_tier(source: EpgSource, tier_aliases: list[str], source_ids: list[str] | None = None, tier_num: int = 1, entry_name: str = "") -> ChannelMatch | None:
     if tier_num == 1:
         for raw_sid in (source_ids or []):
-            if has_conflicting_channel_number(entry_name, raw_sid):
+            if has_conflicting_channel_number(entry_name, raw_sid) or has_conflicting_region(entry_name, raw_sid):
                 continue
             norm_sid = normalize_source_id(raw_sid)
             if norm_sid and norm_sid in source.normalized_id_index:
@@ -1389,13 +1562,11 @@ def find_match_in_tier(source: EpgSource, tier_aliases: list[str], source_ids: l
                 if not match_conflicts_network(entry_name, source, best_cid):
                     return ChannelMatch(source, best_cid, f"id do dicionário: {raw_sid}", 1.0, tier=1)
 
-    exact_id, reason = choose_exact(source, tier_aliases)
-    if exact_id and match_conflicts_network(entry_name, source, exact_id):
-        exact_id = None
+    exact_id, reason = choose_exact(source, tier_aliases, entry_name=entry_name)
     if exact_id:
         return ChannelMatch(source, exact_id, reason if tier_num == 1 else f"{reason} (camada {tier_num})", 1.0, tier=tier_num)
     
-    fuzzy_id, best_score, second_score, fuzzy_reason = best_fuzzy(source, tier_aliases)
+    fuzzy_id, best_score, second_score, fuzzy_reason = best_fuzzy(source, tier_aliases, entry_name=entry_name)
     if fuzzy_id and best_score >= FUZZY_THRESHOLD and (best_score - second_score) >= FUZZY_MARGIN \
             and not match_conflicts_network(entry_name, source, fuzzy_id):
         return ChannelMatch(source, fuzzy_id, fuzzy_reason if tier_num == 1 else f"{fuzzy_reason} (camada {tier_num})", best_score, tier=tier_num)
@@ -1504,7 +1675,8 @@ def _calc_agreement(a_rows: list[ProgrammeRow], b_rows: list[ProgrammeRow], offs
 def cross_source_programme_agreement(a_source: EpgSource, a_id: str, b_source: EpgSource, b_id: str, now: datetime) -> dict[str, object]:
     cache_key = (a_source.spec.key, a_id, b_source.spec.key, b_id)
     if (cached := _AGREEMENT_CACHE.get(cache_key)) is not None: return cached
-    window_start, window_end = now - timedelta(hours=6), now + timedelta(hours=36)
+    # Janela estendida até +72h para permitir que fontes complementares (como Genius/Open-EPG) validem acordo no 2º e 3º dia
+    window_start, window_end = now - timedelta(hours=6), now + timedelta(hours=72)
     a_rows = [r for r in programme_rows(a_source, a_id) if r.stop >= window_start and r.start <= window_end]
     b_rows = [r for r in programme_rows(b_source, b_id) if r.stop >= window_start and r.start <= window_end]
     result = _calc_agreement(a_rows, b_rows, timedelta(0))
@@ -1629,7 +1801,8 @@ def evaluate_candidates(matches: list[ChannelMatch], now: datetime, max_active_v
         health_score = float(h_info["score"])
         richness_score = float(h_info.get("richness_score", 0.0))
 
-        quality = 0.45 * weighted_ratio + 0.30 * health_score + 0.10 * richness_score + 0.15 * avg_support
+        eff_health = 1.0 if (health_score >= 0.80 and float(h_info.get("future_hours", 0.0)) >= 60.0) else health_score
+        quality = 0.45 * weighted_ratio + 0.30 * eff_health + 0.10 * richness_score + 0.15 * avg_support
         evidence_factor = 0.55 + 0.45 * min(vote_weight / max(max_active_vote_weight, 0.5), 1.0)
         confidence = round(100 * max(0.0, min(1.0, quality * evidence_factor)))
         evaluations.append(CandidateEvaluation(
@@ -1643,9 +1816,9 @@ def evaluate_candidates(matches: list[ChannelMatch], now: datetime, max_active_v
     def rank(ev: CandidateEvaluation) -> tuple:
         has_programmes = int(bool(ev.match.source.rows.get(ev.match.channel_id)))
         fut_h = float(ev.health.get("future_hours", 0.0))
-        is_healthy_full_day = int(fut_h >= 16.0 and ev.health_score >= 0.75)
-        consensus_tier = round(ev.support_weight / 1.5)
-        health_bucket = 1.0 if ev.health_score >= 0.80 else round(ev.health_score, 1)
+        is_healthy_full_day = int(fut_h >= 36.0 and ev.health_score >= 0.75 and ev.richness_score >= 0.15)
+        consensus_tier = int(ev.weighted_ratio >= 0.65 and ev.support_votes >= 2)
+        health_bucket = 1.0 if (ev.health_score >= 0.80 and fut_h >= 60.0) else round(ev.health_score, 1)
         return (
             has_programmes,
             -ev.match.tier,
@@ -1717,7 +1890,7 @@ def get_clean_aliases(entry: dict[str, object]) -> list[str]:
         v = html.unescape(str(val or "")).strip()
         if not v or len(v) > 100:
             return
-        if has_conflicting_channel_number(raw_name, v):
+        if has_conflicting_channel_number(raw_name, v) or has_conflicting_region(raw_name, v):
             return
         if v.upper() not in seen:
             result.append(v)
@@ -1885,6 +2058,12 @@ def apply_rich_metadata_to_element(
 def stitch_multi_source_schedule(
     all_evaluations: list[CandidateEvaluation], target_channel_id: str, channel_name: str, cutoff: datetime, max_future: datetime, overrides: dict[str, object]
 ) -> list[ET.Element]:
+    """
+    Recorta e costura grades de múltiplas fontes para o mesmo canal:
+    - Usa o líder como base nos períodos em que ele é saudável.
+    - Quando o líder tem buracos (gaps >= 10 min) ou termina mais cedo (ex: metade do dia / 48h),
+      costura os programas das fontes secundárias que concordam OU de fontes com match exato (score=1.0) para completar as 72h.
+    """
     if not all_evaluations: return []
 
     leader_ev = all_evaluations[0]
@@ -1892,9 +2071,15 @@ def stitch_multi_source_schedule(
     for comp in leader_ev.comparisons:
         other_key = str(comp.get("other_source_key", ""))
         agreement = comp.get("agreement")
-        if isinstance(agreement, float) and agreement >= AGREEMENT_THRESHOLD \
-                and int(comp.get("comparable") or 0) >= MIN_COMPARABLE_PROGRAMMES:
+        comparable = int(comp.get("comparable") or 0)
+        if isinstance(agreement, float) and agreement >= AGREEMENT_THRESHOLD and comparable >= MIN_COMPARABLE_PROGRAMMES:
             shift_by_source_key[other_key] = int(comp.get("detected_shift") or 0)
+        elif comparable < MIN_COMPARABLE_PROGRAMMES:
+            # Se a fonte principal acabou antes e não tinha programas no mesmo horário para comparar,
+            # aceita a fonte complementar (como Genius, Claro Git ou Open-EPG) se o match do canal for exato (1.0)
+            cand_ev = next((e for e in all_evaluations if e.match.source.spec.key == other_key), None)
+            if cand_ev and cand_ev.match.match_score >= 0.999 and cand_ev.match.tier == 1:
+                shift_by_source_key[other_key] = 0
 
     all_aligned_progs_by_source: list[list[dict[str, Any]]] = []
     metadata_by_norm_title: dict[str, list[dict[str, Any]]] = defaultdict(list)
@@ -2178,7 +2363,7 @@ def main() -> None:
         u = text.upper().strip()
         if not u:
             return True
-        if re.search(r"^[\s⭐\-—=_.*]+$", u):
+        if re.search(r"⭐{2,}|^[\s⭐\-—=_.*]+$", u):
             return True
         if re.match(r"^(?:24\s*H|\d{4}[A-Z])", u):
             return True
@@ -2216,14 +2401,14 @@ def main() -> None:
         rec = grouped_by_norm[norm_key]
         rec_base_name = rec["name"]
 
-        if not has_conflicting_channel_number(rec_base_name, base_name):
+        if not has_conflicting_channel_number(rec_base_name, base_name) and not has_conflicting_region(rec_base_name, base_name):
             rec["raw_aliases"].add(base_name)
             rec["aliases"].add(strip_qualities_keep_case(base_name) or base_name)
 
         for a in aliases:
             if a:
                 a_raw = normalize_channel_number_zero(html.unescape(str(a)).strip())
-                if not a_raw or is_junk_or_24h_channel(a_raw) or has_conflicting_channel_number(rec_base_name, a_raw):
+                if not a_raw or is_junk_or_24h_channel(a_raw) or has_conflicting_channel_number(rec_base_name, a_raw) or has_conflicting_region(rec_base_name, a_raw):
                     continue
                 rec["raw_aliases"].add(a_raw)
                 a_clean = strip_qualities_keep_case(a_raw)
@@ -2231,15 +2416,15 @@ def main() -> None:
                     rec["aliases"].add(a_clean)
         for t in tvg_ids:
             t_str = str(t).strip()
-            if t_str and not has_conflicting_channel_number(rec_base_name, t_str):
+            if t_str and not has_conflicting_channel_number(rec_base_name, t_str) and not has_conflicting_region(rec_base_name, t_str):
                 rec["tvg_ids_to_export"].add(t_str)
         for c in comp_ids:
             c_str = str(c).strip()
-            if c_str and not has_conflicting_channel_number(rec_base_name, c_str):
+            if c_str and not has_conflicting_channel_number(rec_base_name, c_str) and not has_conflicting_region(rec_base_name, c_str):
                 rec["compatibility_ids"].add(c_str)
         for s in source_ids:
             s_str = str(s).strip()
-            if s_str and not has_conflicting_channel_number(rec_base_name, s_str):
+            if s_str and not has_conflicting_channel_number(rec_base_name, s_str) and not has_conflicting_region(rec_base_name, s_str):
                 rec["source_ids"].add(s_str)
         if group and not rec["group"]:
             rec["group"] = group
