@@ -7,7 +7,7 @@
 - Blindado para Smart TVs (Samsung Tizen / LG webOS): zero espaços, '&', '!' ou '+' dentro de channel id / tvg-id.
 - Mantém todos os aliases reais da M3U (incluindo FHD [H265], FHD H265, FHDR, variantes sem '&') em <display-name>.
 - Bloqueia colisões entre canais estrangeiros (PT/US/UK/CO/ARG/MX/EC/PY) e redes brasileiras.
-- Impede falsos positivos regionais (BAND SP vs BAND RJ, RECORD SP vs BAHIA, JI-PARANA vs PARANA, RIO PRETO vs RJ).
+- Impede falsos positivos regionais (BAND SP vs BAND RJ, RECORD SP vs BAHIA, JI-PARANA vs PARANA, RIO PRETO vs RJ, NSC CENTRO OESTE vs BAHIA).
 """
 from __future__ import annotations
 
@@ -194,8 +194,8 @@ _STATE_TOKEN_MAP = {
     "MG": "MG", "MINAS": "MG", "BELOHORIZONTE": "MG", "JUIZDEFORA": "MG", "UBERLANDIA": "MG", "UBERABA": "MG", "ARAXA": "MG", "ALTEROSA": "MG", "SULDEMINAS": "MG", "GRANDEMINAS": "MG", "DOSVALES": "MG",
     "RS": "RS", "RIOGRANDEDOSUL": "RS", "PORTOALEGRE": "RS", "POA": "RS", "PELOTAS": "RS", "CAXIAS": "RS", "PASSOFUNDO": "RS", "PAMPA": "RS", "SANTAMARIA": "RS", "BAGE": "RS", "ALVORADADOSUL": "PR",
     "PR": "PR", "PARANA": "PR", "CURITIBA": "PR", "LONDRINA": "PR", "MARINGA": "PR", "CASCAVEL": "PR", "FOZDOIGUACU": "PR", "PARANAVAI": "PR", "PONTAGROSSA": "PR", "REDEMASSA": "PR",
-    "SC": "SC", "SANTACATARINA": "SC", "FLORIANOPOLIS": "SC", "JOINVILLE": "SC", "BLUMENAU": "SC", "CHAPECO": "SC", "CRICIUMA": "SC",
-    "BA": "BA", "BAHIA": "BA", "SALVADOR": "BA", "ITAPOAN": "BA", "ARATU": "BA", "SANTACRUZ": "BA", "SUBAE": "BA", "SUDOESTE": "BA", "SAOFRANCISCO": "BA", "JUAZEIRO": "BA", "OESTE": "BA",
+    "SC": "SC", "SANTACATARINA": "SC", "FLORIANOPOLIS": "SC", "JOINVILLE": "SC", "BLUMENAU": "SC", "CHAPECO": "SC", "CRICIUMA": "SC", "JOACABA": "SC", "NSC": "SC", "NSCTV": "SC",
+    "BA": "BA", "BAHIA": "BA", "SALVADOR": "BA", "ITAPOAN": "BA", "ARATU": "BA", "SANTACRUZ": "BA", "SUBAE": "BA", "SUDOESTE": "BA", "SAOFRANCISCO": "BA", "JUAZEIRO": "BA", "TVOESTE": "BA",
     "PE": "PE", "PERNAMBUCO": "PE", "RECIFE": "PE", "ASABRANCA": "PE", "GRANDERIO": "PE", "GUARARAPES": "PE", "PETROLINA": "PE", "CARUARU": "PE",
     "CE": "CE", "CEARA": "CE", "FORTALEZA": "CE", "VERDESMARES": "CE", "JANGADEIRO": "CE", "CARIRI": "CE",
     "GO": "GO", "GOIAS": "GO", "GOIANIA": "GO", "ANHANGUERA": "GO", "SERRADOURADA": "GO", "RIOVERDE": "GO", "ANAPOLIS": "GO", "CATALAO": "GO", "ITUMBIARA": "GO", "JATAI": "GO", "LUZIANIA": "GO", "PORANGATU": "GO",
@@ -220,12 +220,14 @@ _STATE_TOKEN_MAP = {
 
 
 def extract_state_ufs(text: str) -> set[str]:
-    """Identifica a(s) UF(s) explícita(s) de um nome de canal regional para evitar mistura de estados (ex: SP vs RJ/BA/PR, JI-PARANA vs PR, RIO PRETO vs RJ)."""
+    """Identifica a(s) UF(s) explícita(s) de um nome de canal regional para evitar mistura de estados (ex: SP vs RJ/BA/PR, JI-PARANA vs PR, RIO PRETO vs RJ, NSC vs BA)."""
     nk = name_key(text)
     words = nk.split()
     joined = "".join(words)
     ufs: set[str] = set()
 
+    if "NSCTV" in joined or "NSC" in words:
+        ufs.add("SC")
     if "RIOPRETO" in joined or "SJRIOPRETO" in joined:
         ufs.add("SP")
     if "RIOVERDE" in joined:
@@ -548,12 +550,12 @@ CHANNEL_SYNONYMS = {
     "HOME & HEALTH": ["DISCOVERY HOME & HEALTH", "DISCOVERY HOME AND HEALTH", "DiscoveryHomeHealth.br"],
     "HOME AND HEALTH": ["DISCOVERY HOME & HEALTH", "DISCOVERY HOME AND HEALTH", "DiscoveryHomeHealth.br"],
     "DISCOVERY HOME & HEALTH": ["HOME & HEALTH", "HOME AND HEALTH", "DiscoveryHomeHealth.br"],
-    "LOVE NATURE": ["LOVENATURE", "LOVE NATURE 4K", "LoveNature.br", "lovenature.br"],
-    "LOVENATURE": ["LOVE NATURE", "LOVE NATURE 4K", "LoveNature.br", "lovenature.br"],
-    "CNBC BRASIL": ["TIMES BRASIL", "TIMES BRASIL CNBC", "CNBC", "CNBC BRASIL"],
-    "CNBC": ["TIMES BRASIL", "TIMES BRASIL CNBC", "CNBC BRASIL"],
-    "TIMES BRASIL": ["TIMES BRASIL CNBC", "CNBC", "CNBC BRASIL"],
-    "TIMES BRASIL CNBC": ["TIMES BRASIL", "CNBC", "CNBC BRASIL"],
+    "LOVE NATURE": ["LOVENATURE", "LOVE NATURE 4K", "LOVENATURE 4K", "LOVE NATURE HD", "LoveNature.br", "lovenature.br"],
+    "LOVENATURE": ["LOVE NATURE", "LOVE NATURE 4K", "LOVENATURE 4K", "LOVE NATURE HD", "LoveNature.br", "lovenature.br"],
+    "CNBC BRASIL": ["TIMES BRASIL", "TIMES BRASIL CNBC", "TIMES BRASIL LICENCIADO EXCLUSIVO CNBC", "CNBC", "CNBC BRASIL", "timesbrasil.br"],
+    "CNBC": ["TIMES BRASIL", "TIMES BRASIL CNBC", "TIMES BRASIL LICENCIADO EXCLUSIVO CNBC", "CNBC BRASIL", "timesbrasil.br"],
+    "TIMES BRASIL": ["TIMES BRASIL CNBC", "TIMES BRASIL LICENCIADO EXCLUSIVO CNBC", "CNBC", "CNBC BRASIL", "timesbrasil.br"],
+    "TIMES BRASIL CNBC": ["TIMES BRASIL", "TIMES BRASIL LICENCIADO EXCLUSIVO CNBC", "CNBC", "CNBC BRASIL", "timesbrasil.br"],
     "DISNEY PLUS 1": ["DISNEY PLUS ESPN", "DISNEY PLUS ESPN 1", "DISNEY+ 1", "DISNEY+ ESPN 1"],
     "DISNEY PLUS 2": ["DISNEY PLUS ESPN 2", "DISNEY+ 2", "DISNEY+ ESPN 2"],
     "DISNEY PLUS 3": ["DISNEY PLUS ESPN 3", "DISNEY+ 3", "DISNEY+ ESPN 3"],
@@ -779,6 +781,7 @@ def normalizar_canal(nome: str) -> str:
         nome = re.sub(r'\bREDE\s+TV!?\b', 'REDETV', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bAGRO\s*\+\b', 'AGROMAIS', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bSPORTTV\b', 'SPORTV', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bLOVENATURE\b', 'LOVE NATURE', nome, flags=re.IGNORECASE)
 
     nome_limpo = ' '.join(nome.split()).strip().upper()
     return nome_limpo if len(nome_limpo) >= 1 else original_normalize_name(original_nome)
@@ -854,7 +857,8 @@ def is_valid_provider_tvid(channel_name: str, tvid: str) -> bool:
         cand_digits = re.findall(r'\d+', cand_alnum)
         tvid_digits = re.findall(r'\d+', tvid_clean)
         if cand_digits != tvid_digits:
-            continue
+            if not ("LOVE NATURE" in base_clean or "LOVENATURE" in base_clean):
+                continue
         if tvid_clean in cand_alnum or cand_alnum in tvid_clean:
             return True
         if SequenceMatcher(None, tvid_clean, cand_alnum).ratio() >= 0.65:
@@ -1324,6 +1328,8 @@ def _fuzzy_incompatible(alias: str, candidate: str) -> bool:
         return True
     if ("DIARIO" in alias and "DIARIO" not in candidate) or ("DIARIO" in candidate and "DIARIO" not in alias):
         return True
+    if ("RIOSUL" in alias and "RIOSUL" not in candidate) or ("RIOSUL" in candidate and "RIOSUL" not in alias):
+        return True
     if ("GAZETAES" in alias or "GAZETAVITORIA" in alias or "GAZETASUL" in alias or "GAZETAALAGOAS" in alias) and candidate in {"TVGAZETA", "GAZETA", "REDEGAZETA"}:
         return True
     if ("WSBRASIL" in alias and "WSBRASIL" not in candidate) or ("WSBRASIL" in candidate and "WSBRASIL" not in alias):
@@ -1484,6 +1490,7 @@ def expand_open_tv_tiers(nome_limpo: str, grupo: str) -> tuple[list[str], list[s
         tier1_local.extend(["RPC CURITIBA", "RPC TV", "RPC", "GLOBO RPC", "GLOBO CURITIBA", "GLOBO PARANA", "GLOBO PR"])
     if "NSC" in nome_limpo or "FLORIANOPOLIS" in nome_limpo:
         tier1_local.extend(["NSC TV FLORIANOPOLIS", "NSC TV", "GLOBO NSC", "GLOBO FLORIANOPOLIS", "GLOBO SANTA CATARINA", "GLOBO SC"])
+        tier2_state.extend(["NSC TV FLORIANOPOLIS", "GLOBO FLORIANOPOLIS", "GLOBO SANTA CATARINA", "GLOBO SC"])
     if "EPTV" in nome_limpo or "EP CAMPINAS" in nome_limpo or "EPCAMPINAS" in nome_limpo or "EPRIBEIRAO" in nome_limpo or "EPSAO CARLOS" in nome_limpo or "EPSÃO CARLOS" in nome_limpo:
         if "SUL DE MINAS" in nome_limpo or "VARGINHA" in nome_limpo:
             tier1_local.extend(["EPTV SUL DE MINAS", "GLOBO SUL DE MINAS", "GLOBO VARGINHA"])
@@ -1527,7 +1534,7 @@ def expand_open_tv_tiers(nome_limpo: str, grupo: str) -> tuple[list[str], list[s
         tier1_local.extend(["TV MORENA", "GLOBO CAMPO GRANDE", "GLOBO MATO GROSSO DO SUL", "GLOBO MS"])
     if "CENTRO AMERICA" in nome_limpo or "CUIABA" in nome_limpo:
         tier1_local.extend(["TV CENTRO AMERICA", "GLOBO CUIABA", "GLOBO MATO GROSSO", "GLOBO MT"])
-    if "BAHIA" in nome_limpo or "SALVADOR" in nome_limpo or "SANTA CRUZ" in nome_limpo or "SUBAE" in nome_limpo or "SUDOESTE" in nome_limpo or "SAO FRANCISCO" in nome_limpo or "OESTE" in nome_limpo:
+    if "BAHIA" in nome_limpo or "SALVADOR" in nome_limpo or "SANTA CRUZ" in nome_limpo or "SUBAE" in nome_limpo or "SUDOESTE" in nome_limpo or "SAO FRANCISCO" in nome_limpo or "TV OESTE" in nome_limpo:
         if network == "GLOBO":
             tier1_local.extend(["TV BAHIA", "REDE BAHIA", "GLOBO SALVADOR", "GLOBO BAHIA", "GLOBO BA"])
             tier2_state.extend(["TV BAHIA", "GLOBO TV BAHIA", "GLOBO BAHIA"])
@@ -1554,7 +1561,7 @@ def expand_open_tv_tiers(nome_limpo: str, grupo: str) -> tuple[list[str], list[s
         for state_alias in UF_TO_STATE_AND_CAPITAL.get(uf, []):
             if state_alias == "RO" and network == "GLOBO":
                 continue
-            if state_alias.startswith(("TV ", "REDE ", "GLOBO ", "INTER ")):
+            if state_alias.startswith(("TV ", "REDE ", "GLOBO ", "INTER ", "NSC ")):
                 tier2_state.append(state_alias)
             else:
                 tier2_state.append(f"{network} {state_alias}")
@@ -1591,10 +1598,10 @@ def aliases_tiers_for(entry: dict[str, object]) -> list[list[str]]:
     def add_to(target_list: list[str], val: str, allow_national_fallback: bool = False):
         if not allow_national_fallback and has_conflicting_region(base_channel_name, val):
             return
-        n = original_normalize_name(val)
-        if n and n not in seen:
-            target_list.append(n)
-            seen.add(n)
+        for n in (normalize_name(val), original_normalize_name(val)):
+            if n and n not in seen:
+                target_list.append(n)
+                seen.add(n)
 
     cleaned_pairs: list[str] = []
     for value in values:
