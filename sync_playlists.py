@@ -4,6 +4,7 @@
 - Consulta apenas a API leve de Canais ao Vivo (get_live_categories + get_live_streams) em ~2 segundos!
 - Gera 'xtream_map_X.json' com '__upstream_host__' e os TVG-IDs de alta precisão para o Cloudflare Worker.
 - Gera 'canais_X.m3u' e 'lista_X.m3u' (ambas enxutas, apenas com os canais ao vivo calibrados, < 1 MB).
+- Blindado para Smart TVs (Samsung Tizen / LG webOS): bloqueia '&', '!' ou '+' em tvg-id (A&E -> ae.br, E! -> eentertainment.br, BM&C -> bmcnews.br).
 - Blindado contra colisão de numeração (HBO vs HBO 2), suporte total a FHD [H265] e canais de 1 letra (E!).
 """
 from __future__ import annotations
@@ -31,6 +32,7 @@ except ImportError:
 from merge_epg import (
     extract_significant_digits,
     has_conflicting_channel_number,
+    is_smart_tv_safe_id,
     name_key,
     normalizar_canal,
     strip_qualities_keep_case,
@@ -68,47 +70,59 @@ _RE_NO_EPG_CHANNEL = re.compile(
     re.IGNORECASE,
 )
 
-# Sinônimos diretos: Nome limpo na lista -> Lista de candidatos de alta precisão no EPG
+# Sinônimos diretos: Nome limpo na lista -> Lista de candidatos de alta precisão no EPG (IDs limpos sem '&', '!' ou '+' na frente)
 CHANNEL_SYNONYMS: dict[str, list[str]] = {
-    "E": ["E!", "E! Entertainment", "eentertainment.br", "E!.br", "e.br", "E"],
-    "E!": ["E!", "E! Entertainment", "eentertainment.br", "E!.br", "e.br", "E"],
-    "A E": ["A&E", "A&E.br", "ae.br"],
+    "E": ["eentertainment.br", "e.br", "E Entertainment", "E! Entertainment", "E!"],
+    "E!": ["eentertainment.br", "e.br", "E Entertainment", "E! Entertainment", "E!"],
+    "A E": ["ae.br", "AE", "A E", "A&E"],
+    "AE": ["ae.br", "AE", "A E", "A&E"],
+    "BM C NEWS": ["bmcnews.br", "BMC NEWS", "BM C NEWS", "BM&C NEWS"],
+    "BMC NEWS": ["bmcnews.br", "BMC NEWS", "BM C NEWS", "BM&C NEWS"],
+    "BM C": ["bmcnews.br", "BMC NEWS", "BM&C NEWS"],
+    "FILM ARTS": ["FilmAndArts.br", "FilmAndArts.mx", "FILM AND ARTS", "FILM&ARTS"],
+    "FILM AND ARTS": ["FilmAndArts.br", "FilmAndArts.mx", "FILM AND ARTS", "FILM&ARTS"],
+    "FAST FUNBOX": ["FastAndFunBox.br", "FAST AND FUNBOX", "FAST & FUNBOX"],
     "TVE": ["TVE Bahia", "TVE BAHIA", "tve.bahia.br", "TV BRASIL", "tvbrasil.br"],
-    "HBO 2": ["HBO 2", "HBO2", "HBO2.br", "hbo2.br"],
-    "HBO": ["HBO", "HBO.br", "hbo.br"],
-    "HBO PLUS": ["HBO Plus", "HBOPlusBrasil.br", "HBOPlus.br", "hboplusbrasil.br"],
+    "HBO 2": ["HBO2.br", "hbo2.br", "HBO 2", "HBO2"],
+    "HBO": ["HBO.br", "hbo.br", "HBO"],
+    "HBO PLUS": ["HBOPlusBrasil.br", "HBOPlus.br", "hboplusbrasil.br", "HBO Plus"],
     "HBO FAMILY": ["HBOFamily.br", "HBO Family"],
     "HBO SIGNATURE": ["HBOSignature.br", "HBO Signature"],
     "HBO MUNDI": ["HBOMundi.br", "HBO Mundi"],
     "HBO POP": ["HBOPop.br", "HBO Pop"],
     "HBO XTREME": ["HBOXtreme.br", "HBO Xtreme"],
-    "DISCOVERY H H": ["Discovery Home & Health", "DiscoveryHomeHealth.br", "discoveryhomehealth.br"],
-    "DISCOVERY HOME HEALTH": ["Discovery Home & Health", "DiscoveryHomeHealth.br"],
-    "UNIVERSAL STUDIO": ["Studio Universal", "Studiouniversal.br", "studiouniversal.br", "Universal Studio"],
-    "STUDIO UNIVERSAL": ["Studio Universal", "Studiouniversal.br", "studiouniversal.br"],
-    "UNIVERSAL CHANNEL": ["Universal TV", "Universal Channel", "Universal.br", "universal.br"],
-    "SONY CHANNEL": ["Sony Channel", "Sony", "Sony.br", "sony.br"],
-    "WARNER": ["Warner Channel", "Warner", "Warner.br", "warnerchannel.br"],
-    "WARNER CHANNEL": ["Warner Channel", "Warner", "Warner.br", "warnerchannel.br"],
-    "TNT": ["TNT", "TNT.br", "tnt.br"],
-    "TNT SERIES": ["TNT Séries", "TNT Series", "TNTSeries.br", "tntseries.br"],
-    "TNT NOVELAS": ["TNT Novelas", "TNTNovelas.br", "auto.tntnovelas"],
-    "ADULT SWIM": ["Adult Swim", "Adult.Swim.HD.br", "auto.adultswim"],
-    "GLOBOPLAY NOVELAS": ["Globoplay Novelas", "VIVA", "Viva.br"],
-    "LOVE NATURE": ["Love Nature", "LoveNature.br", "lovenature.br"],
-    "H2": ["History 2", "H2", "History2.br", "history2.br"],
-    "HISTORY 2": ["History 2", "H2", "History2.br", "history2.br"],
+    "DISCOVERY H H": ["DiscoveryHomeHealth.br", "discoveryhomehealth.br", "Discovery Home and Health", "Discovery Home & Health"],
+    "DISCOVERY HOME HEALTH": ["DiscoveryHomeHealth.br", "discoveryhomehealth.br", "Discovery Home and Health", "Discovery Home & Health"],
+    "HOME HEALTH": ["DiscoveryHomeHealth.br", "discoveryhomehealth.br", "Discovery Home and Health", "Discovery Home & Health"],
+    "UNIVERSAL STUDIO": ["Studiouniversal.br", "studiouniversal.br", "Studio Universal", "Universal Studio"],
+    "STUDIO UNIVERSAL": ["Studiouniversal.br", "studiouniversal.br", "Studio Universal"],
+    "UNIVERSAL CHANNEL": ["Universal.br", "universal.br", "Universal TV", "Universal Channel"],
+    "SONY CHANNEL": ["Sony.br", "sony.br", "Sony Channel", "Sony"],
+    "WARNER": ["Warner.br", "warnerchannel.br", "Warner Channel", "Warner"],
+    "WARNER CHANNEL": ["Warner.br", "warnerchannel.br", "Warner Channel", "Warner"],
+    "TNT": ["TNT.br", "tnt.br", "TNT"],
+    "TNT SERIES": ["TNTSeries.br", "tntseries.br", "TNT Séries", "TNT Series"],
+    "TNT NOVELAS": ["TNTNovelas.br", "auto.tntnovelas", "TNT Novelas"],
+    "ADULT SWIM": ["Adult.Swim.HD.br", "auto.adultswim", "Adult Swim"],
+    "GLOBOPLAY NOVELAS": ["Viva.br", "Globoplay Novelas", "VIVA"],
+    "LOVE NATURE": ["LoveNature.br", "lovenature.br", "Love Nature"],
+    "H2": ["History2.br", "history2.br", "History 2", "H2"],
+    "HISTORY 2": ["History2.br", "history2.br", "History 2", "H2"],
     "HISTORY": ["HistoryChannel.br", "History Channel", "History"],
-    "CANAL OFF": ["OFF", "Canal OFF", "Off.br"],
-    "OFF": ["OFF", "Canal OFF", "Off.br"],
-    "SPORTV": ["SporTV 1", "SporTV", "SporTV.br", "sportv.br"],
-    "SPORTV 1": ["SporTV 1", "SporTV", "SporTV.br", "sportv.br"],
-    "SPORTV 2": ["SPORTV 2", "SporTV 2", "Sportv2.br", "sportv2.br"],
-    "SPORTV 3": ["SPORTV 3", "SporTV 3", "SporTV3.br", "sportv3.br"],
-    "PREMIERE CLUBES": ["PREMIERE CLUBES", "Premiere Clubes", "PremiereClubes.br", "premiereclubes.br", "Premiere 1"],
-    "PREMIERE 1": ["PREMIERE CLUBES", "Premiere Clubes", "PremiereClubes.br", "premiereclubes.br"],
-    "JOVEM PAN": ["jovem.pan.news.br", "Jovem Pan News", "JOVEM PAN", "jovempannews.br"],
-    "CNN BRASIL": ["cnn.brasil.br", "CNN Brasil", "cnnbrasil.br"],
+    "CANAL OFF": ["Off.br", "OFF", "Canal OFF"],
+    "OFF": ["Off.br", "OFF", "Canal OFF"],
+    "SPORTV": ["SporTV.br", "sportv.br", "SporTV 1", "SporTV"],
+    "SPORTV 1": ["SporTV.br", "sportv.br", "SporTV 1", "SporTV"],
+    "SPORTV 2": ["Sportv2.br", "sportv2.br", "SPORTV 2", "SporTV 2"],
+    "SPORTV 3": ["SporTV3.br", "sportv3.br", "SPORTV 3", "SporTV 3"],
+    "PREMIERE CLUBES": ["PremiereClubes.br", "premiereclubes.br", "PREMIERE CLUBES", "Premiere Clubes", "Premiere 1"],
+    "PREMIERE 1": ["PremiereClubes.br", "premiereclubes.br", "PREMIERE CLUBES", "Premiere Clubes"],
+    "JOVEM PAN": ["jovem.pan.news.br", "jovempannews.br", "Jovem Pan News", "JOVEM PAN"],
+    "CNN BRASIL": ["cnn.brasil.br", "cnnbrasil.br", "CNN Brasil"],
+    "REDE TV": ["redetv.br", "REDETV", "REDE TV"],
+    "REDETV": ["redetv.br", "REDETV", "REDE TV"],
+    "AGROMAIS": ["agromais.br", "AGROMAIS", "AGRO MAIS"],
+    "AGRO": ["agromais.br", "AGROMAIS", "AGRO MAIS"],
     "GLOBO SP": ["GB SP", "Globo SP", "globosp.br"],
     "GLOBO RJ": ["GB RJ", "Globo RJ", "globorj.br"],
     "GLOBO MINAS": ["GB MINAS", "Globo Minas", "globominas.br"],
@@ -177,7 +191,6 @@ def clean_channel_title_for_epg(raw_name: str) -> str:
     s = html.unescape(raw_name or "")
     s = re.sub(r"\(\s*(?:BR\s*\d+|EVENTOS?|PPV|BACKUP|ALT|FHD|HD|SD|4K|UHD|H\.?26[45]|HEVC)\s*\)", " ", s, flags=re.I)
     s = re.sub(r"\[\s*(?:H\.?26[45]|HEVC|P|BR\s*\d+|FHD|HD|SD|4K|UHD|ALT|BACKUP)\s*\]", " ", s, flags=re.I)
-    # Se houver "[2]" (ex: HBO HD [2]), transforma em " 2 " antes de limpar
     s = re.sub(r"\[\s*(\d+)\s*\]", r" \1 ", s)
     s = re.sub(r"[¹²³⁴⁵⁶⁷⁸⁹⁰]+", " ", s)
     s = re.sub(r"\b(?:FHD|UHD|4K|8K|HD|SD|H\.?265|H\.?264|HEVC|AVC|1080P|1080I|720P|60FPS)\b", " ", s, flags=re.I)
@@ -319,9 +332,9 @@ def load_epg_id_index(epg_path: Path) -> dict[str, str]:
 
 
 def is_orig_tvg_id_poisoned(clean_ch_name: str, orig_id: str) -> bool:
-    """Detecta tvg-ids falsos ou com colisão de número (ex: hbo.br em HBO 2)."""
+    """Detecta tvg-ids falsos, caracteres incompatíveis com Smart TV (&) ou colisão de número (ex: hbo.br em HBO 2)."""
     oid = orig_id.lower().strip()
-    if not oid:
+    if not oid or not is_smart_tv_safe_id(orig_id):
         return True
     if re.match(r"^[0-9a-f]{8}-[0-9a-f]{4}-", oid):
         return True
@@ -355,7 +368,7 @@ def resolve_best_tvg_id(channel_name: str, original_tvg_id: str, epg_index: dict
     clean_title = clean_channel_title_for_epg(channel_name)
 
     def _valid_candidate_id(cand_id: str) -> bool:
-        if not cand_id:
+        if not cand_id or not is_smart_tv_safe_id(cand_id):
             return False
         cid_low = cand_id.lower()
         if "tvescola" in cid_low and "ESCOLA" not in clean_title:
