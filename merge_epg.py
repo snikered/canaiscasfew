@@ -4,7 +4,8 @@
 - Recorte e Costura por Janelas de 6h (Time-Window Splicing): se a Fonte A é melhor até metade do dia e a Fonte B é
   melhor no restante do dia/semana, funde os dois períodos automaticamente sem sobreposição.
 - Exporta estritamente 1 <channel> por emissora real (elimina a duplicação de exported_ids).
-- Mantém todos os aliases reais da M3U (incluindo FHD [H265], FHD H265, FHDR, old_tvg_ids) em <display-name>.
+- Blindado para Smart TVs (Samsung Tizen / LG webOS): zero caracteres '&', '!' ou '+' dentro de channel id / tvg-id.
+- Mantém todos os aliases reais da M3U (incluindo FHD [H265], FHD H265, FHDR, variantes sem '&') em <display-name>.
 - Bloqueia colisões entre canais estrangeiros (PT/US/UK/CO/ARG/MX/EC/PY) e redes brasileiras.
 - Impede falsos positivos regionais (BAND SP vs BAND RJ, RECORD SP vs BAHIA, JI-PARANA vs PARANA, RIO PRETO vs RJ).
 """
@@ -51,6 +52,62 @@ _FOREIGN_COUNTRY_PREFIX_RE = re.compile(
     r"^(?:PT|US|USA|UK|CO|ARG|AR|MX|EC|PY|UY|CL|PE|BOL|VEN|DE|ES|FR|IT|CA|JP)\b",
     re.IGNORECASE,
 )
+
+# Mapa de IDs canônicos limpos para canais que possuem '&', '!' ou '+' no nome
+SMART_TV_SAFE_CANONICAL_IDS: dict[str, str] = {
+    "A&E": "ae.br",
+    "A E": "ae.br",
+    "AE": "ae.br",
+    "E!": "eentertainment.br",
+    "E": "eentertainment.br",
+    "E! ENTERTAINMENT": "eentertainment.br",
+    "E ENTERTAINMENT": "eentertainment.br",
+    "BM&C NEWS": "bmcnews.br",
+    "BMC NEWS": "bmcnews.br",
+    "BM C NEWS": "bmcnews.br",
+    "BM&C": "bmcnews.br",
+    "DISCOVERY HOME & HEALTH": "DiscoveryHomeHealth.br",
+    "DISCOVERY HOME AND HEALTH": "DiscoveryHomeHealth.br",
+    "DISCOVERY H&H": "DiscoveryHomeHealth.br",
+    "DISCOVERY H H": "DiscoveryHomeHealth.br",
+    "HOME & HEALTH": "DiscoveryHomeHealth.br",
+    "FILM&ARTS": "FilmAndArts.br",
+    "FILM & ARTS": "FilmAndArts.br",
+    "FILM AND ARTS": "FilmAndArts.br",
+    "FAST & FUNBOX": "FastAndFunBox.br",
+    "FAST AND FUNBOX": "FastAndFunBox.br",
+    "REDETV": "redetv.br",
+    "REDETV!": "redetv.br",
+    "REDE TV": "redetv.br",
+    "REDE TV!": "redetv.br",
+    "AGROMAIS": "agromais.br",
+    "AGRO+": "agromais.br",
+}
+
+
+def is_smart_tv_safe_id(tvid: str) -> bool:
+    """Verifica se o ID está livre de caracteres que quebram parsers XML/Regex em Smart TVs (&, !, +, <, >, aspas)."""
+    if not tvid:
+        return False
+    return not any(ch in tvid for ch in ("&", "!", "+", '"', "'", "<", ">", ";"))
+
+
+def sanitize_xmltv_id(raw_id: str) -> str:
+    """Converte qualquer ID com caracteres especiais (&, !, +) em um ID 100% seguro para Smart TVs."""
+    s = html.unescape(str(raw_id or "")).strip()
+    if not s:
+        return ""
+    up = s.upper()
+    if up in SMART_TV_SAFE_CANONICAL_IDS:
+        return SMART_TV_SAFE_CANONICAL_IDS[up]
+    if is_smart_tv_safe_id(s):
+        return s
+    s = re.sub(r"(?i)\bA\s*&\s*E\b", "ae", s)
+    s = re.sub(r"(?i)\bBM\s*&\s*C\b", "bmc", s)
+    s = re.sub(r"(?i)\bH\s*&\s*H\b", "HomeHealth", s)
+    s = s.replace("&", "And").replace("+", "Plus").replace("!", "")
+    s = re.sub(r"[\"'<>:;]+", "", s)
+    return " ".join(s.split()).strip()
 
 
 def extract_foreign_country_code(text: str) -> str:
@@ -154,7 +211,6 @@ def extract_state_ufs(text: str) -> set[str]:
     joined = "".join(words)
     ufs: set[str] = set()
 
-    # Cidades/Estados compostos com "RIO" que NÃO pertencem ao RJ
     if "RIOPRETO" in joined or "SJRIOPRETO" in joined:
         ufs.add("SP")
     if "RIOVERDE" in joined:
@@ -349,6 +405,7 @@ NON_SERIES_CHANNEL_KEYWORDS = (
     "BANDNEWS",
     "SBT NEWS",
     "BM&C",
+    "BMC NEWS",
     "TV SENADO",
     "TV CAMARA",
     "TV JUSTICA",
@@ -460,11 +517,18 @@ class CandidateEvaluation:
     richness_score: float; health: dict[str, object]; confidence: int; comparisons: list[dict[str, object]]
 
 CHANNEL_SYNONYMS = {
-    "E": ["E!", "E! ENTERTAINMENT", "E ENTERTAINMENT"],
-    "E!": ["E", "E! ENTERTAINMENT", "E ENTERTAINMENT"],
-    "HOME & HEALTH": ["DISCOVERY HOME & HEALTH", "DISCOVERY HOME AND HEALTH"],
-    "HOME AND HEALTH": ["DISCOVERY HOME & HEALTH", "DISCOVERY HOME AND HEALTH"],
-    "DISCOVERY HOME & HEALTH": ["HOME & HEALTH", "HOME AND HEALTH"],
+    "A&E": ["A&E", "A E", "AE", "ae.br"],
+    "A E": ["A&E", "A E", "AE", "ae.br"],
+    "AE": ["A&E", "A E", "AE", "ae.br"],
+    "E": ["E!", "E! ENTERTAINMENT", "E ENTERTAINMENT", "eentertainment.br"],
+    "E!": ["E", "E! ENTERTAINMENT", "E ENTERTAINMENT", "eentertainment.br"],
+    "BM&C NEWS": ["BM&C NEWS", "BMC NEWS", "BM&C", "bmcnews.br"],
+    "BMC NEWS": ["BM&C NEWS", "BMC NEWS", "BM&C", "bmcnews.br"],
+    "FILM&ARTS": ["FILM & ARTS", "FILM AND ARTS", "FilmAndArts.br", "FilmAndArts.mx"],
+    "FILM & ARTS": ["FILM&ARTS", "FILM AND ARTS", "FilmAndArts.br", "FilmAndArts.mx"],
+    "HOME & HEALTH": ["DISCOVERY HOME & HEALTH", "DISCOVERY HOME AND HEALTH", "DiscoveryHomeHealth.br"],
+    "HOME AND HEALTH": ["DISCOVERY HOME & HEALTH", "DISCOVERY HOME AND HEALTH", "DiscoveryHomeHealth.br"],
+    "DISCOVERY HOME & HEALTH": ["HOME & HEALTH", "HOME AND HEALTH", "DiscoveryHomeHealth.br"],
     "DISNEY PLUS 1": ["DISNEY PLUS ESPN", "DISNEY PLUS ESPN 1", "DISNEY+ 1", "DISNEY+ ESPN 1"],
     "DISNEY PLUS 2": ["DISNEY PLUS ESPN 2", "DISNEY+ 2", "DISNEY+ ESPN 2"],
     "DISNEY PLUS 3": ["DISNEY PLUS ESPN 3", "DISNEY+ 3", "DISNEY+ ESPN 3"],
@@ -598,6 +662,7 @@ UF_TO_STATE_AND_CAPITAL = {
     "RR": ["RORAIMA", "BOA VISTA", "REDE AMAZONICA BOA VISTA", "RR"],
 }
 
+# Removido "ae" e "aande" para permitir que ae.br seja o ID oficial do canal A&E!
 POISONED_OPEN_TV_IDS = {
     "globo", "tvglobo", "redeglobo", "globosp", "globorj", "globonacional", "globohd", "globofhd",
     "record", "recordtv", "rederecord", "recordsp", "recordtvsp", "recordrj", "recordtvrj",
@@ -605,8 +670,8 @@ POISONED_OPEN_TV_IDS = {
     "recordtvrs", "recordrs", "recordtvba", "recordbahia", "recordtvgoias", "recordgoias",
     "sbt", "sbtsp", "sbtrj", "sbtnacional", "tvsbt", "sbthd",
     "band", "bandtv", "tvband", "bandeirantes", "redebandeirantes", "bandsp", "bandrj", "bandhd",
-    "redetv", "redetvsp", "tvbrasil", "tvcultura", "cultura",
-    "aande", "ae", "agromais", "terraviva", "canalrural", "canaldoboi", "boomerang",
+    "redetvsp", "tvbrasil", "tvcultura", "cultura",
+    "agromais", "terraviva", "canalrural", "canaldoboi", "boomerang",
 }
 
 def strip_qualities_keep_case(name: str) -> str:
@@ -628,7 +693,6 @@ def strip_qualities_keep_case(name: str) -> str:
     )
     s = re.sub(r'[()]', ' ', s)
     s = re.sub(r'[\¹\²\³\⁴\⁵\⁶\⁷\⁸\⁹\⁰\~]', ' ', s)
-    # Remove BR2/SRV2 mesmo quando estiver colado no final da palavra (ex: GLOBORJBR2)
     s = re.sub(r'(?<=[A-Za-z0-9])(?:BR\d+|SRV\d+)\b', ' ', s, flags=re.IGNORECASE)
     tags = r'\b(SD|HD|FHD|FHDR|UHD|4K|8K|H\.?264|H\.?265|HEVC|AVC|HDR\+?|LEG|LEGENDADO|DUB|DUBLADO|DUAL|HQ|VIP|VOD|24H[S]?|24/7|1080P|1080I|720P|60FPS|PPV|EVENTOS?|ALTERNATIVO|ALT|BACKUP|BKP|BR\d+|SRV\d+|SERVER\s*\d+|OP[CÇ][AÃ]O\s*\d+)\b[\*\²\³\¹\⁴\+]*'
     s = re.sub(tags, ' ', s, flags=re.IGNORECASE)
@@ -645,7 +709,6 @@ def normalizar_canal(nome: str) -> str:
     foreign_code = extract_foreign_country_code(original_nome)
     nome = strip_qualities_keep_case(original_nome)
 
-    # Se o canal for estrangeiro (ex: PT, US, CO, ARG), não aplica substituições exclusivas de canais BR
     if not foreign_code:
         nome = re.sub(r'^E!$', 'E!', nome.strip(), flags=re.IGNORECASE)
         nome = re.sub(r'\bADULT SWIN\b', 'ADULT SWIM', nome, flags=re.IGNORECASE)
@@ -750,7 +813,6 @@ def is_valid_provider_tvid(channel_name: str, tvid: str) -> bool:
         return False
 
     base_clean = normalizar_canal(channel_name)
-    # Bloqueia IDs legados de canais que mudaram de programação (TruTV -> Adult Swim e TBS -> TNT Novelas)
     if "ADULT SWIM" in base_clean and "trutv" in tvid_clean:
         return False
     if "TNT NOVELAS" in base_clean and "tbs" in tvid_clean:
@@ -1834,10 +1896,8 @@ def evaluate_candidates(matches: list[ChannelMatch], now: datetime, max_active_v
         richness_score = float(h_info.get("richness_score", 0.0))
         fut_h = float(h_info.get("future_hours", 0.0))
 
-        # Saúde efetiva: se tem >= 0.80 de saúde e >= 48h de grade futura, considera saúde plena (1.0)
         eff_health = 1.0 if (health_score >= 0.80 and fut_h >= 48.0) else health_score
 
-        # Pontuação 100% baseada em mérito da grade naquele momento (Precisão/Consenso + Conteúdo/Sinopse + Saúde/Cobertura)
         quality = 0.40 * weighted_ratio + 0.25 * eff_health + 0.20 * richness_score + 0.15 * avg_support
         evidence_factor = 0.55 + 0.45 * min(vote_weight / max(max_active_vote_weight, 0.5), 1.0)
         confidence = round(100 * max(0.0, min(1.0, quality * evidence_factor)))
@@ -1850,14 +1910,11 @@ def evaluate_candidates(matches: list[ChannelMatch], now: datetime, max_active_v
         ))
 
     def merit_rank(ev: CandidateEvaluation) -> tuple:
-        """Ranking puro por qualidade real no canal, sem favorecer posição fixa na lista de fontes."""
         has_programmes = int(bool(ev.match.source.rows.get(ev.match.channel_id)))
         fut_h = float(ev.health.get("future_hours", 0.0))
         near_cov = float(ev.health.get("near_coverage_ratio", 0.0))
         eff_h = 1.0 if (ev.health_score >= 0.80 and fut_h >= 48.0) else ev.health_score
-        # Só dá bônus para Afiliadas Locais quando é match direto (tier 1) de uma afiliada regional específica
         is_direct_local_affiliate = int(ev.match.tier == 1 and ev.match.source.spec.family == "afiliadas_locais" and ev.health_score >= 0.70)
-        # Nota composta de mérito (0.0 a 1.0): Precisão de horário (consenso) + Riqueza de metadados + Cobertura sem buracos
         horizon_factor = min(1.0, fut_h / 48.0)
         composite_merit = (
             0.38 * ev.weighted_ratio
@@ -1926,7 +1983,7 @@ def make_validation(entry: dict[str, object], chosen: CandidateEvaluation, all_e
     }
 
 def get_clean_aliases(entry: dict[str, object]) -> list[str]:
-    """Retorna os nomes base, IDs de compatibilidade sincronizados e TODAS as variantes reais da M3U (incluindo FHD [H265])."""
+    """Retorna os nomes base, IDs de compatibilidade sincronizados e TODAS as variantes reais da M3U (incluindo variantes sem '&' para TVs Samsung/LG)."""
     result = []
     seen = set()
     raw_name = str(entry.get("name", "")).strip()
@@ -1944,7 +2001,15 @@ def get_clean_aliases(entry: dict[str, object]) -> list[str]:
     clean_base = strip_qualities_keep_case(raw_name)
     norm_clean = normalizar_canal(raw_name)
 
-    for candidate in (clean_base, norm_clean, raw_name):
+    base_variants = [clean_base, norm_clean, raw_name]
+    for bv in list(base_variants):
+        if "&" in bv:
+            base_variants.append(bv.replace("&", ""))
+            base_variants.append(" ".join(bv.replace("&", " ").split()))
+        if "!" in bv:
+            base_variants.append(bv.replace("!", "").strip())
+
+    for candidate in base_variants:
         if candidate:
             add_alias(candidate)
             for suf in ("FHD", "HD", "SD", "4K", "FHD [H265]", "FHD H265", "HD [H265]"):
@@ -1973,23 +2038,33 @@ def get_clean_aliases(entry: dict[str, object]) -> list[str]:
         raw_s = str(raw_a).strip()
         if raw_s:
             add_alias(raw_s)
+            if "&" in raw_s:
+                add_alias(raw_s.replace("&", ""))
+                add_alias(" ".join(raw_s.replace("&", " ").split()))
 
     return result
 
 def get_primary_export_ids(entry: dict[str, object]) -> list[str]:
-    """Retorna ESTRITAMENTE 1 único ID por canal, priorizando o tvg-id sincronizado na M3U (ex: hbo.br, A&E)."""
+    """Retorna ESTRITAMENTE 1 único ID por canal, 100% livre de '&', '!' ou '+' para total compatibilidade com Smart TVs (Samsung Tizen / LG webOS)."""
     raw_name = str(entry.get("name", "")).strip()
     target_id = str(entry.get("id", "")).strip()
     clean_base = strip_qualities_keep_case(raw_name) or target_id
+    norm_clean = normalizar_canal(raw_name)
+
+    for key_cand in (clean_base.upper(), norm_clean.upper(), raw_name.upper()):
+        if key_cand in SMART_TV_SAFE_CANONICAL_IDS:
+            return [SMART_TV_SAFE_CANONICAL_IDS[key_cand]]
 
     for cid in entry.get("compatibility_ids", []) or []:
-        if is_valid_provider_tvid(raw_name, str(cid)) and not has_conflicting_channel_number(raw_name, str(cid)):
-            return [str(cid).strip()]
+        c_str = str(cid).strip()
+        if is_smart_tv_safe_id(c_str) and is_valid_provider_tvid(raw_name, c_str) and not has_conflicting_channel_number(raw_name, c_str):
+            return [c_str]
     for t_id in entry.get("tvg_ids_to_export", []) or []:
-        if is_valid_provider_tvid(raw_name, str(t_id)) and not has_conflicting_channel_number(raw_name, str(t_id)):
-            return [str(t_id).strip()]
+        t_str = str(t_id).strip()
+        if is_smart_tv_safe_id(t_str) and is_valid_provider_tvid(raw_name, t_str) and not has_conflicting_channel_number(raw_name, t_str):
+            return [t_str]
 
-    return [clean_base]
+    return [sanitize_xmltv_id(clean_base)]
 
 def apply_rich_metadata_to_element(
     el: ET.Element, meta_pool: list[dict[str, Any]], channel_name: str, duration_minutes: float
@@ -2197,7 +2272,6 @@ def stitch_multi_source_schedule(
     if not aligned_sources_data:
         return []
 
-    # Ordena todas as fontes alinhadas da melhor para a pior (garante que o tapa-buracos use sempre a 2ª melhor antes da 3ª)
     aligned_sources_data.sort(key=lambda s: s["global_merit"], reverse=True)
 
     # 1. SELEÇÃO POR JANELA DE 6 HORAS
@@ -2263,7 +2337,6 @@ def stitch_multi_source_schedule(
             ]
             for cand in chosen_win_progs:
                 c_start, c_stop = cand["start"], cand["stop"]
-                # Se for um bloco gigante (>3h30) sem sinopse e sem consenso na janela, ignora para deixar a 2ª melhor fonte preencher!
                 if (c_stop - c_start).total_seconds() > 3.5 * 3600 and cand["richness"] < 0.25 and title_counts_in_win.get(cand["norm_title"], 0) <= 1 and len(aligned_sources_data) > 1:
                     continue
 
@@ -2287,7 +2360,7 @@ def stitch_multi_source_schedule(
 
     merged_timeline.sort(key=lambda x: x["start"])
 
-    # 2. TAPA-BURACOS CIRÚRGICO DENTRO DAS JANELAS (Qualquer buraco >= 10 min é preenchido pela melhor fonte seguinte)
+    # 2. TAPA-BURACOS CIRÚRGICO DENTRO DAS JANELAS
     MIN_GAP_SECONDS = 10 * 60
     MAX_EDGE_TRIM_SECONDS = 15 * 60
 
