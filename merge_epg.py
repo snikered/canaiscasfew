@@ -4,7 +4,7 @@
 - Recorte e Costura por Janelas de 6h (Time-Window Splicing): se a Fonte A é melhor até metade do dia e a Fonte B é
   melhor no restante do dia/semana, funde os dois períodos automaticamente sem sobreposição.
 - Exporta estritamente 1 <channel> por emissora real (elimina a duplicação de exported_ids).
-- Blindado para Smart TVs (Samsung Tizen / LG webOS): zero caracteres '&', '!' ou '+' dentro de channel id / tvg-id.
+- Blindado para Smart TVs (Samsung Tizen / LG webOS): zero espaços, '&', '!' ou '+' dentro de channel id / tvg-id.
 - Mantém todos os aliases reais da M3U (incluindo FHD [H265], FHD H265, FHDR, variantes sem '&') em <display-name>.
 - Bloqueia colisões entre canais estrangeiros (PT/US/UK/CO/ARG/MX/EC/PY) e redes brasileiras.
 - Impede falsos positivos regionais (BAND SP vs BAND RJ, RECORD SP vs BAHIA, JI-PARANA vs PARANA, RIO PRETO vs RJ).
@@ -53,7 +53,7 @@ _FOREIGN_COUNTRY_PREFIX_RE = re.compile(
     re.IGNORECASE,
 )
 
-# Mapa de IDs canônicos limpos para canais que possuem '&', '!' ou '+' no nome
+# Mapa de IDs canônicos limpos para canais que possuem '&', '!', '+' ou espaços no nome/ID
 SMART_TV_SAFE_CANONICAL_IDS: dict[str, str] = {
     "A&E": "ae.br",
     "A E": "ae.br",
@@ -80,20 +80,31 @@ SMART_TV_SAFE_CANONICAL_IDS: dict[str, str] = {
     "REDETV!": "redetv.br",
     "REDE TV": "redetv.br",
     "REDE TV!": "redetv.br",
+    "REDETV PAMPA": "redetvpampa.br",
+    "REDETV! PAMPA": "redetvpampa.br",
     "AGROMAIS": "agromais.br",
     "AGRO+": "agromais.br",
+    "TRACE BRAZUCA": "tracebrazuca.br",
+    "TVE BAHIA": "tvebahia.br",
+    "CURTA!": "curta.br",
+    "CURTA": "curta.br",
+    "LOVE NATURE": "LoveNature.br",
+    "LOVENATURE": "LoveNature.br",
+    "CNBC BRASIL": "timesbrasil.br",
+    "TIMES BRASIL": "timesbrasil.br",
+    "TIMES BRASIL CNBC": "timesbrasil.br",
 }
 
 
 def is_smart_tv_safe_id(tvid: str) -> bool:
-    """Verifica se o ID está livre de caracteres que quebram parsers XML/Regex em Smart TVs (&, !, +, <, >, aspas)."""
-    if not tvid:
+    """Verifica se o ID está livre de espaços ou caracteres que quebram parsers XML/Regex em Smart TVs (&, !, +, <, >, aspas)."""
+    if not tvid or " " in tvid.strip():
         return False
     return not any(ch in tvid for ch in ("&", "!", "+", '"', "'", "<", ">", ";"))
 
 
 def sanitize_xmltv_id(raw_id: str) -> str:
-    """Converte qualquer ID com caracteres especiais (&, !, +) em um ID 100% seguro para Smart TVs."""
+    """Converte qualquer ID com caracteres especiais (&, !, +, espaços) em um ID 100% seguro e contínuo para Smart TVs."""
     s = html.unescape(str(raw_id or "")).strip()
     if not s:
         return ""
@@ -107,7 +118,8 @@ def sanitize_xmltv_id(raw_id: str) -> str:
     s = re.sub(r"(?i)\bH\s*&\s*H\b", "HomeHealth", s)
     s = s.replace("&", "And").replace("+", "Plus").replace("!", "")
     s = re.sub(r"[\"'<>:;]+", "", s)
-    return " ".join(s.split()).strip()
+    s = re.sub(r"\s+", ".", s.strip())
+    return s.lower() if not s.endswith(".br") else s
 
 
 def extract_foreign_country_code(text: str) -> str:
@@ -153,6 +165,7 @@ def extract_significant_digits(text: str) -> list[str]:
     if not text:
         return []
     s = html.unescape(str(text)).upper()
+    s = re.sub(r"\b4DULT\s+SWI[NM]\b", "ADULT SWIM", s)
     s = re.sub(r"(?<=[A-Z0-9])(?:BR\d+|SRV\d+)\b", " ", s)
     s = re.sub(r"\b(?:H\.?264|H\.?265|1080[PI]?|720P?|60FPS|4K|8K|24H[S]?|24/7|BR\d+|SRV\d+|SERVER\s*\d+|OP[CÇ][AÃ]O\s*\d+)\b", " ", s)
     s = re.sub(r"[¹²³⁴⁵⁶⁷⁸⁹⁰]+", " ", s)
@@ -169,18 +182,20 @@ def has_conflicting_channel_number(base_channel_name: str, candidate_text: str) 
             (not base_digits and cand_digits == ["1"]) or (base_digits == ["1"] and not cand_digits)
         ):
             return False
+        if "LOVE NATURE" in b_up or "LOVENATURE" in b_up:
+            return False
         return True
     return False
 
 
 _STATE_TOKEN_MAP = {
     "SP": "SP", "SAOPAULO": "SP", "CAMPINAS": "SP", "RIBEIRAOPRETO": "SP", "BAURU": "SP", "SOROCABA": "SP", "SANTOS": "SP", "TAUBATE": "SP", "SJCAMPOS": "SP", "RIOPRETO": "SP", "SJRIOPRETO": "SP", "SAOJOSEDORIOPRETO": "SP", "MOGIDASCRUZES": "SP", "ITAPETININGA": "SP", "PRUDENTE": "SP", "FRANCA": "SP", "ARARAQUARA": "SP", "SAOCARLOS": "SP",
-    "RJ": "RJ", "RIO": "RJ", "RIODEJANEIRO": "RJ", "RIOSUL": "RJ", "SERRAMAR": "RJ",
-    "MG": "MG", "MINAS": "MG", "BELOHORIZONTE": "MG", "JUIZDEFORA": "MG", "UBERLANDIA": "MG", "UBERABA": "MG", "ARAXA": "MG", "ALTEROSA": "MG", "SULDEMINAS": "MG", "GRANDEMINAS": "MG",
-    "RS": "RS", "RIOGRANDEDOSUL": "RS", "PORTOALEGRE": "RS", "POA": "RS", "PELOTAS": "RS", "CAXIAS": "RS", "PASSOFUNDO": "RS", "PAMPA": "RS", "SANTAMARIA": "RS", "BAGE": "RS",
+    "RJ": "RJ", "RIO": "RJ", "RIODEJANEIRO": "RJ", "RIOSUL": "RJ", "SERRAMAR": "RJ", "ALTOLITORAL": "RJ", "PLANICIE": "RJ",
+    "MG": "MG", "MINAS": "MG", "BELOHORIZONTE": "MG", "JUIZDEFORA": "MG", "UBERLANDIA": "MG", "UBERABA": "MG", "ARAXA": "MG", "ALTEROSA": "MG", "SULDEMINAS": "MG", "GRANDEMINAS": "MG", "DOSVALES": "MG",
+    "RS": "RS", "RIOGRANDEDOSUL": "RS", "PORTOALEGRE": "RS", "POA": "RS", "PELOTAS": "RS", "CAXIAS": "RS", "PASSOFUNDO": "RS", "PAMPA": "RS", "SANTAMARIA": "RS", "BAGE": "RS", "ALVORADADOSUL": "PR",
     "PR": "PR", "PARANA": "PR", "CURITIBA": "PR", "LONDRINA": "PR", "MARINGA": "PR", "CASCAVEL": "PR", "FOZDOIGUACU": "PR", "PARANAVAI": "PR", "PONTAGROSSA": "PR", "REDEMASSA": "PR",
     "SC": "SC", "SANTACATARINA": "SC", "FLORIANOPOLIS": "SC", "JOINVILLE": "SC", "BLUMENAU": "SC", "CHAPECO": "SC", "CRICIUMA": "SC",
-    "BA": "BA", "BAHIA": "BA", "SALVADOR": "BA", "ITAPOAN": "BA", "ARATU": "BA", "SANTACRUZ": "BA", "SUBAE": "BA", "SUDOESTE": "BA",
+    "BA": "BA", "BAHIA": "BA", "SALVADOR": "BA", "ITAPOAN": "BA", "ARATU": "BA", "SANTACRUZ": "BA", "SUBAE": "BA", "SUDOESTE": "BA", "SAOFRANCISCO": "BA", "JUAZEIRO": "BA", "OESTE": "BA",
     "PE": "PE", "PERNAMBUCO": "PE", "RECIFE": "PE", "ASABRANCA": "PE", "GRANDERIO": "PE", "GUARARAPES": "PE", "PETROLINA": "PE", "CARUARU": "PE",
     "CE": "CE", "CEARA": "CE", "FORTALEZA": "CE", "VERDESMARES": "CE", "JANGADEIRO": "CE", "CARIRI": "CE",
     "GO": "GO", "GOIAS": "GO", "GOIANIA": "GO", "ANHANGUERA": "GO", "SERRADOURADA": "GO", "RIOVERDE": "GO", "ANAPOLIS": "GO", "CATALAO": "GO", "ITUMBIARA": "GO", "JATAI": "GO", "LUZIANIA": "GO", "PORANGATU": "GO",
@@ -188,11 +203,11 @@ _STATE_TOKEN_MAP = {
     "ES": "ES", "ESPIRITOSANTO": "ES", "VITORIA": "ES", "GAZETASUL": "ES",
     "PA": "PA", "PARA": "PA", "BELEM": "PA", "LIBERAL": "PA", "TAPAJOS": "PA",
     "AM": "AM", "AMAZONAS": "AM", "MANAUS": "AM",
-    "MA": "MA", "MARANHAO": "MA", "SAOLUIS": "MA", "SAOLUIZ": "MA", "MIRANTE": "MA", "DIFUSORA": "MA", "BALSAS": "MA", "IMPERATRIZ": "MA",
+    "MA": "MA", "MARANHAO": "MA", "SAOLUIS": "MA", "SAOLUIZ": "MA", "MIRANTE": "MA", "DIFUSORA": "MA", "BALSAS": "MA", "IMPERATRIZ": "MA", "COCAIS": "MA",
     "MT": "MT", "MATOGROSSO": "MT", "CUIABA": "MT", "CENTROAMERICA": "MT", "TANGARADASERRA": "MT",
     "MS": "MS", "MATOGROSSODOSUL": "MS", "CAMPOGRANDE": "MS", "MORENA": "MS", "CORUMBA": "MS", "PONTAPORA": "MS",
     "PB": "PB", "PARAIBA": "PB", "JOAOPESSOA": "PB", "CABOBRANCO": "PB", "TAMBAU": "PB", "CORREIO": "PB", "MANAIRA": "PB",
-    "RN": "RN", "RIOGRANDEDONORTE": "RN", "NATAL": "RN", "CABUGI": "RN", "TROPICAL": "RN",
+    "RN": "RN", "RIOGRANDEDONORTE": "RN", "NATAL": "RN", "CABUGI": "RN", "TROPICAL": "RN", "COSTABRANCA": "RN",
     "AL": "AL", "ALAGOAS": "AL", "MACEIO": "AL", "PONTAVERDE": "AL",
     "SE": "SE", "SERGIPE": "SE", "ARACAJU": "SE", "ATALAIA": "SE",
     "PI": "PI", "PIAUI": "PI", "TERESINA": "PI", "CIDADEVERDE": "PI", "PICOS": "PI",
@@ -223,6 +238,10 @@ def extract_state_ufs(text: str) -> set[str]:
         ufs.add("RN")
     if "GRANDERIO" in joined:
         ufs.add("PE")
+    if "RIOSUL" in joined:
+        ufs.add("RJ")
+    if "TVALVORADA" in joined and "SUL" not in joined:
+        ufs.add("PI")
 
     if "JIPARANA" in joined:
         ufs.add("RO")
@@ -529,6 +548,12 @@ CHANNEL_SYNONYMS = {
     "HOME & HEALTH": ["DISCOVERY HOME & HEALTH", "DISCOVERY HOME AND HEALTH", "DiscoveryHomeHealth.br"],
     "HOME AND HEALTH": ["DISCOVERY HOME & HEALTH", "DISCOVERY HOME AND HEALTH", "DiscoveryHomeHealth.br"],
     "DISCOVERY HOME & HEALTH": ["HOME & HEALTH", "HOME AND HEALTH", "DiscoveryHomeHealth.br"],
+    "LOVE NATURE": ["LOVENATURE", "LOVE NATURE 4K", "LoveNature.br", "lovenature.br"],
+    "LOVENATURE": ["LOVE NATURE", "LOVE NATURE 4K", "LoveNature.br", "lovenature.br"],
+    "CNBC BRASIL": ["TIMES BRASIL", "TIMES BRASIL CNBC", "CNBC", "CNBC BRASIL"],
+    "CNBC": ["TIMES BRASIL", "TIMES BRASIL CNBC", "CNBC BRASIL"],
+    "TIMES BRASIL": ["TIMES BRASIL CNBC", "CNBC", "CNBC BRASIL"],
+    "TIMES BRASIL CNBC": ["TIMES BRASIL", "CNBC", "CNBC BRASIL"],
     "DISNEY PLUS 1": ["DISNEY PLUS ESPN", "DISNEY PLUS ESPN 1", "DISNEY+ 1", "DISNEY+ ESPN 1"],
     "DISNEY PLUS 2": ["DISNEY PLUS ESPN 2", "DISNEY+ 2", "DISNEY+ ESPN 2"],
     "DISNEY PLUS 3": ["DISNEY PLUS ESPN 3", "DISNEY+ 3", "DISNEY+ ESPN 3"],
@@ -626,10 +651,9 @@ CHANNEL_SYNONYMS = {
     "REDE BRASIL": ["RBTV", "REDE BRASIL DE TELEVISAO"],
     "REDE SUPER": ["TV SUPER"],
     "TVE": ["TVE RS", "TVE BAHIA"],
-    "TIMES BRASIL": ["TIMES BRASIL CNBC", "CNBC", "CNBC BRASIL"],
-    "TIMES BRASIL CNBC": ["TIMES BRASIL", "CNBC", "CNBC BRASIL"],
-    "ADULT SWIM": ["ADULT SWIN"],
-    "ADULT SWIN": ["ADULT SWIM"],
+    "ADULT SWIM": ["ADULT SWIN", "4DULT SWIN"],
+    "ADULT SWIN": ["ADULT SWIM", "4DULT SWIN"],
+    "4DULT SWIN": ["ADULT SWIM", "ADULT SWIN"],
 }
 
 UF_TO_STATE_AND_CAPITAL = {
@@ -662,7 +686,6 @@ UF_TO_STATE_AND_CAPITAL = {
     "RR": ["RORAIMA", "BOA VISTA", "REDE AMAZONICA BOA VISTA", "RR"],
 }
 
-# Removido "ae" e "aande" para permitir que ae.br seja o ID oficial do canal A&E!
 POISONED_OPEN_TV_IDS = {
     "globo", "tvglobo", "redeglobo", "globosp", "globorj", "globonacional", "globohd", "globofhd",
     "record", "recordtv", "rederecord", "recordsp", "recordtvsp", "recordrj", "recordtvrj",
@@ -711,7 +734,8 @@ def normalizar_canal(nome: str) -> str:
 
     if not foreign_code:
         nome = re.sub(r'^E!$', 'E!', nome.strip(), flags=re.IGNORECASE)
-        nome = re.sub(r'\bADULT SWIN\b', 'ADULT SWIM', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\b4DULT\s+SWI[NM]\b', 'ADULT SWIM', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bADULT\s+SWIN\b', 'ADULT SWIM', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bZOOMOOO\b', 'ZOOMOO', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bWOHOO\b', 'WOOHOO', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bJP NEWS\b', 'JOVEM PAN NEWS', nome, flags=re.IGNORECASE)
@@ -888,7 +912,7 @@ def fetch_iptv_json(url: str, timeout: int = 45) -> Any:
         except Exception as exc:
             last_err = exc
             time.sleep(1)
-    raise RuntimeError(f"Todos os User-Agents falharam: {last_err}")
+    raise RuntimeError(f"Todos os User-Agents falharam: {last_err})")
 
 def download_to_temp_file(url: str, attempts: int = 4) -> Path:
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".tmp")
@@ -1201,6 +1225,8 @@ def read_source_from_file(spec: SourceSpec, file_path: Path) -> EpgSource:
                 stop = next_start
             if (stop - row.start) > timedelta(hours=8):
                 stop = next_start if (next_start and next_start > row.start and (next_start - row.start) <= timedelta(hours=4)) else row.start + timedelta(hours=2)
+            if stop <= row.start:
+                continue
             fixed_rows.append(ProgrammeRow(start=row.start, stop=stop, title=row.title, normalized_title=row.normalized_title, element=row.element))
         rows[channel_id] = fixed_rows
     root.clear()
@@ -1448,7 +1474,7 @@ def expand_open_tv_tiers(nome_limpo: str, grupo: str) -> tuple[list[str], list[s
     if "TAPAJOS" in nome_limpo or "SANTAREM" in nome_limpo:
         tier1_local.extend(["TV TAPAJOS", "GLOBO SANTAREM"])
         tier2_state.extend(["TV LIBERAL", "GLOBO BELEM", "GLOBO PA"])
-    if "TV MIRANTE" in nome_limpo or "SAO LUIS" in nome_limpo or "MARANHAO" in nome_limpo:
+    if "TV MIRANTE" in nome_limpo or "SAO LUIS" in nome_limpo or "MARANHAO" in nome_limpo or "COCAIS" in nome_limpo:
         tier1_local.extend(["TV MIRANTE SAO LUIS", "TV MIRANTE", "GLOBO SAO LUIS", "GLOBO MARANHAO", "GLOBO MA"])
     if "ANHANGUERA" in nome_limpo or "GOIANIA" in nome_limpo or "GOIAS" in nome_limpo:
         tier1_local.extend(["TV ANHANGUERA", "GLOBO ANHANGUERA", "GLOBO GOIANIA", "GLOBO GOIAS", "GLOBO GO"])
@@ -1458,45 +1484,53 @@ def expand_open_tv_tiers(nome_limpo: str, grupo: str) -> tuple[list[str], list[s
         tier1_local.extend(["RPC CURITIBA", "RPC TV", "RPC", "GLOBO RPC", "GLOBO CURITIBA", "GLOBO PARANA", "GLOBO PR"])
     if "NSC" in nome_limpo or "FLORIANOPOLIS" in nome_limpo:
         tier1_local.extend(["NSC TV FLORIANOPOLIS", "NSC TV", "GLOBO NSC", "GLOBO FLORIANOPOLIS", "GLOBO SANTA CATARINA", "GLOBO SC"])
-    if "EPTV" in nome_limpo:
+    if "EPTV" in nome_limpo or "EP CAMPINAS" in nome_limpo or "EPCAMPINAS" in nome_limpo or "EPRIBEIRAO" in nome_limpo or "EPSAO CARLOS" in nome_limpo or "EPSÃO CARLOS" in nome_limpo:
         if "SUL DE MINAS" in nome_limpo or "VARGINHA" in nome_limpo:
             tier1_local.extend(["EPTV SUL DE MINAS", "GLOBO SUL DE MINAS", "GLOBO VARGINHA"])
         elif "CAMPINAS" in nome_limpo:
             tier1_local.extend(["EPTV CAMPINAS", "GLOBO CAMPINAS"])
         elif "RIBEIRAO" in nome_limpo:
-            tier1_local.extend(["EPTV RIBEIRAO", "GLOBO RIBEIRAO PRETO"])
-        elif "CENTRAL" in nome_limpo or "SAO CARLOS" in nome_limpo:
-            tier1_local.extend(["EPTV CENTRAL", "GLOBO SAO CARLOS"])
+            tier1_local.extend(["EPTV RIBEIRAO", "EPTV RIBEIRAO PRETO", "GLOBO RIBEIRAO PRETO"])
+        elif "CENTRAL" in nome_limpo or "SAO CARLOS" in nome_limpo or "SÃO CARLOS" in nome_limpo:
+            tier1_local.extend(["EPTV CENTRAL", "EPTV CAMPINAS", "GLOBO SAO CARLOS"])
         tier2_state.extend(["EPTV CAMPINAS", "EPTV SUL DE MINAS", "EPTV"])
-    if "TV TEM" in nome_limpo or "SJRP" in nome_limpo or "RIO PRETO" in nome_limpo or "MOGI DAS CRUZES" in nome_limpo or "FRONTEIRA" in nome_limpo:
+    if "TV TEM" in nome_limpo or "TEM BAURU" in nome_limpo or "TEM SOROCABA" in nome_limpo or "SJRP" in nome_limpo or "RIO PRETO" in nome_limpo or "MOGI DAS CRUZES" in nome_limpo or "FRONTEIRA" in nome_limpo:
         tier1_local.extend(["TV TEM", "GLOBO BAURU", "GLOBO SOROCABA", "GLOBO SAO JOSE DO RIO PRETO", "GLOBO ITAPETININGA"])
         tier2_state.extend(["GLOBO SP", "GLOBO SAO PAULO"])
-    if "VANGUARDA" in nome_limpo:
+    if "VANGUARDA" in nome_limpo or "VANG " in nome_limpo:
         tier1_local.extend(["TV VANGUARDA", "REDE VANGUARDA", "GLOBO SAO JOSE DOS CAMPOS", "GLOBO TAUBATE"])
+        tier2_state.extend(["GLOBO SP", "GLOBO SAO PAULO"])
+    if "RIO SUL" in nome_limpo:
+        tier1_local.extend(["TV RIO SUL", "GLOBO RIO SUL"])
+        tier2_state.extend(["GLOBO RJ", "GLOBO RIO", "GLOBO RIO DE JANEIRO"])
     if "INTEGRACAO" in nome_limpo or "INTEG " in nome_limpo or "BELOHORIZONTE" in nome_limpo.replace(" ", ""):
         tier1_local.extend(["TV INTEGRACAO", "GLOBO MINAS", "GLOBO BELO HORIZONTE", "GLOBO UBERLANDIA", "GLOBO JUIZ DE FORA", "GLOBO DIVINOPOLIS", "GLOBO ARAXA"])
         tier2_state.extend(["GLOBO MINAS", "GLOBO BELO HORIZONTE", "GLOBO MG"])
-    if "INTER TV" in nome_limpo or "INTERTV" in nome_limpo or "INTER VALE" in nome_limpo:
-        if "CABUGI" in nome_limpo or "RN" in nome_limpo or "NATAL" in nome_limpo:
+    if "INTER TV" in nome_limpo or "INTERTV" in nome_limpo or "INTER VALE" in nome_limpo or "INTER CABUGI" in nome_limpo or "INTER GRANDE MINAS" in nome_limpo or "INTER DOS VALES" in nome_limpo or "INTER ALTO LITORAL" in nome_limpo:
+        if "CABUGI" in nome_limpo or "COSTA BRANCA" in nome_limpo or "RN" in nome_limpo or "NATAL" in nome_limpo:
             tier1_local.extend(["INTER TV CABUGI", "GLOBO NATAL", "GLOBO RN"])
+            tier2_state.extend(["INTER TV CABUGI", "GLOBO NATAL", "GLOBO NORDESTE"])
         elif "MG" in nome_limpo or "MINAS" in nome_limpo or "VALES" in nome_limpo or "MONTES CLAROS" in nome_limpo:
             tier1_local.extend(["INTER TV GRANDE MINAS", "INTER TV DOS VALES"])
-            tier2_state.extend(["GLOBO MINAS", "GLOBO MG"])
+            tier2_state.extend(["INTER TV GRANDE MINAS", "GLOBOBELOHORIZONTE", "GLOBO BELO HORIZONTE", "GLOBO MINAS", "GLOBO MG"])
         else:
             tier1_local.extend(["INTER TV ALTO LITORAL", "INTER TV SERRA MAR", "INTER TV PLANICIE", "INTER TV"])
+            tier2_state.extend(["GLOBO RJ", "GLOBO RIO", "GLOBO RIO DE JANEIRO"])
     if "CABO BRANCO" in nome_limpo or "PARAIBA" in nome_limpo or "JOAO PESSOA" in nome_limpo:
         tier1_local.extend(["TV CABO BRANCO", "TV PARAIBA", "GLOBO JOAO PESSOA", "GLOBO CAMPINA GRANDE", "GLOBO PB"])
     if "SERGIPE" in nome_limpo or "ARACAJU" in nome_limpo:
         tier1_local.extend(["TV SERGIPE", "GLOBO ARACAJU", "GLOBO SERGIPE", "GLOBO SE"])
-    if "CLUBE" in nome_limpo or "PIAUI" in nome_limpo or "TERESINA" in nome_limpo:
-        tier1_local.extend(["TV CLUBE", "GLOBO TERESINA", "GLOBO PIAUI", "GLOBO PI"])
+    if "CLUBE" in nome_limpo or "PIAUI" in nome_limpo or "TERESINA" in nome_limpo or ("ALVORADA" in nome_limpo and "SUL" not in nome_limpo):
+        tier1_local.extend(["TV CLUBE", "TV ALVORADA", "GLOBO TERESINA", "GLOBO PIAUI", "GLOBO PI"])
+        tier2_state.extend(["TV CLUBE", "GLOBO TERESINA", "GLOBO PIAUI"])
     if "MORENA" in nome_limpo or "CAMPO GRANDE" in nome_limpo:
         tier1_local.extend(["TV MORENA", "GLOBO CAMPO GRANDE", "GLOBO MATO GROSSO DO SUL", "GLOBO MS"])
     if "CENTRO AMERICA" in nome_limpo or "CUIABA" in nome_limpo:
         tier1_local.extend(["TV CENTRO AMERICA", "GLOBO CUIABA", "GLOBO MATO GROSSO", "GLOBO MT"])
-    if "BAHIA" in nome_limpo or "SALVADOR" in nome_limpo or "SANTA CRUZ" in nome_limpo or "SUBAE" in nome_limpo or "SUDOESTE" in nome_limpo:
+    if "BAHIA" in nome_limpo or "SALVADOR" in nome_limpo or "SANTA CRUZ" in nome_limpo or "SUBAE" in nome_limpo or "SUDOESTE" in nome_limpo or "SAO FRANCISCO" in nome_limpo or "OESTE" in nome_limpo:
         if network == "GLOBO":
             tier1_local.extend(["TV BAHIA", "REDE BAHIA", "GLOBO SALVADOR", "GLOBO BAHIA", "GLOBO BA"])
+            tier2_state.extend(["TV BAHIA", "GLOBO TV BAHIA", "GLOBO BAHIA"])
         elif network == "SBT":
             tier1_local.extend(["TV ARATU", "SBT BAHIA", "SBT SALVADOR"])
         elif network == "RECORD":
@@ -2045,7 +2079,7 @@ def get_clean_aliases(entry: dict[str, object]) -> list[str]:
     return result
 
 def get_primary_export_ids(entry: dict[str, object]) -> list[str]:
-    """Retorna ESTRITAMENTE 1 único ID por canal, 100% livre de '&', '!' ou '+' para total compatibilidade com Smart TVs (Samsung Tizen / LG webOS)."""
+    """Retorna ESTRITAMENTE 1 único ID por canal, 100% livre de espaços, '&', '!' ou '+' para compatibilidade total com Smart TVs (Samsung Tizen / LG webOS)."""
     raw_name = str(entry.get("name", "")).strip()
     target_id = str(entry.get("id", "")).strip()
     clean_base = strip_qualities_keep_case(raw_name) or target_id
