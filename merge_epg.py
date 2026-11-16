@@ -2,12 +2,12 @@
 """EPG Universal Consolidado — 100% Mérito Dinâmico por Canal e por Período do Dia (Sem Prioridade Fixa)
 - Seleciona a melhor fonte de cada canal puramente por Precisão de Horário (Consenso) + Conteúdo (Richness) + Cobertura.
 - Recorte e Costura por Janelas de 6h (Time-Window Splicing): se a Fonte A é melhor até metade do dia e a Fonte B é
-  better no restante do dia/semana, funde os dois períodos automaticamente sem sobreposição.
+  melhor no restante do dia/semana, funde os dois períodos automaticamente sem sobreposição.
 - Exporta estritamente 1 <channel> por emissora real (elimina a duplicação de exported_ids).
 - Blindado para Smart TVs (Samsung Tizen / LG webOS): zero espaços, '&', '!' ou '+' dentro de channel id / tvg-id.
 - Mantém todos os aliases reais da M3U (incluindo FHD [H265], FHD H265, FHDR, variantes sem '&') em <display-name>.
 - Bloqueia colisões entre canais estrangeiros (PT/US/UK/CO/ARG/MX/EC/PY) e redes brasileiras.
-- Impede falsos positivos regionais (BAND SP vs BAND RJ, RECORD SP vs BAHIA, JI-PARANA vs PARANA, RIO PRETO vs RJ, NSC CENTRO OESTE vs BAHIA).
+- Impede falsos positivos regionais (BAND SP vs BAND RJ, RECORD SP vs BAHIA, JI-PARANA vs PARANA, PARANA vs PARA, RIO PRETO vs RJ, NSC CENTRO OESTE vs BAHIA).
 """
 from __future__ import annotations
 
@@ -44,7 +44,7 @@ except ImportError:
     from epg_utils import digit_signature, normalize_name as original_normalize_name, normalize_source_id
 
 _QUALITY = re.compile(
-    r"\b(SD|HD|FHD|FHDR|HDR|UHD|4K|8K|H\.?264|H\.?265|HEVC|AVC|1080P|1080I|720P|60FPS|BR\d*|SRV\d*|SERVER\s*\d*|OP[CÇ][AÃ]O\s*\d*|ALT|ALTERNATIVO|BACKUP|BKP|LOW|MED|HIGH|PLUS\s*HD|HQ|P)\b[\*\+]*",
+    r"\b(SD|HD|FHD|FHDR|HDR|UHD|4K|8K|H\.?264|H\.?265|HEVC|AVC|1080P|1080I|720P|60FPS|BR\d*|SRV\d*|SERVER\s*\d*|OP[CÇ][AÃ]O\s*\d*|OP\d*|ALT|ALTERNATIVO|BACKUP|BKP|LOW|MED|HIGH|PLUS\s*HD|HQ|P|1X)\b[\*\+]*",
     re.IGNORECASE,
 )
 
@@ -53,7 +53,18 @@ _FOREIGN_COUNTRY_PREFIX_RE = re.compile(
     re.IGNORECASE,
 )
 
-# Mapa de IDs canônicos limpos para canais que possuem '&', '!', '+' ou espaços no nome/ID
+# Canais que NÃO possuem "Canal 2 / Canal 3" reais (números no final como "Globo Rio 1" ou "Band SP 2" são apenas links alternativos na M3U)
+_SINGLE_STREAM_CHANNEL_PREFIXES = (
+    "GLOBO ", "GB ", "SBT ", "RECORD ", "RECORDTV ", "BAND ", "REDETV", "REDE TV",
+    "MULTISHOW", "ANIMAL PLANET", "DISCOVERY", "CARTOON", "NICK", "WARNER", "SONY",
+    "AXN", "TNT", "SPACE", "CINEMAX", "MEGAPIX", "UNIVERSAL", "STUDIO UNIVERSAL",
+    "GNT", "VIVA", "GLOBOPLAY NOVELAS", "OFF", "CANAL OFF", "BIS", "GLOOB",
+    "CURTA", "ARTE 1", "FASHION TV", "TLC", "HGTV", "FOOD NETWORK", "AMC",
+    "FILM & ARTS", "FILM AND ARTS", "LOVE NATURE", "ADULT SWIM", "TOONCAST",
+    "CNN ", "JOVEM PAN", "BAND NEWS", "BANDNEWS", "RECORD NEWS", "GLOBO NEWS", "GLOBONEWS", "SBT NEWS",
+)
+
+# Mapa de IDs canônicos limpos para canais que possuem '&', '!', '+' ou duplicidades históricas no XML
 SMART_TV_SAFE_CANONICAL_IDS: dict[str, str] = {
     "A&E": "ae.br",
     "A E": "ae.br",
@@ -70,6 +81,8 @@ SMART_TV_SAFE_CANONICAL_IDS: dict[str, str] = {
     "DISCOVERY HOME AND HEALTH": "DiscoveryHomeHealth.br",
     "DISCOVERY H&H": "DiscoveryHomeHealth.br",
     "DISCOVERY H H": "DiscoveryHomeHealth.br",
+    "DISC HOME & HEALTH": "DiscoveryHomeHealth.br",
+    "DISC. HOME & HEALTH": "DiscoveryHomeHealth.br",
     "HOME & HEALTH": "DiscoveryHomeHealth.br",
     "FILM&ARTS": "FilmAndArts.br",
     "FILM & ARTS": "FilmAndArts.br",
@@ -84,15 +97,44 @@ SMART_TV_SAFE_CANONICAL_IDS: dict[str, str] = {
     "REDETV! PAMPA": "redetvpampa.br",
     "AGROMAIS": "agromais.br",
     "AGRO+": "agromais.br",
+    "AGRO PLUS": "agromais.br",
     "TRACE BRAZUCA": "tracebrazuca.br",
     "TVE BAHIA": "tvebahia.br",
     "CURTA!": "curta.br",
     "CURTA": "curta.br",
     "LOVE NATURE": "LoveNature.br",
     "LOVENATURE": "LoveNature.br",
+    "LOVE NATURE 4K": "LoveNature.br",
+    "LOVENATURE4K": "LoveNature.br",
     "CNBC BRASIL": "timesbrasil.br",
     "TIMES BRASIL": "timesbrasil.br",
     "TIMES BRASIL CNBC": "timesbrasil.br",
+    "VIVA": "viva.br",
+    "CANAL VIVA": "viva.br",
+    "GLOBOPLAY NOVELAS": "viva.br",
+    "CARTOON NETWORK": "CartoonNetwork.br",
+    "CARTOON": "CartoonNetwork.br",
+    "JOVEM PAN NEWS": "JovemPanNews.br",
+    "JOVEN PAN NEWS": "JovemPanNews.br",
+    "JOVEM PAN": "JovemPanNews.br",
+    "MUSIC BOX BRAZIL": "music.box.brazil",
+    "MUSIC BOX BRASIL": "music.box.brazil",
+    "PRIME BOX BRAZIL": "prime.box.brasil",
+    "PRIME BOX BRASIL": "prime.box.brasil",
+    "TV NOVO TEMPO": "tv.novo.tempo",
+    "NOVO TEMPO": "tv.novo.tempo",
+    "TV PAI ETERNO": "pai.eterno",
+    "PAI ETERNO": "pai.eterno",
+    "BOA VONTADE": "boa.vontade.tv",
+    "BOA VONTADE TV": "boa.vontade.tv",
+    "POLISHOP": "polishop.tv",
+    "POLISHOP TV": "polishop.tv",
+    "USA NETWORK": "usanetwork.br",
+    "USA": "usanetwork.br",
+    "GB USA": "usanetwork.br",
+    "SYFY": "usanetwork.br",
+    "FUTURA": "futura.br",
+    "CANAL FUTURA": "futura.br",
 }
 
 
@@ -123,10 +165,14 @@ def sanitize_xmltv_id(raw_id: str) -> str:
 
 
 def extract_foreign_country_code(text: str) -> str:
-    """Retorna o prefixo de país estrangeiro (ex: PT, US, CO, ARG) ou string vazia se for canal brasileiro/geral."""
+    """Retorna o prefixo ou sufixo de país estrangeiro (ex: PT, US, CO, ARG) ou string vazia se for canal brasileiro/geral."""
     if not text:
         return ""
     s = html.unescape(str(text)).strip().upper()
+    ext_m = re.search(r"\.(PT|US|UK|CO|AR|ARG|MX|EC|PY|UY|CL|PE|ES|DE|FR|IT)$", s)
+    if ext_m:
+        c = ext_m.group(1)
+        return "ARG" if c == "AR" else c
     s = re.sub(r"^[^A-Z0-9]+", "", s)
     if s.startswith(("USA NETWORK", "USA HD", "USA FHD", "GB USA")):
         return ""
@@ -145,8 +191,9 @@ def name_key(value: str) -> str:
     """Chave de comparação: sem acento, sem sufixo .br, sem BR2 grudado e sem qualidade/tags."""
     s = html.unescape(str(value or ""))
     s = re.sub(r"\.(?:br|us|uk|pt|ar|mx|cl|co|pe|latam|int|bt)$", " ", s, flags=re.IGNORECASE)
-    s = re.sub(r"(?<=[A-Za-z0-9])(?:BR\d+|SRV\d+)\b", " ", s, flags=re.IGNORECASE)
-    s = re.sub(r"[¹²³⁴⁵⁶⁷⁸⁹⁰]+", " ", s)
+    s = re.sub(r"(?<=[A-Za-z])(4K|8K|UHD|FHD|FHDR|HD|SD)\b", r" \1", s, flags=re.IGNORECASE)
+    s = re.sub(r"(?<=[A-Za-z0-9])(?:BR\d+|SRV\d+|OP\d+)\b", " ", s, flags=re.IGNORECASE)
+    s = re.sub(r"[¹²³⁴⁵⁶⁷⁸⁹⁰ᴴᴰ]+", " ", s)
     s = unicodedata.normalize("NFKD", s)
     s = "".join(c for c in s if not unicodedata.combining(c)).upper()
     s = re.sub(r"\[\s*(\d+)\s*\]", r" \1 ", s)
@@ -161,13 +208,15 @@ def name_key(value: str) -> str:
 
 
 def extract_significant_digits(text: str) -> list[str]:
-    """Extrai números significativos do nome do canal (ignorando H264, H265, 4K, 8K, 1080p, 720p, 60fps, 24h, BR2)."""
+    """Extrai números significativos do nome do canal (ignorando H264, H265, 4K, 8K, 1080p, 720p, 60fps, 24h, BR2, OP1, A10)."""
     if not text:
         return []
     s = html.unescape(str(text)).upper()
-    s = re.sub(r"\b4DULT\s+SWI[NM]\b", "ADULT SWIM", s)
-    s = re.sub(r"(?<=[A-Z0-9])(?:BR\d+|SRV\d+)\b", " ", s)
-    s = re.sub(r"\b(?:H\.?264|H\.?265|1080[PI]?|720P?|60FPS|4K|8K|24H[S]?|24/7|BR\d+|SRV\d+|SERVER\s*\d+|OP[CÇ][AÃ]O\s*\d+)\b", " ", s)
+    s = re.sub(r"\b4DULT\s+SWI[NM](?:\s+\d+)?\b", "ADULT SWIM", s)
+    s = re.sub(r"\bPIAUI\s+A10\b", "PIAUI", s)
+    s = re.sub(r"(?<=[A-Z])(4K|8K|UHD|FHD|FHDR|HD|SD)\b", r" \1", s)
+    s = re.sub(r"(?<=[A-Z0-9])(?:BR\d+|SRV\d+|OP\d+)\b", " ", s)
+    s = re.sub(r"\b(?:H\.?264|H\.?265|1080[PI]?|720P?|60FPS|4K|8K|24H[S]?|24/7|BR\d+|SRV\d+|SERVER\s*\d+|OP[CÇ][AÃ]O\s*\d+|OP\d+|1X)\b", " ", s)
     s = re.sub(r"[¹²³⁴⁵⁶⁷⁸⁹⁰]+", " ", s)
     return [str(int(d)) for d in re.findall(r"\d+", s)]
 
@@ -178,7 +227,7 @@ def has_conflicting_channel_number(base_channel_name: str, candidate_text: str) 
     cand_digits = extract_significant_digits(candidate_text)
     if base_digits != cand_digits:
         b_up = base_channel_name.upper()
-        if ("PREMIERE" in b_up or "SPORTV" in b_up or "ESPN" in b_up) and (
+        if ("PREMIERE" in b_up or "SPORTV" in b_up or "ESPN" in b_up or "CAZE" in b_up or "GOAT" in b_up) and (
             (not base_digits and cand_digits == ["1"]) or (base_digits == ["1"] and not cand_digits)
         ):
             return False
@@ -193,20 +242,20 @@ _STATE_TOKEN_MAP = {
     "RJ": "RJ", "RIO": "RJ", "RIODEJANEIRO": "RJ", "RIOSUL": "RJ", "SERRAMAR": "RJ", "ALTOLITORAL": "RJ", "PLANICIE": "RJ",
     "MG": "MG", "MINAS": "MG", "BELOHORIZONTE": "MG", "JUIZDEFORA": "MG", "UBERLANDIA": "MG", "UBERABA": "MG", "ARAXA": "MG", "ALTEROSA": "MG", "SULDEMINAS": "MG", "GRANDEMINAS": "MG", "DOSVALES": "MG",
     "RS": "RS", "RIOGRANDEDOSUL": "RS", "PORTOALEGRE": "RS", "POA": "RS", "PELOTAS": "RS", "CAXIAS": "RS", "PASSOFUNDO": "RS", "PAMPA": "RS", "SANTAMARIA": "RS", "BAGE": "RS", "ALVORADADOSUL": "PR",
-    "PR": "PR", "PARANA": "PR", "CURITIBA": "PR", "LONDRINA": "PR", "MARINGA": "PR", "CASCAVEL": "PR", "FOZDOIGUACU": "PR", "PARANAVAI": "PR", "PONTAGROSSA": "PR", "REDEMASSA": "PR",
-    "SC": "SC", "SANTACATARINA": "SC", "FLORIANOPOLIS": "SC", "JOINVILLE": "SC", "BLUMENAU": "SC", "CHAPECO": "SC", "CRICIUMA": "SC", "JOACABA": "SC", "NSC": "SC", "NSCTV": "SC",
-    "BA": "BA", "BAHIA": "BA", "SALVADOR": "BA", "ITAPOAN": "BA", "ARATU": "BA", "SANTACRUZ": "BA", "SUBAE": "BA", "SUDOESTE": "BA", "SAOFRANCISCO": "BA", "JUAZEIRO": "BA", "TVOESTE": "BA",
+    "PR": "PR", "PARANA": "PR", "CURITIBA": "PR", "LONDRINA": "PR", "MARINGA": "PR", "CASCAVEL": "PR", "FOZDOIGUACU": "PR", "PARANAVAI": "PR", "PONTAGROSSA": "PR", "REDEMASSA": "PR", "TAROBA": "PR",
+    "SC": "SC", "SANTACATARINA": "SC", "FLORIANOPOLIS": "SC", "JOINVILLE": "SC", "BLUMENAU": "SC", "CHAPECO": "SC", "CRICIUMA": "SC", "JOACABA": "SC", "NSC": "SC", "NSCTV": "SC", "TVBV": "SC",
+    "BA": "BA", "BAHIA": "BA", "SALVADOR": "BA", "ITAPOAN": "BA", "ARATU": "BA", "SANTACRUZ": "BA", "SUBAE": "BA", "SUDOESTE": "BA", "SAOFRANCISCO": "BA", "JUAZEIRO": "BA", "TVOESTE": "BA", "CABRALIA": "BA",
     "PE": "PE", "PERNAMBUCO": "PE", "RECIFE": "PE", "ASABRANCA": "PE", "GRANDERIO": "PE", "GUARARAPES": "PE", "PETROLINA": "PE", "CARUARU": "PE",
     "CE": "CE", "CEARA": "CE", "FORTALEZA": "CE", "VERDESMARES": "CE", "JANGADEIRO": "CE", "CARIRI": "CE",
     "GO": "GO", "GOIAS": "GO", "GOIANIA": "GO", "ANHANGUERA": "GO", "SERRADOURADA": "GO", "RIOVERDE": "GO", "ANAPOLIS": "GO", "CATALAO": "GO", "ITUMBIARA": "GO", "JATAI": "GO", "LUZIANIA": "GO", "PORANGATU": "GO",
-    "DF": "DF", "BRASILIA": "DF",
+    "DF": "DF", "BRASILIA": "DF", "BSB": "DF",
     "ES": "ES", "ESPIRITOSANTO": "ES", "VITORIA": "ES", "GAZETASUL": "ES",
-    "PA": "PA", "PARA": "PA", "BELEM": "PA", "LIBERAL": "PA", "TAPAJOS": "PA",
-    "AM": "AM", "AMAZONAS": "AM", "MANAUS": "AM",
+    "PA": "PA", "PARA": "PA", "BELEM": "PA", "LIBERAL": "PA", "TAPAJOS": "PA", "ALTAMIRA": "PA", "REDENCAO": "PA", "PARAGOMINAS": "PA", "PARAUAPEBAS": "PA", "CASTANHAL": "PA", "MARABA": "PA",
+    "AM": "AM", "AMAZONAS": "AM", "MANAUS": "AM", "PARINTINS": "AM", "ITACOATIARA": "AM", "MANACAPURU": "AM", "COARI": "AM", "HUMAITA": "AM",
     "MA": "MA", "MARANHAO": "MA", "SAOLUIS": "MA", "SAOLUIZ": "MA", "MIRANTE": "MA", "DIFUSORA": "MA", "BALSAS": "MA", "IMPERATRIZ": "MA", "COCAIS": "MA",
-    "MT": "MT", "MATOGROSSO": "MT", "CUIABA": "MT", "CENTROAMERICA": "MT", "TANGARADASERRA": "MT",
+    "MT": "MT", "MATOGROSSO": "MT", "CUIABA": "MT", "CENTROAMERICA": "MT", "TANGARADASERRA": "MT", "VILAREAL": "MT",
     "MS": "MS", "MATOGROSSODOSUL": "MS", "CAMPOGRANDE": "MS", "MORENA": "MS", "CORUMBA": "MS", "PONTAPORA": "MS",
-    "PB": "PB", "PARAIBA": "PB", "JOAOPESSOA": "PB", "CABOBRANCO": "PB", "TAMBAU": "PB", "CORREIO": "PB", "MANAIRA": "PB",
+    "PB": "PB", "PARAIBA": "PB", "JOAOPESSOA": "PB", "CABOBRANCO": "PB", "TAMBAU": "PB", "CORREIO": "PB", "MANAIRA": "PB", "ARAPUAN": "PB",
     "RN": "RN", "RIOGRANDEDONORTE": "RN", "NATAL": "RN", "CABUGI": "RN", "TROPICAL": "RN", "COSTABRANCA": "RN",
     "AL": "AL", "ALAGOAS": "AL", "MACEIO": "AL", "PONTAVERDE": "AL",
     "SE": "SE", "SERGIPE": "SE", "ARACAJU": "SE", "ATALAIA": "SE",
@@ -220,13 +269,13 @@ _STATE_TOKEN_MAP = {
 
 
 def extract_state_ufs(text: str) -> set[str]:
-    """Identifica a(s) UF(s) explícita(s) de um nome de canal regional para evitar mistura de estados (ex: SP vs RJ/BA/PR, JI-PARANA vs PR, RIO PRETO vs RJ, NSC vs BA)."""
+    """Identifica a(s) UF(s) explícita(s) de um nome de canal regional para evitar mistura de estados."""
     nk = name_key(text)
     words = nk.split()
     joined = "".join(words)
     ufs: set[str] = set()
 
-    if "NSCTV" in joined or "NSC" in words:
+    if "NSCTV" in joined or "NSC" in words or "TVBV" in words:
         ufs.add("SC")
     if "RIOPRETO" in joined or "SJRIOPRETO" in joined:
         ufs.add("SP")
@@ -550,8 +599,8 @@ CHANNEL_SYNONYMS = {
     "HOME & HEALTH": ["DISCOVERY HOME & HEALTH", "DISCOVERY HOME AND HEALTH", "DiscoveryHomeHealth.br"],
     "HOME AND HEALTH": ["DISCOVERY HOME & HEALTH", "DISCOVERY HOME AND HEALTH", "DiscoveryHomeHealth.br"],
     "DISCOVERY HOME & HEALTH": ["HOME & HEALTH", "HOME AND HEALTH", "DiscoveryHomeHealth.br"],
-    "LOVE NATURE": ["LOVENATURE", "LOVE NATURE 4K", "LOVENATURE 4K", "LOVE NATURE HD", "LoveNature.br", "lovenature.br"],
-    "LOVENATURE": ["LOVE NATURE", "LOVE NATURE 4K", "LOVENATURE 4K", "LOVE NATURE HD", "LoveNature.br", "lovenature.br"],
+    "LOVE NATURE": ["LOVENATURE", "LOVE NATURE 4K", "LOVENATURE 4K", "LOVENATURE4K", "LOVE NATURE HD", "LoveNature.br", "LoveNature4K.br", "lovenature.br"],
+    "LOVENATURE": ["LOVE NATURE", "LOVE NATURE 4K", "LOVENATURE 4K", "LOVENATURE4K", "LOVE NATURE HD", "LoveNature.br", "LoveNature4K.br", "lovenature.br"],
     "CNBC BRASIL": ["TIMES BRASIL", "TIMES BRASIL CNBC", "TIMES BRASIL LICENCIADO EXCLUSIVO CNBC", "CNBC", "CNBC BRASIL", "timesbrasil.br"],
     "CNBC": ["TIMES BRASIL", "TIMES BRASIL CNBC", "TIMES BRASIL LICENCIADO EXCLUSIVO CNBC", "CNBC BRASIL", "timesbrasil.br"],
     "TIMES BRASIL": ["TIMES BRASIL CNBC", "TIMES BRASIL LICENCIADO EXCLUSIVO CNBC", "CNBC", "CNBC BRASIL", "timesbrasil.br"],
@@ -563,6 +612,14 @@ CHANNEL_SYNONYMS = {
     "DISNEY PLUS 5": ["DISNEY PLUS ESPN 5", "DISNEY+ 5", "DISNEY+ ESPN 5"],
     "DISNEY PLUS 6": ["DISNEY PLUS ESPN 6", "DISNEY+ 6", "DISNEY+ ESPN 6"],
     "DISNEY PLUS 7": ["DISNEY PLUS ESPN 7", "DISNEY+ 7", "DISNEY+ ESPN 7"],
+    "GOAT": ["CANAL GOAT", "GOAT BR", "GOAT TV"],
+    "CAZE TV": ["CAZETV", "CAZE TV 1", "CAZETV 1"],
+    "CAZE TV 1": ["CAZETV", "CAZE TV"],
+    "UFC FIGHT PASS": ["UFC TV", "UFC", "UFC FIGHT PASS 1"],
+    "NBA TV": ["NBA", "NBATV"],
+    "FORMULA 1 TV": ["F1 TV", "FORMULA 1", "F1TV"],
+    "TV ASSEMBLEIA": ["ASSEMBLEIA LEGISLATIVA", "TV ASSEMBLEIA LEGISLATIVA"],
+    "RECORD PIAUI": ["RECORDTV PIAUI", "TV ANTENA 10", "RECORD ANTENA 10", "RECORD TV ANTENA 10"],
     "RBS CAXIAS": ["RBS CAXIAS DO SUL", "RBS TV CAXIAS DO SUL", "GLOBO RBS TV POA"],
     "RBS PASSO FUNDO GLOBO": ["RBS TV PASSO FUNDO", "GLOBO RBS PASSO FUNDO", "GLOBO RBS TV POA"],
     "TV FRONTEIRA": ["TV FRONTEIRA P PRUDENTE", "GLOBO FRONTEIRA PAULISTA", "GLOBO TV FRONTEIRA", "GLOBO SP"],
@@ -598,8 +655,8 @@ CHANNEL_SYNONYMS = {
     "USA NETWORK": ["USA", "SYFY"],
     "SYFY": ["USA", "USA NETWORK"],
     "TNT SERIES": ["TNT SERIES", "TNT SÉRIES", "TNT SERIE"],
-    "AGROMAIS": ["AGRO+", "AGRO MAIS"],
-    "AGRO+": ["AGROMAIS", "AGRO MAIS"],
+    "AGROMAIS": ["AGRO+", "AGRO MAIS", "AGRO PLUS"],
+    "AGRO+": ["AGROMAIS", "AGRO MAIS", "AGRO PLUS"],
     "REDE TV": ["REDETV!", "REDETV", "REDE TV!"],
     "REDETV": ["REDE TV", "REDETV!", "REDE TV!"],
     "TV GAZETA SP": ["TV GAZETA", "GAZETA", "REDE GAZETA"],
@@ -616,6 +673,8 @@ CHANNEL_SYNONYMS = {
     "TRAVEL BOX BRASIL": ["TRAVEL BOX BRAZIL"],
     "MUSIC BOX BRAZIL": ["MUSIC BOX BRASIL"],
     "MUSIC BOX BRASIL": ["MUSIC BOX BRAZIL"],
+    "CARTOON NETWORK": ["CARTOON", "CartoonNetwork.br"],
+    "CARTOON": ["CARTOON NETWORK", "CartoonNetwork.br"],
     "CARTOONITO": ["CARTOONITO", "BOOMERANG"],
     "SPORTTV": ["SPORTV", "SPORTV 1"],
     "SPORTV": ["SPORTV", "SPORTV 1"],
@@ -647,6 +706,10 @@ CHANNEL_SYNONYMS = {
     "PAI ETERNO": ["TV PAI ETERNO"],
     "TV NOVO TEMPO": ["NOVO TEMPO"],
     "NOVO TEMPO": ["TV NOVO TEMPO"],
+    "BOA VONTADE TV": ["BOA VONTADE"],
+    "BOA VONTADE": ["BOA VONTADE TV"],
+    "POLISHOP": ["POLISHOP TV"],
+    "POLISHOP TV": ["POLISHOP"],
     "TV EVANGELIZAR": ["EVANGELIZAR", "REDE EVANGELIZAR"],
     "TV DIARIO": ["TV DIARIO FORTALEZA", "TV DIARIO CE"],
     "REDE CNT": ["CNT", "TV CNT"],
@@ -700,33 +763,39 @@ POISONED_OPEN_TV_IDS = {
 }
 
 def strip_qualities_keep_case(name: str) -> str:
-    """Remove apenas tags de qualidade/codec (FHD, FHDR, [H265], 4K, BR2 grudado, etc.), preservando numeração de canal como [2]."""
+    """Remove tags de qualidade/codec (incluindo 4K/8K/HD grudados no nome e opções OP1/OP2), preservando numeração real de canais."""
     if not name: return ""
     s = html.unescape(name)
+    s = re.sub(r'(?<=[A-Za-z])(4K|8K|UHD|FHD|FHDR|HD|SD)\b', r' \1', s, flags=re.IGNORECASE)
     s = re.sub(
-        r'\[\s*(?:SD|HD|FHD|FHDR|UHD|4K|8K|H\.?264|H\.?265|HEVC|AVC|HDR\+?|BR\d*|SRV\d*|SERVER\s*\d*|OP[CÇ][AÃ]O\s*\d*|BACKUP|BKP|ALT|ALTERNATIVO|1080P|720P|60FPS|DUAL|LEG|DUB|P)\s*\]',
+        r'\[\s*(?:SD|HD|FHD|FHDR|UHD|4K|8K|H\.?264|H\.?265|HEVC|AVC|HDR\+?|BR\d*|SRV\d*|SERVER\s*\d*|OP[CÇ][AÃ]O\s*\d*|OP\d*|BACKUP|BKP|ALT|ALTERNATIVO|1080P|720P|60FPS|DUAL|LEG|DUB|P)\s*\]',
         ' ',
         s,
         flags=re.IGNORECASE,
     )
     s = re.sub(r'\|.*?\|', ' ', s)
     s = re.sub(
-        r'\(\s*(?:SD|HD|FHD|FHDR|UHD|4K|8K|H\.?264|H\.?265|HEVC|AVC|HDR\+?|BR\d*|SRV\d*|SERVER\s*\d*|OP[CÇ][AÃ]O\s*\d*|BACKUP|BKP|ALT|ALTERNATIVO|1080P|720P|60FPS|DUAL|LEG|DUB|EVENTOS?|PPV)\s*\)',
+        r'\(\s*(?:SD|HD|FHD|FHDR|UHD|4K|8K|H\.?264|H\.?265|HEVC|AVC|HDR\+?|BR\d*|SRV\d*|SERVER\s*\d*|OP[CÇ][AÃ]O\s*\d*|OP\d*|BACKUP|BKP|ALT|ALTERNATIVO|1080P|720P|60FPS|DUAL|LEG|DUB|EVENTOS?|PPV)\s*\)',
         ' ',
         s,
         flags=re.IGNORECASE,
     )
     s = re.sub(r'[()]', ' ', s)
-    s = re.sub(r'[\¹\²\³\⁴\⁵\⁶\⁷\⁸\⁹\⁰\~]', ' ', s)
-    s = re.sub(r'(?<=[A-Za-z0-9])(?:BR\d+|SRV\d+)\b', ' ', s, flags=re.IGNORECASE)
-    tags = r'\b(SD|HD|FHD|FHDR|UHD|4K|8K|H\.?264|H\.?265|HEVC|AVC|HDR\+?|LEG|LEGENDADO|DUB|DUBLADO|DUAL|HQ|VIP|VOD|24H[S]?|24/7|1080P|1080I|720P|60FPS|PPV|EVENTOS?|ALTERNATIVO|ALT|BACKUP|BKP|BR\d+|SRV\d+|SERVER\s*\d+|OP[CÇ][AÃ]O\s*\d+)\b[\*\²\³\¹\⁴\+]*'
+    s = re.sub(r'[\¹\²\³\⁴\⁵\⁶\⁷\⁸\⁹\⁰\~ᴴᴰ]', ' ', s)
+    s = re.sub(r'(?<=[A-Za-z0-9])(?:BR\d+|SRV\d+|OP\d+)\b', ' ', s, flags=re.IGNORECASE)
+    tags = r'\b(SD|HD|FHD|FHDR|UHD|4K|8K|H\.?264|H\.?265|HEVC|AVC|HDR\+?|LEG|LEGENDADO|DUB|DUBLADO|DUAL|HQ|VIP|VOD|24H[S]?|24/7|1080P|1080I|720P|60FPS|PPV|EVENTOS?|ALTERNATIVO|ALT|BACKUP|BKP|BR\d+|SRV\d+|SERVER\s*\d+|OP[CÇ][AÃ]O\s*\d+|OP\d+|1X)\b[\*\²\³\¹\⁴\+]*'
     s = re.sub(tags, ' ', s, flags=re.IGNORECASE)
     s = re.sub(r'\bH\s+D\b', ' ', s, flags=re.IGNORECASE)
     s = re.sub(r'\[\s*(\d+)\s*\]', r' \1 ', s)
     s = re.sub(r'\[.*?\]', ' ', s)
     s = re.sub(r'[*=_\-–—/\\]', ' ', s)
     s = re.sub(r'\.\s*$', '', s)
-    return ' '.join(s.split()).strip()
+    cleaned = ' '.join(s.split()).strip()
+
+    up_cl = cleaned.upper()
+    if up_cl.startswith(_SINGLE_STREAM_CHANNEL_PREFIXES) and not up_cl.startswith(("ARTE 1",)):
+        cleaned = re.sub(r'\s+[123]$', '', cleaned)
+    return cleaned
 
 def normalizar_canal(nome: str) -> str:
     if not nome: return ""
@@ -738,10 +807,30 @@ def normalizar_canal(nome: str) -> str:
         nome = re.sub(r'^E!$', 'E!', nome.strip(), flags=re.IGNORECASE)
         nome = re.sub(r'\b4DULT\s+SWI[NM]\b', 'ADULT SWIM', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bADULT\s+SWIN\b', 'ADULT SWIM', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bADULT\s+SWIM\s+\d+\b', 'ADULT SWIM', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bZOOMOOO\b', 'ZOOMOO', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bWOHOO\b', 'WOOHOO', nome, flags=re.IGNORECASE)
-        nome = re.sub(r'\bJP NEWS\b', 'JOVEM PAN NEWS', nome, flags=re.IGNORECASE)
-        nome = re.sub(r'\bJOVEM PAN\b(?! NEWS)', 'JOVEM PAN NEWS', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'^CANAL\s+WOOHOO$', 'WOOHOO', nome.strip(), flags=re.IGNORECASE)
+        nome = re.sub(r'\bJOVEN\s+PAN\b', 'JOVEM PAN', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bJP\s+NEWS\b', 'JOVEM PAN NEWS', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bJOVEM\s+PAN\b(?!\s+NEWS)', 'JOVEM PAN NEWS', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bMUSIC\s+BOX\s+BRASIL\b', 'MUSIC BOX BRAZIL', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bPRIME\s+BOX\s+BRASIL\b', 'PRIME BOX BRAZIL', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bTRAVEL\s+BOX\s+BRASIL\b', 'TRAVEL BOX BRAZIL', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'^NOVO\s+TEMPO$', 'TV NOVO TEMPO', nome.strip(), flags=re.IGNORECASE)
+        nome = re.sub(r'^PAI\s+ETERNO$', 'TV PAI ETERNO', nome.strip(), flags=re.IGNORECASE)
+        nome = re.sub(r'^BOA\s+VONTADE$', 'BOA VONTADE TV', nome.strip(), flags=re.IGNORECASE)
+        nome = re.sub(r'^POLISHOP\s+TV$', 'POLISHOP', nome.strip(), flags=re.IGNORECASE)
+        nome = re.sub(r'^CARTOON$', 'CARTOON NETWORK', nome.strip(), flags=re.IGNORECASE)
+        nome = re.sub(r'\bGLOBOPLAY\s+NOVELAS\b', 'VIVA', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bCANAL\s+VIVA\b', 'VIVA', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bPIAUAI\b', 'PIAUI', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bPIAUI\s+A10\b', 'PIAUI', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bALTAMRIA\b', 'ALTAMIRA', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bRENDENCAO\b', 'REDENCAO', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bARQUEMES\b', 'ARIQUEMES', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bITACOTIARA\b', 'ITACOATIARA', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bCAZ[EÉ]\s*TV\b', 'CAZE TV', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bFOX SPORTS 2\b', 'ESPN 5', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bFOX SPORTS\b', 'ESPN 4', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bESPN EXTRA\b', 'ESPN 6', nome, flags=re.IGNORECASE)
@@ -757,10 +846,10 @@ def normalizar_canal(nome: str) -> str:
         nome = re.sub(r'\bHBO\s*\+\b', 'HBO PLUS', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bH2\b', 'HISTORY 2', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bHISTORY CHANNEL\b', 'HISTORY', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bDISC(?:OVERY)?\.?\s*HOME\s*(?:&|AND)?\s*HEALT[H]?\b', 'DISCOVERY HOME & HEALTH', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bDISCOVERY H&H\b', 'DISCOVERY HOME & HEALTH', nome, flags=re.IGNORECASE)
         nome = re.sub(r'^HOME\s*(?:&|AND)\s*HEALTH$', 'DISCOVERY HOME & HEALTH', nome.strip(), flags=re.IGNORECASE)
-        nome = re.sub(r'\bDISCOVERY HOME\s*(?:&|AND)?\s*HEALT[H]?\b', 'DISCOVERY HOME & HEALTH', nome, flags=re.IGNORECASE)
-        nome = re.sub(r'\bDISCOVERY TLC\b', 'TLC', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bDISCOVERY TLC(?:\s+\d+)?\b', 'TLC', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bID\s+INVESTIGA[CÇ][AÃ]O DISCOVERY\b', 'INVESTIGACAO DISCOVERY', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bDISCOVERY ID\b', 'INVESTIGACAO DISCOVERY', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bFOX PREMIUM\b', 'STAR PREMIUM', nome, flags=re.IGNORECASE)
@@ -773,6 +862,7 @@ def normalizar_canal(nome: str) -> str:
         nome = re.sub(r'\bTC\s+FUN\b', 'TELECINE FUN', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bTC\s+CULT\b', 'TELECINE CULT', nome, flags=re.IGNORECASE)
         nome = re.sub(r'^GB\s+USA$', 'USA NETWORK', nome.strip(), flags=re.IGNORECASE)
+        nome = re.sub(r'^USA$', 'USA NETWORK', nome.strip(), flags=re.IGNORECASE)
         nome = re.sub(r'^GB\b', 'GLOBO', nome, flags=re.IGNORECASE)
         nome = re.sub(r'^RECORDTV\b', 'RECORD', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bRECORD\s+TV\b', 'RECORD', nome, flags=re.IGNORECASE)
@@ -780,10 +870,14 @@ def normalizar_canal(nome: str) -> str:
         nome = re.sub(r'\bBAND\s+TV\b', 'BAND', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bREDE\s+TV!?\b', 'REDETV', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bAGRO\s*\+\b', 'AGROMAIS', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bAGRO\s+PLUS\b', 'AGROMAIS', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bSPORTTV\b', 'SPORTV', nome, flags=re.IGNORECASE)
-        nome = re.sub(r'\bLOVENATURE\b', 'LOVE NATURE', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bLOVENATURE(?:4K)?\b', 'LOVE NATURE', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bLOVE\s+NATURE\s*4K\b', 'LOVE NATURE', nome, flags=re.IGNORECASE)
 
     nome_limpo = ' '.join(nome.split()).strip().upper()
+    if nome_limpo.startswith(_SINGLE_STREAM_CHANNEL_PREFIXES) and not nome_limpo.startswith(("ARTE 1",)):
+        nome_limpo = re.sub(r'\s+[123]$', '', nome_limpo)
     return nome_limpo if len(nome_limpo) >= 1 else original_normalize_name(original_nome)
 
 def normalize_name(value: str) -> str:
@@ -1172,8 +1266,6 @@ def read_source_from_file(spec: SourceSpec, file_path: Path) -> EpgSource:
         if tag == "channel":
             channel_id = child.attrib.get("id", "").strip()
             if not channel_id: continue
-            if re.search(r'\.(us|uk|ar|mx|cl|co|pe|es|fr|de|it)$', channel_id, flags=re.IGNORECASE):
-                continue
             channels[channel_id] = child
             display_names = [(node.text or "").strip() for node in child if local_tag(node) == "display-name" and (node.text or "").strip()]
             names[channel_id] = display_names
@@ -1188,6 +1280,11 @@ def read_source_from_file(spec: SourceSpec, file_path: Path) -> EpgSource:
                 norm_candidates.append(normalized)
                 exact_index[normalized].add(channel_id)
                 fuzzy_index[digit_signature(normalized)][normalized].add(channel_id)
+                if "LOVENATURE" in normalized:
+                    clean_ln = normalized.replace("4K", "").replace("4", "")
+                    if clean_ln:
+                        exact_index[clean_ln].add(channel_id)
+                        fuzzy_index[()][clean_ln].add(channel_id)
             normalized_names[channel_id] = norm_candidates
             normalized_id = normalize_source_id(channel_id)
             if normalized_id: normalized_id_index[normalized_id].add(channel_id)
@@ -1319,6 +1416,8 @@ def _fuzzy_incompatible(alias: str, candidate: str) -> bool:
     if alias == candidate:
         return False
     if _is_foreign_prefix(alias) != _is_foreign_prefix(candidate):
+        return True
+    if ("PARANA" in alias) != ("PARANA" in candidate):
         return True
     if ("SPORT TV" in alias or "SPORTTV" in alias or "PTSPORT" in alias) and ("SPORTV" in candidate and "SPORT TV" not in candidate):
         return True
@@ -1550,8 +1649,9 @@ def expand_open_tv_tiers(nome_limpo: str, grupo: str) -> tuple[list[str], list[s
         tier1_local.extend(["TV JANGADEIRO", "SBT FORTALEZA", "SBT CEARA"])
     if "ALTEROSA" in nome_limpo:
         tier1_local.extend(["TV ALTEROSA", "SBT MINAS", "SBT BELO HORIZONTE", "SBT MG"])
-    if "REDE MASSA" in nome_limpo:
-        tier1_local.extend(["REDE MASSA", "SBT CURITIBA", "SBT PARANA", "SBT PR"])
+    if "REDE MASSA" in nome_limpo or (network == "SBT" and (" PR" in nome_limpo or "PARANA" in nome_limpo)):
+        tier1_local.extend(["REDE MASSA", "SBT REDE MASSA", "SBT CURITIBA", "SBT PARANA", "SBT PR"])
+        tier2_state.extend(["REDE MASSA", "SBT REDE MASSA", "SBT CURITIBA"])
     if "TV JORNAL" in nome_limpo or (network == "SBT" and re.search(r"\bJORNAL\b", nome_limpo)):
         tier1_local.extend(["TV JORNAL", "SBT RECIFE", "SBT PERNAMBUCO", "SBT PE"])
 
@@ -1614,7 +1714,11 @@ def aliases_tiers_for(entry: dict[str, object]) -> list[list[str]]:
         add_to(tier1, nome_com_grupo)
         add_to(tier1, nome_limpo)
 
-        if not foreign_code:
+        if foreign_code:
+            stripped_foreign = re.sub(rf'^{foreign_code}\s+', '', nome_limpo, flags=re.IGNORECASE).strip()
+            if stripped_foreign and stripped_foreign != nome_limpo:
+                add_to(tier1, stripped_foreign, allow_national_fallback=True)
+        else:
             for syn in CHANNEL_SYNONYMS.get(nome_limpo, []):
                 add_to(tier1, syn)
 
@@ -2066,6 +2170,8 @@ def get_clean_aliases(entry: dict[str, object]) -> list[str]:
 
     for syn in CHANNEL_SYNONYMS.get(norm_clean, []):
         add_alias(syn)
+        for suf in ("FHD", "HD", "SD", "4K"):
+            add_alias(f"{syn} {suf}")
 
     for a in entry.get("aliases", []) or []:
         a_str = str(a).strip()
@@ -2636,9 +2742,13 @@ def main() -> None:
             return True
         if re.match(r"^(?:24\s*H|\d{4}[A-Z])", u):
             return True
-        if re.search(r"\bS\d{1,3}\s*E\d{1,3}\b|\bT\d{1,3}\s*EP?\d{1,3}\b|\b24HS?\b|^24\s*H\b", u):
+        if re.search(r"\bS\d{1,3}\s*E\d{1,3}\b|\bT\d{1,3}\s*EP?\d{1,3}\b|24H[S]?\b|^24\s*H\b", u):
             return True
-        if any(bad in u for bad in ("LIVE QUARENTENA", "A FAZENDA CAMERA", "ATUALIZACAO DE CONTEUDO", "ATUALIZAÇÃO DE CONTEÚDO")):
+        if re.match(r"^(?:CINE\s+(?!CANAL|BRASIL)|PROGRAMA\s+|LIVE\s+|FILMES\s+|ESPECIAL\s+VIAGENS)", u):
+            return True
+        if re.search(r"\bLIVE\b", u) and not any(k in u for k in ("NEWS", "ABC", "CBS", "NBC", "FOX", "CNN", "BBC", "SPORTS")):
+            return True
+        if any(bad in u for bad in ("LIVE QUARENTENA", "A FAZENDA CAMERA", "ATUALIZACAO DE CONTEUDO", "ATUALIZAÇÃO DE CONTEÚDO", "GUIA DE CANAIS", "JOGOS DO DIA")):
             return True
         return False
 
