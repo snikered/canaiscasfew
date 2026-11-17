@@ -5,7 +5,7 @@
 - Gera 'xtream_map_X.json' com '__upstream_host__' e os TVG-IDs de alta precisão para o Cloudflare Worker.
 - Gera 'canais_X.m3u' e 'lista_X.m3u' (ambas enxutas, apenas com os canais ao vivo calibrados, < 1 MB).
 - Blindado para Smart TVs (Samsung Tizen / LG webOS): bloqueia '&', '!' ou '+' em tvg-id (A&E -> ae.br, E! -> eentertainment.br, BM&C -> bmcnews.br).
-- Blindado contra colisão de numeração (HBO vs HBO 2), suporte total a FHD [H265] e canais de 1 letra (E!).
+- Alinhado 100% com o merge_epg.py: respeita travas de país (PT/US/ARG/CO/MX), UFs estaduais e numeração de canais.
 """
 from __future__ import annotations
 
@@ -30,8 +30,10 @@ except ImportError:
     cloudscraper = None
 
 from merge_epg import (
+    extract_foreign_country_code,
     extract_significant_digits,
     has_conflicting_channel_number,
+    has_conflicting_region,
     is_smart_tv_safe_id,
     name_key,
     normalizar_canal,
@@ -63,14 +65,14 @@ ADULT_FILTER_RE = re.compile(
     re.IGNORECASE,
 )
 
-# Canais informativos/24h que NUNCA devem receber tvg-id para não puxarem guia errado
+# Canais informativos/24h/eventos sem guia fixo que NUNCA devem receber tvg-id para não puxarem guia errado
 _RE_NO_EPG_CHANNEL = re.compile(
-    r"(^24H|\b24\s*H(?:S|ORAS)?\b|JOGOS\s+DO\s+DIA|ATUALIZA[CÇ][AÃ]O\s+DE\s+CONTE[UÚ]DO|"
-    r"GUIA\s+DE\s+CANAIS|^PROGRAMA\s*-\s*|^ESPECIAL\s*-\s*)",
+    r"(^24H|\b24\s*H(?:S|ORAS)?\b|\b24/7\b|JOGOS\s+DO\s+DIA|ATUALIZA[CÇ][AÃ]O\s+DE\s+CONTE[UÚ]DO|"
+    r"GUIA\s+DE\s+CANAIS|^PROGRAMA\s*-\s*|^ESPECIAL\s*-\s*|^CINE\s+(?!CANAL|BRASIL)|^LIVE\s+)",
     re.IGNORECASE,
 )
 
-# Sinônimos diretos: Nome limpo na lista -> Lista de candidatos de alta precisão no EPG (IDs limpos sem '&', '!' ou '+' na frente)
+# Sinônimos diretos alinhados com os IDs reais gerados no epg.xml.gz
 CHANNEL_SYNONYMS: dict[str, list[str]] = {
     "E": ["eentertainment.br", "e.br", "E Entertainment", "E! Entertainment", "E!"],
     "E!": ["eentertainment.br", "e.br", "E Entertainment", "E! Entertainment", "E!"],
@@ -82,97 +84,129 @@ CHANNEL_SYNONYMS: dict[str, list[str]] = {
     "FILM ARTS": ["FilmAndArts.br", "FilmAndArts.mx", "FILM AND ARTS", "FILM&ARTS"],
     "FILM AND ARTS": ["FilmAndArts.br", "FilmAndArts.mx", "FILM AND ARTS", "FILM&ARTS"],
     "FAST FUNBOX": ["FastAndFunBox.br", "FAST AND FUNBOX", "FAST & FUNBOX"],
-    "TVE": ["TVE Bahia", "TVE BAHIA", "tve.bahia.br", "TV BRASIL", "tvbrasil.br"],
+    "TVE": ["tve.br", "tvescola.br", "TVE", "TVE RS"],
+    "TVE RS": ["tve.br", "tvescola.br", "TVE RS", "TVE"],
+    "TVE BAHIA": ["tvebahia.br", "TVE BAHIA", "TVE Bahia"],
     "HBO 2": ["HBO2.br", "hbo2.br", "HBO 2", "HBO2"],
-    "HBO": ["HBO.br", "hbo.br", "HBO"],
-    "HBO PLUS": ["HBOPlusBrasil.br", "HBOPlus.br", "hboplusbrasil.br", "HBO Plus"],
-    "HBO FAMILY": ["HBOFamily.br", "HBO Family"],
-    "HBO SIGNATURE": ["HBOSignature.br", "HBO Signature"],
-    "HBO MUNDI": ["HBOMundi.br", "HBO Mundi"],
-    "HBO POP": ["HBOPop.br", "HBO Pop"],
-    "HBO XTREME": ["HBOXtreme.br", "HBO Xtreme"],
-    "DISCOVERY H H": ["DiscoveryHomeHealth.br", "discoveryhomehealth.br", "Discovery Home and Health", "Discovery Home & Health"],
-    "DISCOVERY HOME HEALTH": ["DiscoveryHomeHealth.br", "discoveryhomehealth.br", "Discovery Home and Health", "Discovery Home & Health"],
-    "HOME HEALTH": ["DiscoveryHomeHealth.br", "discoveryhomehealth.br", "Discovery Home and Health", "Discovery Home & Health"],
+    "HBO": ["hbo.br", "HBO.br", "HBO"],
+    "HBO PLUS": ["HBOPlusBrasil.br", "hbo.plus.br", "HBOPlus.br", "HBO Plus"],
+    "HBO FAMILY": ["HBOFamily.br", "hbo.family.br", "HBO Family"],
+    "HBO SIGNATURE": ["HBOSignature.br", "hbo.signature.br", "HBO Signature"],
+    "HBO MUNDI": ["HBOMundi.br", "hbo.mundi.br", "HBO Mundi", "MAX"],
+    "MAX": ["HBOMundi.br", "HBO Mundi"],
+    "HBO POP": ["HBOPop.br", "hbo.pop.br", "HBO Pop"],
+    "HBO XTREME": ["HBOXtreme.br", "hbo.xtreme.br", "HBO Xtreme"],
+    "DISCOVERY H H": ["DiscoveryHomeHealth.br", "discovery.home.and.health.br", "Discovery Home and Health", "Discovery Home & Health"],
+    "DISCOVERY HOME HEALTH": ["DiscoveryHomeHealth.br", "discovery.home.and.health.br", "Discovery Home and Health", "Discovery Home & Health"],
+    "HOME HEALTH": ["DiscoveryHomeHealth.br", "discovery.home.and.health.br", "Discovery Home and Health", "Discovery Home & Health"],
     "UNIVERSAL STUDIO": ["Studiouniversal.br", "studiouniversal.br", "Studio Universal", "Universal Studio"],
     "STUDIO UNIVERSAL": ["Studiouniversal.br", "studiouniversal.br", "Studio Universal"],
-    "UNIVERSAL CHANNEL": ["Universal.br", "universal.br", "Universal TV", "Universal Channel"],
-    "SONY CHANNEL": ["Sony.br", "sony.br", "Sony Channel", "Sony"],
-    "WARNER": ["Warner.br", "warnerchannel.br", "Warner Channel", "Warner"],
-    "WARNER CHANNEL": ["Warner.br", "warnerchannel.br", "Warner Channel", "Warner"],
-    "TNT": ["TNT.br", "tnt.br", "TNT"],
-    "TNT SERIES": ["TNTSeries.br", "tntseries.br", "TNT Séries", "TNT Series"],
-    "TNT NOVELAS": ["TNTNovelas.br", "auto.tntnovelas", "TNT Novelas"],
-    "ADULT SWIM": ["Adult.Swim.HD.br", "auto.adultswim", "Adult Swim"],
-    "GLOBOPLAY NOVELAS": ["Viva.br", "Globoplay Novelas", "VIVA"],
-    "LOVE NATURE": ["LoveNature.br", "lovenature.br", "Love Nature"],
-    "H2": ["History2.br", "history2.br", "History 2", "H2"],
-    "HISTORY 2": ["History2.br", "history2.br", "History 2", "H2"],
-    "HISTORY": ["HistoryChannel.br", "History Channel", "History"],
-    "CANAL OFF": ["Off.br", "OFF", "Canal OFF"],
-    "OFF": ["Off.br", "OFF", "Canal OFF"],
-    "SPORTV": ["SporTV.br", "sportv.br", "SporTV 1", "SporTV"],
-    "SPORTV 1": ["SporTV.br", "sportv.br", "SporTV 1", "SporTV"],
+    "UNIVERSAL CHANNEL": ["universal.br", "Universal.br", "Universal TV", "Universal Channel"],
+    "UNIVERSAL TV": ["universal.br", "Universal.br", "Universal TV"],
+    "SONY CHANNEL": ["sony.br", "Sony.br", "Sony Channel", "Sony"],
+    "SONY": ["sony.br", "Sony.br", "Sony Channel", "Sony"],
+    "WARNER": ["warnerchannel.br", "Warner.br", "Warner Channel", "Warner"],
+    "WARNER CHANNEL": ["warnerchannel.br", "Warner.br", "Warner Channel", "Warner"],
+    "WARNER TV": ["warnerchannel.br", "Warner.br", "Warner TV", "Warner"],
+    "TNT": ["tnt.br", "TNT.br", "TNT"],
+    "TNT SERIES": ["tntseries.br", "TNTSeries.br", "TNT Séries", "TNT Series"],
+    "TNT NOVELAS": ["tnt.novelas", "TNTNovelas.br", "auto.tntnovelas", "TNT Novelas"],
+    "ADULT SWIM": ["adult.swim", "Adult.Swim.HD.br", "auto.adultswim", "Adult Swim"],
+    "ADULT SWIN": ["adult.swim", "Adult Swim"],
+    "4DULT SWIN": ["adult.swim", "Adult Swim"],
+    "GLOBOPLAY NOVELAS": ["viva.br", "Viva.br", "Globoplay Novelas", "VIVA"],
+    "VIVA": ["viva.br", "Viva.br", "VIVA", "Globoplay Novelas"],
+    "LOVE NATURE": ["LoveNature.br", "lovenature.br", "Love Nature", "Love Nature 4K"],
+    "LOVENATURE": ["LoveNature.br", "lovenature.br", "Love Nature", "Love Nature 4K"],
+    "H2": ["History2.br", "history.2.br", "History 2", "H2"],
+    "HISTORY 2": ["History2.br", "history.2.br", "History 2", "H2"],
+    "HISTORY": ["HistoryChannel.br", "history.br", "History Channel", "History"],
+    "HISTORY CHANNEL": ["HistoryChannel.br", "history.br", "History Channel", "History"],
+    "CANAL OFF": ["off.br", "Off.br", "OFF", "Canal OFF"],
+    "OFF": ["off.br", "Off.br", "OFF", "Canal OFF"],
+    "FUTURA": ["futura.br", "FUTURA", "CANAL FUTURA"],
+    "CANAL FUTURA": ["futura.br", "FUTURA", "CANAL FUTURA"],
+    "SPORTV": ["sportv.1", "SporTV.br", "sportv.br", "SporTV 1", "SporTV"],
+    "SPORTV 1": ["sportv.1", "SporTV.br", "sportv.br", "SporTV 1", "SporTV"],
     "SPORTV 2": ["Sportv2.br", "sportv2.br", "SPORTV 2", "SporTV 2"],
     "SPORTV 3": ["SporTV3.br", "sportv3.br", "SPORTV 3", "SporTV 3"],
-    "PREMIERE CLUBES": ["PremiereClubes.br", "premiereclubes.br", "PREMIERE CLUBES", "Premiere Clubes", "Premiere 1"],
-    "PREMIERE 1": ["PremiereClubes.br", "premiereclubes.br", "PREMIERE CLUBES", "Premiere Clubes"],
-    "JOVEM PAN": ["jovem.pan.news.br", "jovempannews.br", "Jovem Pan News", "JOVEM PAN"],
+    "PREMIERE CLUBES": ["PremiereClubes.br", "premiere.clubes.br", "PREMIERE CLUBES", "Premiere Clubes", "Premiere 1"],
+    "PREMIERE 1": ["PremiereClubes.br", "premiere.clubes.br", "PREMIERE CLUBES", "Premiere Clubes"],
+    "PREMIERE": ["PremiereClubes.br", "premiere.clubes.br", "PREMIERE CLUBES"],
+    "JOVEM PAN": ["JovemPanNews.br", "jovem.pan.news.br", "Jovem Pan News", "JOVEM PAN"],
+    "JOVEM PAN NEWS": ["JovemPanNews.br", "jovem.pan.news.br", "Jovem Pan News"],
+    "JOVEN PAN NEWS": ["JovemPanNews.br", "jovem.pan.news.br", "Jovem Pan News"],
     "CNN BRASIL": ["cnn.brasil.br", "cnnbrasil.br", "CNN Brasil"],
-    "REDE TV": ["redetv.br", "REDETV", "REDE TV"],
-    "REDETV": ["redetv.br", "REDETV", "REDE TV"],
-    "AGROMAIS": ["agromais.br", "AGROMAIS", "AGRO MAIS"],
-    "AGRO": ["agromais.br", "AGROMAIS", "AGRO MAIS"],
-    "GLOBO SP": ["GB SP", "Globo SP", "globosp.br"],
-    "GLOBO RJ": ["GB RJ", "Globo RJ", "globorj.br"],
-    "GLOBO MINAS": ["GB MINAS", "Globo Minas", "globominas.br"],
-    "GLOBO BELO HORIZONTE": ["GB MINAS", "Globo Minas", "GLOBO BELO HORIZONTE", "auto.globobelohorizontebr2"],
-    "GLOBO NORDESTE": ["GB NORDESTE", "GLOBO TV NORDESTE", "Globo Nordeste"],
-    "GLOBO PERNAMBUCO": ["GB NORDESTE", "GLOBO TV NORDESTE", "GLOBO PERNAMBUCO"],
-    "GLOBO TV NORDESTE": ["GB NORDESTE", "GLOBO TV NORDESTE"],
-    "GLOBO BRASILIA": ["GLOBO BRASÍLIA", "Globo Brasilia", "GB BRASILIA"],
-    "GLOBO REDE BAHIA": ["GB TV BAHIA", "Globo Rede Bahia", "GLOBO TV BAHIA"],
-    "GLOBO TV BAHIA": ["GB TV BAHIA", "Globo Rede Bahia", "GLOBO TV BAHIA"],
-    "GLOBO RBS PORTO ALEGRE": ["Globo RBS TV Porto Alegre", "GB RBS PORTO ALEGRE"],
-    "GLOBO RBS TV PORTO ALEGRE": ["Globo RBS TV Porto Alegre", "GB RBS PORTO ALEGRE"],
-    "RBS PASSO FUNDO GLOBO": ["RBS TV PASSO FUNDO", "GLOBO RBS TV PASSO FUNDO", "RBS PASSO FUNDO GLOBO"],
-    "RBS CAXIAS": ["RBS TV CAXIAS DO SUL", "GLOBO RBS TV CAXIAS DO SUL", "RBS CAXIAS"],
-    "GLOBO RPC CURITIBA": ["Globo RPC TV Curitiba", "GB RPC CURITIBA"],
-    "GLOBO RPC TV CURITIBA": ["Globo RPC TV Curitiba", "GB RPC CURITIBA"],
-    "GLOBO TV DIARIO": ["tv.diario.mogi.das.cruzes.br", "auto.globotvdiariobr2", "GB SP", "Globo SP"],
-    "GLOBO TV DIARIO MOGI DAS CRUZES": ["tv.diario.mogi.das.cruzes.br", "auto.globotvdiariobr2", "GB SP", "Globo SP"],
-    "GLOBO TV INTEG JUIZ DE FORA": ["Globo TV Integracao Juiz de Fora", "GLOBO TV INTEG JUIZ DE FORA", "GB MINAS"],
-    "GLOBO TV INTEGRACAO JUIZ DE FORA": ["Globo TV Integracao Juiz de Fora", "GLOBO TV INTEG JUIZ DE FORA", "GB MINAS"],
-    "GLOBO TV VANG S J CAMPOS": ["Globo TV Vanguarda S J dos Campos", "GLOBO TV VANG S J CAMPOS"],
-    "GLOBO TV VANGUARDA S J DOS CAMPOS": ["Globo TV Vanguarda S J dos Campos", "GLOBO TV VANG S J CAMPOS"],
-    "GLOBO VERDES MARES": ["GB TV VERDES MARES", "GLOBO VERDES MARES", "Globo TV Verdes Mares"],
-    "GLOBO TV VERDES MARES": ["GB TV VERDES MARES", "GLOBO VERDES MARES", "Globo TV Verdes Mares"],
-    "RECORD SP": ["RECORDTV SP", "Record SP", "RecordTV SP"],
-    "RECORD TV SP": ["RECORDTV SP", "Record SP", "RecordTV SP"],
-    "RECORD RJ": ["RECORDTV RJ", "Record RJ", "RecordTV RJ"],
-    "RECORD TV RJ": ["RECORDTV RJ", "Record RJ", "RecordTV RJ"],
-    "RECORD BRASILIA": ["RECORD BRASILIA", "RecordTV Brasilia"],
-    "RECORD TV BRASILIA": ["RECORD BRASILIA", "RecordTV Brasilia"],
-    "RECORD GOIAS": ["RECORDTV GOIAS", "Record Goias"],
-    "RECORD TV GOIAS": ["RECORDTV GOIAS", "Record Goias"],
-    "RECORD MANAUS": ["RECORDTV MANAUS", "Record Manaus"],
+    "CNN ESPANHOL": ["cnn.espanhol", "CNN ESPANHOL", "CNN EN ESPANOL"],
+    "CNN EN ESPANOL": ["cnn.espanhol", "CNN ESPANHOL", "CNN EN ESPANOL"],
+    "CNBC BRASIL": ["timesbrasil.br", "CNBC BRASIL", "TIMES BRASIL", "TIMES BRASIL CNBC"],
+    "TIMES BRASIL": ["timesbrasil.br", "CNBC BRASIL", "TIMES BRASIL", "TIMES BRASIL CNBC"],
+    "TIMES BRASIL CNBC": ["timesbrasil.br", "CNBC BRASIL", "TIMES BRASIL", "TIMES BRASIL CNBC"],
+    "REDE TV": ["redetv.br", "REDETV", "REDE TV", "REDETV!"],
+    "REDETV": ["redetv.br", "REDETV", "REDE TV", "REDETV!"],
+    "REDE CNT": ["rede.cnt", "cnt.br", "REDE CNT", "CNT"],
+    "CNT": ["rede.cnt", "cnt.br", "REDE CNT", "CNT"],
+    "TV ASSEMBLEIA": ["tv.assembleia", "TV ASSEMBLEIA", "ASSEMBLEIA LEGISLATIVA"],
+    "ASSEMBLEIA LEGISLATIVA": ["tv.assembleia", "TV ASSEMBLEIA", "ASSEMBLEIA LEGISLATIVA"],
+    "AGROMAIS": ["agromais.br", "AGROMAIS", "AGRO MAIS", "AGRO+"],
+    "AGRO": ["agromais.br", "AGROMAIS", "AGRO MAIS", "AGRO+"],
+    "AGRO PLUS": ["agromais.br", "AGROMAIS", "AGRO MAIS", "AGRO+"],
+    "USA NETWORK": ["usanetwork.br", "USA Network", "GB USA", "SYFY"],
+    "GB USA": ["usanetwork.br", "USA Network", "GB USA"],
+    "USA": ["usanetwork.br", "USA Network"],
+    "GLOBO SP": ["gb.sp", "globo.são.paulo", "GB SP", "Globo SP", "Globo São Paulo"],
+    "GLOBO SAO PAULO": ["globo.são.paulo", "gb.sp", "Globo São Paulo", "GB SP"],
+    "GLOBO RJ": ["gb.rj", "globo.rio", "GB RJ", "Globo RJ", "Globo Rio"],
+    "GLOBO RIO": ["globo.rio", "gb.rj", "Globo Rio", "GB RJ"],
+    "GLOBO MINAS": ["gb.minas", "GB MINAS", "Globo Minas"],
+    "GLOBO BELO HORIZONTE": ["GLOBOBELOHORIZONTE", "gb.minas", "GLOBO BELO HORIZONTE", "GB MINAS"],
+    "GLOBO NORDESTE": ["gb.nordeste", "globo.recife", "GB NORDESTE", "GLOBO TV NORDESTE", "Globo Nordeste"],
+    "GLOBO PERNAMBUCO": ["globo.pernambuco", "gb.nordeste", "GLOBO PERNAMBUCO", "GB NORDESTE"],
+    "GLOBO TV NORDESTE": ["globo.tv.nordeste", "gb.nordeste", "GLOBO TV NORDESTE", "GB NORDESTE"],
+    "GLOBO BRASILIA": ["globo.brasília", "GLOBO BRASÍLIA", "Globo Brasilia", "GB BRASILIA"],
+    "GLOBO REDE BAHIA": ["globo.rede.bahia", "gb.tv.bahia", "globo.bahia", "Globo Rede Bahia", "GB TV BAHIA"],
+    "GLOBO TV BAHIA": ["gb.tv.bahia", "globo.bahia", "GB TV BAHIA", "GLOBO TV BAHIA"],
+    "GLOBO RBS PORTO ALEGRE": ["gb.rbs.porto.alegre", "globo.rbs.tv.porto.alegre", "GB RBS PORTO ALEGRE", "Globo RBS TV Porto Alegre"],
+    "GLOBO RBS TV PORTO ALEGRE": ["globo.rbs.tv.porto.alegre", "gb.rbs.porto.alegre", "Globo RBS TV Porto Alegre", "GB RBS PORTO ALEGRE"],
+    "RBS PASSO FUNDO GLOBO": ["rbs.passo.fundo.globo", "rbs.tv.passo.fundo", "globo.rbs.passo.fundo", "RBS PASSO FUNDO GLOBO", "RBS TV PASSO FUNDO"],
+    "RBS CAXIAS": ["rbs.caxias", "rbs.caxias.do.sul", "rbs.tv.caxias.do.sul", "RBS CAXIAS", "RBS TV CAXIAS DO SUL"],
+    "GLOBO RPC CURITIBA": ["gb.rpc.curitiba", "globo.rpc.tv.curitiba", "GB RPC CURITIBA", "Globo RPC TV Curitiba"],
+    "GLOBO RPC TV CURITIBA": ["globo.rpc.tv.curitiba", "gb.rpc.curitiba", "Globo RPC TV Curitiba", "GB RPC CURITIBA"],
+    "GLOBO TV DIARIO": ["tv.diario.br", "tv.diario.mogi.das.cruzes.br", "GLOBOTVDIARIO", "TV DIARIO"],
+    "GLOBO TV DIARIO MOGI DAS CRUZES": ["tv.diario.mogi.das.cruzes.br", "globo.diario.mogi.das.cruzes", "TV DIARIO MOGI DAS CRUZES"],
+    "GLOBO TV INTEG JUIZ DE FORA": ["GLOBOTVINTEGJUIZDEFORA", "globo.integ.juiz.de.fora", "Tvintegracaouberlandia.br", "TV INTEGRAÇÃO JUIZ DE FORA"],
+    "GLOBO TV INTEGRACAO JUIZ DE FORA": ["Tvintegracaouberlandia.br", "globo.integ.juiz.de.fora", "GLOBOTVINTEGJUIZDEFORA", "TV INTEGRAÇÃO JUIZ DE FORA"],
+    "TV INTEGRACAO JUIZ DE FORA": ["Tvintegracaouberlandia.br", "globo.integ.juiz.de.fora", "TV INTEGRAÇÃO JUIZ DE FORA"],
+    "GLOBO TV VANG S J CAMPOS": ["GLOBOTVVANGSJCAMPOS", "globo.vang.s.j.campos", "tv.vanguarda.s.j.campos", "Globo TV Vanguarda S J dos Campos"],
+    "GLOBO TV VANGUARDA S J DOS CAMPOS": ["globo.tv.vanguarda.s.j.dos.campos", "tv.vanguarda.s.j.campos", "Globo TV Vanguarda S J dos Campos"],
+    "GLOBO VERDES MARES": ["globo.verdes.mares", "gb.tv.verdes.mares", "GLOBO VERDES MARES", "GB TV VERDES MARES"],
+    "GLOBO TV VERDES MARES": ["gb.tv.verdes.mares", "globo.verdes.mares", "GB TV VERDES MARES", "GLOBO VERDES MARES"],
+    "RECORD SP": ["recordtv.sp", "RECORDTV SP", "Record SP", "RecordTV SP"],
+    "RECORD TV SP": ["recordtv.sp", "RECORDTV SP", "Record SP", "RecordTV SP"],
+    "RECORD RJ": ["recordtv.rj", "record.rio", "RECORDTV RJ", "Record RJ"],
+    "RECORD TV RJ": ["recordtv.rj", "record.rio", "RECORDTV RJ", "Record RJ"],
+    "RECORD BRASILIA": ["record.brasilia", "RECORD BRASILIA", "RecordTV Brasilia"],
+    "RECORD TV BRASILIA": ["record.brasilia", "RECORD BRASILIA", "RecordTV Brasilia"],
+    "RECORD GOIAS": ["recordtv.goias", "RECORDTV GOIAS", "Record Goias"],
+    "RECORD TV GOIAS": ["recordtv.goias", "RECORDTV GOIAS", "Record Goias"],
+    "RECORD MANAUS": ["recordtv.manaus", "RECORDTV MANAUS", "Record Manaus"],
     "RECORD TV NEWS": ["Recordnews.br", "RECORD NEWS", "Record News", "recordnews.br"],
-    "BAND TV SP": ["BAND SP", "Band SP", "band.br"],
-    "BAND TV RJ": ["BAND RJ", "Band RJ"],
-    "BAND TV RS": ["BAND RS", "Band RS"],
-    "BAND TV PR": ["BAND PARANA", "Band Parana"],
-    "BAND TV PARANA": ["BAND PARANA", "Band Parana"],
-    "BAND TV MINAS": ["BAND TV MINAS", "Band Minas"],
-    "BAND TV GOIANIA": ["BAND TV GOIANIA", "Band Goiania"],
-    "BAND TV CAMPINAS": ["BAND CAMPINAS", "Band Campinas"],
-    "BAND TV NEWS": ["band.news.br", "BAND NEWS", "Band News", "bandnews.br"],
+    "BAND TV SP": ["band.sp", "BAND SP", "Band SP"],
+    "BAND TV RJ": ["band.rj", "BAND RJ", "Band RJ"],
+    "BAND TV RS": ["band.rs", "BAND RS", "Band RS"],
+    "BAND TV PR": ["band.parana", "band.pr", "BAND PARANA", "Band Parana"],
+    "BAND TV PARANA": ["band.parana", "band.pr", "BAND PARANA", "Band Parana"],
+    "BAND TV MINAS": ["band.tv.minas", "band.mg", "BAND TV MINAS", "Band Minas"],
+    "BAND TV GOIANIA": ["band.tv.goiania", "BAND TV GOIANIA", "Band Goiania"],
+    "BAND TV CAMPINAS": ["band.campinas", "BAND CAMPINAS", "Band Campinas"],
+    "BAND TV NEWS": ["BandNews.br", "BAND NEWS", "Band News", "bandnews.br"],
     "BAND TV SPORTS": ["BandSports.br", "BAND SPORTS", "BandSports", "bandsports.br"],
     "BANDSPORTS": ["BandSports.br", "BAND SPORTS", "BandSports", "bandsports.br"],
-    "SBT TV SP": ["SBT SP", "SBT", "sbt.br"],
-    "SBT TV RJ": ["SBT RJ", "SBT Rio"],
-    "SBT TV RS": ["SBT RS", "SBT TV RBS"],
-    "SBT TV RBS": ["SBT RS", "SBT TV RBS"],
-    "SBT TV BRASILIA": ["SBT BRASILIA"],
+    "SBT TV SP": ["sbt.sp", "SBT SP", "SBT"],
+    "SBT TV RJ": ["sbt.rj", "SBT RJ", "SBT Rio"],
+    "SBT TV RS": ["sbt.rs", "SBT RS", "SBT TV RBS"],
+    "SBT TV RBS": ["sbt.rs", "SBT RS", "SBT TV RBS"],
+    "SBT TV BRASILIA": ["sbt.brasilia", "SBT BRASILIA"],
     "SBT TV HD PIAUI": ["SBT TV PIAUI"],
     "SBT TV HD RN": ["SBT TV RN"],
 }
@@ -183,17 +217,37 @@ def norm_lookup_key(title: str) -> str:
     s = unicodedata.normalize("NFKD", s)
     s = "".join(c for c in s if not unicodedata.combining(c)).upper()
     s = re.sub(r"[^A-Z0-9]+", " ", s)
+    s = re.sub(r"\b0+(\d+)\b", r"\1", s)
     return " ".join(s.split())
 
 
 def clean_channel_title_for_epg(raw_name: str) -> str:
-    """Limpa todas as tags de resolução, codec, servidor (BR2), [P], (Eventos), ² do nome do canal, preservando [2] como número."""
+    """Limpa todas as tags de resolução, codec, servidor (BR2), [P], (Eventos), ² do nome do canal, preservando numeração real."""
     s = html.unescape(raw_name or "")
-    s = re.sub(r"\(\s*(?:BR\s*\d+|EVENTOS?|PPV|BACKUP|ALT|FHD|HD|SD|4K|UHD|H\.?26[45]|HEVC)\s*\)", " ", s, flags=re.I)
-    s = re.sub(r"\[\s*(?:H\.?26[45]|HEVC|P|BR\s*\d+|FHD|HD|SD|4K|UHD|ALT|BACKUP)\s*\]", " ", s, flags=re.I)
+    s = re.sub(r"\.(?:br|us|uk|pt|ar|mx|cl|co|pe|ca|latam|int|bt)$", " ", s.strip(), flags=re.I)
+    s = re.sub(r"(?<=[A-Za-z0-9])(4K|8K|UHD|FHDR|FHD|(?<![Ff])HD|SD)\b", r" \1", s, flags=re.I)
+    s = re.sub(r"(?<=[A-Za-z0-9])(?:BR\d+|SRV\d+|OP\d+)\b", " ", s, flags=re.I)
+    s = re.sub(
+        r"\(\s*(?:BR\s*\d*|SRV\s*\d*|OP[CÇ][AÃ]O\s*\d*|OP\d*|EVENTOS?|PPV|BACKUP|BKP|ALT|ALTERNATIVO|FHDR|FHD|HD|SD|4K|8K|UHD|H\.?26[45]|HEVC|LEG|DUB|DUAL)\s*\)",
+        " ",
+        s,
+        flags=re.I,
+    )
+    s = re.sub(
+        r"\[\s*(?:H\.?26[45]|HEVC|P|BR\s*\d*|SRV\s*\d*|OP\d*|FHDR|FHD|HD|SD|4K|8K|UHD|ALT|BACKUP|BKP|LEG|DUB|DUAL)\s*\]",
+        " ",
+        s,
+        flags=re.I,
+    )
     s = re.sub(r"\[\s*(\d+)\s*\]", r" \1 ", s)
-    s = re.sub(r"[¹²³⁴⁵⁶⁷⁸⁹⁰]+", " ", s)
-    s = re.sub(r"\b(?:FHD|UHD|4K|8K|HD|SD|H\.?265|H\.?264|HEVC|AVC|1080P|1080I|720P|60FPS)\b", " ", s, flags=re.I)
+    s = re.sub(r"[¹²³⁴⁵⁶⁷⁸⁹⁰ᴴᴰ~*]+", " ", s)
+    s = re.sub(
+        r"\b(?:FHDR|FHD|UHD|4K|8K|HD|SD|H\.?265|H\.?264|HEVC|AVC|1080P|1080I|720P|60FPS|LEG|LEGENDADO|DUB|DUBLADO|DUAL|ALT|ALTERNATIVO|BACKUP|BKP|BR\d+|SRV\d+|OP\d+|1X)\b",
+        " ",
+        s,
+        flags=re.I,
+    )
+    s = re.sub(r"\s+F$", "", s.strip(), flags=re.I)
     return norm_lookup_key(s)
 
 
@@ -264,7 +318,7 @@ def infer_fallback_channel_group(channel_name: str, current_group: str) -> str:
             return "Canais ⫸ Filmes e Séries"
     if any(w in n for w in ("CARTOON", "DISCOVERY KIDS", "GLOOB", "DISNEY", "NICK", "TOONCAST", "RA TIM BUM", "ZOOMOO", "DREAMWORKS", "ANIME", "INFANTIL")):
         return "Canais ⫸ Infantil"
-    if any(w in n for w in ("NEWS", "CNN", "JOVEM PAN", "BLOOMBERG", "SENADO", "CAMARA", "JUSTICA", "ASSEMBLEIA")):
+    if any(w in n for w in ("NEWS", "CNN", "JOVEM PAN", "CNBC", "TIMES BRASIL", "BLOOMBERG", "SENADO", "CAMARA", "JUSTICA", "ASSEMBLEIA")):
         return "Canais ⫸ Noticias"
     if any(w in n for w in ("DISCOVERY", "HISTORY", "H2", "ANIMAL PLANET", "NAT GEO", "NATIONAL GEOGRAPHIC", "LOVE NATURE", "SCIENCE", "THEATER", "TURBO", "WORLD", "INVESTIGACAO")):
         return "Canais ⫸ Documentarios"
@@ -278,14 +332,18 @@ def find_epg_gz_path() -> Path:
     return EPG_GZ_CANDIDATES[-1]
 
 
-def load_epg_id_index(epg_path: Path) -> dict[str, str]:
-    """Carrega o índice EPG em 2 fases, bloqueando aliases com numeração divergente (ex: HBO vs HBO 2)."""
+def load_epg_id_index(epg_path: Path) -> tuple[dict[str, str], dict[str, str]]:
+    """
+    Carrega o índice EPG em 2 fases e também retorna um mapa {channel_id: canonical_display_name}
+    para validar estado (UF) e numeração sem falsos bloqueios.
+    """
     primary_index: dict[str, str] = {}
     secondary_index: dict[str, str] = {}
+    id_to_canonical_name: dict[str, str] = {}
 
     if not epg_path.exists():
         print(f"Aviso: {epg_path} não encontrado!")
-        return primary_index
+        return primary_index, id_to_canonical_name
 
     with gzip.open(epg_path, "rb") as f:
         for _event, elem in ET.iterparse(f, events=("end",)):
@@ -293,7 +351,15 @@ def load_epg_id_index(epg_path: Path) -> dict[str, str]:
             if tag == "channel":
                 cid = (elem.attrib.get("id") or "").strip()
                 if cid:
-                    cid_no_br = re.sub(r"\.br$", "", cid, flags=re.I)
+                    display_names = [
+                        child.text.strip()
+                        for child in elem
+                        if child.tag.rsplit("}", 1)[-1] == "display-name" and child.text and child.text.strip()
+                    ]
+                    canon_label = next((d for d in display_names if d != cid), cid)
+                    id_to_canonical_name[cid] = canon_label
+
+                    cid_no_br = re.sub(r"\.(?:br|bt)$", "", cid, flags=re.I)
                     cid_clean = clean_channel_title_for_epg(cid_no_br)
                     for k in (
                         norm_lookup_key(cid),
@@ -307,102 +373,111 @@ def load_epg_id_index(epg_path: Path) -> dict[str, str]:
                         if k and k not in primary_index:
                             primary_index[k] = cid
 
-                    for child in elem:
-                        if child.tag.rsplit("}", 1)[-1] == "display-name" and child.text:
-                            dn = child.text.strip()
-                            dn_clean = clean_channel_title_for_epg(dn)
-                            if has_conflicting_channel_number(cid_clean, dn_clean):
-                                continue
-                            dn_no_br = re.sub(r"\.br$", "", dn, flags=re.I)
-                            for k_dn in (
-                                norm_lookup_key(dn),
-                                norm_lookup_key(dn_no_br),
-                                dn_clean,
-                                name_key(dn),
-                                name_key(dn_clean),
-                                name_key(normalizar_canal(dn_clean)),
-                            ):
-                                if k_dn and k_dn not in secondary_index:
-                                    secondary_index[k_dn] = cid
+                    for dn in display_names:
+                        if dn.upper().endswith(" F") or len(dn) < 2:
+                            continue
+                        dn_clean = clean_channel_title_for_epg(dn)
+                        if has_conflicting_channel_number(canon_label, dn_clean):
+                            continue
+                        dn_no_br = re.sub(r"\.(?:br|bt)$", "", dn, flags=re.I)
+                        for k_dn in (
+                            norm_lookup_key(dn),
+                            norm_lookup_key(dn_no_br),
+                            dn_clean,
+                            name_key(dn),
+                            name_key(dn_clean),
+                            name_key(normalizar_canal(dn)),
+                            name_key(strip_qualities_keep_case(dn)),
+                        ):
+                            if k_dn and k_dn not in secondary_index:
+                                secondary_index[k_dn] = cid
                 elem.clear()
 
     merged = {**secondary_index, **primary_index}
     print(f"✓ Índice EPG de Alta Precisão carregado de {epg_path} ({len(primary_index)} IDs primários, {len(merged)} chaves totais).")
-    return merged
+    return merged, id_to_canonical_name
 
 
-def is_orig_tvg_id_poisoned(clean_ch_name: str, orig_id: str) -> bool:
-    """Detecta tvg-ids falsos, caracteres incompatíveis com Smart TV (&) ou colisão de número (ex: hbo.br em HBO 2)."""
+def is_orig_tvg_id_poisoned(channel_name: str, clean_ch_name: str, orig_id: str) -> bool:
+    """Detecta tvg-ids falsos, caracteres incompatíveis com Smart TV (&), conflito de UF/país ou colisão de número."""
     oid = orig_id.lower().strip()
     if not oid or not is_smart_tv_safe_id(orig_id):
         return True
     if re.match(r"^[0-9a-f]{8}-[0-9a-f]{4}-", oid):
         return True
+    if has_conflicting_region(channel_name, orig_id):
+        return True
     oid_no_br = re.sub(r"\.(?:br|bt)$", "", oid, flags=re.I)
     oid_clean = clean_channel_title_for_epg(oid_no_br)
-    if has_conflicting_channel_number(clean_ch_name, oid_clean):
+    if has_conflicting_channel_number(channel_name, oid_clean):
         return True
     if oid == "agromais.br" and "AGRO" not in clean_ch_name:
         return True
-    if oid == "globonews.br" and "GLOBO NEWS" not in clean_ch_name and "GLOBONEWS" not in clean_ch_name:
+    if oid == "globonews.br" and "GLOBO NEWS" not in clean_ch_name and "GLOBONEWS" not in clean_ch_name and "GB NEWS" not in clean_ch_name:
         return True
-    if oid == "globosp.br" and clean_ch_name not in {"GLOBO SP", "GLOBO", "TV GLOBO"}:
+    if oid in {"globosp.br", "gb.sp"} and clean_ch_name not in {"GLOBO SP", "GB SP", "GLOBO SAO PAULO", "GLOBO", "TV GLOBO"}:
         return True
-    if "recordtvbras" in oid and "BRASILIA" not in clean_ch_name:
+    if "recordtvbras" in oid and "BRASILIA" not in clean_ch_name and clean_ch_name != "RECORD":
         return True
     if oid == "sbt.br" and clean_ch_name not in {"SBT", "SBT SP", "SBT TV SP"}:
         return True
     if oid == "band.br" and clean_ch_name not in {"BAND", "BAND SP", "BAND TV SP"}:
         return True
-    if "tvescola" in oid and "ESCOLA" not in clean_ch_name:
-        return True
-    if "uberlandia" in oid and "UBERLANDIA" not in clean_ch_name:
-        return True
     return False
 
 
-def resolve_best_tvg_id(channel_name: str, original_tvg_id: str, epg_index: dict[str, str]) -> str:
+def resolve_best_tvg_id(
+    channel_name: str,
+    original_tvg_id: str,
+    epg_index: dict[str, str],
+    id_to_canonical_name: dict[str, str],
+) -> str:
     if _RE_NO_EPG_CHANNEL.search(channel_name):
         return ""
 
+    # Se o canal for estrangeiro (ex: PT ..., US ..., ARG ..., CO ..., MX ...), não vincula em EPG brasileiro
+    if extract_foreign_country_code(channel_name):
+        return ""
+
     clean_title = clean_channel_title_for_epg(channel_name)
+    stripped_title = clean_channel_title_for_epg(strip_qualities_keep_case(channel_name))
+    norm_canon_title = clean_channel_title_for_epg(normalizar_canal(channel_name))
 
     def _valid_candidate_id(cand_id: str) -> bool:
         if not cand_id or not is_smart_tv_safe_id(cand_id):
             return False
-        cid_low = cand_id.lower()
-        if "tvescola" in cid_low and "ESCOLA" not in clean_title:
+        canon_target_name = id_to_canonical_name.get(cand_id, cand_id)
+        if has_conflicting_region(channel_name, canon_target_name):
             return False
-        if "uberlandia" in cid_low and "UBERLANDIA" not in clean_title:
-            return False
-        cand_no_br = re.sub(r"\.(?:br|bt)$", "", cand_id, flags=re.I)
-        cand_clean = clean_channel_title_for_epg(cand_no_br)
-        return not has_conflicting_channel_number(clean_title, cand_clean)
+        return not has_conflicting_channel_number(channel_name, canon_target_name)
 
-    if clean_title in CHANNEL_SYNONYMS:
-        for syn in CHANNEL_SYNONYMS[clean_title]:
-            for k_syn in (norm_lookup_key(syn), name_key(syn), clean_channel_title_for_epg(syn)):
-                if k_syn and k_syn in epg_index:
-                    found_id = epg_index[k_syn]
-                    if _valid_candidate_id(found_id):
-                        return found_id
+    for lookup_title in dict.fromkeys([clean_title, stripped_title, norm_canon_title]):
+        if lookup_title in CHANNEL_SYNONYMS:
+            for syn in CHANNEL_SYNONYMS[lookup_title]:
+                for k_syn in (norm_lookup_key(syn), name_key(syn), clean_channel_title_for_epg(syn)):
+                    if k_syn and k_syn in epg_index:
+                        found_id = epg_index[k_syn]
+                        if _valid_candidate_id(found_id):
+                            return found_id
 
-    no_tv_mid = re.sub(r"^(GLOBO|SBT|RECORD|BAND)\s+TV\s+", r"\1 ", clean_title)
+    no_tv_mid = re.sub(r"^(GLOBO|SBT|RECORD|BAND)\s+TV\s+", r"\1 ", stripped_title)
 
-    for candidate in (
+    for candidate in dict.fromkeys([
         clean_title,
+        stripped_title,
         no_tv_mid,
         strip_qualities_keep_case(channel_name),
-        normalizar_canal(clean_title),
+        normalizar_canal(channel_name),
+        normalizar_canal(stripped_title),
         normalizar_canal(no_tv_mid),
-    ):
+    ]):
         for k in (norm_lookup_key(candidate), name_key(candidate)):
             if k and k in epg_index:
                 found_id = epg_index[k]
                 if _valid_candidate_id(found_id):
                     return found_id
 
-    if original_tvg_id and not is_orig_tvg_id_poisoned(clean_title, original_tvg_id):
+    if original_tvg_id and not is_orig_tvg_id_poisoned(channel_name, stripped_title, original_tvg_id):
         orig_no_br = re.sub(r"\.(?:br|bt)$", "", original_tvg_id.strip(), flags=re.I)
         for k_id in (
             norm_lookup_key(original_tvg_id),
@@ -422,6 +497,7 @@ def resolve_best_tvg_id(channel_name: str, original_tvg_id: str, epg_index: dict
 def build_live_playlists_and_xtream_map(
     url: str,
     epg_index: dict[str, str],
+    id_to_canonical_name: dict[str, str],
     epg_public_url: str,
     full_out_path: Path,
     live_only_out_path: Path,
@@ -494,7 +570,7 @@ def build_live_playlists_and_xtream_map(
             sid = str(ch.get("stream_id") or "").strip()
             logo = str(ch.get("stream_icon") or "").strip()
 
-            best_tvg_id = resolve_best_tvg_id(ch_name, orig_id, epg_index)
+            best_tvg_id = resolve_best_tvg_id(ch_name, orig_id, epg_index, id_to_canonical_name)
             if best_tvg_id:
                 matched_epg += 1
 
@@ -541,7 +617,7 @@ def push_files_to_secret_gist_via_git(generated_files: list[Path], token: str, g
 def main() -> None:
     epg_public_url = os.environ.get("EPG_PUBLIC_URL", "").strip()
     epg_path = find_epg_gz_path()
-    epg_index = load_epg_id_index(epg_path)
+    epg_index, id_to_canonical_name = load_epg_id_index(epg_path)
 
     out_dir = Path("output_lists")
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -558,7 +634,7 @@ def main() -> None:
         map_file = out_dir / f"xtream_map_{i}.json"
         try:
             live_cnt, matched_cnt = build_live_playlists_and_xtream_map(
-                url, epg_index, epg_public_url, full_file, live_file, map_file
+                url, epg_index, id_to_canonical_name, epg_public_url, full_file, live_file, map_file
             )
             if live_cnt == 0:
                 print(f"  -> ⚠ M3U_URL_{i} retornou vazia. Pulando.")
