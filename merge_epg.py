@@ -102,7 +102,9 @@ SMART_TV_SAFE_CANONICAL_IDS: dict[str, str] = {
     "AGRO+": "agromais.br",
     "AGRO PLUS": "agromais.br",
     "TRACE BRAZUCA": "tracebrazuca.br",
+    "TVE": "tvebahia.br",
     "TVE BAHIA": "tvebahia.br",
+    "TVE RS": "tvers.br",
     "CURTA!": "curta.br",
     "CURTA": "curta.br",
     "LOVE NATURE": "LoveNature.br",
@@ -117,6 +119,12 @@ SMART_TV_SAFE_CANONICAL_IDS: dict[str, str] = {
     "GLOBOPLAY NOVELAS": "viva.br",
     "CARTOON NETWORK": "CartoonNetwork.br",
     "CARTOON": "CartoonNetwork.br",
+    "FOOD NETWORK": "FoodNetwork.br",
+    "BAND NEWS": "BandNews.br",
+    "BANDNEWS": "BandNews.br",
+    "BAND TV NEWS": "BandNews.br",
+    "TCM": "TCM.br",
+    "TRUTV": "TruTV.br",
     "JOVEM PAN NEWS": "JovemPanNews.br",
     "JOVEN PAN NEWS": "JovemPanNews.br",
     "JOVEM PAN": "JovemPanNews.br",
@@ -136,7 +144,7 @@ SMART_TV_SAFE_CANONICAL_IDS: dict[str, str] = {
     "USA": "usanetwork.br",
     "GB USA": "usanetwork.br",
     "GLOBO USA": "usanetwork.br",
-    "SYFY": "usanetwork.br",
+    "SYFY": "syfy.br",
     "FUTURA": "futura.br",
     "CANAL FUTURA": "futura.br",
     "OFF": "off.br",
@@ -346,7 +354,7 @@ def extract_state_ufs(text: str) -> set[str]:
 
 
 def has_conflicting_region(base_channel_name: str, candidate_text: str) -> bool:
-    """Retorna True se o canal base e o alias/candidato tiverem estados (UFs) conflitantes ou países diferentes."""
+    """Retorna True se o canal base e o alias/candidato tiverem estados (UFs) conflitantes, cidades conflitantes ou países diferentes."""
     c_base = extract_foreign_country_code(base_channel_name)
     c_cand = extract_foreign_country_code(candidate_text)
     if c_base != c_cand and (c_base or c_cand):
@@ -355,6 +363,15 @@ def has_conflicting_region(base_channel_name: str, candidate_text: str) -> bool:
     uf_cand = extract_state_ufs(candidate_text)
     if uf_base and uf_cand and uf_base.isdisjoint(uf_cand):
         return True
+
+    # Evita que sinal explícito da capital (ex: RecordTV SP / Band SP) seja substituído por praça do interior (ex: Campinas / Ribeirão)
+    nk_base = name_key(base_channel_name)
+    nk_cand = name_key(candidate_text)
+    interior_sp_cities = ("CAMPINAS", "RIBEIRAO", "BAURU", "SOROCABA", "SANTOS", "SJCAMPOS", "RIOPRETO", "PRUDENTE")
+    if any(w in nk_base.split() for w in ("SP", "SAO PAULO")) and not any(c in nk_base.replace(" ", "") for c in interior_sp_cities):
+        if any(c in nk_cand.replace(" ", "") for c in interior_sp_cities):
+            return True
+
     return False
 
 
@@ -682,9 +699,9 @@ CHANNEL_SYNONYMS = {
     "WARNER CHANNEL": ["WARNER TV", "WARNER"],
     "SONY CHANNEL": ["SONY", "SONY ENTERTAINMENT TELEVISION"],
     "SONY": ["SONY CHANNEL"],
-    "USA": ["USA NETWORK", "SYFY"],
-    "USA NETWORK": ["USA", "SYFY", "GB USA"],
-    "SYFY": ["USA", "USA NETWORK"],
+    "USA": ["USA NETWORK", "GB USA", "usanetwork.br"],
+    "USA NETWORK": ["USA", "GB USA", "usanetwork.br"],
+    "SYFY": ["SYFY", "syfy.br"],
     "TNT SERIES": ["TNT SERIES", "TNT SÉRIES", "TNT SERIE"],
     "AGROMAIS": ["AGRO+", "AGRO MAIS", "AGRO PLUS"],
     "AGRO+": ["AGROMAIS", "AGRO MAIS", "AGRO PLUS"],
@@ -708,6 +725,11 @@ CHANNEL_SYNONYMS = {
     "MUSIC BOX BRASIL": ["MUSIC BOX BRAZIL"],
     "CARTOON NETWORK": ["CARTOON", "CartoonNetwork.br"],
     "CARTOON": ["CARTOON NETWORK", "CartoonNetwork.br"],
+    "FOOD NETWORK": ["FoodNetwork.br", "food.network.br", "Food Network"],
+    "BAND NEWS": ["BandNews.br", "band.news.br", "BAND NEWS", "Band News"],
+    "BANDNEWS": ["BandNews.br", "band.news.br", "BAND NEWS", "Band News"],
+    "TCM": ["TCM.br", "tcm.br", "TCM"],
+    "TRUTV": ["TruTV.br", "trutv.br", "TruTV"],
     "CARTOONITO": ["CARTOONITO", "BOOMERANG"],
     "SPORTTV": ["SPORTV", "SPORTV 1"],
     "SPORTV": ["SPORTV", "SPORTV 1"],
@@ -749,7 +771,9 @@ CHANNEL_SYNONYMS = {
     "CNT": ["REDE CNT", "TV CNT"],
     "REDE BRASIL": ["RBTV", "REDE BRASIL DE TELEVISAO"],
     "REDE SUPER": ["TV SUPER"],
-    "TVE": ["TVE RS", "TVE BAHIA"],
+    "TVE": ["TVE BAHIA", "tvebahia.br", "TV EDUCATIVA DA BAHIA"],
+    "TVE BAHIA": ["TVE", "tvebahia.br", "TV EDUCATIVA DA BAHIA"],
+    "TVE RS": ["tvers.br", "TVE RS"],
     "ADULT SWIM": ["ADULT SWIN", "4DULT SWIN"],
     "ADULT SWIN": ["ADULT SWIM", "4DULT SWIN"],
     "4DULT SWIN": ["ADULT SWIM", "ADULT SWIN"],
@@ -1511,6 +1535,10 @@ def _fuzzy_incompatible(alias: str, candidate: str) -> bool:
     if ("BMANDC" in candidate and "BMANDC" not in alias) or ("BMANDC" in alias and "BMANDC" not in candidate):
         return True
     if ("CNNBRASIL" in candidate and "CNBC" in alias) or ("CNBC" in candidate and "CNN" in alias):
+        return True
+    if ("TVESCOLA" in candidate and "TVE" in alias and "ESCOLA" not in alias) or ("TVESCOLA" in alias and "TVE" in candidate and "ESCOLA" not in candidate):
+        return True
+    if ("USANETWORK" in alias and "SYFY" in candidate) or ("SYFY" in alias and "USANETWORK" in candidate):
         return True
     foreign_markers = ("INTERNACIONAL", "PORTUGAL", "AFRICA", "EUROPA", "GLOBOON", "GLOBONOW", "AMERICAS", "CABOVERDE", "MOZAMBIQUE")
     if any(fm in candidate for fm in foreign_markers) and not any(fm in alias for fm in foreign_markers):
