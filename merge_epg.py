@@ -1009,7 +1009,7 @@ def is_valid_provider_tvid(channel_name: str, tvid: str, allow_new_m3u_id: bool 
         if SequenceMatcher(None, tvid_clean, cand_alnum).ratio() >= (0.52 if allow_new_m3u_id else 0.65):
             return True
     return False
-  def is_meaningful_programme(norm_title: str) -> bool:
+def is_meaningful_programme(norm_title: str) -> bool:
     if not norm_title or len(norm_title) < 2:
         return False
     if norm_title in PLACEHOLDER_TITLES:
