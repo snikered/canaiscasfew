@@ -53,7 +53,6 @@ _FOREIGN_COUNTRY_PREFIX_RE = re.compile(
     re.IGNORECASE,
 )
 
-# Emissoras brasileiras de canal único: quando aparecem na lista como "Canal Futura 1", "Canção Nova 2", "Canal UOL 2", "Band SP 1", o número final é apenas opção de stream
 _SINGLE_STREAM_CHANNEL_PREFIXES = (
     "GLOBO ", "GB ", "SBT ", "RECORD ", "RECORDTV ", "BAND ", "REDETV", "REDE TV",
     "MULTISHOW", "ANIMAL PLANET", "DISCOVERY", "CARTOON", "NICK", "WARNER", "SONY",
@@ -67,7 +66,6 @@ _SINGLE_STREAM_CHANNEL_PREFIXES = (
     "TV CULTURA", "CULTURA", "TV BRASIL", "CANAL DO BOI", "CANAL RURAL", "TERRA VIVA", "AGROMAIS", "AGRO+",
 )
 
-# Mapa de IDs canônicos limpos para canais brasileiros (garante 1 único ID por emissora no XML)
 SMART_TV_SAFE_CANONICAL_IDS: dict[str, str] = {
     "A&E": "ae.br",
     "A E": "ae.br",
@@ -160,14 +158,12 @@ SMART_TV_SAFE_CANONICAL_IDS: dict[str, str] = {
 
 
 def is_smart_tv_safe_id(tvid: str) -> bool:
-    """Verifica se o ID está livre de espaços ou caracteres que quebram parsers XML/Regex em Smart TVs (&, !, +, <, >, aspas)."""
     if not tvid or " " in tvid.strip():
         return False
     return not any(ch in tvid for ch in ("&", "!", "+", '"', "'", "<", ">", ";"))
 
 
 def sanitize_xmltv_id(raw_id: str) -> str:
-    """Converte qualquer ID com caracteres especiais (&, !, +, espaços) em um ID 100% seguro e contínuo para Smart TVs."""
     s = html.unescape(str(raw_id or "")).strip()
     if not s:
         return ""
@@ -186,7 +182,6 @@ def sanitize_xmltv_id(raw_id: str) -> str:
 
 
 def extract_foreign_country_code(text: str) -> str:
-    """Retorna o prefixo de país estrangeiro (ex: PT, US, CO, ARG) ou string vazia se for canal brasileiro/geral."""
     if not text:
         return ""
     s = html.unescape(str(text)).strip().upper()
@@ -194,7 +189,7 @@ def extract_foreign_country_code(text: str) -> str:
         return ""
     s = re.sub(r"^[^A-Z0-9]+", "", s)
     if s.startswith(("USA NETWORK", "USA HD", "USA FHD", "USA SD", "USA UHD", "USA 4K", "GB USA", "GLOBO USA")):
-        return ""   # "USA SD" também é o canal USA Network (antes só HD/FHD escapavam e SD virava "estrangeiro")
+        return ""
     m = _FOREIGN_COUNTRY_PREFIX_RE.match(s)
     if not m:
         return ""
@@ -207,7 +202,6 @@ def extract_foreign_country_code(text: str) -> str:
 
 
 def name_key(value: str) -> str:
-    """Chave de comparação: sem acento, sem sufixo .br, sem BR2 grudado e sem qualidade/tags."""
     s = html.unescape(str(value or ""))
     s = re.sub(r"\.(?:br|us|uk|pt|ar|mx|cl|co|pe|ca|latam|int|bt)$", " ", s, flags=re.IGNORECASE)
     s = re.sub(r"(?<=[A-Za-z0-9])(4K|8K|UHD|FHDR|FHD|(?<![Ff])HD|SD)\b", r" \1", s, flags=re.IGNORECASE)
@@ -228,7 +222,6 @@ def name_key(value: str) -> str:
 
 
 def extract_significant_digits(text: str) -> list[str]:
-    """Extrai números significativos do nome do canal (ignorando H264, H265, 4K, 8K, 1080p, 720p, 60fps, 24h, BR2, OP1, A10)."""
     if not text:
         return []
     s = html.unescape(str(text)).upper()
@@ -242,12 +235,11 @@ def extract_significant_digits(text: str) -> list[str]:
 
 
 def has_conflicting_channel_number(base_channel_name: str, candidate_text: str) -> bool:
-    """Evita que 'HBO [2]' ou 'HBO 2' colida com 'HBO' principal (e vice-versa)."""
     base_digits = extract_significant_digits(base_channel_name)
     cand_digits = extract_significant_digits(candidate_text)
     if base_digits != cand_digits:
         b_up = base_channel_name.upper()
-        if ("PREMIERE" in b_up or "SPORTV" in b_up or "ESPN" in b_up or "CAZE" in b_up or "GOAT" in b_up) and (
+        if ("PREMIERE" in b_up or "SPORTV" in b_up or "ESPN" in b_up or "CAZE" in b_up or "CAZÉ" in b_up or "GOAT" in b_up) and (
             (not base_digits and cand_digits == ["1"]) or (base_digits == ["1"] and not cand_digits)
         ):
             return False
@@ -292,7 +284,6 @@ _STATE_TOKEN_MAP = {
 
 
 def extract_state_ufs(text: str) -> set[str]:
-    """Identifica a(s) UF(s) explícita(s) de um nome de canal regional para evitar mistura de estados."""
     nk = name_key(text)
     words = nk.split()
     joined = "".join(words)
@@ -346,7 +337,6 @@ def extract_state_ufs(text: str) -> set[str]:
 
 
 def has_conflicting_region(base_channel_name: str, candidate_text: str) -> bool:
-    """Retorna True se o canal base e o alias/candidato tiverem estados (UFs) conflitantes ou países diferentes."""
     c_base = extract_foreign_country_code(base_channel_name)
     c_cand = extract_foreign_country_code(candidate_text)
     if c_base != c_cand and (c_base or c_cand):
@@ -361,7 +351,6 @@ def has_conflicting_region(base_channel_name: str, candidate_text: str) -> bool:
 def dedupe_display_names(
     names_by_id: dict[str, list[str]],
 ) -> dict[str, list[str]]:
-    """Devolve novo dict {id: [nomes]} em que cada name_key tem um único dono, mantendo todas as variantes H265/FHD do vencedor."""
     owners: dict[str, list[str]] = {}
     bases_per_id: dict[str, set[str]] = {}
     for cid, names in names_by_id.items():
@@ -427,7 +416,6 @@ IPTV_USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
 ]
 
-# Pesos nivelados (1.0): nenhuma fonte ganha por "nome/prioridade fixa", mas sim pelo mérito da grade no canal/horário!
 EPG_SOURCES_CONFIG = [
     ("Afiliadas Locais", "epg_afiliadas.xml", "afiliadas_locais", 1.0),
     ("Vivo Play API", "vivo_epg.xml.gz", "vivo_api", 1.0),
@@ -799,7 +787,6 @@ POISONED_OPEN_TV_IDS = {
 }
 
 def strip_qualities_keep_case(name: str) -> str:
-    """Remove tags de qualidade/codec (incluindo .br, 4K/8K/FHD/HD grudados no nome e opções OP1/OP2), sem cortar FHD em 'F'."""
     if not name: return ""
     s = html.unescape(name).replace("\xa0", " ").replace("\u200b", "").replace("\ufeff", "")
     s = re.sub(r"\[\s*\]", " ", s)
@@ -1009,6 +996,7 @@ def is_valid_provider_tvid(channel_name: str, tvid: str, allow_new_m3u_id: bool 
         if SequenceMatcher(None, tvid_clean, cand_alnum).ratio() >= (0.52 if allow_new_m3u_id else 0.65):
             return True
     return False
+
 def is_meaningful_programme(norm_title: str) -> bool:
     if not norm_title or len(norm_title) < 2:
         return False
@@ -1080,9 +1068,6 @@ def download_to_temp_file(url: str, attempts: int = 4) -> Path:
     if tmp_path.exists(): tmp_path.unlink()
     raise RuntimeError(f"Falha ao baixar ({last_error})")
 
-# =====================================================================
-# EXTRAÇÃO E ENRIQUECIMENTO DE METADADOS (APENAS [T03E07] + VISUAL RICO)
-# =====================================================================
 _RE_XMLTV_NS = re.compile(r"^\s*(\d+)\s*\.\s*(\d+)\s*\.")
 _RE_SE_PATTERNS = [
     re.compile(r"[\[\(\-\s]*\bS(\d{1,2})\s*[:\-., ]*\s*E(?:P|PIS[OÓ]DIO)?\.?\s*(\d{1,4})\b[\]\)]*", re.IGNORECASE),
@@ -1093,7 +1078,6 @@ _RE_EXPLICIT_EPISODE = re.compile(r"[\[\(\-\s]*\b(?:EPIS[OÓ]DIO|EP\.?)\s*(\d{1,
 _RE_TRAILING_FAKE_EP = re.compile(r"(?:\s*[\-\|:]\s*|\s+)(?:\[|\()?E(?:P)?\.?\s*0*1(?:\]|\))?\s*$", re.IGNORECASE)
 
 def clean_raw_title(raw_title: str) -> str:
-    """Limpa repetições após ' : ' (ex: 'Jogo X - Copa : Jogo X') e sufixos falsos ' - Ep. 1' logo na leitura."""
     if not raw_title:
         return ""
     t = raw_title.strip()
@@ -1109,7 +1093,6 @@ def clean_raw_title(raw_title: str) -> str:
     return t
 
 def strip_se_tokens(text: str) -> str:
-    """Remove qualquer S01E02, T01E02, [T03E07], Ep. 2 ou cabeçalhos antigos duplicados do texto."""
     if not text:
         return ""
     cleaned_lines = []
@@ -1297,7 +1280,6 @@ def extract_epgshare_compound_candidates(channel_id: str) -> list[str]:
                 if city_only:
                     extras.append(f"{net} {city_only}")
     return extras
-
 def read_source_from_file(spec: SourceSpec, file_path: Path) -> EpgSource:
     channels: dict[str, ET.Element] = {}
     names, normalized_names = {}, {}
@@ -1460,7 +1442,6 @@ def _network_of_normalized(value: str) -> str:
 _GLOBO_BRAND_COMPACT = tuple(b.replace(" ", "") for b in _GLOBO_ONLY_BRANDS) + ("NSCTV",)
 
 def _is_foreign_prefix(alias: str) -> bool:
-    """Identifica se o canal começa com prefixos internacionais (tanto espaçados quanto compactos) que não devem casar com canais do Brasil."""
     a = alias.upper().strip()
     if a.startswith(("PT ", "US ", "USA ", "UK ", "CO ", "ARG ", "AR ", "EC ", "MX ", "PY ", "DE ", "ES ")):
         return True
@@ -2032,7 +2013,7 @@ def schedule_health(source: EpgSource, channel_id: str, now: datetime) -> dict[s
         if duration.total_seconds() <= 0 or duration > timedelta(hours=12): invalid += 1
         if previous_stop is not None:
             if start < previous_stop - timedelta(seconds=60): overlaps += 1
-            elif start > previous_stop + timedelta(minutes=30): gaps += 1
+            elif start > previous_stop + timedelta(minutes=15): gaps += 1
         if previous_stop is None or stop > previous_stop: previous_stop = stop
         
     future_end = max((row.stop for row in rows if row.stop > now), default=None)
@@ -2044,7 +2025,7 @@ def schedule_health(source: EpgSource, channel_id: str, now: datetime) -> dict[s
         + (0.20 * min(future_hours / 20.0, 1.0))
         + (0.10 * min(len(rows) / 12.0, 1.0))
     )
-    score -= min(0.25, invalid * 0.08 + overlaps * 0.02 + gaps * 0.02)
+    score -= min(0.25, invalid * 0.08 + overlaps * 0.02 + gaps * 0.03)
     if future_hours < 8.0:
         score = min(score, 0.35)
     result = {
@@ -2071,10 +2052,6 @@ def _coverage_end(match: "ChannelMatch") -> datetime | None:
 
 def find_tail_donors(matches: list["ChannelMatch"], active_sources: list[EpgSource], alias_tiers: list[list[str]],
                      entry_name: str, now: datetime) -> list["ChannelMatch"]:
-    """Afiliada local cuja única fonte entrega só ~1 dia (Vivo Play, Claro TV+...) fica sem informação depois disso.
-    Se o melhor candidato cobre menos de TAIL_MIN_HOURS, busca candidatas nas camadas MAIS GENÉRICAS (regional/
-    nacional da mesma emissora) que se estendam além dele. Elas só valem depois que a fonte local acaba ou em
-    buracos vazios sem sobrepor a local."""
     ends = [e for e in (_coverage_end(m) for m in matches) if e]
     if not ends or len(alias_tiers) < 2:
         return []
@@ -2140,7 +2117,7 @@ def evaluate_candidates(matches: list[ChannelMatch], now: datetime, max_active_v
         richness_score = float(h_info.get("richness_score", 0.0))
         fut_h = float(h_info.get("future_hours", 0.0))
 
-        eff_health = 1.0 if (health_score >= 0.80 and fut_h >= 48.0) else health_score
+        eff_health = 1.0 if (health_score >= 0.99 and fut_h >= 48.0) else health_score
 
         quality = 0.40 * weighted_ratio + 0.25 * eff_health + 0.20 * richness_score + 0.15 * avg_support
         evidence_factor = 0.55 + 0.45 * min(vote_weight / max(max_active_vote_weight, 0.5), 1.0)
@@ -2157,7 +2134,7 @@ def evaluate_candidates(matches: list[ChannelMatch], now: datetime, max_active_v
         has_programmes = int(bool(ev.match.source.rows.get(ev.match.channel_id)))
         fut_h = float(ev.health.get("future_hours", 0.0))
         near_cov = float(ev.health.get("near_coverage_ratio", 0.0))
-        eff_h = 1.0 if (ev.health_score >= 0.80 and fut_h >= 48.0) else ev.health_score
+        eff_h = 1.0 if (ev.health_score >= 0.99 and fut_h >= 48.0) else ev.health_score
         is_direct_local_affiliate = int(ev.match.tier == 1 and ev.match.source.spec.family == "afiliadas_locais" and ev.health_score >= 0.70)
         horizon_factor = min(1.0, fut_h / 48.0)
         composite_merit = (
@@ -2227,7 +2204,6 @@ def make_validation(entry: dict[str, object], chosen: CandidateEvaluation, all_e
     }
 
 def get_clean_aliases(entry: dict[str, object]) -> list[str]:
-    """Retorna os nomes base, IDs de compatibilidade, tvg-ids da lista e TODAS as variantes da M3U para o sync_playlist.py."""
     result = []
     seen = set()
     raw_name = str(entry.get("name", "")).strip()
@@ -2297,7 +2273,6 @@ def get_clean_aliases(entry: dict[str, object]) -> list[str]:
     return result
 
 def get_primary_export_ids(entry: dict[str, object]) -> list[str]:
-    """Retorna ESTRITAMENTE 1 único ID por canal, 100% livre de espaços, '&', '!' ou '+' para compatibilidade total com Smart TVs (Samsung Tizen / LG webOS)."""
     raw_name = str(entry.get("name", "")).strip()
     target_id = str(entry.get("id", "")).strip()
     clean_base = strip_qualities_keep_case(raw_name) or target_id
@@ -2321,7 +2296,6 @@ def get_primary_export_ids(entry: dict[str, object]) -> list[str]:
 def apply_rich_metadata_to_element(
     el: ET.Element, meta_pool: list[dict[str, Any]], channel_name: str, duration_minutes: float
 ) -> None:
-    """Formata <programme> com visual rico enxuto (🟢 LIVRE / 🟠 +14) e SOMENTE [T03E07] sem duplicar S04E07."""
     base_meta = extract_program_metadata(el, channel_name, duration_minutes)
     all_metas = [base_meta, *(meta_pool or [])]
 
@@ -2506,7 +2480,7 @@ def stitch_multi_source_schedule(
 
         if cleaned_source_progs:
             fut_h = float(ev.health.get("future_hours", 0.0))
-            eff_h = 1.0 if (ev.health_score >= 0.80 and fut_h >= 48.0) else ev.health_score
+            eff_h = 1.0 if (ev.health_score >= 0.99 and fut_h >= 48.0) else ev.health_score
             aligned_sources_data.append({
                 "ev": ev,
                 "tail_only": bool(getattr(ev, "tail_only", False)),
@@ -2532,7 +2506,7 @@ def stitch_multi_source_schedule(
         best_src_idx = -1
         best_win_score = -1.0
 
-        primary_covers = False                  # alguma fonte principal cobre esta janela?
+        primary_covers = False
         for sd in aligned_sources_data:
             if sd["tail_only"]:
                 continue
@@ -2617,9 +2591,9 @@ def stitch_multi_source_schedule(
 
     merged_timeline.sort(key=lambda x: x["start"])
 
-    # 2. TAPA-BURACOS CIRÚRGICO DENTRO DAS JANELAS (inclui tail_only onde houver buraco vazio)
+    # 2. TAPA-BURACOS CIRÚRGICO COM CLAMP (recorta programa reserva para preencher lacunas reais >= 10m)
     MIN_GAP_SECONDS = 10 * 60
-    MAX_EDGE_TRIM_SECONDS = 15 * 60
+    CLAMP_GAP_SECONDS = 15 * 60
 
     ordered_gap_fillers = sorted(aligned_sources_data, key=lambda s: (int(s["tail_only"]), -s["global_merit"]))
     for s_data in ordered_gap_fillers:
@@ -2642,27 +2616,22 @@ def stitch_multi_source_schedule(
 
             overlapping.sort(key=lambda x: x["start"])
             free_cursor = c_start
-            best_gap = None
+            free_slots: list[tuple[datetime, datetime]] = []
             for ex in overlapping:
                 if ex["start"] > free_cursor:
                     gap_sec = (ex["start"] - free_cursor).total_seconds()
                     if gap_sec >= MIN_GAP_SECONDS:
-                        if best_gap is None or gap_sec > (best_gap[1] - best_gap[0]).total_seconds():
-                            best_gap = (free_cursor, ex["start"])
+                        free_slots.append((free_cursor, ex["start"]))
                 if ex["stop"] > free_cursor:
                     free_cursor = ex["stop"]
             if c_stop > free_cursor:
                 gap_sec = (c_stop - free_cursor).total_seconds()
                 if gap_sec >= MIN_GAP_SECONDS:
-                    if best_gap is None or gap_sec > (best_gap[1] - best_gap[0]).total_seconds():
-                        best_gap = (free_cursor, c_stop)
+                    free_slots.append((free_cursor, c_stop))
 
-            if best_gap is not None:
-                g_start, g_stop = best_gap
+            for g_start, g_stop in free_slots:
                 gap_dur = (g_stop - g_start).total_seconds()
-                left_trim = (g_start - c_start).total_seconds()
-                right_trim = (c_stop - g_stop).total_seconds()
-                if (gap_dur / c_dur) >= 0.65 or (left_trim <= MAX_EDGE_TRIM_SECONDS and right_trim <= MAX_EDGE_TRIM_SECONDS):
+                if gap_dur >= CLAMP_GAP_SECONDS or (gap_dur / c_dur) >= 0.30:
                     new_cand = copy.deepcopy(cand)
                     new_cand["start"] = g_start
                     new_cand["stop"] = g_stop
@@ -2818,7 +2787,6 @@ def write_epg_stream(
     return programme_count, len(xml_id_to_data)
 
 def ensure_operator_epgs_generated() -> None:
-    """Executa automaticamente fetch_claro_epg.py e fetch_vivo_epg.py se ainda não tiverem gerado os .xml.gz."""
     if not Path("claro_epg.xml.gz").exists() and Path("fetch_claro_epg.py").exists():
         try:
             print("\nGerando claro_epg.xml.gz direto da API da Claro TV+...")
@@ -2869,7 +2837,6 @@ def main() -> None:
         return False
 
     def normalize_channel_number_zero(name_str: str) -> str:
-        """Normaliza zeros à esquerda em números de canais (ex: Paramount 01 -> Paramount 1, SportyNet + 01 -> SportyNet + 1)."""
         return re.sub(r'\b(0)(\d+)\b', r'\2', name_str)
 
     def merge_channel_record(ch_id: str, name: str, aliases: Iterable[str] = (), tvg_ids: Iterable[str] = (), comp_ids: Iterable[str] = (), source_ids: Iterable[str] = (), group: str = "", from_m3u: bool = False) -> None:
@@ -3184,7 +3151,7 @@ def main() -> None:
         donor_ids = {id(d) for d in donors}
         for ev in evaluations:
             ev.tail_only = id(ev.match) in donor_ids
-        if getattr(chosen, "tail_only", False):          # doador nunca é a fonte principal
+        if getattr(chosen, "tail_only", False):
             chosen = next((ev for ev in evaluations if not ev.tail_only), chosen)
         if forced and override_source_key:
             if forced_ev := next((ev for ev in evaluations if ev.match.source.spec.key == override_source_key and ev.match.channel_id == override_id), None):
