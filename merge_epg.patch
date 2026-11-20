@@ -1,105 +1,132 @@
---- orig/merge_epg.py	2026-11-10 12:12:53.680686961 +0000
-+++ a/canaiscasfew-main/merge_epg.py	2026-11-10 12:14:21.508115763 +0000
-@@ -39,6 +39,11 @@
-     urllib.request.urlretrieve("https://raw.githubusercontent.com/Limaalef/M3uEpg/main/epg_utils.py", "epg_utils.py")
-     from epg_utils import digit_signature, normalize_name as original_normalize_name, normalize_source_id
+--- merge_epg_original_user.py	2026-11-19 00:12:27.697918131 +0000
++++ merge_epg.py	2026-11-20 00:20:39.498439658 +0000
+@@ -193,8 +193,8 @@
+     if "LOVE NATURE" in s or "LOVENATURE" in s or "FILM&ARTS" in s or "FILM & ARTS" in s or "FILM AND ARTS" in s:
+         return ""
+     s = re.sub(r"^[^A-Z0-9]+", "", s)
+-    if s.startswith(("USA NETWORK", "USA HD", "USA FHD", "GB USA", "GLOBO USA")):
+-        return ""
++    if s.startswith(("USA NETWORK", "USA HD", "USA FHD", "USA SD", "USA UHD", "USA 4K", "GB USA", "GLOBO USA")):
++        return ""   # "USA SD" também é o canal USA Network (antes só HD/FHD escapavam e SD virava "estrangeiro")
+     m = _FOREIGN_COUNTRY_PREFIX_RE.match(s)
+     if not m:
+         return ""
+@@ -2060,6 +2060,40 @@
+     _HEALTH_CACHE[cache_key] = result
+     return result
  
-+try:
-+    from name_dedupe import dedupe_display_names
-+except ImportError:  # pragma: no cover
-+    def dedupe_display_names(names_by_id): return names_by_id
++TAIL_MIN_HOURS = float(os.environ.get("TAIL_MIN_HOURS", "72"))
++TAIL_DONOR_STATS: list[str] = []
 +
- CATALOG_PATH = Path(os.environ.get("CHANNELS_FILE", "channels.json"))
- OVERRIDES_PATH = Path(os.environ.get("OVERRIDES_FILE", "overrides.json"))
- OUTPUT_DIR = Path(os.environ.get("OUTPUT_DIR", "output"))
-@@ -749,6 +754,50 @@
-     r'TV\s+TAROBA|TV\s+MANAIRA)\b'
- )
++def _coverage_end(match: "ChannelMatch") -> datetime | None:
++    rows = match.source.rows.get(match.channel_id) or []
++    return max((r.stop for r in rows), default=None)
++
++def find_tail_donors(matches: list["ChannelMatch"], active_sources: list[EpgSource], alias_tiers: list[list[str]],
++                     entry_name: str, now: datetime) -> list["ChannelMatch"]:
++    """Afiliada local cuja única fonte entrega só ~1 dia (Vivo Play, Claro TV+...) fica sem informação depois disso.
++    Se o melhor candidato cobre menos de TAIL_MIN_HOURS, busca candidatas nas camadas MAIS GENÉRICAS (regional/
++    nacional da mesma emissora) que se estendam além dele. Elas só valem depois que a fonte local acaba e só se
++    concordarem com ela na parte comum (checado no stitch); nunca substituem um trecho que a local cobre."""
++    ends = [e for e in (_coverage_end(m) for m in matches) if e]
++    if not ends or len(alias_tiers) < 2:
++        return []
++    best_end = max(ends)
++    if (best_end - now).total_seconds() / 3600.0 >= TAIL_MIN_HOURS:
++        return []
++    deepest = max(m.tier for m in matches)
++    if deepest >= len(alias_tiers):
++        return []
++    have = {(m.source.spec.key, m.channel_id) for m in matches}
++    donors: list[ChannelMatch] = []
++    for d in find_tiered_matches_across_sources(active_sources, alias_tiers[deepest:], [], entry_name):
++        end = _coverage_end(d)
++        if (d.source.spec.key, d.channel_id) in have or not end or end <= best_end + timedelta(hours=6):
++            continue
++        d.tier = deepest + d.tier
++        donors.append(d)
++    if donors:
++        TAIL_DONOR_STATS.append(entry_name)
++    return donors
++
+ def evaluate_candidates(matches: list[ChannelMatch], now: datetime, max_active_vote_weight: float) -> tuple[CandidateEvaluation, list[CandidateEvaluation]]:
+     health_by_source = {m.source.spec.key: schedule_health(m.source, m.channel_id, now) for m in matches}
+     evaluations: list[CandidateEvaluation] = []
+@@ -2471,6 +2505,7 @@
+             eff_h = 1.0 if (ev.health_score >= 0.80 and fut_h >= 48.0) else ev.health_score
+             aligned_sources_data.append({
+                 "ev": ev,
++                "tail_only": bool(getattr(ev, "tail_only", False)),
+                 "progs": cleaned_source_progs,
+                 "global_merit": 0.45 * ev.weighted_ratio + 0.35 * ev.richness_score + 0.20 * eff_h,
+             })
+@@ -2479,6 +2514,8 @@
+         return []
  
-+
-+# --- Guardas de rede/UF (evita SBT/Record/Band herdarem grade da Globo e UF errada) ---
-+_NETWORK_PREFIXES = {
-+    "GLOBO": ("GLOBO", "TV GLOBO", "REDE GLOBO"),
-+    "SBT": ("SBT",),
-+    "RECORD": ("RECORD", "REDE RECORD"),
-+    "BAND": ("BAND", "TV BAND", "BANDEIRANTES", "REDE BANDEIRANTES"),
-+}
-+_GLOBO_ONLY_BRANDS = (
-+    "TV LIBERAL", "TV ASA BRANCA", "TV GRANDE RIO", "TV VERDES MARES", "TV MIRANTE",
-+    "TV CLUBE", "TV CABO BRANCO", "TV SERGIPE", "TV MORENA", "TV BAHIA", "REDE BAHIA",
-+    "REDE AMAZONICA", "TV AMAZONAS", "RBS TV", "RPC", "NSC TV", "EPTV", "TV TEM",
-+    "TV VANGUARDA", "REDE VANGUARDA", "TV INTEGRACAO", "INTER TV", "TV ANHANGUERA",
-+    "TV TAPAJOS", "TV CENTRO AMERICA", "TV GAZETA", "TV PARAIBA",
-+)
-+_UF_CODES = {"SP","RJ","RS","MG","BA","PR","PE","CE","PA","MA","SC","GO","PB","ES","AM","RN",
-+             "AL","PI","MT","DF","MS","SE","RO","TO","AC","AP","RR"}
-+
-+def _alias_belongs_to_network(alias: str, network: str) -> bool:
-+    a = alias.upper().strip()
-+    for net, prefixes in _NETWORK_PREFIXES.items():
-+        if net != network and a.startswith(prefixes):
-+            return False
-+    if network != "GLOBO" and a.startswith(_GLOBO_ONLY_BRANDS):
-+        return False
-+    return True
-+
-+def _network_of_normalized(value: str) -> str:
-+    for net in ("GLOBO", "SBT", "RECORD", "BAND"):
-+        if value.startswith(net):
-+            return net
-+    return ""
-+
-+def _fuzzy_incompatible(alias: str, candidate: str) -> bool:
-+    """True quando a aproximação cruzaria emissoras ou UFs diferentes (GLOBOPE ~ GLOBOSP)."""
-+    na, nc = _network_of_normalized(alias), _network_of_normalized(candidate)
-+    if na and nc:
-+        if na != nc:
-+            return True
-+        ra = re.sub(r"^TV", "", alias[len(na):]); rc = re.sub(r"^TV", "", candidate[len(nc):])
-+        if ra != rc and ra in _UF_CODES and rc in _UF_CODES:
-+            return True
-+    return False
-+
- def expand_open_tv_tiers(nome_limpo: str, grupo: str) -> tuple[list[str], list[str], list[str]]:
-     """Separa os aliases em 3 camadas estritas:
-     - Tier 1: Nome específico da Afiliada / Cidade local (Ex: TV Asa Branca, Globo Caruaru, TV Gazeta de Alagoas)
-@@ -887,7 +936,7 @@
-         tier1_local.extend(["TV ALTEROSA", "SBT MINAS", "SBT BELO HORIZONTE", "SBT MG"])
-     if "REDE MASSA" in nome_limpo:
-         tier1_local.extend(["REDE MASSA", "SBT CURITIBA", "SBT PARANA", "SBT PR"])
--    if "TV JORNAL" in nome_limpo:
-+    if "TV JORNAL" in nome_limpo or (network == "SBT" and re.search(r"\bJORNAL\b", nome_limpo)):
-         tier1_local.extend(["TV JORNAL", "SBT RECIFE", "SBT PERNAMBUCO", "SBT PE"])
+     aligned_sources_data.sort(key=lambda s: s["global_merit"], reverse=True)
++    # fim da grade das fontes principais: doadores de cauda só valem a partir daqui
++    tail_start = max((p["stop"] for sd in aligned_sources_data if not sd["tail_only"] for p in sd["progs"]), default=None)
  
-     # Tier 2: Cabeça de rede do Estado pela UF
-@@ -912,6 +961,9 @@
-     elif network == "BAND":
-         tier3_national.extend(["BAND SP", "BAND SAO PAULO", "BAND", "TV BAND", "BANDEIRANTES", "REDE BANDEIRANTES"])
+     # 1. SELEÇÃO POR JANELA DE 6 HORAS
+     WINDOW_HOURS = 6
+@@ -2493,6 +2530,16 @@
+         best_src_idx = -1
+         best_win_score = -1.0
  
-+    tier1_local = [a for a in tier1_local if _alias_belongs_to_network(a, network)]
-+    tier2_state = [a for a in tier2_state if _alias_belongs_to_network(a, network)]
-+    tier3_national = [a for a in tier3_national if _alias_belongs_to_network(a, network)]
-     return tier1_local, tier2_state, tier3_national
- 
- def aliases_tiers_for(entry: dict[str, object]) -> list[list[str]]:
-@@ -984,6 +1036,7 @@
-         alias_counter = Counter(alias)
-         bucket = source.fuzzy_index.get(digit_signature(alias), {})
-         for normalized_candidate, channel_ids in bucket.items():
-+            if _fuzzy_incompatible(alias, normalized_candidate): continue
-             if _sequence_ratio_upper_bound(alias, normalized_candidate, alias_counter) < relevant_floor: continue
-             ratio = SequenceMatcher(None, alias, normalized_candidate).ratio()
-             if ratio < relevant_floor: continue
-@@ -1666,6 +1719,12 @@
-                     if n not in existing_names:
-                         existing_names.append(n)
- 
-+    # Cada nome (display-name) passa a pertencer a um único canal: o player que casa
-+    # por tvg-name nunca encontra o mesmo nome em duas grades diferentes.
-+    _deduped = dedupe_display_names({oid: [oid, *v[2]] for oid, v in xml_id_to_data.items()})
-+    for oid, (chosen_, stitched_, _) in list(xml_id_to_data.items()):
-+        xml_id_to_data[oid] = (chosen_, stitched_, [n for n in _deduped[oid] if n != oid])
++        primary_covers = False                  # alguma fonte principal cobre esta janela?
++        for sd in aligned_sources_data:
++            if sd["tail_only"]:
++                continue
++            cov = sum(max(0.0, (min(cur_win_end, p["stop"]) - max(cur_win_start, p["start"])).total_seconds())
++                      for p in sd["progs"] if p["stop"] > cur_win_start and p["start"] < cur_win_end)
++            if cov / actual_win_sec >= 0.25:
++                primary_covers = True
++                break
 +
-     with gzip_path.open("wb") as raw_gzip:
-         with gzip.GzipFile(filename="epg.xml", mode="wb", fileobj=raw_gzip, mtime=0, compresslevel=GZIP_LEVEL) as gz:
-             def emit(data: bytes) -> None:
+         title_counts_in_win: Counter[str] = Counter()
+         for s_data in aligned_sources_data:
+             seen_t = {
+@@ -2510,6 +2557,8 @@
+             ]
+             if not win_progs:
+                 continue
++            if s_data["tail_only"] and primary_covers:
++                continue
+ 
+             covered_sec = sum(
+                 max(0.0, (min(cur_win_end, p["stop"]) - max(cur_win_start, p["start"])).total_seconds())
+@@ -2577,6 +2626,8 @@
+             c_dur = (c_stop - c_start).total_seconds()
+             if c_dur < 300:
+                 continue
++            if s_data["tail_only"] and tail_start is not None and c_start < tail_start - timedelta(minutes=5):
++                continue
+ 
+             overlapping = [
+                 ex for ex in merged_timeline
+@@ -3125,7 +3176,15 @@
+             report_rows.append({"target_id": target_id, "name": visible_name, "status": "missing", "source": None, "source_key": None, "source_channel_id": None, "method": "sem correspondência nas fontes ativas", "confidence": 0})
+             continue
+ 
++        donors = [] if forced else find_tail_donors(matches, active_sources, alias_tiers, visible_name, now)
++        if donors:
++            matches = matches + donors
+         chosen, evaluations = evaluate_candidates(matches, now, max_active_vote_weight)
++        donor_ids = {id(d) for d in donors}
++        for ev in evaluations:
++            ev.tail_only = id(ev.match) in donor_ids
++        if getattr(chosen, "tail_only", False):          # doador nunca é a fonte principal
++            chosen = next((ev for ev in evaluations if not ev.tail_only), chosen)
+         if forced and override_source_key:
+             if forced_ev := next((ev for ev in evaluations if ev.match.source.spec.key == override_source_key and ev.match.channel_id == override_id), None):
+                 chosen = forced_ev
+@@ -3182,6 +3241,9 @@
+         val_md.append(f"- **{v['name']}** ({v['source']}): Agora **{now_title}** - Confiança **{v['confidence']}%**")
+     (OUTPUT_DIR / "validation.md").write_text("\n".join(val_md) + "\n", "utf-8")
+ 
++    if TAIL_DONOR_STATS:
++        print(f"Cauda estendida com fonte regional/nacional (janela local < {TAIL_MIN_HOURS:.0f}h): {len(TAIL_DONOR_STATS)} canais -> "
++              + ", ".join(TAIL_DONOR_STATS[:15]) + (" ..." if len(TAIL_DONOR_STATS) > 15 else ""))
+     print(f"Sucesso! EPG gerado com {programme_count} programas em {ids_count} canais base.")
+ 
+ if __name__ == "__main__":

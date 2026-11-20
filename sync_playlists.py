@@ -10,6 +10,7 @@
 from __future__ import annotations
 
 import gzip
+from collections import Counter
 import html
 import json
 import os
@@ -84,14 +85,9 @@ CHANNEL_SYNONYMS: dict[str, list[str]] = {
     "FILM ARTS": ["FilmAndArts.br", "FilmAndArts.mx", "FILM AND ARTS", "FILM&ARTS"],
     "FILM AND ARTS": ["FilmAndArts.br", "FilmAndArts.mx", "FILM AND ARTS", "FILM&ARTS"],
     "FAST FUNBOX": ["FastAndFunBox.br", "FAST AND FUNBOX", "FAST & FUNBOX"],
-    "TVE": ["tvebahia.br", "TVE BAHIA", "TVE Bahia", "TV Educativa da Bahia"],
-    "TVE BAHIA": ["tvebahia.br", "TVE BAHIA", "TVE Bahia", "TV Educativa da Bahia"],
-    "TVE RS": ["tvers.br", "TVE RS"],
-    "CARTOON NETWORK": ["CartoonNetwork.br", "cartoon.network.br", "Cartoon Network", "CARTOON"],
-    "CARTOON": ["CartoonNetwork.br", "cartoon.network.br", "Cartoon Network", "CARTOON"],
-    "FOOD NETWORK": ["FoodNetwork.br", "food.network.br", "Food Network"],
-    "TCM": ["TCM.br", "tcm.br", "TCM"],
-    "TRUTV": ["TruTV.br", "trutv.br", "TruTV"],
+    "TVE": ["tve.br", "tvescola.br", "TVE", "TVE RS"],
+    "TVE RS": ["tve.br", "tvescola.br", "TVE RS", "TVE"],
+    "TVE BAHIA": ["tvebahia.br", "TVE BAHIA", "TVE Bahia"],
     "HBO 2": ["HBO2.br", "hbo2.br", "HBO 2", "HBO2"],
     "HBO": ["hbo.br", "HBO.br", "HBO"],
     "HBO PLUS": ["HBOPlusBrasil.br", "hbo.plus.br", "HBOPlus.br", "HBO Plus"],
@@ -156,10 +152,9 @@ CHANNEL_SYNONYMS: dict[str, list[str]] = {
     "AGROMAIS": ["agromais.br", "AGROMAIS", "AGRO MAIS", "AGRO+"],
     "AGRO": ["agromais.br", "AGROMAIS", "AGRO MAIS", "AGRO+"],
     "AGRO PLUS": ["agromais.br", "AGROMAIS", "AGRO MAIS", "AGRO+"],
-    "USA NETWORK": ["usanetwork.br", "USA Network", "GB USA"],
+    "USA NETWORK": ["usanetwork.br", "USA Network", "GB USA", "SYFY"],
     "GB USA": ["usanetwork.br", "USA Network", "GB USA"],
-    "USA": ["usanetwork.br", "USA Network", "GB USA"],
-    "SYFY": ["syfy.br", "Syfy", "SYFY"],
+    "USA": ["usanetwork.br", "USA Network"],
     "GLOBO SP": ["gb.sp", "globo.são.paulo", "GB SP", "Globo SP", "Globo São Paulo"],
     "GLOBO SAO PAULO": ["globo.são.paulo", "gb.sp", "Globo São Paulo", "GB SP"],
     "GLOBO RJ": ["gb.rj", "globo.rio", "GB RJ", "Globo RJ", "Globo Rio"],
@@ -205,9 +200,7 @@ CHANNEL_SYNONYMS: dict[str, list[str]] = {
     "BAND TV MINAS": ["band.tv.minas", "band.mg", "BAND TV MINAS", "Band Minas"],
     "BAND TV GOIANIA": ["band.tv.goiania", "BAND TV GOIANIA", "Band Goiania"],
     "BAND TV CAMPINAS": ["band.campinas", "BAND CAMPINAS", "Band Campinas"],
-    "BAND TV NEWS": ["BandNews.br", "band.news.br", "BAND NEWS", "Band News"],
-    "BAND NEWS": ["BandNews.br", "band.news.br", "BAND NEWS", "Band News"],
-    "BANDNEWS": ["BandNews.br", "band.news.br", "BAND NEWS", "Band News"],
+    "BAND TV NEWS": ["BandNews.br", "BAND NEWS", "Band News", "bandnews.br"],
     "BAND TV SPORTS": ["BandSports.br", "BAND SPORTS", "BandSports", "bandsports.br"],
     "BANDSPORTS": ["BandSports.br", "BAND SPORTS", "BandSports", "bandsports.br"],
     "SBT TV SP": ["sbt.sp", "SBT SP", "SBT"],
@@ -502,6 +495,22 @@ def resolve_best_tvg_id(
     return ""
 
 
+SMOKE_TEST = os.environ.get("SMOKE_TEST", "1").strip().lower() in {"1", "true", "yes"}
+
+
+def smoke_test_stream(host: str, q_user: str, q_pwd: str, sid: str) -> str:
+    """Lê 1 KB do stream. O formato gerado (/live/user/pass/<id numérico>.ts) difere do M3U original do provedor
+    (UUID + .m3u). Falha aqui PODE ser só bloqueio do IP do GitHub; se tocar no player, ignore."""
+    url = f"{host}/live/{q_user}/{q_pwd}/{sid}.ts"
+    try:
+        with requests.get(url, stream=True, timeout=(8, 12), allow_redirects=True,
+                          headers={"User-Agent": IPTV_USER_AGENTS[0]}) as r:
+            first = next(r.iter_content(chunk_size=1024), b"")
+            return f"stream {sid}: HTTP {r.status_code} | {r.headers.get('Content-Type', '?')} | {len(first)} bytes"
+    except Exception as exc:  # noqa: BLE001
+        return f"stream {sid}: falhou ({type(exc).__name__})"
+
+
 def build_live_playlists_and_xtream_map(
     url: str,
     epg_index: dict[str, str],
@@ -519,6 +528,7 @@ def build_live_playlists_and_xtream_map(
 
     user = query["username"][0]
     pwd = query["password"][0]
+    q_user, q_pwd = urllib.parse.quote(user, safe=""), urllib.parse.quote(pwd, safe="")
     source_host = f"{parsed.scheme}://{parsed.netloc}"
 
     xtream_tvgid_map: dict[str, str] = {
@@ -527,7 +537,7 @@ def build_live_playlists_and_xtream_map(
 
     print(f"  -> Consultando API de Canais Ao Vivo em {source_host}...")
     c_resp = request_with_bypass(
-        f"{source_host}/player_api.php?username={user}&password={pwd}&action=get_live_categories", timeout=30
+        f"{source_host}/player_api.php?username={q_user}&password={q_pwd}&action=get_live_categories", timeout=30
     )
     if c_resp.url:
         real_parsed = urllib.parse.urlparse(c_resp.url)
@@ -543,7 +553,7 @@ def build_live_playlists_and_xtream_map(
     }
 
     s_live = request_with_bypass(
-        f"{source_host}/player_api.php?username={user}&password={pwd}&action=get_live_streams", timeout=45
+        f"{source_host}/player_api.php?username={q_user}&password={q_pwd}&action=get_live_streams", timeout=45
     ).json()
 
     if not isinstance(s_live, list):
@@ -554,6 +564,9 @@ def build_live_playlists_and_xtream_map(
     header = f'#EXTM3U url-tvg="{epg_public_url}" x-tvg-url="{epg_public_url}"\n' if epg_public_url else "#EXTM3U\n"
     live_count = 0
     matched_epg = 0
+    motivos: Counter = Counter()
+    sem_correspondencia: list[str] = []
+    amostra_com_epg: list[str] = []
 
     with live_only_out_path.open("w", encoding="utf-8") as live_out:
         live_out.write(header)
@@ -581,6 +594,17 @@ def build_live_playlists_and_xtream_map(
             best_tvg_id = resolve_best_tvg_id(ch_name, orig_id, epg_index, id_to_canonical_name)
             if best_tvg_id:
                 matched_epg += 1
+                motivos["com tvg-id (EPG)"] += 1
+                if len(amostra_com_epg) < 3 and sid:
+                    amostra_com_epg.append(sid)
+            elif _RE_NO_EPG_CHANNEL.search(ch_name):
+                motivos["sem guia por natureza (24H/loop/Cine/Live)"] += 1
+            elif extract_foreign_country_code(ch_name):
+                motivos["estrangeiro (EPG é brasileiro)"] += 1
+            else:
+                motivos["sem correspondência no EPG"] += 1
+                if len(sem_correspondencia) < 25:
+                    sem_correspondencia.append(ch_name)
 
             xtream_tvgid_map[norm_lookup_key(ch_name)] = best_tvg_id
             if sid:
@@ -591,7 +615,7 @@ def build_live_playlists_and_xtream_map(
             safe_logo = logo.replace('"', "'")
             safe_grp = grp.replace('"', "'")
 
-            stream_url = f"{source_host}/live/{user}/{pwd}/{sid}.ts"
+            stream_url = f"{source_host}/live/{q_user}/{q_pwd}/{sid}.ts"
             live_out.write(
                 f'#EXTINF:-1 tvg-id="{safe_id}" tvg-name="{safe_name}" tvg-logo="{safe_logo}" group-title="{safe_grp}",{ch_name}\n'
                 f"{stream_url}\n"
@@ -600,6 +624,16 @@ def build_live_playlists_and_xtream_map(
 
     shutil.copy2(live_only_out_path, full_out_path)
     xtream_map_out_path.write_text(json.dumps(xtream_tvgid_map, ensure_ascii=False), encoding="utf-8")
+
+    print("  -> Cobertura de tvg-id por motivo:")
+    for motivo, n in motivos.most_common():
+        print(f"       {n:5d}  {motivo} ({100 * n / max(1, live_count):.0f}%)")
+    if sem_correspondencia:
+        print(f"     sem correspondência (candidatos a alias/dicionário): {', '.join(sem_correspondencia[:15])}")
+    if SMOKE_TEST and amostra_com_epg:
+        print("  -> Teste de fumaça da URL de stream (id numérico + .ts):")
+        for sid in amostra_com_epg:
+            print("       " + smoke_test_stream(source_host, q_user, q_pwd, sid))
     return live_count, matched_epg
 
 

@@ -102,9 +102,7 @@ SMART_TV_SAFE_CANONICAL_IDS: dict[str, str] = {
     "AGRO+": "agromais.br",
     "AGRO PLUS": "agromais.br",
     "TRACE BRAZUCA": "tracebrazuca.br",
-    "TVE": "tvebahia.br",
     "TVE BAHIA": "tvebahia.br",
-    "TVE RS": "tvers.br",
     "CURTA!": "curta.br",
     "CURTA": "curta.br",
     "LOVE NATURE": "LoveNature.br",
@@ -119,12 +117,6 @@ SMART_TV_SAFE_CANONICAL_IDS: dict[str, str] = {
     "GLOBOPLAY NOVELAS": "viva.br",
     "CARTOON NETWORK": "CartoonNetwork.br",
     "CARTOON": "CartoonNetwork.br",
-    "FOOD NETWORK": "FoodNetwork.br",
-    "BAND NEWS": "BandNews.br",
-    "BANDNEWS": "BandNews.br",
-    "BAND TV NEWS": "BandNews.br",
-    "TCM": "TCM.br",
-    "TRUTV": "TruTV.br",
     "JOVEM PAN NEWS": "JovemPanNews.br",
     "JOVEN PAN NEWS": "JovemPanNews.br",
     "JOVEM PAN": "JovemPanNews.br",
@@ -144,7 +136,7 @@ SMART_TV_SAFE_CANONICAL_IDS: dict[str, str] = {
     "USA": "usanetwork.br",
     "GB USA": "usanetwork.br",
     "GLOBO USA": "usanetwork.br",
-    "SYFY": "syfy.br",
+    "SYFY": "usanetwork.br",
     "FUTURA": "futura.br",
     "CANAL FUTURA": "futura.br",
     "OFF": "off.br",
@@ -201,8 +193,8 @@ def extract_foreign_country_code(text: str) -> str:
     if "LOVE NATURE" in s or "LOVENATURE" in s or "FILM&ARTS" in s or "FILM & ARTS" in s or "FILM AND ARTS" in s:
         return ""
     s = re.sub(r"^[^A-Z0-9]+", "", s)
-    if s.startswith(("USA NETWORK", "USA HD", "USA FHD", "GB USA", "GLOBO USA")):
-        return ""
+    if s.startswith(("USA NETWORK", "USA HD", "USA FHD", "USA SD", "USA UHD", "USA 4K", "GB USA", "GLOBO USA")):
+        return ""   # "USA SD" também é o canal USA Network (antes só HD/FHD escapavam e SD virava "estrangeiro")
     m = _FOREIGN_COUNTRY_PREFIX_RE.match(s)
     if not m:
         return ""
@@ -354,7 +346,7 @@ def extract_state_ufs(text: str) -> set[str]:
 
 
 def has_conflicting_region(base_channel_name: str, candidate_text: str) -> bool:
-    """Retorna True se o canal base e o alias/candidato tiverem estados (UFs) conflitantes, cidades conflitantes ou países diferentes."""
+    """Retorna True se o canal base e o alias/candidato tiverem estados (UFs) conflitantes ou países diferentes."""
     c_base = extract_foreign_country_code(base_channel_name)
     c_cand = extract_foreign_country_code(candidate_text)
     if c_base != c_cand and (c_base or c_cand):
@@ -363,15 +355,6 @@ def has_conflicting_region(base_channel_name: str, candidate_text: str) -> bool:
     uf_cand = extract_state_ufs(candidate_text)
     if uf_base and uf_cand and uf_base.isdisjoint(uf_cand):
         return True
-
-    # Evita que sinal explícito da capital (ex: RecordTV SP / Band SP) seja substituído por praça do interior (ex: Campinas / Ribeirão)
-    nk_base = name_key(base_channel_name)
-    nk_cand = name_key(candidate_text)
-    interior_sp_cities = ("CAMPINAS", "RIBEIRAO", "BAURU", "SOROCABA", "SANTOS", "SJCAMPOS", "RIOPRETO", "PRUDENTE")
-    if any(w in nk_base.split() for w in ("SP", "SAO PAULO")) and not any(c in nk_base.replace(" ", "") for c in interior_sp_cities):
-        if any(c in nk_cand.replace(" ", "") for c in interior_sp_cities):
-            return True
-
     return False
 
 
@@ -699,9 +682,9 @@ CHANNEL_SYNONYMS = {
     "WARNER CHANNEL": ["WARNER TV", "WARNER"],
     "SONY CHANNEL": ["SONY", "SONY ENTERTAINMENT TELEVISION"],
     "SONY": ["SONY CHANNEL"],
-    "USA": ["USA NETWORK", "GB USA", "usanetwork.br"],
-    "USA NETWORK": ["USA", "GB USA", "usanetwork.br"],
-    "SYFY": ["SYFY", "syfy.br"],
+    "USA": ["USA NETWORK", "SYFY"],
+    "USA NETWORK": ["USA", "SYFY", "GB USA"],
+    "SYFY": ["USA", "USA NETWORK"],
     "TNT SERIES": ["TNT SERIES", "TNT SÉRIES", "TNT SERIE"],
     "AGROMAIS": ["AGRO+", "AGRO MAIS", "AGRO PLUS"],
     "AGRO+": ["AGROMAIS", "AGRO MAIS", "AGRO PLUS"],
@@ -725,11 +708,6 @@ CHANNEL_SYNONYMS = {
     "MUSIC BOX BRASIL": ["MUSIC BOX BRAZIL"],
     "CARTOON NETWORK": ["CARTOON", "CartoonNetwork.br"],
     "CARTOON": ["CARTOON NETWORK", "CartoonNetwork.br"],
-    "FOOD NETWORK": ["FoodNetwork.br", "food.network.br", "Food Network"],
-    "BAND NEWS": ["BandNews.br", "band.news.br", "BAND NEWS", "Band News"],
-    "BANDNEWS": ["BandNews.br", "band.news.br", "BAND NEWS", "Band News"],
-    "TCM": ["TCM.br", "tcm.br", "TCM"],
-    "TRUTV": ["TruTV.br", "trutv.br", "TruTV"],
     "CARTOONITO": ["CARTOONITO", "BOOMERANG"],
     "SPORTTV": ["SPORTV", "SPORTV 1"],
     "SPORTV": ["SPORTV", "SPORTV 1"],
@@ -771,9 +749,7 @@ CHANNEL_SYNONYMS = {
     "CNT": ["REDE CNT", "TV CNT"],
     "REDE BRASIL": ["RBTV", "REDE BRASIL DE TELEVISAO"],
     "REDE SUPER": ["TV SUPER"],
-    "TVE": ["TVE BAHIA", "tvebahia.br", "TV EDUCATIVA DA BAHIA"],
-    "TVE BAHIA": ["TVE", "tvebahia.br", "TV EDUCATIVA DA BAHIA"],
-    "TVE RS": ["tvers.br", "TVE RS"],
+    "TVE": ["TVE RS", "TVE BAHIA"],
     "ADULT SWIM": ["ADULT SWIN", "4DULT SWIN"],
     "ADULT SWIN": ["ADULT SWIM", "4DULT SWIN"],
     "4DULT SWIN": ["ADULT SWIM", "ADULT SWIN"],
@@ -1536,10 +1512,6 @@ def _fuzzy_incompatible(alias: str, candidate: str) -> bool:
         return True
     if ("CNNBRASIL" in candidate and "CNBC" in alias) or ("CNBC" in candidate and "CNN" in alias):
         return True
-    if ("TVESCOLA" in candidate and "TVE" in alias and "ESCOLA" not in alias) or ("TVESCOLA" in alias and "TVE" in candidate and "ESCOLA" not in candidate):
-        return True
-    if ("USANETWORK" in alias and "SYFY" in candidate) or ("SYFY" in alias and "USANETWORK" in candidate):
-        return True
     foreign_markers = ("INTERNACIONAL", "PORTUGAL", "AFRICA", "EUROPA", "GLOBOON", "GLOBONOW", "AMERICAS", "CABOVERDE", "MOZAMBIQUE")
     if any(fm in candidate for fm in foreign_markers) and not any(fm in alias for fm in foreign_markers):
         return True
@@ -2088,6 +2060,40 @@ def schedule_health(source: EpgSource, channel_id: str, now: datetime) -> dict[s
     _HEALTH_CACHE[cache_key] = result
     return result
 
+TAIL_MIN_HOURS = float(os.environ.get("TAIL_MIN_HOURS", "72"))
+TAIL_DONOR_STATS: list[str] = []
+
+def _coverage_end(match: "ChannelMatch") -> datetime | None:
+    rows = match.source.rows.get(match.channel_id) or []
+    return max((r.stop for r in rows), default=None)
+
+def find_tail_donors(matches: list["ChannelMatch"], active_sources: list[EpgSource], alias_tiers: list[list[str]],
+                     entry_name: str, now: datetime) -> list["ChannelMatch"]:
+    """Afiliada local cuja única fonte entrega só ~1 dia (Vivo Play, Claro TV+...) fica sem informação depois disso.
+    Se o melhor candidato cobre menos de TAIL_MIN_HOURS, busca candidatas nas camadas MAIS GENÉRICAS (regional/
+    nacional da mesma emissora) que se estendam além dele. Elas só valem depois que a fonte local acaba e só se
+    concordarem com ela na parte comum (checado no stitch); nunca substituem um trecho que a local cobre."""
+    ends = [e for e in (_coverage_end(m) for m in matches) if e]
+    if not ends or len(alias_tiers) < 2:
+        return []
+    best_end = max(ends)
+    if (best_end - now).total_seconds() / 3600.0 >= TAIL_MIN_HOURS:
+        return []
+    deepest = max(m.tier for m in matches)
+    if deepest >= len(alias_tiers):
+        return []
+    have = {(m.source.spec.key, m.channel_id) for m in matches}
+    donors: list[ChannelMatch] = []
+    for d in find_tiered_matches_across_sources(active_sources, alias_tiers[deepest:], [], entry_name):
+        end = _coverage_end(d)
+        if (d.source.spec.key, d.channel_id) in have or not end or end <= best_end + timedelta(hours=6):
+            continue
+        d.tier = deepest + d.tier
+        donors.append(d)
+    if donors:
+        TAIL_DONOR_STATS.append(entry_name)
+    return donors
+
 def evaluate_candidates(matches: list[ChannelMatch], now: datetime, max_active_vote_weight: float) -> tuple[CandidateEvaluation, list[CandidateEvaluation]]:
     health_by_source = {m.source.spec.key: schedule_health(m.source, m.channel_id, now) for m in matches}
     evaluations: list[CandidateEvaluation] = []
@@ -2499,6 +2505,7 @@ def stitch_multi_source_schedule(
             eff_h = 1.0 if (ev.health_score >= 0.80 and fut_h >= 48.0) else ev.health_score
             aligned_sources_data.append({
                 "ev": ev,
+                "tail_only": bool(getattr(ev, "tail_only", False)),
                 "progs": cleaned_source_progs,
                 "global_merit": 0.45 * ev.weighted_ratio + 0.35 * ev.richness_score + 0.20 * eff_h,
             })
@@ -2507,6 +2514,8 @@ def stitch_multi_source_schedule(
         return []
 
     aligned_sources_data.sort(key=lambda s: s["global_merit"], reverse=True)
+    # fim da grade das fontes principais: doadores de cauda só valem a partir daqui
+    tail_start = max((p["stop"] for sd in aligned_sources_data if not sd["tail_only"] for p in sd["progs"]), default=None)
 
     # 1. SELEÇÃO POR JANELA DE 6 HORAS
     WINDOW_HOURS = 6
@@ -2520,6 +2529,16 @@ def stitch_multi_source_schedule(
 
         best_src_idx = -1
         best_win_score = -1.0
+
+        primary_covers = False                  # alguma fonte principal cobre esta janela?
+        for sd in aligned_sources_data:
+            if sd["tail_only"]:
+                continue
+            cov = sum(max(0.0, (min(cur_win_end, p["stop"]) - max(cur_win_start, p["start"])).total_seconds())
+                      for p in sd["progs"] if p["stop"] > cur_win_start and p["start"] < cur_win_end)
+            if cov / actual_win_sec >= 0.25:
+                primary_covers = True
+                break
 
         title_counts_in_win: Counter[str] = Counter()
         for s_data in aligned_sources_data:
@@ -2537,6 +2556,8 @@ def stitch_multi_source_schedule(
                 if p["stop"] > cur_win_start and p["start"] < cur_win_end
             ]
             if not win_progs:
+                continue
+            if s_data["tail_only"] and primary_covers:
                 continue
 
             covered_sec = sum(
@@ -2604,6 +2625,8 @@ def stitch_multi_source_schedule(
             c_start, c_stop = cand["start"], cand["stop"]
             c_dur = (c_stop - c_start).total_seconds()
             if c_dur < 300:
+                continue
+            if s_data["tail_only"] and tail_start is not None and c_start < tail_start - timedelta(minutes=5):
                 continue
 
             overlapping = [
@@ -3153,7 +3176,15 @@ def main() -> None:
             report_rows.append({"target_id": target_id, "name": visible_name, "status": "missing", "source": None, "source_key": None, "source_channel_id": None, "method": "sem correspondência nas fontes ativas", "confidence": 0})
             continue
 
+        donors = [] if forced else find_tail_donors(matches, active_sources, alias_tiers, visible_name, now)
+        if donors:
+            matches = matches + donors
         chosen, evaluations = evaluate_candidates(matches, now, max_active_vote_weight)
+        donor_ids = {id(d) for d in donors}
+        for ev in evaluations:
+            ev.tail_only = id(ev.match) in donor_ids
+        if getattr(chosen, "tail_only", False):          # doador nunca é a fonte principal
+            chosen = next((ev for ev in evaluations if not ev.tail_only), chosen)
         if forced and override_source_key:
             if forced_ev := next((ev for ev in evaluations if ev.match.source.spec.key == override_source_key and ev.match.channel_id == override_id), None):
                 chosen = forced_ev
@@ -3210,6 +3241,9 @@ def main() -> None:
         val_md.append(f"- **{v['name']}** ({v['source']}): Agora **{now_title}** - Confiança **{v['confidence']}%**")
     (OUTPUT_DIR / "validation.md").write_text("\n".join(val_md) + "\n", "utf-8")
 
+    if TAIL_DONOR_STATS:
+        print(f"Cauda estendida com fonte regional/nacional (janela local < {TAIL_MIN_HOURS:.0f}h): {len(TAIL_DONOR_STATS)} canais -> "
+              + ", ".join(TAIL_DONOR_STATS[:15]) + (" ..." if len(TAIL_DONOR_STATS) > 15 else ""))
     print(f"Sucesso! EPG gerado com {programme_count} programas em {ids_count} canais base.")
 
 if __name__ == "__main__":
