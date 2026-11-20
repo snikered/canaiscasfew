@@ -160,7 +160,9 @@ SMART_TV_SAFE_CANONICAL_IDS: dict[str, str] = {
 def is_smart_tv_safe_id(tvid: str) -> bool:
     if not tvid or " " in tvid.strip():
         return False
-    return not any(ch in tvid for ch in ("&", "!", "+", '"', "'", "<", ">", ";"))
+    if any(ch in tvid for ch in ("&", "!", "+", '"', "'", "<", ">", ";")):
+        return False
+    return not any(unicodedata.combining(c) for c in unicodedata.normalize("NFKD", tvid))
 
 
 def sanitize_xmltv_id(raw_id: str) -> str:
@@ -172,6 +174,8 @@ def sanitize_xmltv_id(raw_id: str) -> str:
         return SMART_TV_SAFE_CANONICAL_IDS[up]
     if is_smart_tv_safe_id(s):
         return s
+    s = unicodedata.normalize("NFKD", s)
+    s = "".join(c for c in s if not unicodedata.combining(c))
     s = re.sub(r"(?i)\bA\s*&\s*E\b", "ae", s)
     s = re.sub(r"(?i)\bBM\s*&\s*C\b", "bmc", s)
     s = re.sub(r"(?i)\bH\s*&\s*H\b", "HomeHealth", s)
@@ -1545,6 +1549,8 @@ def match_conflicts_network(entry_name: str, source: "EpgSource", channel_id: st
                 return True
         if net != "SBT" and any(k in n for k in ("REDE MASSA", "TV JANGADEIRO", "TV ALTEROSA", "TV ARATU", "SERRA DOURADA", "TV JORNAL")):
             return True
+        if net != "RECORD" and any(k in n for k in ("NDTV", "RICTV", "RIC TV", "TV GUAIBA", "TV ITAPOAN", "TV PAJUCARA")):
+            return True
         if n.startswith(("TV BRASIL", "REDE TV", "REDETV")) or n.startswith(_GLOBO_ONLY_BRANDS) \
                 or n.replace(" ", "").startswith(_GLOBO_BRAND_COMPACT):
             return True
@@ -2703,6 +2709,8 @@ def write_epg_stream(
         target_id = str(entry.get("id", ""))
         channel_name = str(entry.get("name", target_id))
         stitched = stitch_multi_source_schedule(all_evaluations, target_id, channel_name, cutoff, max_future, overrides)
+        if not stitched:
+            continue
         all_names = get_clean_aliases(entry)
         export_ids = get_primary_export_ids(entry)
         
