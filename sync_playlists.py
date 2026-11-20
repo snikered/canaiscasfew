@@ -88,6 +88,13 @@ CHANNEL_SYNONYMS: dict[str, list[str]] = {
     "TVE": ["tve.br", "tvescola.br", "TVE", "TVE RS"],
     "TVE RS": ["tve.br", "tvescola.br", "TVE RS", "TVE"],
     "TVE BAHIA": ["tvebahia.br", "TVE BAHIA", "TVE Bahia"],
+    "CAZE TV": ["caze.tv", "CAZE TV", "CAZETV"],
+    "CAZETV": ["caze.tv", "CAZE TV", "CAZETV"],
+    "CAZE TV 1": ["caze.tv", "CAZE TV", "CAZETV"],
+    "CAZE TV 2": ["caze.tv", "CAZE TV", "CAZETV"],
+    "CAZE TV 3": ["caze.tv", "CAZE TV", "CAZETV"],
+    "DISNEY 1": ["disney.plus.1", "disney.plus.1.br", "DISNEY PLUS 1", "DISNEY+ 1"],
+    "DISNEY PLUS 1": ["disney.plus.1", "disney.plus.1.br", "DISNEY PLUS 1", "DISNEY+ 1"],
     "HBO 2": ["HBO2.br", "hbo2.br", "HBO 2", "HBO2"],
     "HBO": ["hbo.br", "HBO.br", "HBO"],
     "HBO PLUS": ["HBOPlusBrasil.br", "hbo.plus.br", "HBOPlus.br", "HBO Plus"],
@@ -214,7 +221,7 @@ CHANNEL_SYNONYMS: dict[str, list[str]] = {
 
 
 def norm_lookup_key(title: str) -> str:
-    s = html.unescape(title or "")
+    s = html.unescape(title or "").replace("\xa0", " ").replace("\u200b", "").replace("\ufeff", "")
     s = unicodedata.normalize("NFKD", s)
     s = "".join(c for c in s if not unicodedata.combining(c)).upper()
     s = re.sub(r"[^A-Z0-9]+", " ", s)
@@ -224,7 +231,8 @@ def norm_lookup_key(title: str) -> str:
 
 def clean_channel_title_for_epg(raw_name: str) -> str:
     """Limpa todas as tags de resolução, codec, servidor (BR2), [P], (Eventos), ² do nome do canal, preservando numeração real."""
-    s = html.unescape(raw_name or "")
+    s = html.unescape(raw_name or "").replace("\xa0", " ").replace("\u200b", "").replace("\ufeff", "")
+    s = re.sub(r"\[\s*\]", " ", s)
     s = re.sub(r"\.(?:br|us|uk|pt|ar|mx|cl|co|pe|ca|latam|int|bt)$", " ", s.strip(), flags=re.I)
     s = re.sub(r"(?<=[A-Za-z0-9])(4K|8K|UHD|FHDR|FHD|(?<![Ff])HD|SD)\b", r" \1", s, flags=re.I)
     s = re.sub(r"(?<=[A-Za-z0-9])(?:BR\d+|SRV\d+|OP\d+)\b", " ", s, flags=re.I)
