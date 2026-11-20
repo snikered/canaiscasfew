@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 """Extrator Híbrido da Claro TV+ (API mfwkweb + Complemento Multi-Espelho) -> claro_epg.xml.gz
-- Usa headers de IP Brasileiro para evitar Geo-Block no GitHub Actions.
-- Combina a API mfwkweb da Claro com o complemento de grade do repositório BrazilTVEPG (CLARO_FALLBACK_XML),
-  garantindo que nenhum canal da Claro fique de fora mesmo se a API limitar conexões do datacenter.
-- Garante a presença e grade do Love Nature (LoveNature.br) e canais documentais/esportivos.
+- Mostra diagnóstico real de quantos canais vieram da API vs. Fallback XML.
+- Grade sintética do Love Nature desativada por padrão (ative com ALLOW_SYNTHETIC_LOVE_NATURE=1).
 - Preserva fuso horário exato de Brasília (-0300).
 - Formata <desc> com 🟢 LIVRE / 🟠 +14 / ⚫ +18 e [T03E07].
 """
@@ -25,6 +23,7 @@ import requests
 
 BRT_TZ = timezone(timedelta(hours=-3))
 OUT_CLARO_GZ = Path("claro_epg.xml.gz")
+ALLOW_SYNTHETIC_LOVE_NATURE = os.environ.get("ALLOW_SYNTHETIC_LOVE_NATURE", "0").strip().lower() in {"1", "true", "yes"}
 
 CLARO_MFWK_BASE = "https://mfwkweb-api.clarovideo.net/services/epg"
 CLARO_FALLBACK_XMLS = [
@@ -192,7 +191,7 @@ def parse_claro_time_to_brt(unix_ts: Any = None, date_str: Any = None) -> tuple[
     return "", None
 
 
-def fetch_claro_mfwk_window(session: requests.Session, dt_from: datetime, dt_to: datetime) -> list[dict[str, Any]]:
+def fetch_claro_mfwk_window(session: requests.Session, dt_from: datetime, dt_to: datetime) -> tuple[list[dict[str, Any]], str]:
     params = {
         **CLARO_COMMON_PARAMS,
         "date_from": dt_from.strftime("%Y%m%d%H%M%S"),
@@ -202,10 +201,11 @@ def fetch_claro_mfwk_window(session: requests.Session, dt_from: datetime, dt_to:
     try:
         r = session.get(f"{CLARO_MFWK_BASE}/channel", params=params, timeout=45)
         if r.status_code == 200:
-            return r.json().get("response", {}).get("channels") or []
-    except Exception:
-        pass
-    return []
+            channels = r.json().get("response", {}).get("channels") or []
+            return channels, ""
+        return [], f"HTTP {r.status_code}"
+    except Exception as exc:
+        return [], f"{type(exc).__name__}: {exc}"
 
 
 def supplement_from_fallback_xmls(
@@ -218,10 +218,10 @@ def supplement_from_fallback_xmls(
         try:
             resp = session.get(url, timeout=60)
             if resp.status_code != 200 or len(resp.content) < 1000:
+                print(f"  ⚠ Fallback {url} retornou HTTP {resp.status_code} ({len(resp.content)} bytes)")
                 continue
             root = ET.fromstring(resp.content)
             raw_id_to_xml_cid: dict[str, str] = {}
-            raw_id_to_name: dict[str, str] = {}
 
             for child in root:
                 tag = child.tag.rsplit("}", 1)[-1]
@@ -233,7 +233,6 @@ def supplement_from_fallback_xmls(
                     ch_name = dns[0] if dns else raw_cid
                     xml_cid = make_channel_id(ch_name)
                     raw_id_to_xml_cid[raw_cid] = xml_cid
-                    raw_id_to_name[raw_cid] = ch_name
 
                     if xml_cid not in channels_by_id:
                         ch_el = ET.Element("channel", {"id": xml_cid})
@@ -248,8 +247,8 @@ def supplement_from_fallback_xmls(
                                 break
                         channels_by_id[xml_cid] = ch_el
 
-            # Só importa programas para canais que ainda têm menos de 5 programas na API mfwkweb
             sparse_cids = {cid for cid in channels_by_id if len(progs_by_channel.get(cid, {})) < 5}
+            added_progs = 0
             for child in root:
                 tag = child.tag.rsplit("}", 1)[-1]
                 if tag != "programme":
@@ -329,7 +328,11 @@ def supplement_from_fallback_xmls(
                     v_node.text = rating_code
 
                 progs_by_channel.setdefault(xml_cid, {})[start_str] = (dt_start, p_el)
-        except Exception:
+                added_progs += 1
+
+            print(f"  -> Fallback {url}: +{added_progs} programas importados.")
+        except Exception as exc:
+            print(f"  ⚠ Erro no fallback {url}: {exc}")
             continue
 
 
@@ -339,7 +342,7 @@ def ensure_love_nature_schedule(
     start_brt: datetime,
     end_brt: datetime,
 ) -> None:
-    """Garante que o canal Love Nature 4K (LoveNature.br) esteja presente na Claro TV+ caso a API omita o canal."""
+    """Opcional: cria grade sintética para LoveNature.br se ALLOW_SYNTHETIC_LOVE_NATURE=1."""
     ln_id = "LoveNature.br"
     if len(progs_by_channel.get(ln_id, {})) >= 4:
         return
@@ -414,11 +417,15 @@ def generate_claro_epg(days_ahead: int = 2, out_gz_path: Path = OUT_CLARO_GZ) ->
     tv_root = ET.Element("tv", {"generator-info-name": "claro-tvmais-extractor"})
     channels_by_id: dict[str, ET.Element] = {}
     progs_by_channel: dict[str, dict[str, tuple[datetime, ET.Element]]] = {}
+    api_errors: list[str] = []
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
         futures = [pool.submit(fetch_claro_mfwk_window, session, w_f, w_t) for w_f, w_t in windows]
         for fut in concurrent.futures.as_completed(futures):
-            for ch in fut.result():
+            ch_list, err = fut.result()
+            if err:
+                api_errors.append(err)
+            for ch in ch_list:
                 if not isinstance(ch, dict):
                     continue
                 grp_common = ch.get("group", {}).get("common", {}) if isinstance(ch.get("group"), dict) else {}
@@ -463,7 +470,7 @@ def generate_claro_epg(days_ahead: int = 2, out_gz_path: Path = OUT_CLARO_GZ) ->
                             se_badge = f"[T{s_i:02d}E{e_i:02d}]"
 
                     raw_rating = ev.get("parental_rating") or ext.get("parental_rating") or ev.get("rating_code") or ""
-                    rating_badge, rating_code = format_rating_badge(raw_rating)
+                    rating_badge, _ = format_rating_badge(raw_rating)
                     dur_mins = int((dt_stop - dt_start).total_seconds() // 60)
 
                     p_el = ET.Element("programme", {"start": start_str, "stop": stop_str, "channel": xml_cid})
@@ -484,13 +491,20 @@ def generate_claro_epg(days_ahead: int = 2, out_gz_path: Path = OUT_CLARO_GZ) ->
 
                     progs_by_channel.setdefault(xml_cid, {})[start_str] = (dt_start, p_el)
 
-    # Complementa canais faltantes com o fallback XML da Claro e garante o Love Nature
-    supplement_from_fallback_xmls(session, channels_by_id, progs_by_channel)
-    ensure_love_nature_schedule(channels_by_id, progs_by_channel, start_brt, end_brt)
+    api_ch_count = len(channels_by_id)
+    api_prog_count = sum(len(v) for v in progs_by_channel.values())
+    print(f"  -> Diagnóstico API mfwkweb Claro: {api_ch_count} canais, {api_prog_count} programas"
+          + (f" (erros: {len(api_errors)}/{len(windows)}, ex: {api_errors[0]})" if api_errors else " (0 erros)"))
 
+    supplement_from_fallback_xmls(session, channels_by_id, progs_by_channel)
+    if ALLOW_SYNTHETIC_LOVE_NATURE:
+        ensure_love_nature_schedule(channels_by_id, progs_by_channel, start_brt, end_brt)
+
+    valid_channels = 0
     for cid in sorted(channels_by_id.keys()):
         if len(progs_by_channel.get(cid, {})) >= 2:
             tv_root.append(channels_by_id[cid])
+            valid_channels += 1
 
     prog_count = 0
     for cid in sorted(progs_by_channel.keys()):
@@ -504,7 +518,7 @@ def generate_claro_epg(days_ahead: int = 2, out_gz_path: Path = OUT_CLARO_GZ) ->
     with gzip.open(out_gz_path, "wb", compresslevel=6) as gz_out:
         gz_out.write(xml_bytes)
 
-    print(f"✓ Claro TV+ EPG salvo em {out_gz_path} ({len(channels_by_id)} canais, {prog_count} programas válidos em -0300).")
+    print(f"✓ Claro TV+ EPG salvo em {out_gz_path} ({valid_channels} canais válidos, {prog_count} programas em -0300).")
     return prog_count
 
 
