@@ -423,6 +423,7 @@ IPTV_USER_AGENTS = [
 EPG_SOURCES_CONFIG = [
     ("Afiliadas Locais", "epg_afiliadas.xml", "afiliadas_locais", 1.0),
     ("Vivo Play API", "vivo_epg.xml.gz", "vivo_api", 1.0),
+    ("Globo Oficial API", "globo_epg.xml.gz", "globo_api", 1.0),
     ("Claro TV+ API", "claro_epg.xml.gz", "claro_api", 1.0),
     ("Claro Git", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/claro.xml", "git_operadora", 1.0),
     ("GuiaDeTV", "epg_guiadetv.xml", "guiadetv", 1.0),
@@ -2810,6 +2811,14 @@ def ensure_operator_epgs_generated() -> None:
             generate_vivo_epg()
         except Exception as e:
             print(f"  -> Aviso ao extrair Vivo Play API: {e}")
+
+    if not Path("globo_epg.xml.gz").exists() and Path("fetch_globo_epg.py").exists():
+        try:
+            print("\nGerando globo_epg.xml.gz direto da API oficial da Globo...")
+            from fetch_globo_epg import generate_globo_epg
+            generate_globo_epg()
+        except Exception as e:
+            print(f"  -> Aviso ao extrair Globo Oficial API: {e}")
 
 def main() -> None:
     print("Iniciando geração de EPG (100% Mérito Dinâmico por Canal + Recorte de Grade por Período do Dia)...")
