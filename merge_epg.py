@@ -634,16 +634,18 @@ CHANNEL_SYNONYMS = {
     "CNBC": ["TIMES BRASIL", "TIMES BRASIL CNBC", "TIMES BRASIL LICENCIADO EXCLUSIVO CNBC", "CNBC BRASIL", "timesbrasil.br"],
     "TIMES BRASIL": ["TIMES BRASIL CNBC", "TIMES BRASIL LICENCIADO EXCLUSIVO CNBC", "CNBC", "CNBC BRASIL", "timesbrasil.br"],
     "TIMES BRASIL CNBC": ["TIMES BRASIL", "TIMES BRASIL LICENCIADO EXCLUSIVO CNBC", "CNBC", "CNBC BRASIL", "timesbrasil.br"],
-    "DISNEY PLUS 1": ["DISNEY PLUS ESPN", "DISNEY PLUS ESPN 1", "DISNEY+ 1", "DISNEY+ ESPN 1"],
-    "DISNEY PLUS 2": ["DISNEY PLUS ESPN 2", "DISNEY+ 2", "DISNEY+ ESPN 2"],
-    "DISNEY PLUS 3": ["DISNEY PLUS ESPN 3", "DISNEY+ 3", "DISNEY+ ESPN 3"],
-    "DISNEY PLUS 4": ["DISNEY PLUS ESPN 4", "DISNEY+ 4", "DISNEY+ ESPN 4"],
-    "DISNEY PLUS 5": ["DISNEY PLUS ESPN 5", "DISNEY+ 5", "DISNEY+ ESPN 5"],
-    "DISNEY PLUS 6": ["DISNEY PLUS ESPN 6", "DISNEY+ 6", "DISNEY+ ESPN 6"],
-    "DISNEY PLUS 7": ["DISNEY PLUS ESPN 7", "DISNEY+ 7", "DISNEY+ ESPN 7"],
+    "DISNEY PLUS 1": ["DISNEY PLUS ESPN", "DISNEY PLUS ESPN 1", "DISNEY+ 1", "DISNEY+ 01", "DISNEY PLUS 01", "DISNEY+ ESPN 1"],
+    "DISNEY PLUS 2": ["DISNEY PLUS ESPN 2", "DISNEY+ 2", "DISNEY+ 02", "DISNEY+ ESPN 2"],
+    "DISNEY PLUS 3": ["DISNEY PLUS ESPN 3", "DISNEY+ 3", "DISNEY+ 03", "DISNEY+ ESPN 3"],
+    "DISNEY PLUS 4": ["DISNEY PLUS ESPN 4", "DISNEY+ 4", "DISNEY+ 04", "DISNEY+ ESPN 4"],
+    "DISNEY PLUS 5": ["DISNEY PLUS ESPN 5", "DISNEY+ 5", "DISNEY+ 05", "DISNEY+ ESPN 5"],
+    "DISNEY PLUS 6": ["DISNEY PLUS ESPN 6", "DISNEY+ 6", "DISNEY+ 06", "DISNEY+ ESPN 6"],
+    "DISNEY PLUS 7": ["DISNEY PLUS ESPN 7", "DISNEY+ 7", "DISNEY+ 07", "DISNEY+ ESPN 7"],
     "GOAT": ["CANAL GOAT", "GOAT BR", "GOAT TV"],
-    "CAZE TV": ["CAZETV", "CAZE TV 1", "CAZETV 1"],
-    "CAZE TV 1": ["CAZETV", "CAZE TV"],
+    "CAZE TV": ["CAZETV", "CAZE TV 1", "CAZETV 1", "CAZE TV 01", "CAZE TV 2", "CAZE TV 02", "CAZE TV 3", "CAZE TV 03"],
+    "CAZE TV 1": ["CAZETV", "CAZE TV", "CAZE TV 01"],
+    "CAZE TV 2": ["CAZETV", "CAZE TV", "CAZE TV 02"],
+    "CAZE TV 3": ["CAZETV", "CAZE TV", "CAZE TV 03"],
     "UFC FIGHT PASS": ["UFC TV", "UFC", "UFC FIGHT PASS 1"],
     "NBA TV": ["NBA", "NBATV"],
     "FORMULA 1 TV": ["F1 TV", "FORMULA 1", "F1TV"],
@@ -799,7 +801,8 @@ POISONED_OPEN_TV_IDS = {
 def strip_qualities_keep_case(name: str) -> str:
     """Remove tags de qualidade/codec (incluindo .br, 4K/8K/FHD/HD grudados no nome e opções OP1/OP2), sem cortar FHD em 'F'."""
     if not name: return ""
-    s = html.unescape(name)
+    s = html.unescape(name).replace("\xa0", " ").replace("\u200b", "").replace("\ufeff", "")
+    s = re.sub(r"\[\s*\]", " ", s)
     s = re.sub(r'\.(?:br|us|uk|pt|ar|mx|cl|co|pe|ca|latam|int|bt)$', ' ', s.strip(), flags=re.IGNORECASE)
     s = re.sub(r'(?<=[A-Za-z0-9])(4K|8K|UHD|FHDR|FHD|(?<![Ff])HD|SD)\b', r' \1', s, flags=re.IGNORECASE)
     s = re.sub(
@@ -1006,8 +1009,7 @@ def is_valid_provider_tvid(channel_name: str, tvid: str, allow_new_m3u_id: bool 
         if SequenceMatcher(None, tvid_clean, cand_alnum).ratio() >= (0.52 if allow_new_m3u_id else 0.65):
             return True
     return False
-
-def is_meaningful_programme(norm_title: str) -> bool:
+  def is_meaningful_programme(norm_title: str) -> bool:
     if not norm_title or len(norm_title) < 2:
         return False
     if norm_title in PLACEHOLDER_TITLES:
@@ -2071,8 +2073,8 @@ def find_tail_donors(matches: list["ChannelMatch"], active_sources: list[EpgSour
                      entry_name: str, now: datetime) -> list["ChannelMatch"]:
     """Afiliada local cuja única fonte entrega só ~1 dia (Vivo Play, Claro TV+...) fica sem informação depois disso.
     Se o melhor candidato cobre menos de TAIL_MIN_HOURS, busca candidatas nas camadas MAIS GENÉRICAS (regional/
-    nacional da mesma emissora) que se estendam além dele. Elas só valem depois que a fonte local acaba e só se
-    concordarem com ela na parte comum (checado no stitch); nunca substituem um trecho que a local cobre."""
+    nacional da mesma emissora) que se estendam além dele. Elas só valem depois que a fonte local acaba ou em
+    buracos vazios sem sobrepor a local."""
     ends = [e for e in (_coverage_end(m) for m in matches) if e]
     if not ends or len(alias_tiers) < 2:
         return []
@@ -2231,7 +2233,9 @@ def get_clean_aliases(entry: dict[str, object]) -> list[str]:
     raw_name = str(entry.get("name", "")).strip()
 
     def add_alias(val: str):
-        v = html.unescape(str(val or "")).strip()
+        v = html.unescape(str(val or "")).replace("\xa0", " ").replace("\u200b", "").replace("\ufeff", "")
+        v = re.sub(r"\[\s*\]", "", v)
+        v = " ".join(v.split()).strip()
         if not v or len(v) < 2 or len(v) > 100 or v.upper().endswith(" F"):
             return
         if has_conflicting_channel_number(raw_name, v) or has_conflicting_region(raw_name, v):
@@ -2243,7 +2247,7 @@ def get_clean_aliases(entry: dict[str, object]) -> list[str]:
     clean_base = strip_qualities_keep_case(raw_name)
     norm_clean = normalizar_canal(raw_name)
 
-    base_variants = [clean_base, norm_clean, raw_name]
+    base_variants = [raw_name, clean_base, norm_clean]
     for bv in list(base_variants):
         if "&" in bv:
             base_variants.append(bv.replace("&", ""))
@@ -2514,8 +2518,6 @@ def stitch_multi_source_schedule(
         return []
 
     aligned_sources_data.sort(key=lambda s: s["global_merit"], reverse=True)
-    # fim da grade das fontes principais: doadores de cauda só valem a partir daqui
-    tail_start = max((p["stop"] for sd in aligned_sources_data if not sd["tail_only"] for p in sd["progs"]), default=None)
 
     # 1. SELEÇÃO POR JANELA DE 6 HORAS
     WINDOW_HOURS = 6
@@ -2615,18 +2617,17 @@ def stitch_multi_source_schedule(
 
     merged_timeline.sort(key=lambda x: x["start"])
 
-    # 2. TAPA-BURACOS CIRÚRGICO DENTRO DAS JANELAS
+    # 2. TAPA-BURACOS CIRÚRGICO DENTRO DAS JANELAS (inclui tail_only onde houver buraco vazio)
     MIN_GAP_SECONDS = 10 * 60
     MAX_EDGE_TRIM_SECONDS = 15 * 60
 
-    for s_data in aligned_sources_data:
+    ordered_gap_fillers = sorted(aligned_sources_data, key=lambda s: (int(s["tail_only"]), -s["global_merit"]))
+    for s_data in ordered_gap_fillers:
         added_any = False
         for cand in s_data["progs"]:
             c_start, c_stop = cand["start"], cand["stop"]
             c_dur = (c_stop - c_start).total_seconds()
             if c_dur < 300:
-                continue
-            if s_data["tail_only"] and tail_start is not None and c_start < tail_start - timedelta(minutes=5):
                 continue
 
             overlapping = [
