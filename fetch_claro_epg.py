@@ -11,6 +11,7 @@ import gzip
 import html
 import os
 import re
+import time
 import unicodedata
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta, timezone
@@ -143,9 +144,35 @@ def create_session() -> requests.Session:
     return s
 
 
+def _get_with_retry(
+    session: requests.Session,
+    url: str,
+    params: dict[str, str],
+    timeout: int = 30,
+    attempts: int = 3,
+) -> requests.Response:
+    backoffs = (2, 5, 10)
+    last_exc: Exception | None = None
+    for attempt in range(1, attempts + 1):
+        try:
+            r = session.get(url, params=params, timeout=timeout)
+            if r.status_code in (429, 500, 502, 503, 504) and attempt < attempts:
+                time.sleep(backoffs[attempt - 1])
+                continue
+            return r
+        except requests.RequestException as exc:
+            last_exc = exc
+            if attempt < attempts:
+                time.sleep(backoffs[attempt - 1])
+                continue
+            raise
+    raise RuntimeError(f"Falha após {attempts} tentativas: {last_exc}")
+
+
 def fetch_channels(session: requests.Session) -> dict[str, dict[str, str]]:
     """Retorna mapa id_canal -> {name, xml_cid, logo, slug}."""
-    r = session.get(
+    r = _get_with_retry(
+        session,
         f"{GATEKEEPER_BASE}/canal/select",
         params={"q": f"id_cidade:{CLARO_CITY_ID}", "wt": "json", "rows": "1000", "start": "0"},
         timeout=30,
@@ -185,7 +212,7 @@ def fetch_exibicoes_window(session: requests.Session, dt_from_utc: datetime, dt_
             "start": str(start),
             "sort": "dh_inicio asc",
         }
-        r = session.get(f"{GATEKEEPER_BASE}/exibicao/select", params=params, timeout=45)
+        r = _get_with_retry(session, f"{GATEKEEPER_BASE}/exibicao/select", params=params, timeout=45)
         if r.status_code != 200:
             break
         resp = r.json().get("response", {})
