@@ -14,6 +14,7 @@ import json
 import os
 import random
 import re
+import time
 import unicodedata
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta, timezone
@@ -210,26 +211,47 @@ def get_json(
     label: str,
     timeout: int = 30,
     params: dict[str, str] | None = None,
+    attempts: int = 3,
 ) -> Any | None:
-    try:
-        r = session.get(url, params=params, timeout=timeout)
-    except requests.RequestException as exc:
-        print(f"  - [{label}] erro de rede: {type(exc).__name__}: {exc}")
-        return None
-    raw = r.content or b""
-    _debug_dump(re.sub(r"[^A-Za-z0-9]+", "_", label)[:60] + ".bin", raw)
-    ctype = r.headers.get("Content-Type", "")
-    if r.status_code != 200:
-        print(f"  - [{label}] HTTP {r.status_code} ({ctype}) {raw[:120]!r}")
-        return None
-    if not raw.strip():
-        print(f"  - [{label}] resposta vazia (HTTP 200, {ctype})")
-        return None
-    try:
-        return json.loads(raw.decode("utf-8-sig", errors="replace"))
-    except ValueError:
-        print(f"  - [{label}] resposta não é JSON ({ctype}): {raw[:160]!r}")
-        return None
+    backoffs = (2, 5, 10)
+    for attempt in range(1, attempts + 1):
+        try:
+            r = session.get(url, params=params, timeout=timeout)
+        except requests.RequestException as exc:
+            if attempt < attempts:
+                fake_ip = random.choice(BR_IPS)
+                session.headers.update({"X-Forwarded-For": fake_ip, "X-Real-IP": fake_ip})
+                time.sleep(backoffs[attempt - 1])
+                continue
+            print(f"  - [{label}] erro de rede: {type(exc).__name__}: {exc}")
+            return None
+
+        raw = r.content or b""
+        _debug_dump(re.sub(r"[^A-Za-z0-9]+", "_", label)[:60] + ".bin", raw)
+        ctype = r.headers.get("Content-Type", "")
+
+        if r.status_code in (429, 500, 502, 503, 504) or (r.status_code == 200 and not raw.strip()):
+            if attempt < attempts:
+                fake_ip = random.choice(BR_IPS)
+                session.headers.update({"X-Forwarded-For": fake_ip, "X-Real-IP": fake_ip})
+                time.sleep(backoffs[attempt - 1])
+                continue
+
+        if r.status_code != 200:
+            print(f"  - [{label}] HTTP {r.status_code} ({ctype}) {raw[:120]!r}")
+            return None
+        if not raw.strip():
+            print(f"  - [{label}] resposta vazia (HTTP 200, {ctype})")
+            return None
+        try:
+            return json.loads(raw.decode("utf-8-sig", errors="replace"))
+        except ValueError:
+            if attempt < attempts:
+                time.sleep(backoffs[attempt - 1])
+                continue
+            print(f"  - [{label}] resposta não é JSON ({ctype}): {raw[:160]!r}")
+            return None
+    return None
 
 
 def extract_items(payload: Any) -> list[dict[str, Any]]:
