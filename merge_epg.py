@@ -421,6 +421,7 @@ IPTV_USER_AGENTS = [
 ]
 
 EPG_SOURCES_CONFIG = [
+    ("Globoplay Oficial API", "globoplay_epg.xml.gz", "globoplay_api", 1.0),
     ("Globo Oficial API", "globo_epg.xml.gz", "globo_api", 1.0),
     ("Afiliadas Locais", "epg_afiliadas.xml", "afiliadas_locais", 1.0),
     ("Vivo Play API", "vivo_epg.xml.gz", "vivo_api", 1.0),
