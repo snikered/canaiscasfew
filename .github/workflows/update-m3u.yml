@@ -43,7 +43,7 @@ jobs:
 
       - name: Rodar Todos os Extratores (Em Paralelo + Tolerante a Falhas)
         run: |
-          for script in fetch_claro_epg.py fetch_vivo_epg.py pull_afiliadas_locais.py guiadetv.py meuguia.py tvplus.py mitv.py webfinal.py; do
+          for script in fetch_claro_epg.py fetch_vivo_epg.py fetch_globoplay_epg.py pull_afiliadas_locais.py guiadetv.py meuguia.py tvplus.py mitv.py webfinal.py; do
             if [ -f "$script" ]; then
               (python3 "$script" || echo "⚠ Aviso: $script terminou com erro, mas o pipeline continuará.") &
             fi
