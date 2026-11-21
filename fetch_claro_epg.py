@@ -28,7 +28,6 @@ ALLOW_SYNTHETIC_LOVE_NATURE = os.environ.get("ALLOW_SYNTHETIC_LOVE_NATURE", "0")
 CLARO_MFWK_BASE = "https://mfwkweb-api.clarovideo.net/services/epg"
 CLARO_FALLBACK_XMLS = [
     "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/claro.xml",
-    "https://www.open-epg.com/files/brazil.xml",
 ]
 
 BR_IPS = [
