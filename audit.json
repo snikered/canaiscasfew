@@ -1,0 +1,1566 @@
+{
+  "generated_at_brt": "21/11/2026 14:40:58 -0300",
+  "epg_file": "output/epg.xml.gz",
+  "summary": {
+    "xml_channels": 748,
+    "programmes": 58883,
+    "min_gap_minutes": 2,
+    "min_future_hours": 24,
+    "no_now_count": 1,
+    "gaps_count": 52,
+    "short_horizon_count": 1,
+    "empty_channels_count": 0,
+    "unsafe_ids_count": 0,
+    "missing_total": 1097,
+    "missing_br_real": 194,
+    "missing_ppv_evento": 233,
+    "missing_estrangeiro": 638,
+    "missing_duplicata": 32
+  },
+  "source_errors": {},
+  "no_now": [
+    {
+      "channel_id": "sportv.4",
+      "source": "Globo",
+      "future_hours": 12.3,
+      "next": "22/11 00:00 (Aquecimento sportv: Fórmula )",
+      "reason": "Falta de conteúdo na fonte única (Globo) — nenhuma outra fonte cobriu o canal para tapar o buraco"
+    }
+  ],
+  "gaps": [
+    {
+      "channel_id": "sbt.cuiaba",
+      "source": "MiTV",
+      "gap_count": 4,
+      "max_gap_min": 165,
+      "samples": [
+        "22/11 15:15-18:00 (165m)",
+        "23/11 12:30-12:40 (10m)",
+        "24/11 05:30-06:00 (30m)",
+        "24/11 12:30-12:40 (10m)"
+      ],
+      "reason": "Falta de conteúdo na origem regional (MiTV; 2 fontes) — afiliada/grade local veio com lacuna"
+    },
+    {
+      "channel_id": "sbt.cuiaba.mt",
+      "source": "Open-EPG BR",
+      "gap_count": 4,
+      "max_gap_min": 165,
+      "samples": [
+        "22/11 15:15-18:00 (165m)",
+        "23/11 12:30-12:40 (10m)",
+        "24/11 05:30-06:00 (30m)",
+        "24/11 12:30-12:40 (10m)"
+      ],
+      "reason": "Falta de conteúdo na origem regional (Open-EPG BR; 2 fontes) — afiliada/grade local veio com lacuna"
+    },
+    {
+      "channel_id": "sbt.mt",
+      "source": "MiTV",
+      "gap_count": 4,
+      "max_gap_min": 165,
+      "samples": [
+        "22/11 15:15-18:00 (165m)",
+        "23/11 12:30-12:40 (10m)",
+        "24/11 05:30-06:00 (30m)",
+        "24/11 12:30-12:40 (10m)"
+      ],
+      "reason": "Falta de conteúdo na origem regional (MiTV; 2 fontes) — afiliada/grade local veio com lacuna"
+    },
+    {
+      "channel_id": "sbt.alagoas",
+      "source": "MiTV",
+      "gap_count": 2,
+      "max_gap_min": 165,
+      "samples": [
+        "22/11 15:15-18:00 (165m)",
+        "24/11 05:30-06:00 (30m)"
+      ],
+      "reason": "Falta de conteúdo na origem regional (MiTV; 2 fontes) — afiliada/grade local veio com lacuna"
+    },
+    {
+      "channel_id": "sbt.alagoas.tv.ponta.verde",
+      "source": "MiTV",
+      "gap_count": 2,
+      "max_gap_min": 165,
+      "samples": [
+        "22/11 15:15-18:00 (165m)",
+        "24/11 05:30-06:00 (30m)"
+      ],
+      "reason": "Falta de conteúdo na origem regional (MiTV; 2 fontes) — afiliada/grade local veio com lacuna"
+    },
+    {
+      "channel_id": "sbt.jornal",
+      "source": "MiTV",
+      "gap_count": 2,
+      "max_gap_min": 165,
+      "samples": [
+        "22/11 15:15-18:00 (165m)",
+        "24/11 05:30-06:00 (30m)"
+      ],
+      "reason": "Falta de conteúdo na origem regional (MiTV; 3 fontes) — afiliada/grade local veio com lacuna"
+    },
+    {
+      "channel_id": "sbt.jornal.pe",
+      "source": "MiTV",
+      "gap_count": 2,
+      "max_gap_min": 165,
+      "samples": [
+        "22/11 15:15-18:00 (165m)",
+        "24/11 05:30-06:00 (30m)"
+      ],
+      "reason": "Falta de conteúdo na origem regional (MiTV; 3 fontes) — afiliada/grade local veio com lacuna"
+    },
+    {
+      "channel_id": "sbt.pa",
+      "source": "MiTV",
+      "gap_count": 2,
+      "max_gap_min": 165,
+      "samples": [
+        "22/11 15:15-18:00 (165m)",
+        "24/11 05:30-06:00 (30m)"
+      ],
+      "reason": "Falta de conteúdo na origem regional (MiTV; 2 fontes) — afiliada/grade local veio com lacuna"
+    },
+    {
+      "channel_id": "sbt.pa.guajara",
+      "source": "MiTV",
+      "gap_count": 2,
+      "max_gap_min": 165,
+      "samples": [
+        "22/11 15:15-18:00 (165m)",
+        "24/11 05:30-06:00 (30m)"
+      ],
+      "reason": "Falta de conteúdo na origem regional (MiTV; 2 fontes) — afiliada/grade local veio com lacuna"
+    },
+    {
+      "channel_id": "sbt.para",
+      "source": "MiTV",
+      "gap_count": 2,
+      "max_gap_min": 165,
+      "samples": [
+        "22/11 15:15-18:00 (165m)",
+        "24/11 05:30-06:00 (30m)"
+      ],
+      "reason": "Falta de conteúdo na origem regional (MiTV; 2 fontes) — afiliada/grade local veio com lacuna"
+    },
+    {
+      "channel_id": "sbt.pi",
+      "source": "MiTV",
+      "gap_count": 2,
+      "max_gap_min": 165,
+      "samples": [
+        "22/11 15:15-18:00 (165m)",
+        "24/11 05:30-06:00 (30m)"
+      ],
+      "reason": "Falta de conteúdo na origem regional (MiTV; 2 fontes) — afiliada/grade local veio com lacuna"
+    },
+    {
+      "channel_id": "sbt.sc",
+      "source": "MiTV",
+      "gap_count": 2,
+      "max_gap_min": 165,
+      "samples": [
+        "22/11 15:15-18:00 (165m)",
+        "24/11 05:30-06:00 (30m)"
+      ],
+      "reason": "Falta de conteúdo na origem regional (MiTV; 2 fontes) — afiliada/grade local veio com lacuna"
+    },
+    {
+      "channel_id": "sbt.to",
+      "source": "MiTV",
+      "gap_count": 2,
+      "max_gap_min": 165,
+      "samples": [
+        "22/11 15:15-18:00 (165m)",
+        "24/11 05:30-06:00 (30m)"
+      ],
+      "reason": "Falta de conteúdo na origem regional (MiTV; 2 fontes) — afiliada/grade local veio com lacuna"
+    },
+    {
+      "channel_id": "sbt.tv.jornal.recife",
+      "source": "MiTV",
+      "gap_count": 2,
+      "max_gap_min": 165,
+      "samples": [
+        "22/11 15:15-18:00 (165m)",
+        "24/11 05:30-06:00 (30m)"
+      ],
+      "reason": "Falta de conteúdo na origem regional (MiTV; 3 fontes) — afiliada/grade local veio com lacuna"
+    },
+    {
+      "channel_id": "sbt.tv.piaui",
+      "source": "MiTV",
+      "gap_count": 2,
+      "max_gap_min": 165,
+      "samples": [
+        "22/11 15:15-18:00 (165m)",
+        "24/11 05:30-06:00 (30m)"
+      ],
+      "reason": "Falta de conteúdo na origem regional (MiTV; 2 fontes) — afiliada/grade local veio com lacuna"
+    },
+    {
+      "channel_id": "sbt.tv.serra.dourada",
+      "source": "MiTV",
+      "gap_count": 2,
+      "max_gap_min": 165,
+      "samples": [
+        "22/11 15:15-18:00 (165m)",
+        "24/11 05:30-06:00 (30m)"
+      ],
+      "reason": "Falta de conteúdo na origem regional (MiTV; 3 fontes) — afiliada/grade local veio com lacuna"
+    },
+    {
+      "channel_id": "tv.cidade.verde.picos",
+      "source": "MiTV",
+      "gap_count": 2,
+      "max_gap_min": 165,
+      "samples": [
+        "22/11 15:15-18:00 (165m)",
+        "24/11 05:30-06:00 (30m)"
+      ],
+      "reason": "Falta de conteúdo na origem regional (MiTV; 2 fontes) — afiliada/grade local veio com lacuna"
+    },
+    {
+      "channel_id": "FilmAndArts.br",
+      "source": "Open-EPG BR 4",
+      "gap_count": 2,
+      "max_gap_min": 140,
+      "samples": [
+        "23/11 00:10-02:30 (140m)",
+        "23/11 11:00-13:15 (135m)"
+      ],
+      "reason": "Lacuna comum nas fontes alinhadas (base: Open-EPG BR 4, 12 fontes, conf. 76%)"
+    },
+    {
+      "channel_id": "malhacao.fast",
+      "source": "Globoplay Oficial API",
+      "gap_count": 2,
+      "max_gap_min": 60,
+      "samples": [
+        "24/11 04:29-05:30 (60m)",
+        "24/11 08:29-09:00 (30m)"
+      ],
+      "reason": "Lacuna comum nas fontes alinhadas (base: Globoplay Oficial API, 3 fontes, conf. 59%)"
+    },
+    {
+      "channel_id": "tv.assembleia",
+      "source": "MiTV",
+      "gap_count": 2,
+      "max_gap_min": 60,
+      "samples": [
+        "21/11 12:00-12:15 (15m)",
+        "22/11 06:00-07:00 (60m)"
+      ],
+      "reason": "Falta de conteúdo na fonte única (MiTV) — nenhuma outra fonte cobriu o canal para tapar o buraco"
+    },
+    {
+      "channel_id": "record.itapoan",
+      "source": "MiTV",
+      "gap_count": 2,
+      "max_gap_min": 35,
+      "samples": [
+        "23/11 06:00-06:10 (10m)",
+        "23/11 14:55-15:30 (35m)"
+      ],
+      "reason": "Falta de conteúdo na origem regional (MiTV; 2 fontes) — afiliada/grade local veio com lacuna"
+    },
+    {
+      "channel_id": "record.tv.bahia",
+      "source": "MiTV",
+      "gap_count": 2,
+      "max_gap_min": 35,
+      "samples": [
+        "23/11 06:00-06:10 (10m)",
+        "23/11 14:55-15:30 (35m)"
+      ],
+      "reason": "Falta de conteúdo na origem regional (MiTV; 2 fontes) — afiliada/grade local veio com lacuna"
+    },
+    {
+      "channel_id": "record.tv.bahia.itabuna",
+      "source": "MiTV",
+      "gap_count": 2,
+      "max_gap_min": 35,
+      "samples": [
+        "23/11 06:00-06:10 (10m)",
+        "23/11 14:55-15:30 (35m)"
+      ],
+      "reason": "Falta de conteúdo na origem regional (MiTV; 2 fontes) — afiliada/grade local veio com lacuna"
+    },
+    {
+      "channel_id": "recordtv.ba",
+      "source": "MiTV",
+      "gap_count": 2,
+      "max_gap_min": 35,
+      "samples": [
+        "23/11 06:00-06:10 (10m)",
+        "23/11 14:55-15:30 (35m)"
+      ],
+      "reason": "Lacuna comum nas fontes alinhadas (base: MiTV, 2 fontes, conf. 53%)"
+    },
+    {
+      "channel_id": "tvebahia.br",
+      "source": "MiTV",
+      "gap_count": 2,
+      "max_gap_min": 30,
+      "samples": [
+        "23/11 11:30-12:00 (30m)",
+        "24/11 11:30-12:00 (30m)"
+      ],
+      "reason": "Falta de conteúdo na origem regional (MiTV; 2 fontes) — afiliada/grade local veio com lacuna"
+    },
+    {
+      "channel_id": "Pantanal",
+      "source": "Open-EPG BR",
+      "gap_count": 1,
+      "max_gap_min": 1320,
+      "samples": [
+        "22/11 01:30-23:30 (1320m)"
+      ],
+      "reason": "Falta de conteúdo na fonte única (Open-EPG BR) — nenhuma outra fonte cobriu o canal para tapar o buraco"
+    },
+    {
+      "channel_id": "band.fm.bahia",
+      "source": "Open-EPG BR",
+      "gap_count": 1,
+      "max_gap_min": 1320,
+      "samples": [
+        "22/11 01:30-23:30 (1320m)"
+      ],
+      "reason": "Divergência/match entre fontes (1/10 concordam, conf. 17%) — tapa-buracos bloqueou fontes divergentes"
+    },
+    {
+      "channel_id": "sbt.ma",
+      "source": "Open-EPG BR",
+      "gap_count": 1,
+      "max_gap_min": 1320,
+      "samples": [
+        "22/11 01:30-23:30 (1320m)"
+      ],
+      "reason": "Divergência/match entre fontes (1/13 concordam, conf. 18%) — tapa-buracos bloqueou fontes divergentes"
+    },
+    {
+      "channel_id": "sbt.sao.luiz.ma",
+      "source": "Open-EPG BR",
+      "gap_count": 1,
+      "max_gap_min": 1320,
+      "samples": [
+        "22/11 01:30-23:30 (1320m)"
+      ],
+      "reason": "Divergência/match entre fontes (1/13 concordam, conf. 18%) — tapa-buracos bloqueou fontes divergentes"
+    },
+    {
+      "channel_id": "redetvpampa.br",
+      "source": "MiTV",
+      "gap_count": 1,
+      "max_gap_min": 210,
+      "samples": [
+        "22/11 15:00-18:30 (210m)"
+      ],
+      "reason": "Falta de conteúdo em todas as fontes (2 fontes com buraco na origem)"
+    },
+    {
+      "channel_id": "RMINAS",
+      "source": "Open-EPG BR",
+      "gap_count": 1,
+      "max_gap_min": 180,
+      "samples": [
+        "23/11 03:00-06:00 (180m)"
+      ],
+      "reason": "Lacuna comum nas fontes alinhadas (base: Open-EPG BR, 2 fontes, conf. 53%)"
+    },
+    {
+      "channel_id": "sbt.jangadeiro",
+      "source": "MiTV",
+      "gap_count": 1,
+      "max_gap_min": 165,
+      "samples": [
+        "22/11 15:15-18:00 (165m)"
+      ],
+      "reason": "Falta de conteúdo na origem regional (MiTV; 3 fontes) — afiliada/grade local veio com lacuna"
+    },
+    {
+      "channel_id": "sbt.jangadeiro.ce",
+      "source": "MiTV",
+      "gap_count": 1,
+      "max_gap_min": 165,
+      "samples": [
+        "22/11 15:15-18:00 (165m)"
+      ],
+      "reason": "Falta de conteúdo na origem regional (MiTV; 3 fontes) — afiliada/grade local veio com lacuna"
+    },
+    {
+      "channel_id": "sbt.tv.aratu.bahia",
+      "source": "MiTV",
+      "gap_count": 1,
+      "max_gap_min": 165,
+      "samples": [
+        "22/11 15:15-18:00 (165m)"
+      ],
+      "reason": "Falta de conteúdo na origem regional (MiTV; 3 fontes) — afiliada/grade local veio com lacuna"
+    },
+    {
+      "channel_id": "rede.21",
+      "source": "Claro TV+ API",
+      "gap_count": 1,
+      "max_gap_min": 120,
+      "samples": [
+        "21/11 09:00-11:00 (120m)"
+      ],
+      "reason": "Lacuna comum nas fontes alinhadas (base: Claro TV+ API, 3 fontes, conf. 49%)"
+    },
+    {
+      "channel_id": "band.natal",
+      "source": "MiTV",
+      "gap_count": 1,
+      "max_gap_min": 90,
+      "samples": [
+        "23/11 06:30-08:00 (90m)"
+      ],
+      "reason": "Falta de conteúdo na origem regional (MiTV; 2 fontes) — afiliada/grade local veio com lacuna"
+    },
+    {
+      "channel_id": "rede.amazonica.cruzeiro.do.sul",
+      "source": "Globo Oficial API",
+      "gap_count": 1,
+      "max_gap_min": 90,
+      "samples": [
+        "24/11 04:00-05:30 (90m)"
+      ],
+      "reason": "Falta de conteúdo na origem regional (Globo Oficial API; 2 fontes) — afiliada/grade local veio com lacuna"
+    },
+    {
+      "channel_id": "rede.familia",
+      "source": "MiTV",
+      "gap_count": 1,
+      "max_gap_min": 60,
+      "samples": [
+        "24/11 04:00-05:00 (60m)"
+      ],
+      "reason": "Lacuna comum nas fontes alinhadas (base: MiTV, 2 fontes, conf. 54%)"
+    },
+    {
+      "channel_id": "tv.diario.br",
+      "source": "MiTV",
+      "gap_count": 1,
+      "max_gap_min": 60,
+      "samples": [
+        "24/11 04:00-05:00 (60m)"
+      ],
+      "reason": "Lacuna comum nas fontes alinhadas (base: MiTV, 2 fontes, conf. 52%)"
+    },
+    {
+      "channel_id": "SBTRIO",
+      "source": "Vivo Play API",
+      "gap_count": 1,
+      "max_gap_min": 30,
+      "samples": [
+        "24/11 05:30-06:00 (30m)"
+      ],
+      "reason": "Lacuna comum nas fontes alinhadas (base: Vivo Play API, 3 fontes, conf. 55%)"
+    },
+    {
+      "channel_id": "band.tv.goiania",
+      "source": "MiTV",
+      "gap_count": 1,
+      "max_gap_min": 30,
+      "samples": [
+        "22/11 17:30-18:00 (30m)"
+      ],
+      "reason": "Falta de conteúdo na origem regional (MiTV; 2 fontes) — afiliada/grade local veio com lacuna"
+    },
+    {
+      "channel_id": "record.florianopolis.sc.ndtv",
+      "source": "MiTV",
+      "gap_count": 1,
+      "max_gap_min": 30,
+      "samples": [
+        "23/11 06:00-06:30 (30m)"
+      ],
+      "reason": "Falta de conteúdo na origem regional (MiTV; 2 fontes) — afiliada/grade local veio com lacuna"
+    },
+    {
+      "channel_id": "record.pa",
+      "source": "MiTV",
+      "gap_count": 1,
+      "max_gap_min": 30,
+      "samples": [
+        "23/11 06:00-06:30 (30m)"
+      ],
+      "reason": "Falta de conteúdo na origem regional (MiTV; 2 fontes) — afiliada/grade local veio com lacuna"
+    },
+    {
+      "channel_id": "record.sc",
+      "source": "MiTV",
+      "gap_count": 1,
+      "max_gap_min": 30,
+      "samples": [
+        "23/11 06:00-06:30 (30m)"
+      ],
+      "reason": "Falta de conteúdo na origem regional (MiTV; 2 fontes) — afiliada/grade local veio com lacuna"
+    },
+    {
+      "channel_id": "record.tv.belem",
+      "source": "MiTV",
+      "gap_count": 1,
+      "max_gap_min": 30,
+      "samples": [
+        "23/11 06:00-06:30 (30m)"
+      ],
+      "reason": "Falta de conteúdo na origem regional (MiTV; 2 fontes) — afiliada/grade local veio com lacuna"
+    },
+    {
+      "channel_id": "recordtv.florianopolis",
+      "source": "MiTV",
+      "gap_count": 1,
+      "max_gap_min": 30,
+      "samples": [
+        "23/11 06:00-06:30 (30m)"
+      ],
+      "reason": "Lacuna comum nas fontes alinhadas (base: MiTV, 2 fontes, conf. 53%)"
+    },
+    {
+      "channel_id": "recordtv.ndtv.florianopolis",
+      "source": "MiTV",
+      "gap_count": 1,
+      "max_gap_min": 30,
+      "samples": [
+        "23/11 06:00-06:30 (30m)"
+      ],
+      "reason": "Lacuna comum nas fontes alinhadas (base: MiTV, 2 fontes, conf. 53%)"
+    },
+    {
+      "channel_id": "sbt.mg.tv.alterosa",
+      "source": "Vivo Play API",
+      "gap_count": 1,
+      "max_gap_min": 30,
+      "samples": [
+        "24/11 05:30-06:00 (30m)"
+      ],
+      "reason": "Lacuna comum nas fontes alinhadas (base: Vivo Play API, 4 fontes, conf. 56%)"
+    },
+    {
+      "channel_id": "sbt.rs",
+      "source": "Vivo Play API",
+      "gap_count": 1,
+      "max_gap_min": 30,
+      "samples": [
+        "24/11 05:30-06:00 (30m)"
+      ],
+      "reason": "Falta de conteúdo na origem regional (Vivo Play API; 3 fontes) — afiliada/grade local veio com lacuna"
+    },
+    {
+      "channel_id": "sbt.tv.alterosa",
+      "source": "Vivo Play API",
+      "gap_count": 1,
+      "max_gap_min": 30,
+      "samples": [
+        "24/11 05:30-06:00 (30m)"
+      ],
+      "reason": "Lacuna comum nas fontes alinhadas (base: Vivo Play API, 4 fontes, conf. 56%)"
+    },
+    {
+      "channel_id": "sbt.tv.alterosa.mg",
+      "source": "Vivo Play API",
+      "gap_count": 1,
+      "max_gap_min": 30,
+      "samples": [
+        "24/11 05:30-06:00 (30m)"
+      ],
+      "reason": "Lacuna comum nas fontes alinhadas (base: Vivo Play API, 4 fontes, conf. 56%)"
+    },
+    {
+      "channel_id": "record.to",
+      "source": "MiTV",
+      "gap_count": 1,
+      "max_gap_min": 25,
+      "samples": [
+        "21/11 11:35-12:00 (25m)"
+      ],
+      "reason": "Falta de conteúdo na origem regional (MiTV; 2 fontes) — afiliada/grade local veio com lacuna"
+    }
+  ],
+  "short_horizon": [
+    {
+      "channel_id": "sportv.4",
+      "source": "Globo",
+      "future_hours": 12.3,
+      "progs": 2,
+      "reason": "Falta de conteúdo na fonte única (Globo) — nenhuma outra fonte cobriu o canal para tapar o buraco"
+    }
+  ],
+  "empty_channels": [],
+  "unsafe_ids": [],
+  "missing_br_real": [
+    {
+      "name": "SPORTYNET 4",
+      "target_id": "auto.sportynet4",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "HBO MAIS",
+      "target_id": "auto.hbomais",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "Love Nature",
+      "target_id": "auto.lovenature",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "TV GIDEOES",
+      "target_id": "auto.tvgideoes",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "BLACK IS KING",
+      "target_id": "auto.blackisking",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "Casqueiro TV",
+      "target_id": "auto.casqueirotv",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "CBC NEWS NETWORK",
+      "target_id": "auto.cbcnewsnetwork",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "CBC NEWS OTTAWA",
+      "target_id": "auto.cbcnewsottawa",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "CBC NEWS TORONTO",
+      "target_id": "auto.cbcnewstoronto",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "CHDTV",
+      "target_id": "auto.chdtv",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "CNN PORTUGAL",
+      "target_id": "auto.cnnportugal",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "COM BRASIL",
+      "target_id": "auto.combrasil",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "GOSPEL MOVIES TELEVISION",
+      "target_id": "auto.gospelmoviestelevision",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "IGREJA UNIVERSAL",
+      "target_id": "auto.igrejauniversal",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "KRONE HIT",
+      "target_id": "auto.kronehit",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "LIVEHENRIQUEANDJULIANO1904",
+      "target_id": "auto.livehenriqueandjuliano1904",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "MusicTop",
+      "target_id": "auto.musictop",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "NATURE TIME",
+      "target_id": "auto.naturetime",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "NEW BRASIL",
+      "target_id": "auto.newbrasil",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "NSPORTS 1",
+      "target_id": "auto.nsports1",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "Play TV Horse",
+      "target_id": "auto.playtvhorse",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "Rede Universo TV",
+      "target_id": "auto.redeuniversotv",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "SPORTYNETPLUS13",
+      "target_id": "auto.sportynetplus13",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "SPORTYNETPLUS21",
+      "target_id": "auto.sportynetplus21",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "SP USA Bally Sports Kansas CITY",
+      "target_id": "auto.spusaballysportskansascity",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "SP USA Bally Sports NEW Orleans PLUS",
+      "target_id": "auto.spusaballysportsneworleansplus",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "SP USA Nbcsn Washington",
+      "target_id": "auto.spusanbcsnwashington",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "TV Igreja Mundial",
+      "target_id": "auto.tvigrejamundial",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "TV Nova Juarez",
+      "target_id": "auto.tvnovajuarez",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "TV WS BRASIL",
+      "target_id": "auto.tvwsbrasil",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "Universo TV",
+      "target_id": "auto.universotv",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "AGROBRASILTV",
+      "target_id": "auto.agrobrasiltv",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "AGRO CANAL",
+      "target_id": "auto.agrocanal",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "BAH! TV",
+      "target_id": "auto.bahtv",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "CANALGOAT012",
+      "target_id": "auto.canalgoat012",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "CANALGOAT022",
+      "target_id": "auto.canalgoat022",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "CANALGOAT032",
+      "target_id": "auto.canalgoat032",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "CATVE",
+      "target_id": "auto.catve",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "CENTRALTOP TV",
+      "target_id": "auto.centraltoptv",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "COMBATE 1",
+      "target_id": "auto.combate1",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DAZN21",
+      "target_id": "auto.dazn21",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DAZN22",
+      "target_id": "auto.dazn22",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DAZN31",
+      "target_id": "auto.dazn31",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DAZN32",
+      "target_id": "auto.dazn32",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DAZN42",
+      "target_id": "auto.dazn42",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DAZN52",
+      "target_id": "auto.dazn52",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS012",
+      "target_id": "auto.disneyplus012",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS022",
+      "target_id": "auto.disneyplus022",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS032",
+      "target_id": "auto.disneyplus032",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS042",
+      "target_id": "auto.disneyplus042",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS052",
+      "target_id": "auto.disneyplus052",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS062",
+      "target_id": "auto.disneyplus062",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS072",
+      "target_id": "auto.disneyplus072",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS082",
+      "target_id": "auto.disneyplus082",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS092",
+      "target_id": "auto.disneyplus092",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS101",
+      "target_id": "auto.disneyplus101",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS102",
+      "target_id": "auto.disneyplus102",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS111",
+      "target_id": "auto.disneyplus111",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS112",
+      "target_id": "auto.disneyplus112",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS121",
+      "target_id": "auto.disneyplus121",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS122",
+      "target_id": "auto.disneyplus122",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS131",
+      "target_id": "auto.disneyplus131",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS132",
+      "target_id": "auto.disneyplus132",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS141",
+      "target_id": "auto.disneyplus141",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS142",
+      "target_id": "auto.disneyplus142",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS151",
+      "target_id": "auto.disneyplus151",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS152",
+      "target_id": "auto.disneyplus152",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS161",
+      "target_id": "auto.disneyplus161",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS162",
+      "target_id": "auto.disneyplus162",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS171",
+      "target_id": "auto.disneyplus171",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS172",
+      "target_id": "auto.disneyplus172",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS182",
+      "target_id": "auto.disneyplus182",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS191",
+      "target_id": "auto.disneyplus191",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS192",
+      "target_id": "auto.disneyplus192",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS201",
+      "target_id": "auto.disneyplus201",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS202",
+      "target_id": "auto.disneyplus202",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS21",
+      "target_id": "auto.disneyplus21",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS212",
+      "target_id": "auto.disneyplus212",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS222",
+      "target_id": "auto.disneyplus222",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS232",
+      "target_id": "auto.disneyplus232",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS242",
+      "target_id": "auto.disneyplus242",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS252",
+      "target_id": "auto.disneyplus252",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS262",
+      "target_id": "auto.disneyplus262",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS272",
+      "target_id": "auto.disneyplus272",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS282",
+      "target_id": "auto.disneyplus282",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS292",
+      "target_id": "auto.disneyplus292",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS302",
+      "target_id": "auto.disneyplus302",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS31",
+      "target_id": "auto.disneyplus31",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS51",
+      "target_id": "auto.disneyplus51",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS61",
+      "target_id": "auto.disneyplus61",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS71",
+      "target_id": "auto.disneyplus71",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS81",
+      "target_id": "auto.disneyplus81",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DISNEYPLUS91",
+      "target_id": "auto.disneyplus91",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DJTV",
+      "target_id": "auto.djtv",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DR Microvision 10",
+      "target_id": "auto.drmicrovision10",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DR Romana TV 42",
+      "target_id": "auto.drromanatv42",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DR Super TV 55",
+      "target_id": "auto.drsupertv55",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DR Telecanal 28",
+      "target_id": "auto.drtelecanal28",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DR Telefuturo 23",
+      "target_id": "auto.drtelefuturo23",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DR Television DEL ESTE",
+      "target_id": "auto.drtelevisiondeleste",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DW Deutsch",
+      "target_id": "auto.dwdeutsch",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DW English",
+      "target_id": "auto.dwenglish",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "DW Español",
+      "target_id": "auto.dwespanol",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "E! 3",
+      "target_id": "auto.e3",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "Film&Arts 3",
+      "target_id": "auto.filmandarts3",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "Fish TV 3",
+      "target_id": "auto.fishtv3",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "FRFRANCE243",
+      "target_id": "auto.frfrance243",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "FURACAOTV11",
+      "target_id": "auto.furacaotv11",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "FURACAOTV22",
+      "target_id": "auto.furacaotv22",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "HBO22",
+      "target_id": "auto.hbo22",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "HBO Family 2",
+      "target_id": "auto.hbofamily2",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "HBO Mundi 2",
+      "target_id": "auto.hbomundi2",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "HBO PLUS 2",
+      "target_id": "auto.hboplus2",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "HBO Pop 2",
+      "target_id": "auto.hbopop2",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "HBO Signature 2",
+      "target_id": "auto.hbosignature2",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "HBO Xtreme 1",
+      "target_id": "auto.hboxtreme1",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "History 1",
+      "target_id": "auto.history1",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "HISTORY21",
+      "target_id": "auto.history21",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "Igreja Mundial",
+      "target_id": "auto.igrejamundial",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "IGREJA MUNDIAL IMPD",
+      "target_id": "auto.igrejamundialimpd",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "KIDS MAIS",
+      "target_id": "auto.kidsmais",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "LA A&E",
+      "target_id": "auto.laaandand",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "LA ATB",
+      "target_id": "auto.laatb",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "LA AXN",
+      "target_id": "auto.laaxn",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "LA Azteca 7",
+      "target_id": "auto.laazteca7",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "LA Cableonda Sports",
+      "target_id": "auto.lacableondasports",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "LA Canal 5",
+      "target_id": "auto.lacanal5",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "LA Canal DE LAS Estrellas",
+      "target_id": "auto.lacanaldelasestrellas",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "LA Cinema Dinamita",
+      "target_id": "auto.lacinemadinamita",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "LA CNN",
+      "target_id": "auto.lacnn",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "LA Disney JR",
+      "target_id": "auto.ladisneyjr",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "LA ESPN",
+      "target_id": "auto.laespn",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "LA HBO",
+      "target_id": "auto.lahbo",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "LA HBO 2",
+      "target_id": "auto.lahbo2",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "LA telesur",
+      "target_id": "auto.latelesur",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "LA TEN Canal 10",
+      "target_id": "auto.latencanal10",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "LAtin c America TV",
+      "target_id": "auto.latincamericatv",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "LA Unicable",
+      "target_id": "auto.launicable",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "LIGAFUTSAL12",
+      "target_id": "auto.ligafutsal12",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "LIGAFUTSAL22",
+      "target_id": "auto.ligafutsal22",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "LIGAFUTSAL32",
+      "target_id": "auto.ligafutsal32",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "LIGAFUTSAL42",
+      "target_id": "auto.ligafutsal42",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "Like 3",
+      "target_id": "auto.like3",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "LT Canal 12",
+      "target_id": "auto.ltcanal12",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "LT Canal 4",
+      "target_id": "auto.ltcanal4",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "LT VTV",
+      "target_id": "auto.ltvtv",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "LT VTV PLUS",
+      "target_id": "auto.ltvtvplus",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "Modo Viagem 3",
+      "target_id": "auto.modoviagem3",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "Music Box Brasil 3",
+      "target_id": "auto.musicboxbrasil3",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "MUsic MC Dance",
+      "target_id": "auto.musicmcdance",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "Nsports 3",
+      "target_id": "auto.nsports3",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "PR WAPA",
+      "target_id": "auto.prwapa",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "PR WAPA America",
+      "target_id": "auto.prwapaamerica",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "PR WIPR Canal 6",
+      "target_id": "auto.prwiprcanal6",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "RADIOGRENAL959FMAUNICACOMFUTEBOL24HORAS",
+      "target_id": "auto.radiogrenal959fmaunicacomfutebol24horas",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "RECORD PIAUÍ TV ANTENA 10",
+      "target_id": "auto.recordpiauitvantena10",
+      "reason": "Possível problema de match/alias ou afiliada sem guia nas fontes ativas"
+    },
+    {
+      "name": "REDE GENIISES",
+      "target_id": "auto.redegeniises",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "Remo TV 1",
+      "target_id": "auto.remotv1",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "RETRO MUSIC",
+      "target_id": "auto.retromusic",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "RIT TV 2",
+      "target_id": "auto.rittv2",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "ROCK BR TV",
+      "target_id": "auto.rockbrtv",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "ROCK TV",
+      "target_id": "auto.rocktv",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "RS21",
+      "target_id": "auto.rs21",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "RUS RT Documentary",
+      "target_id": "auto.rusrtdocumentary",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "Sabor & Art 3",
+      "target_id": "auto.saborandart3",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "SANTUÁRIO DE FÁTIMA",
+      "target_id": "auto.santuariodefatima",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "SPORTV 5",
+      "target_id": "auto.sportv5",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "SPORTV 6",
+      "target_id": "auto.sportv6",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "SPORTV FHD60FPS",
+      "target_id": "auto.sportvfhd60fps",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "SPORTYNET 6",
+      "target_id": "auto.sportynet06",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "SPORTYNET 7",
+      "target_id": "auto.sportynet07",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "SPORTYNET 8",
+      "target_id": "auto.sportynet08",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "SPORTYNET 9",
+      "target_id": "auto.sportynet09",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "SPORTYNETPLUS31",
+      "target_id": "auto.sportynetplus31",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "TBC BRASIL CENTRAL GO",
+      "target_id": "auto.tbcbrasilcentralgo",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "Telecine Action 2",
+      "target_id": "auto.telecineaction2",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "Telecine Cult 2",
+      "target_id": "auto.telecinecult2",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "Telecine Fun 2",
+      "target_id": "auto.telecinefun2",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "Telecine Pipoca 2",
+      "target_id": "auto.telecinepipoca2",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "Telecine Premium 2",
+      "target_id": "auto.telecinepremium2",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "Telecine Touch 2",
+      "target_id": "auto.telecinetouch2",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "THEATER",
+      "target_id": "auto.theaterfhdr",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "Times Brasil CNBC 1",
+      "target_id": "auto.timesbrasilcnbc1",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "TIMES Exclusivo CNBC 2",
+      "target_id": "auto.timesexclusivocnbc2",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "Travel Box Brazil 3",
+      "target_id": "auto.travelboxbrazil3",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "TV DIARIO FORTALEZA",
+      "target_id": "auto.tvdiariofortaleza",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "TV IMACULADA",
+      "target_id": "auto.tvimaculada",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "TV MANÁ BR",
+      "target_id": "auto.tvmana",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "TV MUNDO MAIOR",
+      "target_id": "auto.tvmundomaior",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "TV Ra Tim Bum 3",
+      "target_id": "auto.tvratimbum3",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "UNIQUE TV",
+      "target_id": "auto.uniquetv",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "Xsports 1",
+      "target_id": "auto.xsports1",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "XXX Evolved Fights 2",
+      "target_id": "auto.xxxevolvedfights2",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    },
+    {
+      "name": "Zoomooo 3",
+      "target_id": "auto.zoomooo3",
+      "reason": "Falta de conteúdo nas fontes ativas (ou alias ausente no dicionário)"
+    }
+  ]
+}

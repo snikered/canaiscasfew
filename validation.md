@@ -1,0 +1,757 @@
+# Validação e Consenso de Grade
+
+- **HBO** (Claro TV+ API): Agora **Pecadores** - Confiança **76%**
+- **PREMIERE CLUBES** (Claro Git): Agora **Giro da Rodada: Brasileirão** - Confiança **64%**
+- **HBO POP** (MiTV): Agora **Sex Tape - Perdido na Nuvem** - Confiança **78%**
+- **PREMIERE 2** (Claro Git): Agora **Hoje a partir das 17:30: Bahia x Coritiba** - Confiança **57%**
+- **PREMIERE 3** (Claro Git): Agora **Dia 23/11: Santos x Grêmio** - Confiança **61%**
+- **HBO MUNDI** (IPTV-EPG BR): Agora **Peixe Grande e Suas Histórias Maravilhosas** - Confiança **78%**
+- **HBO XTREME** (Claro TV+ API): Agora **Os Perdedores** - Confiança **77%**
+- **PREMIERE 4** (Claro Git): Agora **Com o PREMIERE dá jogo!** - Confiança **61%**
+- **Animal Planet** (MiTV): Agora **Animais em Risco - Miami** - Confiança **83%**
+- **HBO SIGNATURE** (MiTV): Agora **Euphoria** - Confiança **83%**
+- **SporTV 1** (Claro Git): Agora **sportv News - ao vivo** - Confiança **79%**
+- **FISH TV** (MiTV): Agora **Na Pegada do Fly** - Confiança **78%**
+- **BAND SPORTS** (Claro Git): Agora **CSKA x Akhmat - ao vivo** - Confiança **59%**
+- **COMBATE** (Globo): Agora **Oktagon: 98 - ao vivo** - Confiança **60%**
+- **ESPN** (Claro Git): Agora **Parma x Roma - ao vivo** - Confiança **72%**
+- **Food Network** (MiTV): Agora **A Guerra dos Cupcakes** - Confiança **75%**
+- **HBO FAMILY** (IPTV-EPG BR): Agora **Titio Noel** - Confiança **79%**
+- **History** (MiTV): Agora **Grandes Fugas com Morgan Freeman** - Confiança **86%**
+- **SPORTV 2** (Claro Git): Agora **Sessão Sportv: Sem Bloqueio** - Confiança **66%**
+- **CARTOON NETWORK** (MiTV): Agora **Hora de Aventura** - Confiança **84%**
+- **HBO 2** (MiTV): Agora **Premonição 6 - Laços de Sangue** - Confiança **80%**
+- **HBO Plus** (IPTV-EPG BR): Agora **Terrifier 3** - Confiança **75%**
+- **CNN BRASIL** (MiTV): Agora **Ao vivo - Boletim CNN Agora** - Confiança **63%**
+- **ESPN 2** (Claro Git): Agora **Rugby Nations Championship: Irlanda x África do Sul - ao vivo** - Confiança **68%**
+- **ESPN 3** (Claro Git): Agora **Billie Jean King Cup: Brasil x Canadá - ao vivo** - Confiança **66%**
+- **History 2** (MiTV): Agora **Recuperando a História** - Confiança **78%**
+- **PREMIERE 5** (Claro Git): Agora **Com o PREMIERE dá jogo!** - Confiança **58%**
+- **PREMIERE 6** (Claro Git): Agora **Com o PREMIERE dá jogo!** - Confiança **58%**
+- **PREMIERE 7** (Claro Git): Agora **Com o PREMIERE dá jogo!** - Confiança **61%**
+- **BAND NEWS** (MiTV): Agora **Viver Melhor** - Confiança **77%**
+- **Cartoonito** (MiTV): Agora **Booba** - Confiança **79%**
+- **ESPN 4** (Claro Git): Agora **Kocaelispor x Fenerbahce - ao vivo** - Confiança **70%**
+- **ESPN 5** (Claro Git): Agora **Premier League Stories** - Confiança **60%**
+- **GLOOB** (MiTV): Agora **D.P.A. - Detetives do Prédio Azul** - Confiança **86%**
+- **REDE TV** (MiTV): Agora **A Hora do Zap** - Confiança **75%**
+- **BIS** (MiTV): Agora **Oasis Knebworth 1996** - Confiança **85%**
+- **SPORTV 3** (Claro Git): Agora **Fórmula 1: GP do Brasil - São Paulo** - Confiança **61%**
+- **DISCOVERY KIDS** (MiTV): Agora **Mermicorno - A Queda das Estrelas** - Confiança **84%**
+- **Multishow** (MiTV): Agora **Vai que Cola** - Confiança **84%**
+- **TV CULTURA** (MiTV): Agora **Ninhos em Movimento** - Confiança **82%**
+- **Discovery Home & Health** (MiTV): Agora **Leslie e Lyndsay - Irmãs pra Toda Obra** - Confiança **80%**
+- **MODO VIAGEM** (Claro Git): Agora **Euceano** - Confiança **71%**
+- **Canal OFF** (MiTV): Agora **É Capixaba - A História do Surfe no Espírito Santo** - Confiança **83%**
+- **ESPN 6** (GuiaDeTV): Agora **VT - Juventude x Botafogo-SP** - Confiança **60%**
+- **GLOOBINHO** (Claro Git): Agora **Cocomelon** - Confiança **77%**
+- **RECORD NEWS** (MiTV): Agora **Hora News - Edição de Sábado** - Confiança **75%**
+- **DISCOVERY TURBO** (MiTV): Agora **Texas Metal** - Confiança **82%**
+- **GNT** (MiTV): Agora **Que Seja Doce** - Confiança **88%**
+- **TLC** (MiTV): Agora **Meu Grande Casamento Cigano** - Confiança **82%**
+- **TOONCAST** (MiTV): Agora **Manda-Chuva** - Confiança **75%**
+- **X SPORTS** (Vivo Play API): Agora **Nice x Paris Saint-Germain - Campeonato Francês** - Confiança **49%**
+- **BAND SP** (IPTV-EPG BR): Agora **Band Esporte Clube** - Confiança **54%**
+- **CANCAO NOVA** (MiTV): Agora **Guido Schäffer** - Confiança **61%**
+- **Curta!** (MiTV): Agora **1968 - Um Ano na Vida** - Confiança **70%**
+- **LIFETIME** (MiTV): Agora **Natal no Velho Oeste** - Confiança **78%**
+- **TV RA TIM BUM** (MiTV): Agora **Era uma Vez no Quintal** - Confiança **79%**
+- **HGTV** (MiTV): Agora **Davina & Kristin - Casas com Potencial** - Confiança **81%**
+- **Megapix** (Claro TV+ API): Agora **Invasão Zumbi** - Confiança **82%**
+- **SBT NEWS** (Mais SBT): Agora **True Crime - inédito** - Confiança **58%**
+- **Sony** (Open-EPG BR): Agora **Arraste-me para o Inferno** - Confiança **74%**
+- **TNT** (Claro Git): Agora **Velozes & Furiosos** - Confiança **81%**
+- **ARTE 1** (MiTV): Agora **Witkin & Witkin - Dois Irmãos, Dois Mundos** - Confiança **75%**
+- **AXN** (MiTV): Agora **CSI: Miami** - Confiança **83%**
+- **CANAL DO BOI** (MiTV): Agora **Ao vivo - 6º Leilão Fazenda Cachoeira do Campo** - Confiança **67%**
+- **E!** (WebFinal): Agora **Million Dollar Listing New York** - Confiança **42%**
+- **GB SP** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **57%**
+- **RECORDTV SP** (IPTV-EPG BR): Agora **Balanço Geral - Edição de Sábado** - Confiança **51%**
+- **TELECINE PIPOCA** (Claro Git): Agora **MR-9: Missão Mortal** - Confiança **82%**
+- **TELECINE PREMIUM** (MiTV): Agora **Velvet Lounge - Noites de Caça** - Confiança **75%**
+- **TV APARECIDA** (MiTV): Agora **Ao vivo - Santuário Nacional de Aparecida** - Confiança **55%**
+- **VIVA** (Globoplay Oficial API): Agora **Final Feliz** - Confiança **84%**
+- **GB RJ** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **62%**
+- **GLOBO BRASÍLIA** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **59%**
+- **Music Box Brazil** (MiTV): Agora **Jukebox** - Confiança **76%**
+- **PREMIERE 8** (IPTV-EPG BR): Agora **Premiere 8** - Confiança **55%**
+- **Space** (Open-EPG BR 4): Agora **Círculo de Fogo** - Confiança **75%**
+- **TNT Séries** (Claro Git): Agora **Law & Order SVU** - Confiança **81%**
+- **Warner** (Claro Git): Agora **Vizinhos** - Confiança **83%**
+- **REDE VIDA** (MiTV): Agora **Batismo de Fogo** - Confiança **77%**
+- **SBT SP** (IPTV-EPG BR): Agora **Eita Lucas!** - Confiança **53%**
+- **TELECINE ACTION** (MiTV): Agora **A Força em Alerta** - Confiança **80%**
+- **TELECINE CULT** (Claro Git): Agora **Um Lobo entre os Cisnes** - Confiança **80%**
+- **TELECINE FUN** (IPTV-EPG BR): Agora **A Sogra Perfeita** - Confiança **80%**
+- **TELECINE TOUCH** (MiTV): Agora **Garota Mimada** - Confiança **77%**
+- **TV BRASIL** (MiTV): Agora **Meu Pedaço do Brasil** - Confiança **76%**
+- **AGROMAIS** (Vivo Play API): Agora **Leilão Nelore Pintado Gênesis & Convidados** - Confiança **66%**
+- **FUTURA** (MiTV): Agora **Somos Museus** - Confiança **85%**
+- **GB NORDESTE** (Afiliadas Locais): Agora **É Pipoco!** - Confiança **55%**
+- **GB RBS PORTO ALEGRE** (Afiliadas Locais): Agora **Baita Sábado** - Confiança **55%**
+- **GLOBO NEWS** (Claro Git): Agora **Cidades e Soluções** - Confiança **82%**
+- **PRIME BOX BRAZIL** (MiTV): Agora **O Baldio Som de Deus** - Confiança **76%**
+- **SBT** (Mais SBT): Agora **Eita Lucas!** - Confiança **70%**
+- **Travel Box Brazil** (Claro Git): Agora **Ponto de Chegada** - Confiança **79%**
+- **TV NOVO TEMPO** (MiTV): Agora **Bíblia Fácil** - Confiança **66%**
+- **CANAL WOOHOO** (MiTV): Agora **Hootalks** - Confiança **79%**
+- **Discovery** (MiTV): Agora **Desafio em Dose Dupla - Brasil** - Confiança **82%**
+- **Fashion TV** (MiTV): Agora **Fash.Weeks - Especial SPFW N61** - Confiança **73%**
+- **TV DIARIO** (MiTV): Agora **Forrobodó** - Confiança **52%**
+- **EPTV CAMPINAS** (Globo Oficial API): Agora **Mais Caminhos** - Confiança **46%**
+- **EPTV RIBEIRÃO PRETO** (Globo Oficial API): Agora **Mais Caminhos** - Confiança **46%**
+- **GB MINAS** (Globo Oficial API): Agora **Coisas Daqui** - Confiança **45%**
+- **GB NSC FLORIANOPOLIS** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **55%**
+- **GB RPC CURITIBA** (Afiliadas Locais): Agora **Estúdio C** - Confiança **55%**
+- **GB TV BAHIA** (MiTV): Agora **Conversa Preta** - Confiança **58%**
+- **GB TV CENTRO AMERICA** (MiTV): Agora **Agro, o Desafio - Bastidores** - Confiança **55%**
+- **GB TV GAZETA VITORIA** (Globo Oficial API): Agora **Em Movimento** - Confiança **45%**
+- **GB TV LIBERAL BELEM** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **53%**
+- **GB TV SERGIPE** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **53%**
+- **GB TV VERDES MARES** (Afiliadas Locais): Agora **Se Liga VM** - Confiança **55%**
+- **INTER TV GRANDE MINAS** (MiTV): Agora **Rota Inter TV MG** - Confiança **58%**
+- **INTER TV SERRA MAR** (Globo Oficial API): Agora **Vim de lá - Bailes do Rio** - Confiança **54%**
+- **NSC JOINVILLE** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **55%**
+- **NSC TV CHAPECO** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **55%**
+- **RBS PELOTAS** (Afiliadas Locais): Agora **Baita Sábado** - Confiança **55%**
+- **RECORD TV BELEM** (MiTV): Agora **Pará Bom D+** - Confiança **53%**
+- **RPC FOZ DO IGUACU** (Afiliadas Locais): Agora **Estúdio C** - Confiança **55%**
+- **RPC MARINGA** (Afiliadas Locais): Agora **Estúdio C** - Confiança **55%**
+- **RPC TV PARANAVAI** (Afiliadas Locais): Agora **Estúdio C** - Confiança **55%**
+- **RPC TV PONTA GROSSA** (Afiliadas Locais): Agora **Estúdio C** - Confiança **55%**
+- **Trace Brazuca** (MiTV): Agora **Hits Non Stop** - Confiança **56%**
+- **TV ASA BRANCA** (Globo Oficial API): Agora **Edição Especial - Roque Santeiro** - Confiança **45%**
+- **TV GAZETA SUL** (MiTV): Agora **Em Movimento** - Confiança **58%**
+- **TV INTEGRAÇÃO JUIZ DE FORA** (MiTV): Agora **Coisas Daqui** - Confiança **58%**
+- **TV MIRANTE SAO LUIS** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **53%**
+- **TV RIO SUL** (MiTV): Agora **Vim de Lá - Bailes do Rio** - Confiança **58%**
+- **TV TEM BAURU** (Globo Oficial API): Agora **Muito+** - Confiança **54%**
+- **TV TEM ITAPETININGA** (Globo Oficial API): Agora **Muito+** - Confiança **55%**
+- **TV TEM S J RIO PRETO** (Globo Oficial API): Agora **Muito+** - Confiança **45%**
+- **TV TEM SOROCABA** (Globo Oficial API): Agora **Muito+** - Confiança **54%**
+- **TV TRIBUNA SANTOS** (MiTV): Agora **Splash!** - Confiança **58%**
+- **TV VANGUARDA TAUBATE** (Globo Oficial API): Agora **Edição Especial - Roque Santeiro** - Confiança **54%**
+- **USA Network** (MiTV): Agora **Suits** - Confiança **68%**
+- **CANAL RURAL** (GuiaDeTV): Agora **Leilão** - Confiança **70%**
+- **Dog TV** (MiTV): Agora **Relaxamento** - Confiança **61%**
+- **A&E** (Claro Git): Agora **Quem dá Mais?** - Confiança **83%**
+- **BAND CAMPINAS** (Vivo Play API): Agora **Band Esporte Clube** - Confiança **61%**
+- **EPTV SUL DE MINAS** (Afiliadas Locais): Agora **Mais Caminhos** - Confiança **55%**
+- **GB TV ANHANGUERA** (Afiliadas Locais): Agora **No Balaio** - Confiança **55%**
+- **GB TV CABO BRANCO** (Afiliadas Locais): Agora **Minha Paraíba** - Confiança **55%**
+- **GB TV GAZETA ALAGOAS** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **43%**
+- **JOVEN PAN NEWS** (Claro Git): Agora **Mala Pronta** - Confiança **69%**
+- **RECORDTV MANAUS** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **RECORDTV MG** (MiTV): Agora **Balanço Geral MG - Edição de Sábado** - Confiança **69%**
+- **TV DIARIO MOGI DAS CRUZES** (Globo Oficial API): Agora **Mais Diário** - Confiança **55%**
+- **TV FRONTEIRA P PRUDENTE** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **53%**
+- **TV GAZETA SP** (IPTV-EPG BR): Agora **O Melhor do Mulheres** - Confiança **68%**
+- **TV VANGUARDA S J CAMPOS** (Globo Oficial API): Agora **Edição Especial - Roque Santeiro** - Confiança **54%**
+- **ZooMoo** (MiTV): Agora **TV Pi-Ki-Pin** - Confiança **64%**
+- **GLOBO CENTRO AMÉRICA** (MiTV): Agora **Agro, o Desafio - Bastidores** - Confiança **55%**
+- **RECORD RS** (MiTV): Agora **The Love School - Escola do Amor** - Confiança **56%**
+- **TV SENADO** (MiTV): Agora **Leituras** - Confiança **70%**
+- **Universal TV** (Claro Git): Agora **Chicago Fire** - Confiança **84%**
+- **AMC** (Claro Git): Agora **Capitão Phillips** - Confiança **78%**
+- **BAND RJ** (MiTV): Agora **Band Esporte Clube** - Confiança **60%**
+- **BOA VONTADE** (MiTV): Agora **7º Congresso do Roteiro Missionário Irmão Paiva, Eterna Gratidão** - Confiança **60%**
+- **CANAL BRASIL** (MiTV): Agora **Narciso** - Confiança **77%**
+- **Cinemax** (Claro TV+ API): Agora **O Esquadrão Suicida** - Confiança **79%**
+- **CNN INTERNACIONAL** (Claro Git): Agora **CNN Newsroom Saturday** - Confiança **58%**
+- **Discovery Science** (MiTV): Agora **O Grande Eclipse** - Confiança **83%**
+- **Discovery Theater** (Claro Git): Agora **Rota Perigosa** - Confiança **83%**
+- **Discovery World** (MiTV): Agora **7 Piscinas Incríveis** - Confiança **82%**
+- **Film & Arts** (Open-EPG BR 4): Agora **Licorice Pizza** - Confiança **76%**
+- **Globo TV TEM Sao Jose do Rio Preto** (MiTV): Agora **Roque Santeiro - Edição Especial** - Confiança **61%**
+- **GLOBO TV VERDES MARES CARIRI** (Afiliadas Locais): Agora **Se Liga VM** - Confiança **55%**
+- **GLOBO VERDES MARES** (Afiliadas Locais): Agora **Se Liga VM** - Confiança **55%**
+- **IDEAL TV** (MiTV): Agora **Ao vivo - Nice x Paris Saint-Germain** - Confiança **57%**
+- **INTER TV DOS VALES** (MiTV): Agora **Rota Inter TV MG** - Confiança **58%**
+- **Investigação Discovery** (MiTV): Agora **Vivendo com o Inimigo** - Confiança **70%**
+- **NHK** (MiTV): Agora **Nyan-chu Space Broadcasting** - Confiança **62%**
+- **NSC BLUMENAU** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **55%**
+- **RECORDTV PARAIBA TV CORREIO** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **RECORDTV RJ** (IPTV-EPG BR): Agora **Rio Bom D+** - Confiança **53%**
+- **SBT RJ** (IPTV-EPG BR): Agora **Eita Lucas!** - Confiança **53%**
+- **SPORTYNET 1** (Claro Git): Agora **Dia 27/11 - Werder Bremen x Borussia Monchengladbach** - Confiança **53%**
+- **SPORTYNET 2** (TV Plus): Agora **Programação Esportiva** - Confiança **50%**
+- **SPORTYNET 3** (TV Plus): Agora **Programação Esportiva** - Confiança **50%**
+- **Universal Studio** (MiTV): Agora **Natal Fora de Casa** - Confiança **78%**
+- **TNT Novelas** (Claro Git): Agora **Os Dez Mandamentos** - Confiança **67%**
+- **TV CLUBE TERESINA** (Afiliadas Locais): Agora **Que Arretado!** - Confiança **39%**
+- **BLOOMBERG** (MiTV): Agora **The Deal With Alex Rodriguez and Jason Kelly** - Confiança **73%**
+- **FOX NEWS** (MiTV): Agora **Ao vivo - Fox News Live** - Confiança **67%**
+- **GLOBO AMAPÁ** (Globo Oficial API): Agora **Zappeando** - Confiança **45%**
+- **GLOBO INTER TV COSTA BRANCA** (MiTV): Agora **Rota InterTV** - Confiança **55%**
+- **GLOBO TEM BAURU** (Globo Oficial API): Agora **Muito+** - Confiança **45%**
+- **GLOBO TV MIRANTE COCAIS** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **53%**
+- **RECORD ITAPOAN** (MiTV): Agora **Balanço Geral BA - Edição de Sábado** - Confiança **53%**
+- **TV CAMARA** (MiTV): Agora **Elas Pautam** - Confiança **65%**
+- **TVE** (Vivo Play API): Agora **D corazón** - Confiança **44%**
+- **Adult Swim** (Claro Git): Agora **Rick & Morty** - Confiança **69%**
+- **ASSEMBLÉIA LEGISLATIVA** (MiTV): Agora **Atividade Parlamentar** - Confiança **42%**
+- **BAND** (MiTV): Agora **Band Esporte Clube** - Confiança **71%**
+- **Band Belem** (MiTV): Agora **Band Esporte Clube** - Confiança **51%**
+- **BAND RS** (Vivo Play API): Agora **Band Esporte Clube** - Confiança **53%**
+- **CANAL UOL** (Claro Git): Agora **Desculpa Alguma Coisa** - Confiança **60%**
+- **CNBC BRASIL** (Vivo Play API): Agora **Times Brasil - CNBC - Semana Prime** - Confiança **50%**
+- **Conmebol TV 1** (IPTV-EPG BR): Agora **Sem programação** - Confiança **23%**
+- **EPTV CENTRAL SAO CARLOS** (Globo Oficial API): Agora **Mais Caminhos** - Confiança **46%**
+- **GB REDE AMAZONICA MANAUS** (Afiliadas Locais): Agora **Paneiro** - Confiança **52%**
+- **GB TV REDE AMAZONICA BOA VISTA** (Globo Oficial API): Agora **Zappeando** - Confiança **45%**
+- **GB TV REDE AMAZONICA MACAPA** (Globo Oficial API): Agora **Zappeando** - Confiança **45%**
+- **GB TV REDE AMAZONICA PORTO VELHO** (Globo Oficial API): Agora **Zappeando** - Confiança **45%**
+- **GLOBO BAHIA** (MiTV): Agora **Conversa Preta** - Confiança **58%**
+- **Globo NSC TV Florianopolis** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **55%**
+- **Globo RBS TV Porto Alegre** (Afiliadas Locais): Agora **Baita Sábado** - Confiança **55%**
+- **Globo Rede Bahia** (MiTV): Agora **Conversa Preta** - Confiança **58%**
+- **Globo RPC TV Curitiba** (Afiliadas Locais): Agora **Estúdio C** - Confiança **55%**
+- **GLOBO SJRP** (Globo Oficial API): Agora **Muito+** - Confiança **45%**
+- **GLOBO TV ALVORADA DO SUL** (MiTV): Agora **Roque Santeiro - Edição Especial** - Confiança **53%**
+- **Globo TV Vanguarda S J dos Campos** (Globo Oficial API): Agora **Edição Especial - Roque Santeiro** - Confiança **54%**
+- **INTER TV ALTO LITORAL** (Globo Oficial API): Agora **Vim de lá - Bailes do Rio** - Confiança **54%**
+- **MARKKET** (Vivo Play API): Agora **Papo de Especialista** - Confiança **62%**
+- **NSC TV BLUMENAU** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **55%**
+- **NSC TV CENTRO OESTE** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **52%**
+- **NSC TV CRICIUMA** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **55%**
+- **Nsports** (Claro Git): Agora **Um Assado Para...** - Confiança **50%**
+- **PAI ETERNO** (Claro Git): Agora **Novena do Perpétuo Socorro** - Confiança **57%**
+- **PARAMOUNT PLUS 1** (Claro Git): Agora **Libertadores e Sulamericana** - Confiança **53%**
+- **PARAMOUNT PLUS 2** (Claro Git): Agora **Libertadores e Sulamericana** - Confiança **55%**
+- **PARAMOUNT PLUS 3** (Claro Git): Agora **Libertadores e Sulamericana** - Confiança **55%**
+- **PARAMOUNT PLUS 4** (Claro Git): Agora **Libertadores e Sulamericana** - Confiança **55%**
+- **RBS CAXIAS DO SUL** (Afiliadas Locais): Agora **Baita Sábado** - Confiança **55%**
+- **RBS TV CAXIAS DO SUL** (Afiliadas Locais): Agora **Baita Sábado** - Confiança **55%**
+- **RBS TV PASSO FUNDO** (Afiliadas Locais): Agora **Baita Sábado** - Confiança **55%**
+- **RBS TV SANTA MARIA** (Afiliadas Locais): Agora **Baita Sábado** - Confiança **55%**
+- **RECORD INTERIOR SP** (Vivo Play API): Agora **Balanço Geral - Edição de Sábado** - Confiança **55%**
+- **RECORD RIO** (MiTV): Agora **Rio Bom D+** - Confiança **56%**
+- **RECORD TV CAMPINAS** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **RECORDTV DF** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **55%**
+- **RECORDTV FRANCA E RIBEIRAO** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **RECORDTV GOIAS** (MiTV): Agora **Balanço Geral GO - Edição de Sábado** - Confiança **58%**
+- **RECORDTV LESTE** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **RECORDTV PAULISTA** (MiTV): Agora **Tá no Ar Interior** - Confiança **56%**
+- **RECORDTV PIAUI A10** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **RECORDTV RJ INTERIOR** (Vivo Play API): Agora **Balanço Geral - Edição de Sábado** - Confiança **53%**
+- **RECORDTV SP INTERIOR** (Vivo Play API): Agora **Balanço Geral - Edição de Sábado** - Confiança **55%**
+- **RECORDTV THATHI CAMPINAS** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **RECORDTV UBERLANDIA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **RPC CASCAVEL** (Afiliadas Locais): Agora **Estúdio C** - Confiança **55%**
+- **RPC LONDRINA** (Afiliadas Locais): Agora **Estúdio C** - Confiança **55%**
+- **SBT VTV SANTOS CAMPINAS** (Claro Git): Agora **Eita Lucas!** - Confiança **78%**
+- **TV EVANGELIZAR** (Vivo Play API): Agora **Pastoral da Criança** - Confiança **57%**
+- **TV INTEGRAÇÃO ARAXA** (MiTV): Agora **Coisas Daqui** - Confiança **58%**
+- **TV INTEGRACAO UBERABA** (MiTV): Agora **Coisas Daqui** - Confiança **58%**
+- **TV INTEGRACAO UBERLANDIA** (MiTV): Agora **Coisas Daqui** - Confiança **58%**
+- **TV MORENA CAMPO GRANDE** (Afiliadas Locais): Agora **Agro, o Desafio - Bastidores** - Confiança **55%**
+- **TV SANTA CRUZ** (MiTV): Agora **Conversa Preta** - Confiança **58%**
+- **TV SUBAE** (MiTV): Agora **Conversa Preta** - Confiança **58%**
+- **TV SUDOESTE** (MiTV): Agora **Conversa Preta** - Confiança **55%**
+- **BAND BAHIA** (MiTV): Agora **Band Esporte Clube** - Confiança **34%**
+- **DUMDUM** (Claro Git): Agora **Tv Pi-Ki-Pin** - Confiança **64%**
+- **GLOBO AMAZÔNICA RIO BRANCO** (Afiliadas Locais): Agora **Almanacre** - Confiança **48%**
+- **GLOBO ANHANGUERA CATALAO** (Afiliadas Locais): Agora **No Balaio** - Confiança **55%**
+- **GLOBO ANHANGUERA GOIANIA** (Afiliadas Locais): Agora **No Balaio** - Confiança **57%**
+- **GLOBO BELÉM** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **49%**
+- **GLOBO CABO BRANCO** (Afiliadas Locais): Agora **Minha Paraíba** - Confiança **55%**
+- **GLOBO EPCAMPINAS** (Globo Oficial API): Agora **Mais Caminhos** - Confiança **46%**
+- **GLOBO INTER GRANDE MINAS** (MiTV): Agora **Rota Inter TV MG** - Confiança **58%**
+- **GLOBO JUAZEIRO BAHIA** (MiTV): Agora **Conversa Preta** - Confiança **58%**
+- **GLOBO MORENA** (Afiliadas Locais): Agora **Agro, o Desafio - Bastidores** - Confiança **55%**
+- **GLOBO TEM SOROCABA** (Globo Oficial API): Agora **Muito+** - Confiança **45%**
+- **GLOBO TRIBUNA SANTOS** (MiTV): Agora **Splash!** - Confiança **58%**
+- **GLOBO VANG S J CAMPOS** (Globo Oficial API): Agora **Edição Especial - Roque Santeiro** - Confiança **54%**
+- **MALHAÇÃO FAST** (Globoplay Oficial API): Agora **Malhação - Múltipla Escolha** - Confiança **59%**
+- **RECORD** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **RECORD BRASILIA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **55%**
+- **RECORDTV GUARARAPES** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **REDE SUPER** (MiTV): Agora **Ao vivo - Conferência Global de Missões** - Confiança **51%**
+- **RIT TV** (MiTV): Agora **Show da Fé** - Confiança **64%**
+- **SBT TV JORNAL RECIFE** (MiTV): Agora **Eita Lucas!** - Confiança **50%**
+- **TV JUSTICA** (IPTV-EPG BR): Agora **Descomplicando** - Confiança **63%**
+- **BAND TV GOIANIA** (MiTV): Agora **Band Esporte Clube** - Confiança **50%**
+- **BAND TV MINAS** (MiTV): Agora **Band Esporte Clube** - Confiança **56%**
+- **Conmebol TV 2** (IPTV-EPG BR): Agora **Sem programação** - Confiança **23%**
+- **Conmebol TV 3** (IPTV-EPG BR): Agora **Sem programação** - Confiança **23%**
+- **Conmebol TV 4** (Claro TV+ API): Agora **Libertadores e Sulamericana** - Confiança **40%**
+- **EPTV SAO CARLOS** (Globo Oficial API): Agora **Mais Caminhos** - Confiança **46%**
+- **GB TV MORENA** (Afiliadas Locais): Agora **Agro, o Desafio - Bastidores** - Confiança **55%**
+- **GB TV REDE AMAZONICA MANAUS** (Afiliadas Locais): Agora **Paneiro** - Confiança **52%**
+- **GB TV REDE AMAZONICA RIO BRANCO** (Afiliadas Locais): Agora **Almanacre** - Confiança **52%**
+- **GE TV** (Globoplay Oficial API): Agora **Pré-Jogo** - Confiança **55%**
+- **Globo Bahia Vitória da Conquista** (MiTV): Agora **Conversa Preta** - Confiança **58%**
+- **GLOBOBELOHORIZONTE** (MiTV): Agora **Coisas Daqui** - Confiança **58%**
+- **GLOBO BOA VISTA** (Globo): Agora **Roque Santeiro - Edição Especial** - Confiança **69%**
+- **GLOBO EPRIBEIRAO PRETO** (Globo Oficial API): Agora **Mais Caminhos** - Confiança **46%**
+- **GLOBO EPSUL DE MINAS** (Afiliadas Locais): Agora **Mais Caminhos** - Confiança **50%**
+- **GLOBO FEIRA DE SANTANA BAHIA** (MiTV): Agora **Conversa Preta** - Confiança **58%**
+- **GLOBO GAZETA VITÓRIA** (Globo Oficial API): Agora **Em Movimento** - Confiança **45%**
+- **GLOBO INTEG JUIZ DE FORA** (MiTV): Agora **Coisas Daqui** - Confiança **58%**
+- **GLOBO INTER CABUGI** (MiTV): Agora **Rota InterTV** - Confiança **56%**
+- **GLOBO INTER DOS VALES** (MiTV): Agora **Rota Inter TV MG** - Confiança **58%**
+- **GLOBO INTER TV CABUGI** (MiTV): Agora **Rota InterTV** - Confiança **56%**
+- **GLOBOINTERTVGRANDEMINASMG** (MiTV): Agora **Rota Inter TV MG** - Confiança **58%**
+- **GLOBO INTERTV PLANICIE** (Globo Oficial API): Agora **Vim de lá - Bailes do Rio** - Confiança **54%**
+- **GLOBO MARANHÃO** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **49%**
+- **GLOBONSCCHAPECO** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **55%**
+- **GLOBONSCCRICIUMA** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **55%**
+- **GLOBO PERNAMBUCO** (Afiliadas Locais): Agora **É Pipoco!** - Confiança **55%**
+- **GLOBO RBS TV BAGE** (Afiliadas Locais): Agora **Baita Sábado** - Confiança **55%**
+- **GLOBORBSTVPELOTAS** (Afiliadas Locais): Agora **Baita Sábado** - Confiança **55%**
+- **GLOBO REDE AMAZONAS ARQUEMES** (Globo): Agora **Roque Santeiro - Edição Especial** - Confiança **69%**
+- **Globo Rede Amazonica** (Afiliadas Locais): Agora **Paneiro** - Confiança **53%**
+- **Globo Rede Amazonica Rio Branco** (Afiliadas Locais): Agora **Almanacre** - Confiança **52%**
+- **GLOBO REDE AMAZONICA RONDONIA** (Globo Oficial API): Agora **Zappeando** - Confiança **45%**
+- **GLOBORPCPARANAVAI** (Afiliadas Locais): Agora **Estúdio C** - Confiança **55%**
+- **GLOBO SERGIPE** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **53%**
+- **GLOBO TV ALAGOAS** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **43%**
+- **GLOBO TV ANHANGUERA ARAGUAINA** (Afiliadas Locais): Agora **No Balaio** - Confiança **54%**
+- **GLOBO TV ANHANGUERA GOIANIA** (Afiliadas Locais): Agora **No Balaio** - Confiança **57%**
+- **GLOBOTVDIARIO** (MiTV): Agora **Forrobodó** - Confiança **52%**
+- **GLOBO TV GAZETA SUL ES** (MiTV): Agora **Em Movimento** - Confiança **58%**
+- **GLOBOTVINTEGARAXA** (MiTV): Agora **Coisas Daqui** - Confiança **58%**
+- **GLOBOTVINTEGJUIZDEFORA** (MiTV): Agora **Coisas Daqui** - Confiança **58%**
+- **GLOBO TV MIRANTE BALSAS MARANHAO** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **53%**
+- **GLOBO TV NORDESTE** (Afiliadas Locais): Agora **É Pipoco!** - Confiança **52%**
+- **GLOBO TV SANTA CRUZ ITABUNA BAHIA** (MiTV): Agora **Conversa Preta** - Confiança **58%**
+- **GLOBOTVSERRAMAR** (MiTV): Agora **Roque Santeiro - Edição Especial** - Confiança **73%**
+- **GLOBOTVVANGSJCAMPOS** (Globo Oficial API): Agora **Edição Especial - Roque Santeiro** - Confiança **54%**
+- **INTER TV CABUGI NATAL** (MiTV): Agora **Rota InterTV** - Confiança **56%**
+- **NHK WORLD** (WebFinal): Agora **Nyan-chu Space Broadcasting** - Confiança **42%**
+- **RAI** (Vivo Play API): Agora **Ciao maschio** - Confiança **55%**
+- **RECORD CAMPOS DOS GOYTACAZES** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **RECORDTV BA** (MiTV): Agora **Balanço Geral BA - Edição de Sábado** - Confiança **53%**
+- **RECORD TV BAHIA** (MiTV): Agora **Balanço Geral BA - Edição de Sábado** - Confiança **53%**
+- **RECORD TV CIDADE CEARA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **RECORDTV FRANCA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **RECORDTV GO** (Open-EPG BR): Agora **Balanço Geral GO - Edição de Sábado** - Confiança **55%**
+- **RECORDTV LITORAL VALE DO PARAIBA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **RECORD TV MINAS** (MiTV): Agora **Balanço Geral MG - Edição de Sábado** - Confiança **56%**
+- **RECORDTV PARANAIBA UBERLANDIA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **RECORDTV RORAIMA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **RECORD TV SANTA CATARINA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **RECORDTV VILA REAL** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **REDE AMAZONICA ARIQUEMES** (Globo Oficial API): Agora **Zappeando** - Confiança **45%**
+- **REDE AMAZONICA COARI** (Afiliadas Locais): Agora **Paneiro** - Confiança **53%**
+- **REDE AMAZONICA HUMAITA** (Afiliadas Locais): Agora **Paneiro** - Confiança **52%**
+- **REDE AMAZONICA ITACOTIARA** (MiTV): Agora **Paneiro** - Confiança **61%**
+- **REDE AMAZONICA JI PARANA** (Globo Oficial API): Agora **Zappeando** - Confiança **45%**
+- **REDE AMAZONICA PARINTINS** (Afiliadas Locais): Agora **Paneiro** - Confiança **49%**
+- **REDE AMAZONICA VILHENA** (Vivo Play API): Agora **Paneiro** - Confiança **57%**
+- **REDE GOSPEL** (MiTV): Agora **Clipes Gospel** - Confiança **62%**
+- **REDETV PAMPA** (MiTV): Agora **Pampa Show** - Confiança **47%**
+- **SBT JANGADEIRO CE** (MiTV): Agora **Eita Lucas!** - Confiança **50%**
+- **SBT PLUS Novelas** (Claro Git): Agora **Eita Lucas!** - Confiança **78%**
+- **SBT PR** (Vivo Play API): Agora **Eita Lucas!** - Confiança **58%**
+- **SBT REDE MASSA** (Vivo Play API): Agora **Eita Lucas!** - Confiança **58%**
+- **SBT TV ALTEROSA** (Vivo Play API): Agora **Eita Lucas!** - Confiança **56%**
+- **SBT TV CAMPINAS** (Claro Git): Agora **Eita Lucas!** - Confiança **78%**
+- **SBT TV SERRA DOURADA** (MiTV): Agora **Eita Lucas!** - Confiança **50%**
+- **SBT VTV CAMPINAS** (Claro Git): Agora **Eita Lucas!** - Confiança **78%**
+- **TERRA VIVA** (Vivo Play API): Agora **Leilão Virtual - Nelore Cutolo Matrizes do Futuro** - Confiança **64%**
+- **TV ALVORADA** (Afiliadas Locais): Agora **Que Arretado!** - Confiança **39%**
+- **TV ANHANGUERA ANAPOLIS** (Afiliadas Locais): Agora **No Balaio** - Confiança **55%**
+- **TV ANHANGUERA CATALAO** (Afiliadas Locais): Agora **No Balaio** - Confiança **55%**
+- **TV ANHANGUERA GURUPI** (Afiliadas Locais): Agora **No Balaio** - Confiança **55%**
+- **TV ANHANGUERA ITUMBIARA** (Afiliadas Locais): Agora **No Balaio** - Confiança **55%**
+- **TV ANHANGUERA JATAI** (Afiliadas Locais): Agora **No Balaio** - Confiança **55%**
+- **TV ANHANGUERA LUZIANIA** (Afiliadas Locais): Agora **No Balaio** - Confiança **59%**
+- **TV ANHANGUERA PORANGATU** (Afiliadas Locais): Agora **No Balaio** - Confiança **57%**
+- **TV ANHANGUERA RIO VERDE** (Afiliadas Locais): Agora **No Balaio** - Confiança **55%**
+- **TV CENTRO AMERICA NORTE** (MiTV): Agora **Agro, o Desafio - Bastidores** - Confiança **55%**
+- **TV CENTRO AMERICA SUL** (MiTV): Agora **Agro, o Desafio - Bastidores** - Confiança **55%**
+- **TV CENTRO AMERICA TANGARA DA SERRA** (MiTV): Agora **Agro, o Desafio - Bastidores** - Confiança **55%**
+- **TV GRANDE RIO** (Globo Oficial API): Agora **Edição Especial - Roque Santeiro** - Confiança **45%**
+- **TV LIBERAL CASTANHAL** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **53%**
+- **TV LIBERAL MARABA** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **53%**
+- **TV LIBERAL PARAGOMINAS** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **53%**
+- **TV LIBERAL PARAUAPEBAS** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **53%**
+- **TV MIRANTE BALSAS** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **53%**
+- **TV MIRANTE IMPERATRIZ** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **53%**
+- **TV MORENA CORUMBA** (Afiliadas Locais): Agora **Agro, o Desafio - Bastidores** - Confiança **55%**
+- **TV MORENA PONTA PORA** (Afiliadas Locais): Agora **Agro, o Desafio - Bastidores** - Confiança **55%**
+- **TV OESTE** (Vivo Play API): Agora **Faroeste à Brasileira** - Confiança **52%**
+- **TV PAMPA RS** (Vivo Play API): Agora **Pampa Show** - Confiança **54%**
+- **TV PARAIBA** (Afiliadas Locais): Agora **Minha Paraíba** - Confiança **55%**
+- **TV SAO FRANCISCO** (MiTV): Agora **Conversa Preta** - Confiança **58%**
+- **TV TAPAJOS** (Globo Oficial API): Agora **Edição Especial - Roque Santeiro** - Confiança **53%**
+- **TV UNIAO** (MiTV): Agora **Super Clipes** - Confiança **55%**
+- **BAND CEARA** (MiTV): Agora **Band Esporte Clube** - Confiança **74%**
+- **BAND NATAL** (MiTV): Agora **Band Esporte Clube** - Confiança **52%**
+- **CNN BRASIL MONEY** (WebFinal): Agora **CNN Money News** - Confiança **44%**
+- **CNN ESPANHOL** (MiTV): Agora **Directo USA** - Confiança **54%**
+- **GLOBO AMAZONICA PORTO VELHO** (Globo Oficial API): Agora **Zappeando** - Confiança **45%**
+- **GLOBO AMAZONICA RONDONIA** (Globo Oficial API): Agora **Zappeando** - Confiança **45%**
+- **GLOBO DIARIO MOGI DAS CRUZES** (Globo Oficial API): Agora **Mais Diário** - Confiança **55%**
+- **GLOBO FRONTEIRA PAULISTA** (MiTV): Agora **Roque Santeiro - Edição Especial** - Confiança **61%**
+- **GLOBO INTEG ARAXÁ** (MiTV): Agora **Coisas Daqui** - Confiança **58%**
+- **GLOBO INTEG UBERLÂNDIA** (MiTV): Agora **Coisas Daqui** - Confiança **58%**
+- **GLOBO INTER ALTO LITORAL** (Globo Oficial API): Agora **Vim de lá - Bailes do Rio** - Confiança **54%**
+- **GLOBO RBS PASSO FUNDO** (Afiliadas Locais): Agora **Baita Sábado** - Confiança **55%**
+- **GLOBO RPC PONTA GROSSA** (Afiliadas Locais): Agora **Estúdio C** - Confiança **55%**
+- **GLOBO SERRA MAR** (MiTV): Agora **Roque Santeiro - Edição Especial** - Confiança **73%**
+- **GLOBO TERESINA** (Afiliadas Locais): Agora **Que Arretado!** - Confiança **25%**
+- **GLOBO VANG TAUBATE** (Globo Oficial API): Agora **Edição Especial - Roque Santeiro** - Confiança **54%**
+- **POLISHOP** (Claro Git): Agora **Programação Polishop TV** - Confiança **51%**
+- **RECORD RICTV MARINGA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **RECORD TV CORREIO JOAO PESSOA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **RECORD TV TROPICAL** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **SBT BRASILIA** (Genius): Agora **Eita Lucas!** - Confiança **54%**
+- **SBT MG TV ALTEROSA** (Vivo Play API): Agora **Eita Lucas!** - Confiança **56%**
+- **SBT PARA** (MiTV): Agora **Eita Lucas!** - Confiança **47%**
+- **SBT RS** (Vivo Play API): Agora **Eita Lucas!** - Confiança **55%**
+- **SBT TV ARATU BAHIA** (MiTV): Agora **Eita Lucas!** - Confiança **50%**
+- **SESCTV** (MiTV): Agora **Fronteiras Fluidas** - Confiança **55%**
+- **BAND BSB** (MiTV): Agora **Band Esporte Clube** - Confiança **74%**
+- **BAND CASCAVEL** (MiTV): Agora **Band Esporte Clube** - Confiança **74%**
+- **BAND CASCAVEL PR** (MiTV): Agora **Band Esporte Clube** - Confiança **57%**
+- **BAND CASCAVEL TV TAROBA** (MiTV): Agora **Band Esporte Clube** - Confiança **74%**
+- **BAND MANAIRA PARAIBA** (MiTV): Agora **Band Esporte Clube** - Confiança **74%**
+- **Band MG** (MiTV): Agora **Band Esporte Clube** - Confiança **56%**
+- **BAND NORDESTE** (MiTV): Agora **Band Esporte Clube** - Confiança **73%**
+- **BAND PARAIBA** (MiTV): Agora **Band Esporte Clube** - Confiança **74%**
+- **BAND PARANA** (MiTV): Agora **Band Esporte Clube** - Confiança **74%**
+- **BAND PAULISTA** (Vivo Play API): Agora **Band Esporte Clube** - Confiança **62%**
+- **BAND RECIFE** (Afiliadas Locais): Agora **Band Esporte Clube** - Confiança **58%**
+- **BAND RIBEIRAO PRETO** (MiTV): Agora **Band Esporte Clube** - Confiança **73%**
+- **BAND RIO** (MiTV): Agora **Band Esporte Clube** - Confiança **57%**
+- **BAND SC TVBV** (MiTV): Agora **Band Esporte Clube** - Confiança **73%**
+- **BAND SJC** (MiTV): Agora **Band Esporte Clube** - Confiança **73%**
+- **BAND TRIANGULO** (Vivo Play API): Agora **Band Esporte Clube** - Confiança **61%**
+- **BAND TV TRIBUNA RECIFE** (MiTV): Agora **Band Esporte Clube** - Confiança **74%**
+- **BAND VALE** (Vivo Play API): Agora **Band Esporte Clube** - Confiança **61%**
+- **CNN** (MiTV): Agora **Off Peak** - Confiança **51%**
+- **DPA FAST** (Open-EPG BR): Agora **D.P.A.- Detetives Do Prédio Azul** - Confiança **55%**
+- **EPTV ARARAQUARA** (Globo Oficial API): Agora **Mais Caminhos** - Confiança **45%**
+- **Globo** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **60%**
+- **GLOBO ALAGOAS** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **43%**
+- **GLOBO AMAZÔNICA MANAUS** (Afiliadas Locais): Agora **Paneiro** - Confiança **49%**
+- **GLOBO CEARÁ** (Afiliadas Locais): Agora **Se Liga VM** - Confiança **49%**
+- **GLOBO EPSÃO CARLOS** (Globo Oficial API): Agora **Mais Caminhos** - Confiança **46%**
+- **GLOBO GAZETA ALAGOAS** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **43%**
+- **GLOBO GAZETA SUL** (Globo Oficial API): Agora **Em Movimento** - Confiança **45%**
+- **GLOBO INTER PT** (MiTV): Agora **Roque Santeiro - Edição Especial** - Confiança **76%**
+- **GLOBO INTER VALE MG** (MiTV): Agora **Rota Inter TV MG** - Confiança **58%**
+- **GLOBO MIRANTE SÃO LUIS** (Globo Oficial API): Agora **Edição Especial - Roque Santeiro** - Confiança **45%**
+- **GLOBO NATAL** (MiTV): Agora **Rota InterTV** - Confiança **56%**
+- **GLOBO PE ASA BRANCA** (Globo Oficial API): Agora **Edição Especial - Roque Santeiro** - Confiança **45%**
+- **GLOBO RECIFE** (Afiliadas Locais): Agora **É Pipoco!** - Confiança **55%**
+- **GLOBO REDE AMAZONAS MACAPA** (Globo): Agora **Roque Santeiro - Edição Especial** - Confiança **69%**
+- **Globo Rio** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **59%**
+- **GLOBO RORAIMA** (Globo Oficial API): Agora **Zappeando** - Confiança **45%**
+- **GLOBO SANTA CRUZ** (MiTV): Agora **Conversa Preta** - Confiança **58%**
+- **Globo São Paulo** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **51%**
+- **GLOBO TV ANHANGUERA GURUPI TOCANTINS** (Afiliadas Locais): Agora **No Balaio** - Confiança **55%**
+- **GLOBO TV ANHANGUERA PALMAS TOCANTINS** (Afiliadas Locais): Agora **No Balaio** - Confiança **54%**
+- **GLOBO TV GAZETA VITORIA ES** (Globo Oficial API): Agora **Em Movimento** - Confiança **45%**
+- **GLOBO TV MIRANTE** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **53%**
+- **GLOBO TV OESTE BAHIA** (MiTV): Agora **Conversa Preta** - Confiança **58%**
+- **GLOBO TV VANG TAUBATE** (Globo Oficial API): Agora **Edição Especial - Roque Santeiro** - Confiança **54%**
+- **GLOBO VITÓRIA** (Globo Oficial API): Agora **Em Movimento** - Confiança **45%**
+- **NBR** (MiTV): Agora **Documentário** - Confiança **56%**
+- **NICK** (IPTV-EPG BR): Agora **Sem programação** - Confiança **23%**
+- **RBS CAXIAS** (Afiliadas Locais): Agora **Baita Sábado** - Confiança **50%**
+- **RBS PASSO FUNDO GLOBO** (Afiliadas Locais): Agora **Baita Sábado** - Confiança **50%**
+- **RECEITAS FAST** (Globo): Agora **Sabor Em Jogo** - Confiança **45%**
+- **RECORD LITORAL VALE DO PARNAIBA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **RECORD SERGIPE** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **RECORD SIC TV RONDONIA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **RECORD SJR PRETO** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **RECORDTV ATALAIA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **RECORDTV BAURU** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **RECORDTV CABRALIA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **RECORDTV CURITIBA** (MiTV): Agora **Macks da Gente** - Confiança **52%**
+- **RECORDTV FLORIANOPOLIS** (MiTV): Agora **Clube da Bola** - Confiança **53%**
+- **RECORDTV NDTV FLORIANOPOLIS** (MiTV): Agora **Clube da Bola** - Confiança **53%**
+- **RECORDTV RECIFE** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **RECORDTV RIC MARINGA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **RECORDTV RN TV TROPICAL** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **RECORDTV VITORIA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **REDE 21** (Claro TV+ API): Agora **Igreja Universal do Reino de Deus** - Confiança **49%**
+- **REDE AMAZONICA CACOAL** (Vivo Play API): Agora **Paneiro** - Confiança **57%**
+- **REDE AMAZONICA CRUZEIRO DO SUL** (Globo Oficial API): Agora **Almanacre** - Confiança **53%**
+- **REDE AMAZONICA MANACAPURU** (Afiliadas Locais): Agora **Paneiro** - Confiança **52%**
+- **REDE AMAZONICA RORAINOPOLIS** (Vivo Play API): Agora **Paneiro** - Confiança **57%**
+- **Rede Brasil** (MiTV): Agora **Asterix e Obelix Contra César** - Confiança **65%**
+- **REDE CNT** (MiTV): Agora **Vício Tem Cura** - Confiança **66%**
+- **SBT ALAGOAS TV PONTA VERDE** (MiTV): Agora **Eita Lucas!** - Confiança **47%**
+- **SBT ALTAMIRA** (Mais SBT): Agora **Eita Lucas!** - Confiança **72%**
+- **SBT CUIABA** (MiTV): Agora **Eita Lucas!** - Confiança **47%**
+- **SBT DIFUSORA** (Mais SBT): Agora **Eita Lucas!** - Confiança **72%**
+- **SBT FOZ DO IGUACU** (Mais SBT): Agora **Eita Lucas!** - Confiança **72%**
+- **SBT INTERIOR SP** (Vivo Play API): Agora **Eita Lucas!** - Confiança **57%**
+- **SBT JORNAL PE** (MiTV): Agora **Eita Lucas!** - Confiança **50%**
+- **SBT MARINGA** (Vivo Play API): Agora **Band Esporte Clube** - Confiança **30%**
+- **SBT NOVA FRIBURGO** (Vivo Play API): Agora **Eita Lucas!** - Confiança **69%**
+- **SBT PLUS Silvio Santos** (Claro Git): Agora **Eita Lucas!** - Confiança **78%**
+- **SBT PLUS Tvzyn** (Claro Git): Agora **Eita Lucas!** - Confiança **78%**
+- **SBT PONTA GROSSA** (Mais SBT): Agora **Eita Lucas!** - Confiança **72%**
+- **SBTRIO** (Vivo Play API): Agora **Eita Lucas!** - Confiança **55%**
+- **SBT SAO LUIZ** (Mais SBT): Agora **Eita Lucas!** - Confiança **72%**
+- **SBT SIM** (Claro Git): Agora **Eita Lucas!** - Confiança **78%**
+- **SBT TAMBAU PARAIBA** (Mais SBT): Agora **Eita Lucas!** - Confiança **72%**
+- **SBT TH PLUS VALE** (Claro Git): Agora **Eita Lucas!** - Confiança **78%**
+- **SBT TV ALTEROSA MG** (Vivo Play API): Agora **Eita Lucas!** - Confiança **56%**
+- **SBT TV PIAUI** (MiTV): Agora **Eita Lucas!** - Confiança **47%**
+- **SBT TV RBS** (Vivo Play API): Agora **Eita Lucas!** - Confiança **71%**
+- **SBT TV RN** (Claro Git): Agora **Eita Lucas!** - Confiança **78%**
+- **SBT VITORIOSA** (MiTV): Agora **Band Esporte Clube** - Confiança **52%**
+- **SPORTSNET** (Open-EPG BR 4): Agora **Borussia Mönchengladbach x Borussia Dortmund - Campeonato Alemão** - Confiança **60%**
+- **TBS** (MiTV): Agora **Os Dez Mandamentos** - Confiança **48%**
+- **TCM** (Claro Git): Agora **Nasce uma Estrela** - Confiança **74%**
+- **TruTV** (MiTV): Agora **Rick and Morty** - Confiança **66%**
+- **Tv Cidade Verde Picos** (MiTV): Agora **Eita Lucas!** - Confiança **47%**
+- **TVE BAHIA** (MiTV): Agora **Meu Pedaço do Brasil** - Confiança **55%**
+- **TV GRANDE RIO PETROLINA** (Globo Oficial API): Agora **Edição Especial - Roque Santeiro** - Confiança **45%**
+- **TV LIBERAL ALTAMIRA** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **53%**
+- **TV LIBERAL REDENCAO** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **53%**
+- **TV Santa Cruz Bahia** (MiTV): Agora **Conversa Preta** - Confiança **53%**
+- **UNIVERSAL REALITY** (Claro Git): Agora **The Real Housewives of Miami** - Confiança **68%**
+- **BAND BRASILIA** (MiTV): Agora **Band Esporte Clube** - Confiança **55%**
+- **Band Curitiba** (MiTV): Agora **Band Esporte Clube** - Confiança **57%**
+- **Band Maceio** (MiTV): Agora **Band Esporte Clube** - Confiança **52%**
+- **BAND PA** (MiTV): Agora **Band Esporte Clube** - Confiança **51%**
+- **BAND PR** (MiTV): Agora **Band Esporte Clube** - Confiança **57%**
+- **BAND TV ARAPUAN PB** (MiTV): Agora **Band Esporte Clube** - Confiança **73%**
+- **BOX KIDS TV** (Vivo Play API): Agora **Zooparky - Quem Sou Eu?** - Confiança **66%**
+- **Chef TV** (MiTV): Agora **Vida Saudável** - Confiança **59%**
+- **DREAMWORKS** (Vivo Play API): Agora **Angry Birds 2 - O Filme** - Confiança **58%**
+- **GLOBO AMAZONICA ITACOATIARA** (MiTV): Agora **Paneiro** - Confiança **61%**
+- **GLOBO AMAZÔNICA MACAPÁ** (Globo): Agora **Roque Santeiro - Edição Especial** - Confiança **69%**
+- **GLOBO AMAZONICA PARINTINS** (MiTV): Agora **Paneiro** - Confiança **61%**
+- **GLOBO ANHANGUERA** (Afiliadas Locais): Agora **No Balaio** - Confiança **55%**
+- **GLOBO ANHANGUERA ANAPOLIS** (Afiliadas Locais): Agora **No Balaio** - Confiança **55%**
+- **GLOBO ANHANGUERA ITUMBIARA** (Afiliadas Locais): Agora **No Balaio** - Confiança **55%**
+- **GLOBO ANHANGUERA JATAI** (Afiliadas Locais): Agora **No Balaio** - Confiança **55%**
+- **GLOBO ANHANGUERA LUZIANIA** (Afiliadas Locais): Agora **No Balaio** - Confiança **57%**
+- **GLOBO ANHANGUERA PORANGATU** (Afiliadas Locais): Agora **No Balaio** - Confiança **57%**
+- **GLOBO ANHANGUERA TOCANTINS** (Afiliadas Locais): Agora **No Balaio** - Confiança **57%**
+- **GLOBO ASA BRANCA** (Globo Oficial API): Agora **Edição Especial - Roque Santeiro** - Confiança **45%**
+- **GLOBO BELÉM LIBERAL** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **53%**
+- **GLOBO BOA VISTA RORAIMA** (Globo): Agora **Roque Santeiro - Edição Especial** - Confiança **69%**
+- **GLOBO CACOAL** (Globo): Agora **Roque Santeiro - Edição Especial** - Confiança **69%**
+- **GLOBO DIÁRIO FORTALEZA** (Afiliadas Locais): Agora **Se Liga VM** - Confiança **55%**
+- **GLOBO DIVINÓPOLIS** (MiTV): Agora **Roque Santeiro - Edição Especial** - Confiança **76%**
+- **Globo EPTV Central** (Globo Oficial API): Agora **Mais Caminhos** - Confiança **46%**
+- **GLOBO GAZETA ES** (Globo Oficial API): Agora **Em Movimento** - Confiança **45%**
+- **GLOBO GAZETA SUL ES** (Globo Oficial API): Agora **Em Movimento** - Confiança **45%**
+- **Globo Integração Araxa** (Globo Oficial API): Agora **Casa Nossa** - Confiança **72%**
+- **Globo Integração Uberaba** (Globo): Agora **Roque Santeiro - Edição Especial** - Confiança **69%**
+- **GLOBO INTERTV CEL FABRICIANO** (Globo Oficial API): Agora **Vim de lá - Bailes do Rio** - Confiança **54%**
+- **GLOBO INTERTV GOV VALADARES** (Globo Oficial API): Agora **Vim de lá - Bailes do Rio** - Confiança **54%**
+- **GLOBO JUAZEIRO DO NORTE** (Globo): Agora **Roque Santeiro - Edição Especial** - Confiança **69%**
+- **GLOBO MIRANTE COCAIS** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **53%**
+- **GLOBO NACIONAL** (MiTV): Agora **Roque Santeiro - Edição Especial** - Confiança **76%**
+- **Globo Novelas** (Globoplay Oficial API): Agora **Final Feliz** - Confiança **84%**
+- **GLOBO NOW** (MiTV): Agora **Roque Santeiro - Edição Especial** - Confiança **76%**
+- **GLOBO NSC CENTRO OESTE** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **55%**
+- **GLOBO OESTE BARREIRAS BAHIA** (MiTV): Agora **Conversa Preta** - Confiança **58%**
+- **GLOBO PORTO VELHO** (Globo): Agora **Roque Santeiro - Edição Especial** - Confiança **69%**
+- **Globo RBS Centro Oeste** (Afiliadas Locais): Agora **Baita Sábado** - Confiança **55%**
+- **Globo RBS Criciúma** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **46%**
+- **GLOBO RBS SANTA MARIA** (Afiliadas Locais): Agora **Baita Sábado** - Confiança **55%**
+- **GLOBO RBS TV CRUZ ALTA** (Afiliadas Locais): Agora **Baita Sábado** - Confiança **55%**
+- **GLOBO RBS TV ERECHIM** (Afiliadas Locais): Agora **Baita Sábado** - Confiança **55%**
+- **GLOBO RBS TV SANTA ROSA** (Afiliadas Locais): Agora **Baita Sábado** - Confiança **55%**
+- **GLOBO RBS TV URUGUAIANA** (Afiliadas Locais): Agora **Baita Sábado** - Confiança **55%**
+- **Globo Recife PE** (Afiliadas Locais): Agora **É Pipoco!** - Confiança **52%**
+- **GLOBO RIO SUL** (MiTV): Agora **Vim de Lá - Bailes do Rio** - Confiança **58%**
+- **GLOBO RJ ALTO LITORAL** (MiTV): Agora **Roque Santeiro - Edição Especial** - Confiança **65%**
+- **GLOBO RJ INTERIOR** (MiTV): Agora **Roque Santeiro - Edição Especial** - Confiança **65%**
+- **GLOBO RPC GUARAPUAVA** (Afiliadas Locais): Agora **Estúdio C** - Confiança **55%**
+- **GLOBO TAPAJÓS PA** (MiTV): Agora **Roque Santeiro - Edição Especial** - Confiança **58%**
+- **GLOBO TAPAJÓS SANTARÉM** (Globo): Agora **Roque Santeiro - Edição Especial** - Confiança **69%**
+- **GLOBO TEM ITAPETININGA** (Globo Oficial API): Agora **Muito+** - Confiança **44%**
+- **Globo TV Asa Branca PE** (Globo Oficial API): Agora **Edição Especial - Roque Santeiro** - Confiança **45%**
+- **Globo TV Cabo Branco PB** (Afiliadas Locais): Agora **Minha Paraíba** - Confiança **55%**
+- **Globo TV Clube PI** (Afiliadas Locais): Agora **Que Arretado!** - Confiança **39%**
+- **Globo TV Grande Rio PE** (Globo Oficial API): Agora **Edição Especial - Roque Santeiro** - Confiança **45%**
+- **GLOBO TV GUAJARÁ MIRIM** (MiTV): Agora **Roque Santeiro - Edição Especial** - Confiança **76%**
+- **GLOBO TV ITACOTIARA** (MiTV): Agora **Roque Santeiro - Edição Especial** - Confiança **76%**
+- **GLOBO TV JI PARANA** (Globo Oficial API): Agora **Zappeando** - Confiança **45%**
+- **Globo TV Oeste BA** (MiTV): Agora **Conversa Preta** - Confiança **58%**
+- **GLOBO TV PARINTINS** (Globo): Agora **Roque Santeiro - Edição Especial** - Confiança **69%**
+- **GLOBO TV RBS BAGÉ** (Afiliadas Locais): Agora **Baita Sábado** - Confiança **55%**
+- **Globo TV Subaé BA** (MiTV): Agora **Conversa Preta** - Confiança **58%**
+- **Globo TV Sudoeste BA** (MiTV): Agora **Conversa Preta** - Confiança **58%**
+- **GLOBO TV VANGUARDA TTE** (Globo Oficial API): Agora **Edição Especial - Roque Santeiro** - Confiança **54%**
+- **GLOBO TV VILHENA** (Globo): Agora **Roque Santeiro - Edição Especial** - Confiança **69%**
+- **Globo Vanguarda Taubaté** (Globo Oficial API): Agora **Edição Especial - Roque Santeiro** - Confiança **54%**
+- **LA Boomerang** (Vivo Play API): Agora **Booba** - Confiança **69%**
+- **LA Cartoon Network** (MiTV): Agora **Hora de Aventura** - Confiança **79%**
+- **LA Discovery** (Vivo Play API): Agora **Desafio em Dose Dupla - Brasil** - Confiança **70%**
+- **LA Discovery KIDS** (Claro Git): Agora **Mermicorno: A Queda das Estrelas** - Confiança **77%**
+- **LA Discovery Science** (Claro Git): Agora **O Grande Eclipse** - Confiança **75%**
+- **LA Discovery Turbo** (Claro Git): Agora **Texas Metal** - Confiança **76%**
+- **LA ESPN 2** (Claro Git): Agora **Rugby Nations Championship: Irlanda x África do Sul - ao vivo** - Confiança **68%**
+- **LA ESPN 3** (Claro Git): Agora **Billie Jean King Cup: Brasil x Canadá - ao vivo** - Confiança **66%**
+- **LA HBO Family** (IPTV-EPG BR): Agora **Titio Noel** - Confiança **77%**
+- **LA HBO PLUS** (IPTV-EPG BR): Agora **Terrifier 3** - Confiança **75%**
+- **LIKE** (Claro TV+ API): Agora **Trailers, Entrevistas e Festivais** - Confiança **52%**
+- **MEgaTV** (MiTV): Agora **Prosperidade com Deus** - Confiança **55%**
+- **Paramount Channel** (EPGShare BR2): Agora **Sem programação** - Confiança **23%**
+- **PARAMOUNT PLUS PLTF 1** (Claro Git): Agora **Libertadores e Sulamericana** - Confiança **53%**
+- **PARAMOUNT PLUS PLTF 2** (Claro Git): Agora **Libertadores e Sulamericana** - Confiança **55%**
+- **PARAMOUNT PLUS PLTF 3** (Claro Git): Agora **Libertadores e Sulamericana** - Confiança **55%**
+- **RECORD CORREIO PB** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **RECORD ES** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **RECORD FLORIANÓPOLIS SC NDTV** (MiTV): Agora **Clube da Bola** - Confiança **53%**
+- **RECORD MT** (MiTV): Agora **Lamba Show** - Confiança **52%**
+- **RECORD NATAL** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **RECORD PA** (MiTV): Agora **Pará Bom D+** - Confiança **53%**
+- **RECORD PAJUÇARA AL** (Afiliadas Locais): Agora **Balanço Geral - Edição de Sábado** - Confiança **50%**
+- **RECORD PR** (MiTV): Agora **Macks da Gente** - Confiança **52%**
+- **RECORD REMANSO MA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **RECORD RN** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **RECORD SC** (MiTV): Agora **Clube da Bola** - Confiança **53%**
+- **RECORD SIC RO** (Vivo Play API): Agora **Rio Bom D+** - Confiança **64%**
+- **RECORD TO** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **35%**
+- **Record TV Bahia Itabuna** (MiTV): Agora **Balanço Geral BA - Edição de Sábado** - Confiança **53%**
+- **Record TV Fortaleza** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **Record TV Guaíba RS** (MiTV): Agora **The Love School - Escola do Amor** - Confiança **59%**
+- **Record TV Rio Preto** (Vivo Play API): Agora **Balanço Geral - Edição de Sábado** - Confiança **62%**
+- **Record TV Santos e Vale** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **REDE BRASIL TV** (MiTV): Agora **Asterix e Obelix Contra César** - Confiança **65%**
+- **REDE FAMILIA** (MiTV): Agora **Família Kids** - Confiança **54%**
+- **REDE MINAS** (Open-EPG BR): Agora **Conexão 31** - Confiança **53%**
+- **Sabor & Arte** (Vivo Play API): Agora **Do Pão ao Caviar** - Confiança **64%**
+- **SBT Alagoas** (MiTV): Agora **Eita Lucas!** - Confiança **47%**
+- **SBT ALLAMANDA RO** (Vivo Play API): Agora **Eita Lucas!** - Confiança **69%**
+- **SBT AMAZONAS** (Mais SBT): Agora **Eita Lucas!** - Confiança **72%**
+- **SBT BA** (Afiliadas Locais): Agora **Eita Lucas!** - Confiança **53%**
+- **SBT CASTANHAL TV PARAENSE** (Mais SBT): Agora **Eita Lucas!** - Confiança **72%**
+- **SBT CENTRAL** (Vivo Play API): Agora **Eita Lucas!** - Confiança **68%**
+- **SBT CUIABA MT** (Open-EPG BR): Agora **Eita Lucas!** - Confiança **43%**
+- **SBT Difusora Caxias** (Mais SBT): Agora **Eita Lucas!** - Confiança **72%**
+- **SBT GO** (Genius): Agora **Eita Lucas!** - Confiança **43%**
+- **SBT MA** (Open-EPG BR): Agora **A Hora do Zap** - Confiança **18%**
+- **SBT MG** (Afiliadas Locais): Agora **Eita Lucas!** - Confiança **52%**
+- **SBT MT** (MiTV): Agora **Eita Lucas!** - Confiança **47%**
+- **SBT Nacional** (Claro Git): Agora **Eita Lucas!** - Confiança **78%**
+- **SBT PA** (MiTV): Agora **Eita Lucas!** - Confiança **47%**
+- **SBT PA GUAJARÁ** (MiTV): Agora **Eita Lucas!** - Confiança **47%**
+- **SBT PE** (Afiliadas Locais): Agora **Eita Lucas!** - Confiança **52%**
+- **SBT PI** (MiTV): Agora **Eita Lucas!** - Confiança **47%**
+- **SBT Rede Massa PR** (Vivo Play API): Agora **Eita Lucas!** - Confiança **58%**
+- **SBT RIBEIRÃO PRETO** (Claro Git): Agora **Eita Lucas!** - Confiança **78%**
+- **SBT SAO LUIZ MA** (Open-EPG BR): Agora **A Hora do Zap** - Confiança **18%**
+- **SBT SC** (MiTV): Agora **Eita Lucas!** - Confiança **47%**
+- **SBT SCC** (Claro Git): Agora **Eita Lucas!** - Confiança **78%**
+- **SBT TO** (MiTV): Agora **Eita Lucas!** - Confiança **47%**
+- **SBT TRIBUNAES** (Claro Git): Agora **Eita Lucas!** - Confiança **78%**
+- **SBT TV Tambaú PB** (Open-EPG BR): Agora **Eita Lucas!** - Confiança **57%**
+- **SPORTV 4** (Globo): Agora **Sem programação** - Confiança **35%**
+- **TV A CRÍTICA** (MiTV): Agora **Magazine** - Confiança **57%**
+- **TV ESCOLA** (MiTV): Agora **Portão Mágico** - Confiança **31%**
+- **TV MEIO NORTE** (Open-EPG BR): Agora **Paradão Sertanejo** - Confiança **42%**
+- **TV PAMPA** (Vivo Play API): Agora **Pampa Show** - Confiança **54%**
+- **UNIVERSAL** (Claro Git): Agora **Chicago Fire** - Confiança **84%**
+- **Xsports 2** (Open-EPG BR): Agora **Premier League Stories** - Confiança **42%**
+- **Sportynet PLUS 1** (Claro Git): Agora **Dia 27/11 - Werder Bremen x Borussia Monchengladbach** - Confiança **53%**
+- **Sportynet PLUS 2** (TV Plus): Agora **Programação Esportiva** - Confiança **50%**
+- **Sabor & Art** (Vivo Play API): Agora **Do Pão ao Caviar** - Confiança **64%**
+- **Sportynet PLUS 3** (TV Plus): Agora **Programação Esportiva** - Confiança **50%**
+- **TIMES Exclusivo CNBC** (Open-EPG BR 4): Agora **Times Brasil - CNBC - Semana Prime** - Confiança **58%**
+- **CARTOON NETWOORK** (MiTV): Agora **Hora de Aventura** - Confiança **84%**
+- **CULTURA PA** (Vivo Play API): Agora **Ninhos em Movimento** - Confiança **67%**
+- **EVANGELIZAR** (Vivo Play API): Agora **Pastoral da Criança** - Confiança **57%**
+- **FOOD NETWOORK** (MiTV): Agora **A Guerra dos Cupcakes** - Confiança **75%**
+- **RECORD NSC SANTA CATARINA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **RECORD TV PARANA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **RECORD SERGIPE ATALAIA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **70%**
+- **SBT JANGADEIRO** (MiTV): Agora **Eita Lucas!** - Confiança **50%**
+- **SBT PARANA** (Vivo Play API): Agora **Eita Lucas!** - Confiança **58%**
+- **TOONSCAST** (MiTV): Agora **Manda-Chuva** - Confiança **75%**
+- **SPORTYNET** (Open-EPG BR 4): Agora **Borussia Mönchengladbach x Borussia Dortmund - Campeonato Alemão** - Confiança **60%**
+- **Band FM Bahia** (Open-EPG BR): Agora **Band Esporte Clube** - Confiança **17%**
+- **Jovem Pan SP** (Claro Git): Agora **Mala Pronta** - Confiança **69%**
+- **Band News RJ** (MiTV): Agora **Viver Melhor** - Confiança **77%**
+- **GLOBO RJ INTER ALTO LITORAL** (Globo Oficial API): Agora **Vim de lá - Bailes do Rio** - Confiança **54%**
+- **GLOBO RJ INTER TV ALTO LITORAL** (Globo Oficial API): Agora **Vim de lá - Bailes do Rio** - Confiança **54%**
+- **GLOBO RJ PLANÍCIE** (MiTV): Agora **Roque Santeiro - Edição Especial** - Confiança **65%**
+- **GLOBO EPTV CENTRAL SÃO CARLOS SP** (Globo Oficial API): Agora **Mais Caminhos** - Confiança **46%**
+- **GLOBO TV BELÉM** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **49%**
+- **GLOBO TV BRASÍLIA** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **59%**
+- **GLOBO TV PORTO VELHO** (Globo): Agora **Roque Santeiro - Edição Especial** - Confiança **69%**
+- **GLOBO AMAZONICA RO** (Globo Oficial API): Agora **Zappeando** - Confiança **45%**
+- **GLOBO AMAZÔNICA CRUZEIRO ACRE** (Globo): Agora **Roque Santeiro - Edição Especial** - Confiança **69%**
+- **GLOBO BAHIA SANTA CRUZ** (MiTV): Agora **Conversa Preta** - Confiança **58%**
+- **GLOBO BAHIA VDC** (MiTV): Agora **Conversa Preta** - Confiança **58%**
+- **GLOBO INTEGRAÇÃO UBERLÂNDIA** (Globo Oficial API): Agora **Casa Nossa** - Confiança **72%**
+- **GLOBO INTER CABUGI RN** (MiTV): Agora **Rota InterTV** - Confiança **56%**
+- **GLOBO INTER TV CORONEL FABRICIANO** (Globo Oficial API): Agora **Vim de lá - Bailes do Rio** - Confiança **54%**
+- **GLOBO INTER TV GOVERNADOR VALADARES** (MiTV): Agora **Rota InterTV** - Confiança **56%**
+- **GLOBO NSC TV JOINVILLE** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **55%**
+- **GLOBO RBS SANTA CRUZ** (MiTV): Agora **Conversa Preta** - Confiança **57%**
+- **GLOBO SÃO JOSÉ DO RIO PRETO** (MiTV): Agora **Roque Santeiro - Edição Especial** - Confiança **61%**
+- **GLOBO TV ANHANGUERA TOCANTINS** (Afiliadas Locais): Agora **No Balaio** - Confiança **57%**
+- **GLOBO TV CLUBE PIAUÍ** (Afiliadas Locais): Agora **Que Arretado!** - Confiança **39%**
+- **GLOBO TV FRONTEIRA PAULISTA** (MiTV): Agora **Roque Santeiro - Edição Especial** - Confiança **61%**
+- **GLOBO TV GAZETA ES** (Globo Oficial API): Agora **Em Movimento** - Confiança **45%**
+- **GLOBO TV INTEGRAÇÃO ITUITABA** (MiTV): Agora **Roque Santeiro - Edição Especial** - Confiança **76%**
+- **GLOBO TV INTEGRAÇÃO JUIZ DE FORA MG** (Globo Oficial API): Agora **Casa Nossa** - Confiança **66%**
+- **GLOBO TV LIBERAL PARAUABEBAS** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **53%**
+- **GLOBO TV RECIFE** (Afiliadas Locais): Agora **É Pipoco!** - Confiança **55%**
+- **GLOBO TV TEM TAUBATÉ** (MiTV): Agora **Roque Santeiro - Edição Especial** - Confiança **61%**
+- **GLOBO TV VANGUARDA SJC** (Globo Oficial API): Agora **Edição Especial - Roque Santeiro** - Confiança **54%**
+- **GLOBO TV VERDES MARES CE** (Afiliadas Locais): Agora **Se Liga VM** - Confiança **55%**
+- **Globo Vanguarda S. J. dos Campos** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **54%**
+- **Globo Integração Ituiutaba MG** (MiTV): Agora **Coisas Daqui** - Confiança **67%**
+- **Globo Integracao Juiz de Fora** (MiTV): Agora **Coisas Daqui** - Confiança **58%**
+- **Globo Inter TV dos Vales MG** (Claro Git): Agora **Cidades e Soluções** - Confiança **82%**
+- **Globo Inter TV Alto Litoral RJ** (Globo Oficial API): Agora **Vim de lá - Bailes do Rio** - Confiança **54%**
+- **Globo Inter TV Planície RJ** (Globo Oficial API): Agora **Vim de lá - Bailes do Rio** - Confiança **54%**
+- **Globo Inter TV Serra Mar RJ** (Globo Oficial API): Agora **Vim de lá - Bailes do Rio** - Confiança **54%**
+- **Globo NSC TV Centro Oeste Joaçaba** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **55%**
+- **Globo RBS TV dos Vales Santa Cruz do Sul** (MiTV): Agora **Conversa Preta** - Confiança **57%**
+- **Globo TV Anhanguera Palmas TO** (Afiliadas Locais): Agora **No Balaio** - Confiança **55%**
+- **Globo TV Anhanguera Gurupi TO** (Afiliadas Locais): Agora **No Balaio** - Confiança **55%**
+- **Globo TV Anhanguera Araguaina TO** (Afiliadas Locais): Agora **No Balaio** - Confiança **55%**
+- **Globo Verdes Mares Fortaleza** (Afiliadas Locais): Agora **Se Liga VM** - Confiança **55%**
+- **Globo Verdes Mares Cariri CE** (Afiliadas Locais): Agora **Se Liga VM** - Confiança **55%**
+- **Globo TV Santa Cruz do Sul Itabuna BA** (MiTV): Agora **Conversa Preta** - Confiança **58%**
+- **Globo TV São Francisco BA** (MiTV): Agora **Conversa Preta** - Confiança **58%**
+- **Globo Inter TV Cabugi Natal RN** (MiTV): Agora **Rota InterTV** - Confiança **56%**
+- **Globo Inter TV Costa Branca RN** (MiTV): Agora **Rota InterTV** - Confiança **56%**
+- **Globo TV Liberal Belém PA** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **53%**
+- **Globo TV Liberal Redenção PA** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **53%**
+- **Globo TV Liberal Castanhal PA** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **53%**
+- **Globo TV Liberal Altamira PA** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **53%**
+- **Globo TV Liberal Maraba PA** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **53%**
+- **Globo TV Liberal Paragominas PA** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **53%**
+- **Globo TV Liberal Parauapebas PA** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **53%**
+- **Globo TV Tapajós Santarém PA** (MiTV): Agora **Roque Santeiro - Edição Especial** - Confiança **58%**
+- **Globo TV Mirante São Luís MA** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **53%**
+- **Globo TV Mirante Balsas MA** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **53%**
+- **Globo TV Mirante Imperatriz MA** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **53%**
+- **Globo TV Mirante Cocais MA** (Afiliadas Locais): Agora **Roque Santeiro - Edição Especial** - Confiança **53%**
+- **Globo TV Alvorada do Sul PI** (MiTV): Agora **Roque Santeiro - Edição Especial** - Confiança **49%**
+- **Globo Rede Amazônica Parintins AM** (MiTV): Agora **Paneiro** - Confiança **61%**
+- **Globo Rede Amazônica Macapá AP** (Globo Oficial API): Agora **Zappeando** - Confiança **45%**
+- **Globo Rede Amazônica Porto Velho RO** (Globo Oficial API): Agora **Zappeando** - Confiança **63%**
+- **Globo Rede Amazônica Boa Vista RR** (Globo Oficial API): Agora **Zappeando** - Confiança **45%**
+- **Globo Rede Amazônica Rio Branco AC** (Afiliadas Locais): Agora **Almanacre** - Confiança **48%**
+- **Globo Rede Amazônica Coari AM** (MiTV): Agora **Paneiro** - Confiança **59%**
+- **Globo Rede Amazônica Humaita AM** (Afiliadas Locais): Agora **Paneiro** - Confiança **49%**
+- **Globo Rede Amazônica Itacoatiara AM** (MiTV): Agora **Paneiro** - Confiança **59%**
+- **Globo Rede Amazônica Manacapuru AM** (Afiliadas Locais): Agora **Paneiro** - Confiança **49%**
+- **Globo Rede Amazônica Rorainópolis RR** (Globo Oficial API): Agora **Zappeando** - Confiança **45%**
+- **Globo Rede Amazônica Cruzeiro do Sul AC** (MiTV): Agora **Almanacre** - Confiança **58%**
+- **Globo Rede Amazônica Ariquemedes RO** (Globo Oficial API): Agora **Zappeando** - Confiança **45%**
+- **Globo Rede Amazônica Coacal RO** (Globo Oficial API): Agora **Zappeando** - Confiança **45%**
+- **Globo Rede Amazônica Ji Paraná RO** (Globo Oficial API): Agora **Zappeando** - Confiança **45%**
+- **Globo Rede Amazônica Vilhena RO** (Globo Oficial API): Agora **Zappeando** - Confiança **45%**
+- **Globo Asa Branca Caruaru PE** (Globo Oficial API): Agora **Edição Especial - Roque Santeiro** - Confiança **45%**
+- **SBT AM** (Claro Git): Agora **Eita Lucas!** - Confiança **78%**
+- **GLOBO PE** (Globo Oficial API): Agora **Edição Especial - Roque Santeiro** - Confiança **45%**
+- **SBT JORNAL** (MiTV): Agora **Eita Lucas!** - Confiança **50%**
+- **BAND TV ARAPUAN** (MiTV): Agora **Band Esporte Clube** - Confiança **73%**
+- **SBT TV Tambaú** (Open-EPG BR): Agora **Eita Lucas!** - Confiança **57%**
+- **FUTURAMA** (Claro Git): Agora **Somos Museus** - Confiança **79%**
+- **FBI Internacional** (Claro Git): Agora **Talentos Em Grande** - Confiança **57%**
+- **XXX Sextreme** (Claro TV+ API): Agora **Boa de Boca e Muito Mais** - Confiança **57%**
+- **Pantanal** (Open-EPG BR): Agora **A Hora do Zap** - Confiança **33%**
+- **Eurochannel** (Claro Git): Agora **A Sombra** - Confiança **73%**
+- **France 24** (Claro Git): Agora **Esrpl Noticias** - Confiança **54%**
+- **Sony Movies** (EPGShare BR1): Agora **Hotel Transilvânia** - Confiança **68%**
