@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 """Extrator da Vivo Play (GVP Telefonica) -> vivo_epg.xml.gz
-- Tenta primeiro a API GVP direta da Telefônica com headers de IP brasileiro.
-- Usa o espelho vivoplay.xml (limaalef) SOMENTE para canais não obtidos pela API direta.
+- Busca canais e grade direto na API GVP da Telefônica (/25/default/pt-BR).
+- Usa vivoplay.xml (limaalef) SOMENTE como fallback para canais ausentes na API direta.
 - Aplica formatação rica (🟢 LIVRE / 🟠 +14 / [T03E07]) e ordena cronologicamente por canal.
+- VIVO_DEBUG=1 grava as respostas brutas em vivo_debug/ para inspeção.
 """
 from __future__ import annotations
 
+import concurrent.futures
 import gzip
 import html
+import json
 import os
 import random
 import re
@@ -22,8 +25,6 @@ import requests
 BRT_TZ = timezone(timedelta(hours=-3))
 OUT_VIVO_GZ = Path("vivo_epg.xml.gz")
 
-SPOTLIGHT_IMG_BASE = "https://spotlight-br.cdn.telefonica.com/customer/v1/source"
-
 BR_IPS = [
     "177.37.142.88",
     "179.218.44.19",
@@ -34,11 +35,8 @@ BR_IPS = [
 
 VIVO_GVP_ENDPOINTS = [
     "https://contentapi-br.cdn.telefonica.com/25/default/pt-BR",
-    "https://contentapi-br.cdn.telefonica.com/24/default/pt-BR",
-    "https://api.vivoplay.com.br/25/default/pt-BR",
 ]
 
-# Apenas espelho real da Vivo Play (sem agregadores genéricos com buracos)
 VIVO_FALLBACK_MIRROR = "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/vivoplay.xml"
 
 RATING_SHORT_MAP = {
@@ -70,14 +68,33 @@ _RE_SE_PATTERNS = [
     re.compile(r"[\[\(\-\s]*\bT(?:EMP(?:ORADA)?)?\s*\.?\s*(\d{1,2})\s*[\-:/, ]*\s*E(?:P(?:IS[OÓ]DIO)?)?\.?\s*(\d{1,4})\b[\]\)]*", re.I),
 ]
 
+_RE_TEST_CHANNEL = re.compile(
+    r"^(?:canal\s+(?:de\s+)?testes?\b|teste\s*\d+|testes\s+de\s+apps\b|in\s+channel\s+app\b)",
+    re.I,
+)
+
+SCHEDULE_FIELDS = (
+    "Pid,Title,Description,ChannelName,ChannelNumber,CallLetter,Start,End,"
+    "EpgNetworkDvr,LiveChannelPid,LiveProgramPid,EpgSerieId,SeriesPid,SeriesId,"
+    "SeasonPid,SeasonNumber,EpisodeNumber,images.videoFrame,images.banner,"
+    "LiveToVod,AgeRatingPid,forbiddenTechnology,IsSoDisabled"
+)
+CHANNELS_PER_REQUEST = 10   # a API devolve HTTP 400 com mais canais por chamada
+PAGE_SIZE = 1000
+API_BASES = [os.environ["VIVO_API_BASE"]] if os.environ.get("VIVO_API_BASE") else VIVO_GVP_ENDPOINTS
+DEBUG = os.environ.get("VIVO_DEBUG", "").strip() not in ("", "0", "false")
+
 
 def format_rating_badge(raw_rating: Any) -> tuple[str, str]:
     if not raw_rating:
         return "", ""
     r = str(raw_rating).strip().upper()
-    if "LIVRE" in r or r in {"L", "0", "G", "ALL"}:
+    if not r or "NONE" in r or r in {"UNRATED", "N/A"}:
+        return "", ""
+    r_clean = re.sub(r"^AGE_", "", r)
+    if "LIVRE" in r_clean or r_clean in {"L", "0", "G", "ALL", "AL"}:
         return "🟢 LIVRE", "L"
-    m = re.search(r"(?:\+|\b)(10|12|14|16|18)\b", r)
+    m = re.search(r"(?:^|[\s_+:\-])(10|12|14|16|18)(?:$|\b)", r_clean)
     if m:
         age = m.group(1)
         return RATING_SHORT_MAP[age], f"PG-{age}"
@@ -145,6 +162,7 @@ def build_clean_visual_desc(
 
 def make_channel_id(name: str) -> str:
     s = html.unescape(name or "")
+    s = re.sub(r"\.(?:br|us|uk|pt|ar|mx|cl|co|pe|ca|latam|int)$", " ", s.strip(), flags=re.I)
     s = re.sub(r"\b(FHD|UHD|4K|HD|SD)\b", " ", s, flags=re.I)
     s = unicodedata.normalize("NFKD", s)
     s = "".join(c for c in s if not unicodedata.combining(c))
@@ -153,6 +171,10 @@ def make_channel_id(name: str) -> str:
     words = re.findall(r"[A-Za-z0-9]+", s)
     camel = "".join(w.capitalize() if not w.isupper() else w for w in words)
     return f"{camel or 'Canal'}.br"
+
+
+def _norm_key(name: str) -> str:
+    return make_channel_id(name).lower()
 
 
 def create_session() -> requests.Session:
@@ -175,6 +197,57 @@ def create_session() -> requests.Session:
     return s
 
 
+def _debug_dump(name: str, content: bytes) -> None:
+    if DEBUG:
+        d = Path("vivo_debug")
+        d.mkdir(exist_ok=True)
+        (d / name).write_bytes(content)
+
+
+def get_json(
+    session: requests.Session,
+    url: str,
+    label: str,
+    timeout: int = 30,
+    params: dict[str, str] | None = None,
+) -> Any | None:
+    try:
+        r = session.get(url, params=params, timeout=timeout)
+    except requests.RequestException as exc:
+        print(f"  - [{label}] erro de rede: {type(exc).__name__}: {exc}")
+        return None
+    raw = r.content or b""
+    _debug_dump(re.sub(r"[^A-Za-z0-9]+", "_", label)[:60] + ".bin", raw)
+    ctype = r.headers.get("Content-Type", "")
+    if r.status_code != 200:
+        print(f"  - [{label}] HTTP {r.status_code} ({ctype}) {raw[:120]!r}")
+        return None
+    if not raw.strip():
+        print(f"  - [{label}] resposta vazia (HTTP 200, {ctype})")
+        return None
+    try:
+        return json.loads(raw.decode("utf-8-sig", errors="replace"))
+    except ValueError:
+        print(f"  - [{label}] resposta não é JSON ({ctype}): {raw[:160]!r}")
+        return None
+
+
+def extract_items(payload: Any) -> list[dict[str, Any]]:
+    if isinstance(payload, list):
+        return [x for x in payload if isinstance(x, dict)]
+    if isinstance(payload, dict):
+        lowered = {str(k).lower(): v for k, v in payload.items()}
+        for key in ("content", "list", "contents", "items", "schedules", "data", "results"):
+            v = lowered.get(key)
+            if isinstance(v, list):
+                return [x for x in v if isinstance(x, dict)]
+            if isinstance(v, dict):
+                inner = extract_items(v)
+                if inner:
+                    return inner
+    return []
+
+
 def _epoch_to_xmltv_brt(ts_val: Any) -> tuple[str, datetime] | tuple[None, None]:
     if ts_val is None:
         return None, None
@@ -190,134 +263,198 @@ def _epoch_to_xmltv_brt(ts_val: Any) -> tuple[str, datetime] | tuple[None, None]
         return None, None
 
 
+def list_live_channels(session: requests.Session, base: str) -> list[str]:
+    pids: list[str] = []
+    seen: set[str] = set()
+    offset = 0
+    first = True
+    while True:
+        params = {
+            "ca_deviceTypes": "null|401",
+            "contentTypes": "LCH",
+            "limit": str(PAGE_SIZE),
+            "offset": str(offset),
+        }
+        payload = get_json(session, f"{base}/contents/all", f"Vivo GVP canais {base}", 30, params)
+        items = extract_items(payload) if payload is not None else []
+        if not items:
+            break
+        if first and DEBUG:
+            print(f"    exemplo de canal: {json.dumps(items[0], ensure_ascii=False)[:400]}")
+        first = False
+        for it in items:
+            pid = str(it.get("Pid") or it.get("LiveChannelPid") or it.get("Id") or it.get("id") or "").strip().lower()
+            if pid.startswith("lch") and pid not in seen:
+                seen.add(pid)
+                pids.append(pid)
+        if len(items) < PAGE_SIZE:
+            break
+        offset += PAGE_SIZE
+    return pids
+
+
+def fetch_schedule_block(
+    session: requests.Session,
+    base: str,
+    group: list[str],
+    start_ts: int,
+    end_ts: int,
+) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    offset = 0
+    while True:
+        params = {
+            "ca_deviceTypes": "null|401",
+            "fields": SCHEDULE_FIELDS,
+            "includeRelations": "Genre",
+            "orderBy": "START_TIME:a",
+            "filteravailability": "false",
+            "starttime": str(start_ts),
+            "endtime": str(end_ts),
+            "livechannelpids": ",".join(group),
+            "offset": str(offset),
+            "limit": str(PAGE_SIZE),
+        }
+        chmap = os.environ.get("VIVO_CHANNELMAPS", "").strip()
+        if chmap:
+            params["ca_channelmaps"] = chmap
+        data = get_json(session, f"{base}/schedules", f"Vivo GVP grade {group[0]}..+{len(group) - 1}", 60, params)
+        records = extract_items(data) if data is not None else []
+        out.extend(records)
+        if len(records) < PAGE_SIZE:
+            break
+        offset += PAGE_SIZE
+    return out
+
+
+def _genre_names(ev: dict[str, Any]) -> list[str]:
+    names: list[str] = []
+    for key in ("Genres", "Genre", "genres"):
+        v = ev.get(key)
+        if isinstance(v, list):
+            for g in v:
+                n = g.get("Name") or g.get("Title") if isinstance(g, dict) else str(g)
+                if n and str(n).strip():
+                    names.append(str(n).strip())
+    rel = ev.get("Relations") or ev.get("relations")
+    if isinstance(rel, list):
+        for r_ in rel:
+            if isinstance(r_, dict) and str(r_.get("Type", "")).lower() == "genre":
+                n = r_.get("Name") or r_.get("Title")
+                if n:
+                    names.append(str(n).strip())
+    return list(dict.fromkeys(names))
+
+
 def fetch_from_gvp_api(
     session: requests.Session,
     days_ahead: int,
     channels_by_id: dict[str, ET.Element],
     progs_by_ch: dict[str, dict[str, ET.Element]],
 ) -> int:
-    """Tenta buscar canais e grade direto na API GVP da Vivo Play."""
-    api_channels: dict[str, str] = {}  # gvp_channel_id -> xml_cid
-    working_base = ""
-
-    for base in VIVO_GVP_ENDPOINTS:
-        try:
-            url = f"{base}/contents/all?ca_deviceTypes=null%7C401&contentTypes=LCH&limit=1000"
-            r = session.get(url, timeout=20)
-            if r.status_code != 200:
-                print(f"  - [Vivo GVP API] {base} -> HTTP {r.status_code}")
-                continue
-            payload = r.json()
-            items = payload.get("Content") or payload.get("contents") or payload.get("items") or []
-            if not isinstance(items, list) or not items:
-                continue
-
-            working_base = base
-            for ch in items:
-                gvp_id = str(ch.get("Pid") or ch.get("Id") or ch.get("id") or "").strip()
-                name = str(ch.get("Title") or ch.get("Name") or ch.get("title") or "").strip()
-                if not gvp_id or not name:
-                    continue
-                cid = make_channel_id(name)
-                api_channels[gvp_id] = cid
-                if cid not in channels_by_id:
-                    ch_el = ET.Element("channel", {"id": cid})
-                    dn = ET.SubElement(ch_el, "display-name", {"lang": "pt"})
-                    dn.text = name
-                    channels_by_id[cid] = ch_el
+    """Canais (LCH) + grade por grupos de 10 canais em blocos de 24h direto na API Vivo/Telefônica."""
+    base, pids = "", []
+    for b in API_BASES:
+        pids = list_live_channels(session, b)
+        if pids:
+            base = b
             break
-        except Exception as exc:
-            print(f"  - [Vivo GVP API] {base} falhou: {exc}")
-            continue
-
-    if not working_base or not api_channels:
-        print("  ⚠ [Vivo GVP API] Indisponível ou bloqueada por Geo-IP; seguindo para fallback vivoplay.xml.")
+    if not pids:
+        print("  ⚠ [Vivo GVP API] Nenhum LiveChannelPid retornado.")
         return 0
+    print(f"  ✓ [Vivo GVP API] {len(pids)} canais em {base}")
 
-    now_brt = datetime.now(BRT_TZ).replace(hour=0, minute=0, second=0, microsecond=0)
-    added_progs = 0
+    day0 = datetime.now(BRT_TZ).replace(hour=0, minute=0, second=0, microsecond=0)
+    blocks = [
+        (int((day0 + timedelta(days=d)).timestamp()), int((day0 + timedelta(days=d + 1)).timestamp()))
+        for d in range(days_ahead + 1)
+    ]
+    groups = [pids[i:i + CHANNELS_PER_REQUEST] for i in range(0, len(pids), CHANNELS_PER_REQUEST)]
+    jobs = [(g, st, et) for g in groups for st, et in blocks]
+    print(f"  Consultando grade: {len(groups)} grupos x {len(blocks)} dias = {len(jobs)} requisições")
 
-    for d in range(days_ahead + 1):
-        day_start = now_brt + timedelta(days=d)
-        day_end = day_start + timedelta(days=1)
-        st_ms = int(day_start.astimezone(timezone.utc).timestamp() * 1000)
-        et_ms = int(day_end.astimezone(timezone.utc).timestamp() * 1000)
+    records: list[dict[str, Any]] = []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+        for res in pool.map(lambda j: fetch_schedule_block(session, base, *j), jobs):
+            records.extend(res)
+    if DEBUG and records:
+        print(f"    exemplo de registro: {json.dumps(records[0], ensure_ascii=False)[:600]}")
 
-        try:
-            sched_url = (
-                f"{working_base}/schedules?ca_deviceTypes=null%7C401"
-                f"&starttime={st_ms}&endtime={et_ms}&filteravailability=false"
-            )
-            r = session.get(sched_url, timeout=30)
-            if r.status_code != 200:
-                continue
-            data = r.json()
-            entries = data.get("Content") or data.get("schedules") or data.get("items") or []
-            if not isinstance(entries, list):
-                continue
-
-            for ev in entries:
-                gvp_ch = str(ev.get("ChannelId") or ev.get("ChannelPid") or "").strip()
-                cid = api_channels.get(gvp_ch)
-                if not cid:
-                    continue
-
-                start_str, dt_s = _epoch_to_xmltv_brt(ev.get("Start") or ev.get("StartTime"))
-                stop_str, dt_e = _epoch_to_xmltv_brt(ev.get("End") or ev.get("EndTime"))
-                title = str(ev.get("Title") or "").strip()
-                if not start_str or not stop_str or not title or not dt_s or not dt_e:
-                    continue
-
-                raw_desc = str(ev.get("Description") or ev.get("Synopsis") or "").strip()
-                rating_badge, rating_code = format_rating_badge(ev.get("AgeRatingPid") or ev.get("AgeRating"))
-                dur_mins = int((dt_e - dt_s).total_seconds() // 60)
-                if not (1 <= dur_mins <= 720):
-                    dur_mins = None
-
-                cats = []
-                for g in ev.get("Genres") or []:
-                    g_name = g.get("Name") if isinstance(g, dict) else str(g)
-                    if g_name and g_name.strip():
-                        cats.append(g_name.strip())
-
-                se_badge = ""
-                s_num, e_num = ev.get("SeasonNumber"), ev.get("EpisodeNumber")
-                if str(s_num).isdigit() and str(e_num).isdigit():
-                    se_badge = f"[T{int(s_num):02d}E{int(e_num):02d}]"
-
-                p_out = ET.Element("programme", {"start": start_str, "stop": stop_str, "channel": cid})
-                t_out = ET.SubElement(p_out, "title", {"lang": "pt"})
-                t_out.text = strip_old_headers_and_se(title) or title
-
-                clean_desc = build_clean_visual_desc(
-                    synopsis=raw_desc,
-                    rating_badge=rating_badge,
-                    duration_mins=dur_mins,
-                    categories=cats,
-                    se_badge=se_badge,
-                )
-                if clean_desc:
-                    d_out = ET.SubElement(p_out, "desc", {"lang": "pt"})
-                    d_out.text = clean_desc
-
-                for c_name in dict.fromkeys(cats[:5]):
-                    c_node = ET.SubElement(p_out, "category", {"lang": "pt"})
-                    c_node.text = c_name
-
-                if rating_code:
-                    r_node = ET.SubElement(p_out, "rating", {"system": "age"})
-                    v_node = ET.SubElement(r_node, "value")
-                    v_node.text = rating_code
-
-                sort_key = start_str.split()[0][:14]
-                progs_by_ch.setdefault(cid, {})[sort_key] = p_out
-                added_progs += 1
-        except Exception:
+    pid_set = set(pids)
+    added = 0
+    for ev in records:
+        pid = str(ev.get("LiveChannelPid") or "").strip().lower()
+        if pid not in pid_set:
+            continue
+        name = html.unescape(str(ev.get("ChannelName") or "")).strip()
+        call = html.unescape(str(ev.get("CallLetter") or "")).strip()
+        base_name = name or call or pid.upper()
+        if _RE_TEST_CHANNEL.search(base_name):
             continue
 
-    api_ch_with_progs = sum(1 for c in channels_by_id if progs_by_ch.get(c))
-    print(f"  ✓ [Vivo GVP API] {api_ch_with_progs} canais | {added_progs} programas obtidos direto da API.")
-    return added_progs
+        cid = make_channel_id(base_name)
+        if cid not in channels_by_id:
+            ch_el = ET.Element("channel", {"id": cid})
+            for dn_txt in dict.fromkeys([base_name, call]):
+                if dn_txt:
+                    ET.SubElement(ch_el, "display-name", {"lang": "pt"}).text = dn_txt
+            channels_by_id[cid] = ch_el
+
+        start_str, dt_s = _epoch_to_xmltv_brt(ev.get("Start"))
+        stop_str, dt_e = _epoch_to_xmltv_brt(ev.get("End"))
+        title = html.unescape(str(ev.get("Title") or "")).strip()
+        if not (start_str and stop_str and title and dt_s and dt_e) or dt_e <= dt_s:
+            continue
+
+        sub_title = ""
+        if " : " in title:
+            parts = [p.strip() for p in title.split(" : ", 1)]
+            if len(parts) == 2 and parts[0] and parts[1]:
+                title, sub_title = parts[0], parts[1]
+
+        raw_desc = html.unescape(str(ev.get("Description") or "")).strip()
+        rating_badge, rating_code = format_rating_badge(ev.get("AgeRatingPid"))
+        dur_mins = int((dt_e - dt_s).total_seconds() // 60)
+        dur_mins = dur_mins if 1 <= dur_mins <= 720 else None
+        cats = _genre_names(ev)
+
+        s_num = ev.get("SeasonNumber")
+        e_num = ev.get("EpisodeNumber")
+        se_badge = ""
+        if str(s_num).isdigit() and str(e_num).isdigit():
+            s_i, e_i = int(s_num), int(e_num)
+            if 0 < s_i <= 60 and 0 < e_i <= 999:
+                se_badge = f"[T{s_i:02d}E{e_i:02d}]"
+
+        p_out = ET.Element("programme", {"start": start_str, "stop": stop_str, "channel": cid})
+        ET.SubElement(p_out, "title", {"lang": "pt"}).text = strip_old_headers_and_se(title) or title
+        if sub_title:
+            ET.SubElement(p_out, "sub-title", {"lang": "pt"}).text = sub_title
+
+        clean_desc = build_clean_visual_desc(
+            synopsis=raw_desc,
+            rating_badge=rating_badge,
+            duration_mins=dur_mins,
+            categories=cats,
+            sub_title=sub_title,
+            se_badge=se_badge,
+        )
+        if clean_desc:
+            ET.SubElement(p_out, "desc", {"lang": "pt"}).text = clean_desc
+        for c_name in cats[:5]:
+            ET.SubElement(p_out, "category", {"lang": "pt"}).text = c_name
+        if rating_code:
+            r_node = ET.SubElement(p_out, "rating", {"system": "age"})
+            ET.SubElement(r_node, "value").text = rating_code
+
+        sort_key = start_str.split()[0][:14]
+        if sort_key not in progs_by_ch.setdefault(cid, {}):
+            added += 1
+        progs_by_ch[cid][sort_key] = p_out
+
+    n_ch = sum(1 for c in channels_by_id if progs_by_ch.get(c))
+    print(f"  ✓ [Vivo GVP API] {n_ch} canais | {added} programas.")
+    return added
 
 
 def fill_missing_from_vivo_mirror(
@@ -325,7 +462,7 @@ def fill_missing_from_vivo_mirror(
     channels_by_id: dict[str, ET.Element],
     progs_by_ch: dict[str, dict[str, ET.Element]],
 ) -> int:
-    """Usa vivoplay.xml SOMENTE para canais que a API direta não retornou."""
+    """Usa vivoplay.xml (limaalef) SOMENTE para canais não cobertos pela API direta."""
     try:
         resp = session.get(VIVO_FALLBACK_MIRROR, timeout=60)
         if resp.status_code != 200 or len(resp.content) < 1000:
@@ -336,40 +473,53 @@ def fill_missing_from_vivo_mirror(
         print(f"  ⚠ [Vivo Fallback] Erro ao ler vivoplay.xml: {exc}")
         return 0
 
-    # Canais que já têm grade vinda da API direta ficam protegidos
-    already_covered = {c for c, pmap in progs_by_ch.items() if len(pmap) >= 5}
-    fallback_channels: set[str] = set()
+    covered_keys = {_norm_key(c) for c, pmap in progs_by_ch.items() if len(pmap) >= 5}
+    raw_to_cid: dict[str, str] = {}
+    fallback_cids: set[str] = set()
 
     for child in root:
-        tag = child.tag.rsplit("}", 1)[-1]
-        if tag == "channel":
-            cid = (child.attrib.get("id") or "").strip()
-            if not cid or cid in already_covered:
-                continue
-            if cid not in channels_by_id:
-                ch_copy = ET.Element("channel", {"id": cid})
-                seen_icons: set[str] = set()
-                for sub in child:
-                    s_tag = sub.tag.rsplit("}", 1)[-1]
-                    if s_tag == "display-name" and sub.text:
-                        dn = ET.SubElement(ch_copy, "display-name", {"lang": "pt"})
-                        dn.text = sub.text.strip()
-                    elif s_tag == "icon" and sub.attrib.get("src"):
-                        ic_url = sub.attrib["src"].strip()
-                        if ic_url and ic_url not in seen_icons:
-                            seen_icons.add(ic_url)
-                            ET.SubElement(ch_copy, "icon", {"src": ic_url})
-                channels_by_id[cid] = ch_copy
-            fallback_channels.add(cid)
+        if child.tag.rsplit("}", 1)[-1] != "channel":
+            continue
+        raw_cid = (child.attrib.get("id") or "").strip()
+        if not raw_cid:
+            continue
+        dns = [
+            (n.text or "").strip()
+            for n in child
+            if n.tag.rsplit("}", 1)[-1] == "display-name" and (n.text or "").strip()
+        ]
+        ch_name = dns[0] if dns else raw_cid
+        if _RE_TEST_CHANNEL.search(ch_name):
+            continue
+        if _norm_key(ch_name) in covered_keys or _norm_key(raw_cid) in covered_keys:
+            continue
+
+        xml_cid = make_channel_id(ch_name)
+        raw_to_cid[raw_cid] = xml_cid
+        if xml_cid not in channels_by_id:
+            ch_copy = ET.Element("channel", {"id": xml_cid})
+            for d_txt in dict.fromkeys(dns or [ch_name]):
+                ET.SubElement(ch_copy, "display-name", {"lang": "pt"}).text = d_txt
+            for sub in child:
+                if sub.tag.rsplit("}", 1)[-1] == "icon" and sub.attrib.get("src"):
+                    ET.SubElement(ch_copy, "icon", {"src": sub.attrib["src"].strip()})
+                    break
+            channels_by_id[xml_cid] = ch_copy
+        fallback_cids.add(xml_cid)
+
+    if not fallback_cids:
+        print("  ✓ [Vivo Fallback] 0 canais extras necessários (100% coberto pela API direta).")
+        return 0
 
     added_progs = 0
     for child in root:
-        tag = child.tag.rsplit("}", 1)[-1]
-        if tag != "programme":
+        if child.tag.rsplit("}", 1)[-1] != "programme":
             continue
-        cid = (child.attrib.get("channel") or "").strip()
-        if not cid or cid not in fallback_channels or cid in already_covered:
+        raw_cid = (child.attrib.get("channel") or "").strip()
+        cid = raw_to_cid.get(raw_cid)
+        if not cid or cid not in fallback_cids:
             continue
+
         start_raw = (child.attrib.get("start") or "").strip()
         stop_raw = (child.attrib.get("stop") or "").strip()
         if not start_raw or not stop_raw:
@@ -384,7 +534,7 @@ def fill_missing_from_vivo_mirror(
         sub_txt = (sub_el.text or "").strip() if sub_el is not None and sub_el.text else ""
         if " : " in title_txt and not sub_txt:
             parts = [x.strip() for x in title_txt.split(" : ", 1)]
-            if len(parts) == 2:
+            if len(parts) == 2 and parts[0] and parts[1]:
                 title_txt, sub_txt = parts[0], parts[1]
 
         desc_el = child.find("desc")
@@ -392,41 +542,10 @@ def fill_missing_from_vivo_mirror(
 
         date_el = child.find("date")
         year_txt = (date_el.text or "").strip()[:4] if date_el is not None and date_el.text else ""
-        if not year_txt:
-            m_yr = re.search(r"📅\s*(\d{4})", raw_desc)
-            if m_yr:
-                year_txt = m_yr.group(1)
 
-        rating_raw = ""
         r_val_el = child.find("./rating/value")
-        if r_val_el is not None and r_val_el.text:
-            rating_raw = r_val_el.text.strip()
-        elif raw_desc:
-            if "LIVRE" in raw_desc.upper():
-                rating_raw = "L"
-            else:
-                m_r = re.search(r"(?:menores de|\+)\s*(10|12|14|16|18)\b", raw_desc, flags=re.I)
-                if m_r:
-                    rating_raw = m_r.group(1)
-
+        rating_raw = (r_val_el.text or "").strip() if r_val_el is not None and r_val_el.text else ""
         rating_badge, rating_code = format_rating_badge(rating_raw)
-
-        se_badge = ""
-        ep_el = child.find("episode-num")
-        if ep_el is not None and ep_el.text:
-            ep_txt = ep_el.text.strip()
-            if (ep_el.attrib.get("system") or "").lower() == "xmltv_ns":
-                m_ns = re.match(r"^\s*(\d+)\s*\.\s*(\d+)\s*\.", ep_txt)
-                if m_ns:
-                    s_n, e_n = int(m_ns.group(1)) + 1, int(m_ns.group(2)) + 1
-                    if not (s_n == 1 and e_n == 1 and "0.0." in ep_txt):
-                        se_badge = f"[T{s_n:02d}E{e_n:02d}]"
-            else:
-                for pat in _RE_SE_PATTERNS:
-                    m_se = pat.search(ep_txt)
-                    if m_se:
-                        se_badge = f"[T{int(m_se.group(1)):02d}E{int(m_se.group(2)):02d}]"
-                        break
 
         cats = [c.text.strip() for c in child.findall("category") if c.text and c.text.strip()]
 
@@ -441,8 +560,9 @@ def fill_missing_from_vivo_mirror(
             pass
 
         p_out = ET.Element("programme", {"start": start_raw, "stop": stop_raw, "channel": cid})
-        t_out = ET.SubElement(p_out, "title", {"lang": "pt"})
-        t_out.text = strip_old_headers_and_se(title_txt) or title_txt
+        ET.SubElement(p_out, "title", {"lang": "pt"}).text = strip_old_headers_and_se(title_txt) or title_txt
+        if sub_txt:
+            ET.SubElement(p_out, "sub-title", {"lang": "pt"}).text = sub_txt
 
         clean_desc = build_clean_visual_desc(
             synopsis=raw_desc,
@@ -451,34 +571,20 @@ def fill_missing_from_vivo_mirror(
             duration_mins=dur_mins,
             categories=cats,
             sub_title=sub_txt,
-            se_badge=se_badge,
         )
         if clean_desc:
-            d_out = ET.SubElement(p_out, "desc", {"lang": "pt"})
-            d_out.text = clean_desc
-
-        if year_txt and year_txt.isdigit():
-            dt_node = ET.SubElement(p_out, "date")
-            dt_node.text = year_txt
-
+            ET.SubElement(p_out, "desc", {"lang": "pt"}).text = clean_desc
         for c_name in dict.fromkeys(cats[:5]):
-            c_node = ET.SubElement(p_out, "category", {"lang": "pt"})
-            c_node.text = c_name
-
-        ic_el = child.find("icon")
-        if ic_el is not None and ic_el.attrib.get("src"):
-            ET.SubElement(p_out, "icon", {"src": ic_el.attrib["src"]})
-
+            ET.SubElement(p_out, "category", {"lang": "pt"}).text = c_name
         if rating_code:
             r_node = ET.SubElement(p_out, "rating", {"system": "age"})
-            v_node = ET.SubElement(r_node, "value")
-            v_node.text = rating_code
+            ET.SubElement(r_node, "value").text = rating_code
 
         sort_key = start_raw.split()[0][:14]
         progs_by_ch.setdefault(cid, {})[sort_key] = p_out
         added_progs += 1
 
-    print(f"  ✓ [Vivo Fallback] {len(fallback_channels)} canais complementares | {added_progs} programas via vivoplay.xml.")
+    print(f"  ✓ [Vivo Fallback] {len(fallback_cids)} canais complementares | {added_progs} programas via vivoplay.xml.")
     return added_progs
 
 
