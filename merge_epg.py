@@ -1988,6 +1988,7 @@ def schedule_health(source: EpgSource, channel_id: str, now: datetime) -> dict[s
     rows = programme_rows(source, channel_id)
     current, next_item = now_next_for(source, channel_id, now)
     invalid, overlaps, gaps = 0, 0, 0
+    gap_seconds = 0.0
     previous_stop = None
     
     window_end = now + timedelta(hours=24)
@@ -2020,8 +2021,11 @@ def schedule_health(source: EpgSource, channel_id: str, now: datetime) -> dict[s
         duration = stop - start
         if duration.total_seconds() <= 0 or duration > timedelta(hours=12): invalid += 1
         if previous_stop is not None:
-            if start < previous_stop - timedelta(seconds=60): overlaps += 1
-            elif start > previous_stop + timedelta(minutes=15): gaps += 1
+            if start < previous_stop - timedelta(seconds=60):
+                overlaps += 1
+            elif start > previous_stop + timedelta(minutes=5):
+                gaps += 1
+                gap_seconds += (start - previous_stop).total_seconds()
         if previous_stop is None or stop > previous_stop: previous_stop = stop
         
     future_end = max((row.stop for row in rows if row.stop > now), default=None)
@@ -2033,7 +2037,10 @@ def schedule_health(source: EpgSource, channel_id: str, now: datetime) -> dict[s
         + (0.20 * min(future_hours / 20.0, 1.0))
         + (0.10 * min(len(rows) / 12.0, 1.0))
     )
-    score -= min(0.25, invalid * 0.08 + overlaps * 0.02 + gaps * 0.03)
+    gap_penalty = min(0.45, gaps * 0.12 + (gap_seconds / 3600.0) * 0.08)
+    score -= min(0.50, invalid * 0.08 + overlaps * 0.02 + gap_penalty)
+    if gaps > 0 or near_coverage_ratio < 0.96:
+        score = min(score, 0.85)
     if future_hours < 8.0:
         score = min(score, 0.35)
     result = {
@@ -2559,11 +2566,13 @@ def stitch_multi_source_schedule(
             else:
                 local_agr = 1.0
 
+            gap_pen = (1.0 - cov_ratio) * 0.65 if cov_ratio < 0.98 else 0.0
             win_score = (
                 0.40 * cov_ratio
                 + 0.30 * local_agr
                 + 0.20 * avg_rich
                 + 0.10 * s_data["global_merit"]
+                - gap_pen
             )
             if win_score > best_win_score:
                 best_win_score = win_score
@@ -2589,7 +2598,7 @@ def stitch_multi_source_schedule(
                         prev["stop"] = c_start
                     else:
                         c_start = prev["stop"]
-                if (c_stop - c_start).total_seconds() >= 300:
+                if (c_stop - c_start).total_seconds() >= 120:
                     cp = copy.deepcopy(cand)
                     cp["start"] = c_start
                     cp["stop"] = c_stop
@@ -2599,9 +2608,9 @@ def stitch_multi_source_schedule(
 
     merged_timeline.sort(key=lambda x: x["start"])
 
-    # 2. TAPA-BURACOS CIRÚRGICO COM CLAMP (recorta programa reserva para preencher lacunas reais >= 10m)
-    MIN_GAP_SECONDS = 10 * 60
-    CLAMP_GAP_SECONDS = 15 * 60
+    # 2. TAPA-BURACOS CIRÚRGICO COM CLAMP (recorta programa reserva para preencher lacunas reais >= 2m)
+    MIN_GAP_SECONDS = 2 * 60
+    CLAMP_GAP_SECONDS = 5 * 60
 
     ordered_gap_fillers = sorted(aligned_sources_data, key=lambda s: (int(s["tail_only"]), -s["global_merit"]))
     for s_data in ordered_gap_fillers:
@@ -2609,7 +2618,7 @@ def stitch_multi_source_schedule(
         for cand in s_data["progs"]:
             c_start, c_stop = cand["start"], cand["stop"]
             c_dur = (c_stop - c_start).total_seconds()
-            if c_dur < 300:
+            if c_dur < 120:
                 continue
 
             overlapping = [
@@ -2639,7 +2648,7 @@ def stitch_multi_source_schedule(
 
             for g_start, g_stop in free_slots:
                 gap_dur = (g_stop - g_start).total_seconds()
-                if gap_dur >= CLAMP_GAP_SECONDS or (gap_dur / c_dur) >= 0.30:
+                if gap_dur >= CLAMP_GAP_SECONDS or (gap_dur / c_dur) >= 0.15:
                     new_cand = copy.deepcopy(cand)
                     new_cand["start"] = g_start
                     new_cand["stop"] = g_stop
@@ -2655,8 +2664,12 @@ def stitch_multi_source_schedule(
     final_elements = []
     for i, prog in enumerate(merged_timeline):
         s_dt, sp_dt = prog["start"], prog["stop"]
-        if i + 1 < len(merged_timeline) and sp_dt > merged_timeline[i + 1]["start"]:
-            sp_dt = merged_timeline[i + 1]["start"]
+        if i + 1 < len(merged_timeline):
+            next_start = merged_timeline[i + 1]["start"]
+            if sp_dt > next_start:
+                sp_dt = next_start
+            elif 0 < (next_start - sp_dt).total_seconds() <= 5 * 60:
+                sp_dt = next_start
         dur_sec = (sp_dt - s_dt).total_seconds()
         if dur_sec < 60:
             continue
