@@ -3,8 +3,7 @@ name: Atualizar EPG
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 */6 * * *" # Roda a cada 6 horas automaticamente
-
+    - cron: "37 9,21 * * *" # Roda 2x por dia: 06:37 e 18:37 (horário de Brasília)
 permissions:
   contents: write
 
