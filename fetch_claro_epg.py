@@ -51,6 +51,7 @@ def format_rating_badge(raw_rating: Any) -> tuple[str, str]:
 
 def make_channel_id(name: str) -> str:
     s = html.unescape(name or "")
+    s = re.sub(r"[¹²³⁴⁵⁶⁷⁸⁹⁰]+", " ", s)  # remove sobrescritos antes do NFKD
     s = re.sub(r"\.(?:br|us|uk|pt|ar|mx|cl|co|pe|ca|latam|int)$", " ", s.strip(), flags=re.I)
     s = re.sub(r"\b(FHD|UHD|4K|HD|SD)\b", " ", s, flags=re.I)
     s = unicodedata.normalize("NFKD", s)
@@ -58,7 +59,7 @@ def make_channel_id(name: str) -> str:
     if re.search(r"\bLOVE\s*NATURE\b", s, flags=re.I):
         return "LoveNature.br"
     words = re.findall(r"[A-Za-z0-9]+", s)
-    camel = "".join(w.capitalize() if not w.isupper() else w for w in words)
+    camel = "".join(w.capitalize() for w in words)
     return f"{camel or 'Canal'}.br"
 
 
@@ -66,7 +67,9 @@ def parse_iso_utc_to_brt(iso_str: Any) -> tuple[str, datetime | None]:
     if not iso_str:
         return "", None
     try:
-        dt = datetime.fromisoformat(str(iso_str).strip().replace("Z", "+00:00")).astimezone(BRT_TZ)
+        # Gatekeeper envia 'Z' mas o relógio já está em horário de Brasília (-0300)
+        raw = str(iso_str).strip().replace("Z", "-03:00")
+        dt = datetime.fromisoformat(raw).astimezone(BRT_TZ)
         return dt.strftime("%Y%m%d%H%M%S -0300"), dt
     except Exception:
         return "", None
@@ -201,7 +204,7 @@ def generate_claro_epg(days_ahead: int = 3, out_gz_path: Path = OUT_CLARO_GZ) ->
     if not channel_map:
         raise RuntimeError("Nenhum canal retornado pelo Gatekeeper da Claro.")
 
-    now_utc = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0)
+    now_utc = datetime.now(BRT_TZ).replace(minute=0, second=0, microsecond=0)
     start_utc = now_utc - timedelta(hours=3)
     end_utc = now_utc + timedelta(days=days_ahead)
 
