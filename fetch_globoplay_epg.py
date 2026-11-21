@@ -33,7 +33,7 @@ RATING_SHORT_MAP = {
 }
 
 EPG_QUERY = """
-query GetGloboplayEpg($date: String!) {
+query GetGloboplayEpg($date: Date!) {
   broadcasts {
     mediaId
     name
@@ -197,7 +197,7 @@ def generate_globoplay_epg(days_ahead: int = 3, out_gz_path: Path = OUT_GLOBOPLA
             cid = make_channel_id(name)
             if cid not in channels_by_id:
                 ch_el = ET.Element("channel", {"id": cid})
-                for dn in dict.fromkeys([name, ch_obj.get("name") or "", slug]):
+                for dn in dict.fromkeys([name, slug]):
                     if dn:
                         ET.SubElement(ch_el, "display-name", {"lang": "pt"}).text = str(dn).strip()
                 logo_url = ch_obj.get("logo") or bc.get("logo") or ""
