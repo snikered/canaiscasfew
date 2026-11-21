@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Extrator oficial da grade da Rede Globo (redeglobo.globo.com/.../programacao/) -> globo_epg.xml.gz
-- Raspa o HTML SSR oficial de todas as emissoras e afiliadas brasileiras da Globo.
-- Extrai data/hora exata (ISO-8601 com fuso) de 'accordion-title-<ISO>' e título de 'accordionTitle__name'.
+- Raspa o JSON SSR oficial (escapado em HTML) de todas as emissoras/afiliadas brasileiras da Globo.
+- Extrai data/hora exata (scheduledDate), duração (duration), título, sinopse e categoria.
 - Mantém TV Asa Branca Alagoas e TV Asa Branca Pernambuco separadas.
 """
 from __future__ import annotations
@@ -9,6 +9,7 @@ from __future__ import annotations
 import concurrent.futures
 import gzip
 import html
+import json
 import re
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta, timezone
@@ -98,67 +99,73 @@ GLOBO_AFFILIATES: list[tuple[str, str, str, list[str]]] = [
     ("tv.tapajos", "https://redeglobo.globo.com/pa/tvtapajos/programacao/", "TV Tapajós", ["TV Tapajos"]),
 ]
 
-_TITLE_BTN_RE = re.compile(
-    r'id="accordion-title-(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2})"[^>]*>'
-    r'.*?class="accordionTitle__name"[^>]*>\s*<p[^>]*>(.*?)</p>',
-    re.DOTALL | re.IGNORECASE,
-)
-
-_P_TAG_RE = re.compile(r"<p\b[^>]*>(.*?)</p>", re.DOTALL | re.IGNORECASE)
+_SLOT_MARKER_RE = re.compile(r'\{\s*"contentType"\s*:')
 
 
-def clean_html(raw: str) -> str:
-    txt = re.sub(r"<[^>]+>", " ", raw or "")
-    return " ".join(html.unescape(txt).split()).strip()
+def parse_duration(dur_str: str) -> timedelta | None:
+    if not dur_str or ":" not in dur_str:
+        return None
+    parts = dur_str.strip().split(":")
+    if len(parts) != 3:
+        return None
+    try:
+        h, m, s = int(parts[0]), int(parts[1]), int(parts[2])
+        td = timedelta(hours=h, minutes=m, seconds=s)
+        return td if td.total_seconds() > 0 else None
+    except ValueError:
+        return None
 
 
-def extract_panel_desc(page_html: str, iso_ts: str) -> str:
-    marker = f'id="accordion-panel-{iso_ts}"'
-    idx = page_html.find(marker)
-    if idx == -1:
-        return ""
-    chunk = page_html[idx : idx + 2500]
-    next_item = chunk.find("accordion-title-", len(marker))
-    if next_item != -1:
-        chunk = chunk[:next_item]
-
-    best = ""
-    for m in _P_TAG_RE.finditer(chunk):
-        txt = clean_html(m.group(1))
-        if len(txt) > len(best) and len(txt) >= 20:
-            best = txt
-    return best
-
-
-def fetch_affiliate_schedule(session: requests.Session, url: str) -> list[tuple[datetime, str, str]]:
+def fetch_affiliate_schedule(session: requests.Session, url: str) -> tuple[int, list[tuple[datetime, datetime | None, str, str, str]]]:
     try:
         resp = session.get(url, headers=HEADERS, timeout=25)
-        if resp.status_code != 200 or "accordion-title-" not in resp.text:
-            return []
-        page = resp.text
+        if resp.status_code != 200:
+            return resp.status_code, []
+        text = html.unescape(resp.text)
     except Exception:
-        return []
+        return 0, []
 
-    by_start: dict[datetime, tuple[str, str]] = {}
-    for m in _TITLE_BTN_RE.finditer(page):
-        iso_ts, raw_title = m.groups()
-        title = clean_html(raw_title)
-        if not title:
-            continue
+    decoder = json.JSONDecoder()
+    by_start: dict[datetime, tuple[datetime | None, str, str, str]] = {}
+
+    for m in _SLOT_MARKER_RE.finditer(text):
         try:
-            dt_brt = datetime.fromisoformat(iso_ts).astimezone(BRT_TZ)
+            obj, _ = decoder.raw_decode(text, m.start())
         except Exception:
             continue
-        desc = extract_panel_desc(page, iso_ts)
-        if dt_brt not in by_start:
-            by_start[dt_brt] = (title, desc)
+        if not isinstance(obj, dict) or "scheduledDate" not in obj:
+            continue
 
-    return [(dt, t, d) for dt, (t, d) in sorted(by_start.items(), key=lambda x: x[0])]
+        sched = str(obj.get("scheduledDate") or "").strip()
+        title = str(obj.get("showName") or obj.get("name") or "").strip()
+        if not sched or not title:
+            continue
+
+        try:
+            dt_start = datetime.fromisoformat(sched).astimezone(BRT_TZ)
+        except Exception:
+            continue
+
+        dur = parse_duration(str(obj.get("duration") or ""))
+        dt_stop = (dt_start + dur) if dur else None
+
+        prog_obj = obj.get("program") if isinstance(obj.get("program"), dict) else {}
+        title_obj = obj.get("title") if isinstance(obj.get("title"), dict) else {}
+        desc = str(title_obj.get("synopsis") or prog_obj.get("synopsis") or "").strip()
+
+        genre_obj = title_obj.get("genre") if isinstance(title_obj.get("genre"), dict) else {}
+        category = str(genre_obj.get("name") or obj.get("contentType") or "").strip()
+
+        if dt_start not in by_start or (desc and not by_start[dt_start][2]):
+            by_start[dt_start] = (dt_stop, title, desc, category)
+
+    items = [(dt, st, ti, de, ca) for dt, (st, ti, de, ca) in sorted(by_start.items(), key=lambda x: x[0])]
+    return 200, items
 
 
 def generate_globo_epg(out_gz_path: Path = OUT_GLOBO_GZ) -> int:
     session = requests.Session()
-    tv_root = ET.Element("tv", {"generator-info-name": "redeglobo-official-html-extractor"})
+    tv_root = ET.Element("tv", {"generator-info-name": "redeglobo-official-ssr-extractor"})
     total_progs = 0
     ok_channels = 0
 
@@ -171,13 +178,13 @@ def generate_globo_epg(out_gz_path: Path = OUT_GLOBO_GZ) -> int:
         for fut in concurrent.futures.as_completed(future_map):
             cid, main_name, aliases = future_map[fut]
             try:
-                items = fut.result()
+                status, items = fut.result()
             except Exception as exc:
                 print(f"  ⚠ [{main_name}] Erro: {exc}")
                 continue
 
             if len(items) < 2:
-                print(f"  - [{main_name}] Sem grade retornada.")
+                print(f"  - [{main_name}] Sem grade (HTTP {status}).")
                 continue
 
             ok_channels += 1
@@ -186,13 +193,14 @@ def generate_globo_epg(out_gz_path: Path = OUT_GLOBO_GZ) -> int:
                 dn_el = ET.SubElement(ch_el, "display-name", {"lang": "pt"})
                 dn_el.text = dn
 
-            for i, (dt_start, title, desc) in enumerate(items):
-                if i + 1 < len(items):
-                    dt_stop = items[i + 1][0]
-                    if (dt_stop - dt_start) > timedelta(hours=6):
-                        dt_stop = dt_start + timedelta(hours=2)
-                else:
-                    dt_stop = dt_start + timedelta(minutes=60)
+            for i, (dt_start, dt_stop, title, desc, category) in enumerate(items):
+                if dt_stop is None:
+                    if i + 1 < len(items):
+                        dt_stop = items[i + 1][0]
+                        if (dt_stop - dt_start) > timedelta(hours=6):
+                            dt_stop = dt_start + timedelta(hours=2)
+                    else:
+                        dt_stop = dt_start + timedelta(minutes=60)
 
                 if dt_stop <= dt_start:
                     continue
@@ -207,6 +215,9 @@ def generate_globo_epg(out_gz_path: Path = OUT_GLOBO_GZ) -> int:
                 if desc:
                     d_el = ET.SubElement(p_el, "desc", {"lang": "pt"})
                     d_el.text = desc
+                if category:
+                    c_el = ET.SubElement(p_el, "category", {"lang": "pt"})
+                    c_el.text = category
                 total_progs += 1
 
             print(f"  ✓ [{main_name}] {len(items)} programas extraídos.")
