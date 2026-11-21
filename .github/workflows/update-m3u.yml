@@ -115,6 +115,12 @@ jobs:
         run: |
           python3 merge_epg.py
 
+      - name: Auditar EPG e Gerar Diagnóstico de Falhas
+        run: |
+          if [ -f "audit_epg.py" ]; then
+            python3 audit_epg.py output/epg.xml.gz --report output/report.json --validation output/validation.json --out-md output/audit.md --out-json output/audit.json || true
+          fi
+
       - name: Publicar EPG, Espelho e Cache de Metadados na branch epg
         run: |
           set -e
@@ -139,6 +145,12 @@ jobs:
           cp output/report.md report.md
           cp output/validation.json validation.json
           cp output/validation.md validation.md
+          if [ -f "output/audit.md" ]; then
+            cp output/audit.md audit.md
+          fi
+          if [ -f "output/audit.json" ]; then
+            cp output/audit.json audit.json
+          fi
           if [ -f "output/metadata_cache.json" ]; then
             cp output/metadata_cache.json metadata_cache.json
           fi
@@ -147,6 +159,12 @@ jobs:
           echo "Atualizado automaticamente via GitHub Actions." >> README.md
           
           git add epg.xml.gz espelho.json report.json report.md validation.json validation.md README.md
+          if [ -f "audit.md" ]; then
+            git add audit.md
+          fi
+          if [ -f "audit.json" ]; then
+            git add audit.json
+          fi
           if [ -f "metadata_cache.json" ]; then
             git add metadata_cache.json
           fi
