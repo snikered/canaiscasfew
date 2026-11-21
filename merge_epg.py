@@ -2820,6 +2820,14 @@ def ensure_operator_epgs_generated() -> None:
             generate_globo_epg()
         except Exception as e:
             print(f"  -> Aviso ao extrair Globo Oficial API: {e}")
+          
+    if not Path("globoplay_epg.xml.gz").exists() and Path("fetch_globoplay_epg.py").exists():
+        try:
+            print("\nGerando globoplay_epg.xml.gz direto da API oficial do Globoplay...")
+            from fetch_globoplay_epg import generate_globoplay_epg
+            generate_globoplay_epg()
+        except Exception as e:
+            print(f"  -> Aviso ao extrair Globoplay Oficial API: {e}")
 
 def main() -> None:
     print("Iniciando geração de EPG (100% Mérito Dinâmico por Canal + Recorte de Grade por Período do Dia)...")
