@@ -85,6 +85,8 @@ SMART_TV_SAFE_CANONICAL_IDS: dict[str, str] = {
     "DISC HOME & HEALTH": "DiscoveryHomeHealth.br",
     "DISC. HOME & HEALTH": "DiscoveryHomeHealth.br",
     "HOME & HEALTH": "DiscoveryHomeHealth.br",
+    "DISCOVERY THEATER": "DiscoveryTheater.br",
+    "THEATER": "DiscoveryTheater.br",
     "FILM&ARTS": "FilmAndArts.br",
     "FILM & ARTS": "FilmAndArts.br",
     "FILM AND ARTS": "FilmAndArts.br",
@@ -154,6 +156,41 @@ SMART_TV_SAFE_CANONICAL_IDS: dict[str, str] = {
     "TV FRONTEIRA P PRUDENTE": "tv.fronteira.p.prudente",
     "GLOBO TV FRONTEIRA": "tv.fronteira.p.prudente",
     "GLOBOTVFRONTEIRA": "tv.fronteira.p.prudente",
+    # Colisão Globo Mogi das Cruzes vs TV Diário Fortaleza
+    "GLOBO TV DIARIO": "tv.diario.mogi.das.cruzes.br",
+    "GLOBO TV DIARIO MOGI DAS CRUZES": "tv.diario.mogi.das.cruzes.br",
+    "GLOBOTVDIARIO": "tv.diario.mogi.das.cruzes.br",
+    "TV DIARIO FORTALEZA": "tv.diario.br",
+    "TV DIARIO CE": "tv.diario.br",
+    "TV DIARIO": "tv.diario.br",
+    # Resgate missing_br_real
+    "HBO MAIS": "HBOPlusBrasil.br",
+    "HBO PLUS": "HBOPlusBrasil.br",
+    "HBO+": "HBOPlusBrasil.br",
+    "RECORD PIAUI TV ANTENA 10": "recordtv.piaui.a10",
+    "RECORD TV ANTENA 10": "recordtv.piaui.a10",
+    "TV ANTENA 10": "recordtv.piaui.a10",
+    # Canonicalização de IDs duplicados (Globo SP / RJ / Alagoas)
+    "GLOBO SP": "globo.sao.paulo",
+    "GLOBO SAO PAULO": "globo.sao.paulo",
+    "GLOBO SÃO PAULO": "globo.sao.paulo",
+    "GLOBO RJ": "globo.rio",
+    "GLOBO RIO": "globo.rio",
+    "GLOBO RIO DE JANEIRO": "globo.rio",
+    "GLOBO ALAGOAS": "globo.alagoas",
+    "GLOBO TV ALAGOAS": "globo.alagoas",
+    "GLOBO GAZETA ALAGOAS": "globo.alagoas",
+    "GLOBO TV GAZETA ALAGOAS": "globo.alagoas",
+    "TV GAZETA DE ALAGOAS": "globo.alagoas",
+    "TV GAZETA ALAGOAS": "globo.alagoas",
+}
+
+BLOCKED_DISPLAY_NAMES_BY_ID: dict[str, set[str]] = {
+    "tv.fronteira.p.prudente": {"GLOBO SP", "GLOBO SAO PAULO"},
+    "rbs.caxias": {"GLOBO RBS TV POA", "RBS TV POA"},
+    "rbs.passo.fundo": {"GLOBO RBS TV POA", "RBS TV POA"},
+    "tv.diario.br": {"GLOBO TV DIARIO", "GLOBO TV DIARIO MOGI DAS CRUZES", "TV DIARIO MOGI DAS CRUZES"},
+    "tv.diario.mogi.das.cruzes.br": {"TV DIARIO FORTALEZA", "TV DIARIO CE"},
 }
 
 
@@ -231,6 +268,7 @@ def extract_significant_digits(text: str) -> list[str]:
     s = html.unescape(str(text)).upper()
     s = re.sub(r"\b4DULT\s+SWI[NM](?:\s+\d+)?\b", "ADULT SWIM", s)
     s = re.sub(r"\bPIAUI\s+A10\b", "PIAUI", s)
+    s = re.sub(r"\b(?:TV\s+)?ANTENA\s*10\b", "ANTENA", s)
     s = re.sub(r"(?<=[A-Z0-9])(4K|8K|UHD|FHDR|FHD|(?<![F])HD|SD)\b", r" \1", s)
     s = re.sub(r"(?<=[A-Z0-9])(?:BR\d+|SRV\d+|OP\d+)\b", " ", s)
     s = re.sub(r"\b(?:H\.?264|H\.?265|1080[PI]?|720P?|60FPS|4K|8K|24H[S]?|24/7|BR\d+|SRV\d+|SERVER\s*\d+|OP[CÇ][AÃ]O\s*\d+|OP\d+|1X)\b", " ", s)
@@ -619,6 +657,10 @@ CHANNEL_SYNONYMS = {
     "HOME & HEALTH": ["DISCOVERY HOME & HEALTH", "DISCOVERY HOME AND HEALTH", "DiscoveryHomeHealth.br"],
     "HOME AND HEALTH": ["DISCOVERY HOME & HEALTH", "DISCOVERY HOME AND HEALTH", "DiscoveryHomeHealth.br"],
     "DISCOVERY HOME & HEALTH": ["HOME & HEALTH", "HOME AND HEALTH", "DiscoveryHomeHealth.br"],
+    "THEATER": ["DISCOVERY THEATER", "DiscoveryTheater.br"],
+    "DISCOVERY THEATER": ["THEATER", "DiscoveryTheater.br"],
+    "HBO PLUS": ["HBO+", "HBO MAIS", "HBOPlusBrasil.br"],
+    "HBO MAIS": ["HBO PLUS", "HBO+", "HBOPlusBrasil.br"],
     "LOVE NATURE": [
         "LOVENATURE", "LOVE NATURE 4K", "LOVENATURE 4K", "LOVENATURE4K", "LOVE NATURE HD",
         "LOVENATUREHD", "CANAL LOVE NATURE", "LOVE NATURE BRASIL", "LoveNature.br", "LoveNature4K.br", "lovenature.br"
@@ -648,11 +690,13 @@ CHANNEL_SYNONYMS = {
     "FORMULA 1 TV": ["F1 TV", "FORMULA 1", "F1TV"],
     "TV ASSEMBLEIA": ["ASSEMBLEIA LEGISLATIVA", "TV ASSEMBLEIA LEGISLATIVA"],
     "ASSEMBLEIA LEGISLATIVA": ["TV ASSEMBLEIA", "TV ASSEMBLEIA LEGISLATIVA"],
-    "RECORD PIAUI": ["RECORDTV PIAUI", "TV ANTENA 10", "RECORD ANTENA 10", "RECORD TV ANTENA 10"],
-    "RBS CAXIAS": ["RBS CAXIAS DO SUL", "RBS TV CAXIAS DO SUL", "GLOBO RBS TV POA"],
-    "RBS PASSO FUNDO GLOBO": ["RBS TV PASSO FUNDO", "GLOBO RBS PASSO FUNDO", "GLOBO RBS TV POA"],
-    "TV FRONTEIRA": ["TV FRONTEIRA P PRUDENTE", "GLOBO FRONTEIRA PAULISTA", "GLOBO TV FRONTEIRA", "GLOBO SP"],
-    "TV FRONTEIRA P PRUDENTE": ["TV FRONTEIRA", "GLOBO FRONTEIRA PAULISTA", "GLOBO TV FRONTEIRA", "GLOBO SP"],
+    "RECORD PIAUI": ["RECORDTV PIAUI", "TV ANTENA 10", "RECORD ANTENA 10", "RECORD TV ANTENA 10", "RECORD PIAUI TV ANTENA 10", "recordtv.piaui.a10"],
+    "RECORD PIAUI TV ANTENA 10": ["RECORD PIAUI", "RECORDTV PIAUI", "TV ANTENA 10", "recordtv.piaui.a10"],
+    "SBT TH PLUS VALE": ["SBT VALE", "SBT SP", "SBT SAO PAULO"],
+    "RBS CAXIAS": ["RBS CAXIAS DO SUL", "RBS TV CAXIAS DO SUL"],
+    "RBS PASSO FUNDO GLOBO": ["RBS TV PASSO FUNDO", "GLOBO RBS PASSO FUNDO"],
+    "TV FRONTEIRA": ["TV FRONTEIRA P PRUDENTE", "GLOBO FRONTEIRA PAULISTA", "GLOBO TV FRONTEIRA"],
+    "TV FRONTEIRA P PRUDENTE": ["TV FRONTEIRA", "GLOBO FRONTEIRA PAULISTA", "GLOBO TV FRONTEIRA"],
     "TV SANTA CRUZ BAHIA": ["TV SANTA CRUZ", "GLOBO SANTA CRUZ", "GLOBO TV SANTA CRUZ ITABUNA BAHIA"],
     "WOHOO": ["WOOHOO", "CANAL WOOHOO"],
     "WOOHOO": ["WOHOO", "CANAL WOOHOO"],
@@ -672,6 +716,7 @@ CHANNEL_SYNONYMS = {
     "GLOBO PE ASA BRANCA": ["TV ASA BRANCA", "GLOBO ASA BRANCA", "GLOBO TV ASA BRANCA", "GLOBO CARUARU"],
     "GLOBO ASA BRANCA": ["TV ASA BRANCA", "GLOBO PE ASA BRANCA", "GLOBO TV ASA BRANCA", "GLOBO CARUARU"],
     "TV ASA BRANCA": ["GLOBO ASA BRANCA", "GLOBO PE ASA BRANCA", "GLOBO TV ASA BRANCA"],
+    "GLOBO TV DIARIO": ["TV DIARIO MOGI DAS CRUZES", "GLOBO DIARIO MOGI DAS CRUZES", "GLOBO MOGI DAS CRUZES", "tv.diario.mogi.das.cruzes.br"],
     "UNIVERSAL CHANNEL": ["UNIVERSAL TV", "UNIVERSAL"],
     "UNIVERSAL TV": ["UNIVERSAL CHANNEL", "UNIVERSAL"],
     "UNIVERSAL STUDIO": ["STUDIO UNIVERSAL"],
@@ -743,7 +788,8 @@ CHANNEL_SYNONYMS = {
     "POLISHOP": ["POLISHOP TV"],
     "POLISHOP TV": ["POLISHOP"],
     "TV EVANGELIZAR": ["EVANGELIZAR", "REDE EVANGELIZAR"],
-    "TV DIARIO": ["TV DIARIO FORTALEZA", "TV DIARIO CE"],
+    "TV DIARIO": ["TV DIARIO FORTALEZA", "TV DIARIO CE", "tv.diario.br"],
+    "TV DIARIO FORTALEZA": ["TV DIARIO", "TV DIARIO CE", "tv.diario.br"],
     "REDE CNT": ["CNT", "TV CNT"],
     "CNT": ["REDE CNT", "TV CNT"],
     "REDE BRASIL": ["RBTV", "REDE BRASIL DE TELEVISAO"],
@@ -840,6 +886,7 @@ def normalizar_canal(nome: str) -> str:
 
     if not foreign_code:
         nome = re.sub(r'^E!$', 'E!', nome.strip(), flags=re.IGNORECASE)
+        nome = re.sub(r'^THEATER$', 'DISCOVERY THEATER', nome.strip(), flags=re.IGNORECASE)
         nome = re.sub(r'\b4DULT\s+SWI[NM]\b', 'ADULT SWIM', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bADULT\s+SWIN\b', 'ADULT SWIM', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bADULT\s+SWIM\s+\d+\b', 'ADULT SWIM', nome, flags=re.IGNORECASE)
@@ -868,6 +915,7 @@ def normalizar_canal(nome: str) -> str:
         nome = re.sub(r'\bCANAL\s+VIVA\b', 'VIVA', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bPIAUAI\b', 'PIAUI', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bPIAUI\s+A10\b', 'PIAUI', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bPIAUI\s+TV\s+ANTENA\s*10\b', 'PIAUI', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bALTAMRIA\b', 'ALTAMIRA', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bRENDENCAO\b', 'REDENCAO', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bARQUEMES\b', 'ARIQUEMES', nome, flags=re.IGNORECASE)
@@ -885,7 +933,7 @@ def normalizar_canal(nome: str) -> str:
         nome = re.sub(r'\bMAX PRIME\b', 'HBO POP', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bMAX UP\b', 'HBO POP', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bMAX\b(?!\s*(?:PRIME|\d))', 'HBO MUNDI', nome, flags=re.IGNORECASE)
-        nome = re.sub(r'\bHBO\s*\+\b', 'HBO PLUS', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bHBO\s*(?:\+|MAIS)\b', 'HBO PLUS', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bH2\b', 'HISTORY 2', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bHISTORY CHANNEL\b', 'HISTORY', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bDISC(?:OVERY)?\.?\s*HOME\s*(?:&|AND)?\s*HEALT[H]?\b', 'DISCOVERY HOME & HEALTH', nome, flags=re.IGNORECASE)
@@ -1295,6 +1343,7 @@ def extract_epgshare_compound_candidates(channel_id: str) -> list[str]:
                 if city_only:
                     extras.append(f"{net} {city_only}")
     return extras
+
 def read_source_from_file(spec: SourceSpec, file_path: Path) -> EpgSource:
     channels: dict[str, ET.Element] = {}
     names, normalized_names = {}, {}
@@ -1598,7 +1647,7 @@ def expand_open_tv_tiers(nome_limpo: str, grupo: str) -> tuple[list[str], list[s
     network = ""
     if (nome_limpo.startswith("GLOBO") or "GLOBO" in grupo.upper()) and "NEWS" not in nome_limpo and "NOVELAS" not in nome_limpo and "GLOOB" not in nome_limpo and "USA" not in nome_limpo:
         network = "GLOBO"
-    elif nome_limpo.startswith("SBT") and "NEWS" not in nome_limpo and "PLUS" not in nome_limpo and "+" not in nome_limpo:
+    elif nome_limpo.startswith("SBT") and "NEWS" not in nome_limpo and "SBT PLUS" not in nome_limpo and "SBT+" not in nome_limpo:
         network = "SBT"
     elif nome_limpo.startswith("RECORD") and "NEWS" not in nome_limpo:
         network = "RECORD"
@@ -2163,11 +2212,22 @@ def evaluate_candidates(matches: list[ChannelMatch], now: datetime, max_active_v
         richness_score = float(h_info.get("richness_score", 0.0))
         fut_h = float(h_info.get("future_hours", 0.0))
 
-        eff_health = 1.0 if (health_score >= 0.99 and fut_h >= 48.0) else health_score
+        # Penaliza fontes com horizonte curto (< 48h, com penalidade extra < 36h)
+        horizon_factor = min(1.0, fut_h / 48.0)
+        if fut_h < 36.0:
+            horizon_factor *= 0.85
 
-        quality = 0.40 * weighted_ratio + 0.25 * eff_health + 0.20 * richness_score + 0.15 * avg_support
+        eff_health = 1.0 if (health_score >= 0.99 and fut_h >= 48.0) else (health_score * (0.65 + 0.35 * horizon_factor))
+
+        quality = (
+            0.36 * weighted_ratio
+            + 0.22 * eff_health
+            + 0.22 * richness_score
+            + 0.12 * avg_support
+            + 0.08 * horizon_factor
+        )
         evidence_factor = 0.55 + 0.45 * min(vote_weight / max(max_active_vote_weight, 0.5), 1.0)
-        confidence = round(100 * max(0.0, min(1.0, quality * evidence_factor)))
+        confidence = round(100 * max(0.0, min(1.0, quality * evidence_factor * (0.75 + 0.25 * horizon_factor))))
         evaluations.append(CandidateEvaluation(
             match=match, support_votes=support_votes, vote_sources=vote_sources,
             support_weight=round(support_weight, 3), vote_weight=round(vote_weight, 3),
@@ -2180,21 +2240,24 @@ def evaluate_candidates(matches: list[ChannelMatch], now: datetime, max_active_v
         has_programmes = int(bool(ev.match.source.rows.get(ev.match.channel_id)))
         fut_h = float(ev.health.get("future_hours", 0.0))
         near_cov = float(ev.health.get("near_coverage_ratio", 0.0))
-        eff_h = 1.0 if (ev.health_score >= 0.99 and fut_h >= 48.0) else ev.health_score
-        is_direct_local_affiliate = int(ev.match.tier == 1 and ev.match.source.spec.family == "afiliadas_locais" and ev.health_score >= 0.70)
         horizon_factor = min(1.0, fut_h / 48.0)
+        if fut_h < 36.0:
+            horizon_factor *= 0.85
+        eff_h = 1.0 if (ev.health_score >= 0.99 and fut_h >= 48.0) else (ev.health_score * (0.65 + 0.35 * horizon_factor))
+        is_direct_local_affiliate = int(ev.match.tier == 1 and ev.match.source.spec.family == "afiliadas_locais" and ev.health_score >= 0.70)
         composite_merit = (
-            0.38 * ev.weighted_ratio
-            + 0.22 * ev.avg_support_agreement
-            + 0.24 * ev.richness_score
+            0.34 * ev.weighted_ratio
+            + 0.18 * ev.avg_support_agreement
+            + 0.26 * ev.richness_score
             + 0.10 * eff_h
-            + 0.06 * horizon_factor
+            + 0.12 * horizon_factor
         )
         return (
             has_programmes,
             -ev.match.tier,
             is_direct_local_affiliate,
             int(near_cov >= 0.65 and ev.health_score >= 0.70),
+            int(fut_h >= 36.0),
             round(composite_merit, 4),
             ev.support_votes,
             round(ev.richness_score, 3),
@@ -2323,8 +2386,9 @@ def get_primary_export_ids(entry: dict[str, object]) -> list[str]:
     target_id = str(entry.get("id", "")).strip()
     clean_base = strip_qualities_keep_case(raw_name) or target_id
     norm_clean = normalizar_canal(raw_name)
+    norm_key = name_key(raw_name)
 
-    for key_cand in (clean_base.upper(), norm_clean.upper(), raw_name.upper()):
+    for key_cand in (clean_base.upper(), norm_clean.upper(), raw_name.upper(), norm_key.upper()):
         if key_cand in SMART_TV_SAFE_CANONICAL_IDS:
             return [SMART_TV_SAFE_CANONICAL_IDS[key_cand]]
 
@@ -2776,7 +2840,15 @@ def write_epg_stream(
                     if n not in existing_names:
                         existing_names.append(n)
 
-    _deduped = dedupe_display_names({oid: [oid, *v[2]] for oid, v in xml_id_to_data.items()})
+    filtered_names_by_id: dict[str, list[str]] = {}
+    for oid, v in xml_id_to_data.items():
+        blocked = BLOCKED_DISPLAY_NAMES_BY_ID.get(oid)
+        raw_list = [oid, *v[2]]
+        if blocked:
+            raw_list = [n for n in raw_list if n == oid or name_key(n) not in blocked]
+        filtered_names_by_id[oid] = raw_list
+
+    _deduped = dedupe_display_names(filtered_names_by_id)
     for oid, (chosen_, stitched_, _) in list(xml_id_to_data.items()):
         xml_id_to_data[oid] = (chosen_, stitched_, [n for n in _deduped[oid] if n != oid])
 
