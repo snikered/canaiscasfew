@@ -443,6 +443,7 @@ EPG_SOURCES_CONFIG = [
     ("EPG.pw BR", "https://epg.pw/xmltv/epg_BR.xml.gz", "epgpw", 1.0),
     ("Dearbulut BR", "https://dearbulut.github.io/iptv/epg/br.xml.gz", "dearbulut", 1.0),
     ("EPG.lat BR", "https://epg.lat/files/br.xml.gz", "epglat", 1.0),
+    ("Free-EPG BR", "https://free-epg.de/api/epg/br.xml", "freeepg", 1.0),
 ]
 
 PLACEHOLDER_TITLES = {
