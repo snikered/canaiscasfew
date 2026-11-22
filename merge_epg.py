@@ -440,7 +440,6 @@ EPG_SOURCES_CONFIG = [
     ("EPGShare BR2", "https://epgshare01.online/epgshare01/epg_ripper_BR2.xml.gz", "epgshare", 1.0),
     ("IPTV-EPG BR", "https://iptv-epg.org/files/epg-br.xml", "iptvepg", 1.0),
     ("Genius", os.environ.get("PRIMARY_EPG_URL", "https://github.com/ferteque/Curated-M3U-Repository/raw/refs/heads/main/epg13.xml.gz"), "genius", 1.0),
-    ("EPG.pw BR", "https://epg.pw/xmltv/epg_BR.xml.gz", "epgpw", 1.0),
     ("Dearbulut BR", "https://dearbulut.github.io/iptv/epg/br.xml.gz", "dearbulut", 1.0),
     ("EPG.lat BR", "https://epg.lat/files/br.xml.gz", "epglat", 1.0),
     ("Free-EPG BR", "https://free-epg.de/api/epg/br.xml", "freeepg", 1.0),
