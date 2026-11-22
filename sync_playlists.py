@@ -184,11 +184,11 @@ CHANNEL_SYNONYMS: dict[str, list[str]] = {
     "RBS CAXIAS": ["rbs.caxias", "rbs.caxias.do.sul", "rbs.tv.caxias.do.sul", "RBS CAXIAS", "RBS TV CAXIAS DO SUL"],
     "GLOBO RPC CURITIBA": ["gb.rpc.curitiba", "globo.rpc.tv.curitiba", "GB RPC CURITIBA", "Globo RPC TV Curitiba"],
     "GLOBO RPC TV CURITIBA": ["globo.rpc.tv.curitiba", "gb.rpc.curitiba", "Globo RPC TV Curitiba", "GB RPC CURITIBA"],
-    "GLOBO TV DIARIO": ["tv.diario.br", "tv.diario.mogi.das.cruzes.br", "GLOBOTVDIARIO", "TV DIARIO"],
+    "GLOBO TV DIARIO": ["tv.diario.mogi.das.cruzes.br", "globo.diario.mogi.das.cruzes", "GLOBOTVDIARIO"],
     "GLOBO TV DIARIO MOGI DAS CRUZES": ["tv.diario.mogi.das.cruzes.br", "globo.diario.mogi.das.cruzes", "TV DIARIO MOGI DAS CRUZES"],
-    "GLOBO TV INTEG JUIZ DE FORA": ["GLOBOTVINTEGJUIZDEFORA", "globo.integ.juiz.de.fora", "Tvintegracaouberlandia.br", "TV INTEGRAÇÃO JUIZ DE FORA"],
-    "GLOBO TV INTEGRACAO JUIZ DE FORA": ["Tvintegracaouberlandia.br", "globo.integ.juiz.de.fora", "GLOBOTVINTEGJUIZDEFORA", "TV INTEGRAÇÃO JUIZ DE FORA"],
-    "TV INTEGRACAO JUIZ DE FORA": ["Tvintegracaouberlandia.br", "globo.integ.juiz.de.fora", "TV INTEGRAÇÃO JUIZ DE FORA"],
+    "GLOBO TV INTEG JUIZ DE FORA": ["tv.integracao.juiz.de.fora.br", "GLOBOTVINTEGJUIZDEFORA", "globo.integ.juiz.de.fora", "TV INTEGRAÇÃO JUIZ DE FORA"],
+    "GLOBO TV INTEGRACAO JUIZ DE FORA": ["tv.integracao.juiz.de.fora.br", "globo.integ.juiz.de.fora", "GLOBOTVINTEGJUIZDEFORA", "TV INTEGRAÇÃO JUIZ DE FORA"],
+    "TV INTEGRACAO JUIZ DE FORA": ["tv.integracao.juiz.de.fora.br", "globo.integ.juiz.de.fora", "TV INTEGRAÇÃO JUIZ DE FORA"],
     "GLOBO TV VANG S J CAMPOS": ["GLOBOTVVANGSJCAMPOS", "globo.vang.s.j.campos", "tv.vanguarda.s.j.campos", "Globo TV Vanguarda S J dos Campos"],
     "GLOBO TV VANGUARDA S J DOS CAMPOS": ["globo.tv.vanguarda.s.j.dos.campos", "tv.vanguarda.s.j.campos", "Globo TV Vanguarda S J dos Campos"],
     "GLOBO VERDES MARES": ["globo.verdes.mares", "gb.tv.verdes.mares", "GLOBO VERDES MARES", "GB TV VERDES MARES"],
@@ -435,6 +435,8 @@ def is_orig_tvg_id_poisoned(channel_name: str, clean_ch_name: str, orig_id: str)
     if oid == "sbt.br" and clean_ch_name not in {"SBT", "SBT SP", "SBT TV SP"}:
         return True
     if oid == "band.br" and clean_ch_name not in {"BAND", "BAND SP", "BAND TV SP"}:
+        return True
+    if oid == "tv.diario.br" and ("GLOBO" in clean_ch_name or "MOGI" in clean_ch_name):
         return True
     return False
 
