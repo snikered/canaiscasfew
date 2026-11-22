@@ -985,6 +985,12 @@ def is_valid_provider_tvid(channel_name: str, tvid: str, allow_new_m3u_id: bool 
         return False
     if "TNT NOVELAS" in base_clean and "tbs" in tvid_clean:
         return False
+    if base_clean == "TVE" and "escola" in tvid_clean:
+        return False
+    if ("GLOBO" in base_clean or "MOGI" in base_clean) and tvid_clean == "tvdiario":
+        return False
+    if "JUIZ DE FORA" in base_clean and "uberlandia" in tvid_clean:
+        return False
 
     if base_clean.startswith(("GLOBO ", "TV GLOBO", "RECORD ", "SBT ", "BAND ", "TV BAHIA", "TV ASA BRANCA", "TV VERDES MARES", "TV GAZETA", "TV ANHANGUERA", "TV LIBERAL", "TV MIRANTE", "RBS ", "RPC ", "NSC ", "EPTV")):
         if "NEWS" not in base_clean and "SPORTS" not in base_clean and "NOVELAS" not in base_clean:
@@ -1505,6 +1511,18 @@ def _fuzzy_incompatible(alias: str, candidate: str) -> bool:
         return True
     if ("CNNBRASIL" in candidate and "CNBC" in alias) or ("CNBC" in candidate and "CNN" in alias):
         return True
+    if ("ABCNEWS" in alias) != ("ABCNEWS" in candidate):
+        return True
+    if ("BMCNEWS" in alias) != ("BMCNEWS" in candidate):
+        return True
+    if ("NSPORTS" in alias) != ("NSPORTS" in candidate):
+        return True
+    if ("SPORTSNET" in alias) != ("SPORTSNET" in candidate):
+        return True
+    if ("VITORIOSA" in alias) != ("VITORIOSA" in candidate):
+        return True
+    if ("TVESCOLA" in alias) != ("TVESCOLA" in candidate):
+        return True
     foreign_markers = ("INTERNACIONAL", "PORTUGAL", "AFRICA", "EUROPA", "GLOBOON", "GLOBONOW", "AMERICAS", "CABOVERDE", "MOZAMBIQUE")
     if any(fm in candidate for fm in foreign_markers) and not any(fm in alias for fm in foreign_markers):
         return True
@@ -1545,6 +1563,12 @@ def match_conflicts_network(entry_name: str, source: "EpgSource", channel_id: st
         return True
 
     compact = re.sub(r"[^A-Z]", "", _compact_upper(entry_name))
+    if compact.startswith("GLOBO") and "DIARIO" in compact:
+        for lab in labels:
+            n = " ".join(_compact_upper(lab).split())
+            if "DIARIO" in n and "MOGI" not in n and "GLOBO" not in n:
+                return True
+
     net = next((n for n in ("SBT", "RECORD", "BAND") if compact.startswith(n)), "")
     if not net:
         return False
@@ -1556,6 +1580,8 @@ def match_conflicts_network(entry_name: str, source: "EpgSource", channel_id: st
         if net != "SBT" and any(k in n for k in ("REDE MASSA", "TV JANGADEIRO", "TV ALTEROSA", "TV ARATU", "SERRA DOURADA", "TV JORNAL")):
             return True
         if net != "RECORD" and any(k in n for k in ("NDTV", "RICTV", "RIC TV", "TV GUAIBA", "TV ITAPOAN", "TV PAJUCARA")):
+            return True
+        if net != "BAND" and any(k in n for k in ("TV MARINGA", "TV TAROBA", "TV MANAIRA", "TVBV")):
             return True
         if n.startswith(("TV BRASIL", "REDE TV", "REDETV")) or n.startswith(_GLOBO_ONLY_BRANDS) \
                 or n.replace(" ", "").startswith(_GLOBO_BRAND_COMPACT):
@@ -1573,7 +1599,7 @@ def expand_open_tv_tiers(nome_limpo: str, grupo: str) -> tuple[list[str], list[s
     network = ""
     if (nome_limpo.startswith("GLOBO") or "GLOBO" in grupo.upper()) and "NEWS" not in nome_limpo and "NOVELAS" not in nome_limpo and "GLOOB" not in nome_limpo and "USA" not in nome_limpo:
         network = "GLOBO"
-    elif nome_limpo.startswith("SBT") and "NEWS" not in nome_limpo:
+    elif nome_limpo.startswith("SBT") and "NEWS" not in nome_limpo and "PLUS" not in nome_limpo and "+" not in nome_limpo:
         network = "SBT"
     elif nome_limpo.startswith("RECORD") and "NEWS" not in nome_limpo:
         network = "RECORD"
