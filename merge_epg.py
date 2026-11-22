@@ -1685,6 +1685,9 @@ def expand_open_tv_tiers(nome_limpo: str, grupo: str) -> tuple[list[str], list[s
     if "TV TEM" in nome_limpo or "TEM BAURU" in nome_limpo or "TEM SOROCABA" in nome_limpo or "SJRP" in nome_limpo or "RIO PRETO" in nome_limpo or "MOGI DAS CRUZES" in nome_limpo or "FRONTEIRA" in nome_limpo:
         tier1_local.extend(["TV TEM", "GLOBO BAURU", "GLOBO SOROCABA", "GLOBO SAO JOSE DO RIO PRETO", "GLOBO ITAPETININGA"])
         tier2_state.extend(["GLOBO SP", "GLOBO SAO PAULO"])
+    if network == "GLOBO" and "DIARIO" in nome_limpo:
+        tier1_local.extend(["TV DIARIO MOGI DAS CRUZES", "GLOBO DIARIO MOGI DAS CRUZES", "GLOBO MOGI DAS CRUZES"])
+        tier2_state.extend(["GLOBO SP", "GLOBO SAO PAULO"])
     if "VANGUARDA" in nome_limpo or "VANG " in nome_limpo:
         tier1_local.extend(["TV VANGUARDA", "REDE VANGUARDA", "GLOBO SAO JOSE DOS CAMPOS", "GLOBO TAUBATE"])
         tier2_state.extend(["GLOBO SP", "GLOBO SAO PAULO"])
@@ -1763,7 +1766,6 @@ def expand_open_tv_tiers(nome_limpo: str, grupo: str) -> tuple[list[str], list[s
     tier2_state = [a for a in tier2_state if _alias_belongs_to_network(a, network)]
     tier3_national = [a for a in tier3_national if _alias_belongs_to_network(a, network)]
     return tier1_local, tier2_state, tier3_national
-
 def aliases_tiers_for(entry: dict[str, object]) -> list[list[str]]:
     base_channel_name = str(entry.get("name", ""))
     foreign_code = extract_foreign_country_code(base_channel_name)
@@ -2740,7 +2742,7 @@ def write_epg_stream(
     selected: list[tuple[dict[str, object], CandidateEvaluation, list[CandidateEvaluation], bool]],
     now: datetime,
     overrides: dict[str, object] = None,
-) -> tuple[int, int]:
+) -> tuple[int, int, set[str]]:
     overrides = overrides or {}
     gzip_path, plain_path = OUTPUT_DIR / "epg.xml.gz", OUTPUT_DIR / "epg.xml"
     plain = plain_path.open("wb") if WRITE_PLAIN_XML else None
@@ -2749,12 +2751,14 @@ def write_epg_stream(
     max_future = now + timedelta(hours=OUTPUT_FUTURE_HOURS)
 
     xml_id_to_data: dict[str, tuple[CandidateEvaluation, list[ET.Element], list[str]]] = {}
+    empty_in_window_ids: set[str] = set()
     
     for entry, chosen, all_evaluations, _forced in selected:
         target_id = str(entry.get("id", ""))
         channel_name = str(entry.get("name", target_id))
         stitched = stitch_multi_source_schedule(all_evaluations, target_id, channel_name, cutoff, max_future, overrides)
         if not stitched:
+            empty_in_window_ids.add(target_id)
             continue
         all_names = get_clean_aliases(entry)
         export_ids = get_primary_export_ids(entry)
@@ -2837,7 +2841,7 @@ def write_epg_stream(
     
     size_mb = gzip_path.stat().st_size / (1024 * 1024)
     print(f"Tamanho final do epg.xml.gz: {size_mb:.2f} MB (Limite do GitHub: 100 MB)")
-    return programme_count, len(xml_id_to_data)
+    return programme_count, len(xml_id_to_data), empty_in_window_ids
 
 def ensure_operator_epgs_generated() -> None:
     if not Path("claro_epg.xml.gz").exists() and Path("fetch_claro_epg.py").exists():
@@ -3242,10 +3246,16 @@ def main() -> None:
     timings["matching_consenso_validacao"] = round(time.perf_counter() - stage_start, 3)
 
     stage_start = time.perf_counter()
-    programme_count, ids_count = write_epg_stream(selected, now, overrides)
+    programme_count, ids_count, empty_in_window_ids = write_epg_stream(selected, now, overrides)
     timings["serializacao_e_gzip"] = round(time.perf_counter() - stage_start, 3)
 
-    source_counts = {source.label: sum(1 for row in report_rows if row.get("source") == source.label) for source in active_sources}
+    if empty_in_window_ids:
+        for row in report_rows:
+            if row.get("target_id") in empty_in_window_ids and row.get("status") == "matched":
+                row["status"] = "empty_in_window"
+                row["method"] = f"{row.get('method', '')} (sem programas válidos na janela)"
+
+    source_counts = {source.label: sum(1 for row in report_rows if row.get("status") == "matched" and row.get("source") == source.label) for source in active_sources}
     counts = {
         "playlist_channels": len(entries),
         "matched": sum(1 for row in report_rows if row["status"] == "matched"),
