@@ -26,18 +26,19 @@ PLACEHOLDER_TITLES = {
 }
 
 _FOREIGN_RE = re.compile(
-    r"^(?:PT|US|USA|UK|CO|ARG|AR|MX|EC|PY|UY|CL|PE|BOL|VEN|DE|ES|FR|IT|CA|JP|CR)\b|"
-    r"\b(?:PY|US|USA|UK)\s*$|"
-    r"\b(?:ABC|CBS|NBC|FOX|CW|PBS|CTV|TSN|GLOBAL NEWS|NEWS 12|TELEMUNDO|UNIVISION|BBC AMERICA|AL JAZEERA|EURONEWS|ARIRANG|WEATHER NETWORK)\b",
+    r"^(?:PT|US|USA|UK|CO|ARG|AR|MX|EC|PY|UY|CL|PE|BOL|VEN|DE|ES|FR|IT|CA|JP|CR|LA|DR|PR|LT|DW|RUS|SP\s+USA)\b|"
+    r"^(?:FRFRANCE|LATIN)\b|"
+    r"\b(?:PY|US|USA|UK|PORTUGAL)\s*$|"
+    r"\b(?:ABC|CBS|NBC|FOX|CW|PBS|CTV|TSN|CBC\s+NEWS|GLOBAL NEWS|NEWS 12|TELEMUNDO|UNIVISION|BBC AMERICA|AL JAZEERA|EURONEWS|ARIRANG|WEATHER NETWORK|KRONE\s*HIT|RT\s+DOCUMENTARY)\b",
     re.I,
 )
 
 _PPV_OR_EVENT_RE = re.compile(
-    r"\b(?:PPV|EVENTO|EVENTOS|JOGO\s*\d*|CAZ[EÉ]\s*TV|GOAT|DAZN|DISNEY\s*\+|DISNEY\s*PLUS|"
+    r"(?:PPV|EVENTO|EVENTOS|JOGO\s*\d*|CAZ[EÉ]\s*TV|CANAL\s*GOAT|GOAT\d*|DAZN\d*|DISNEY\s*\+|DISNEY\s*PLUS\d*|"
     r"HBO\s*MAX|MAX\s*\d+|PRIME\s*VIDEO|APPLE\s*TV|NETFLIX|NBA\s*LEAGUE|NBA\s*TV|NFL|MLS|"
-    r"UFC|BJJ|FLOGRAPPLING|KINGS\s*LEAGUE|CAMPEONATO|BRASILEIR[AÃ]O|LIGA\s*FUTSAL|"
-    r"NORDESTE\s*FC|BUNDESLIGA|LALIGA|CONMEBOL|FORMULA\s*1|DESIMPEDIDOS|FURAC[AÃ]O\s*TV|"
-    r"FLAMENGO\s*TV|OLYMPIA|REDBULL|CINE\s*SKY|PLUTO\s*TV|24\s*H|CAMERA|CÂMERA|LIVE)\b",
+    r"UFC|BJJ|FLOGRAPPLING|KINGS\s*LEAGUE|CAMPEONATO|BRASILEIR[AÃ]O|LIGA\s*FUTSAL\d*|"
+    r"NORDESTE\s*FC|BUNDESLIGA|LALIGA|CONMEBOL|FORMULA\s*1|DESIMPEDIDOS|FURAC[AÃ]O\s*TV\d*|FURACAOTV\d*|"
+    r"FLAMENGO\s*TV|OLYMPIA|REDBULL|CINE\s*SKY|PLUTO\s*TV|SPORTYNET\s*PLUS\d*|SPORTYNET\s*[4-9]|24\s*H|24HORAS|CAMERA|CÂMERA|LIVE|XXX)\b",
     re.I,
 )
 
@@ -149,8 +150,14 @@ def classify_missing(name: str, source_errors: dict[str, str]) -> tuple[str, str
         return "estrangeiro", "Canal estrangeiro (fora do escopo BR)"
     if _PPV_OR_EVENT_RE.search(n):
         return "ppv_evento", "Canal de evento/PPV/24h (normal sem EPG fixo)"
-    if re.search(r"(?:^|\s)(?:SPORTV|ESPN|PREMIERE)\s*\d{2}\b", n, re.I):
-        return "duplicata_lista", "Nome numérico duplicado da lista M3U (ex: SPORTV11/PREMIERE21) — possível erro de limpeza/match"
+    if re.search(
+        r"(?:^|\s)(?:SPORTV|ESPN|PREMIERE|HBO|HISTORY)\s*\d{2}\b|"
+        r"(?:TELECINE\s+\w+|HBO\s+(?:FAMILY|MUNDI|PLUS|POP|SIGNATURE|XTREME)|HISTORY|E!|FILM&ARTS|FISH\s+TV|COMBATE|NSPORTS|LIKE|MODO\s+VIAGEM|MUSIC\s+BOX\s+BRASIL|RIT\s+TV|SABOR\s*&\s*ART|TIMES\s+(?:BRASIL|EXCLUSIVO)\s+CNBC|TRAVEL\s+BOX\s+BRAZIL|TV\s+RA\s+TIM\s+BUM|XSPORTS|ZOOMOOO)\s+[1-3]\b|"
+        r"\b(?:FHD60FPS|SPORTV\s+[56])\b",
+        n,
+        re.I,
+    ):
+        return "duplicata_lista", "Duplicata/opção numerada da lista M3U (canal principal já tem EPG)"
     if source_errors:
         return "br_real", f"Falta de conteúdo ou fonte fora do ar ({', '.join(list(source_errors)[:3])})"
     if _REGIONAL_OPEN_RE.search(n):
@@ -400,7 +407,6 @@ def main() -> None:
     empty_channels = [cid for cid in channel_ids if not by_ch.get(cid)]
     unsafe_ids = [cid for cid in channel_ids if has_accent_or_unsafe(cid)]
 
-    # Analisa canais missing do report.json
     missing_counts = defaultdict(int)
     missing_br_real: list[dict[str, str]] = []
     for row in report_data.get("channels") or []:
