@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Coletor completo e otimizado WebFinal (esportes-e-futebol, logos, gêneros, elenco/diretor, lxml e BRT -0300)."""
+"""Coletor completo e estável WebFinal (anti-403, esportes-e-futebol, logos, gêneros, elenco/diretor)."""
 from __future__ import annotations
 
 import os
 import re
 import time
 import xml.etree.ElementTree as ET
+from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -22,7 +23,8 @@ except ImportError:
     HTML_PARSER = "html.parser"
 
 DIAS_PARA_FRENTE = 4
-MAX_WORKERS = 16
+MAX_WORKERS = 3
+DELAY_POR_REQ = 0.25
 BASE_URL = "https://webfinal.com.br"
 OUTPUT_FILE = Path(
     os.environ.get(
@@ -48,11 +50,12 @@ CATEGORIAS = [
     f"{BASE_URL}/programacao/internacional/",
 ]
 
-_RE_ANO = re.compile(r"^(\d{4})\.\s*(.+)", re.DOTALL)
+_RE_ANO = re.compile(r"^(\d{4})\.\s*(.*)$", re.DOTALL)
 _RE_PROG_CARD = re.compile(r"program-card")
 _RE_GENEROS = re.compile(r"^g[eê]neros?\s*:\s*(.+)$", re.IGNORECASE)
 _RE_ELENCO = re.compile(r"^elenco\s*:\s*(.+)$", re.IGNORECASE)
 _RE_DIRETOR = re.compile(r"^diretor(?:es|a|as)?\s*:\s*(.+)$", re.IGNORECASE)
+_RE_INLINE_GEN = re.compile(r"\s*g[eê]neros?\s*:\s*(.+)$", re.IGNORECASE)
 _SINOPSES_IGNORAR = {
     "sinopse não disponível",
     "sinopse nao disponivel",
@@ -65,14 +68,14 @@ _SINOPSES_IGNORAR = {
 def criar_sessao() -> requests.Session:
     session = requests.Session()
     retry = Retry(
-        total=3,
-        backoff_factor=0.4,
+        total=2,
+        backoff_factor=0.8,
         status_forcelist=(429, 500, 502, 503, 504),
         allowed_methods=("GET",),
     )
     adapter = HTTPAdapter(
-        pool_connections=MAX_WORKERS,
-        pool_maxsize=MAX_WORKERS * 2,
+        pool_connections=MAX_WORKERS + 2,
+        pool_maxsize=(MAX_WORKERS + 2) * 2,
         max_retries=retry,
     )
     session.mount("https://", adapter)
@@ -118,7 +121,8 @@ def _extrair_lista_csv(texto: str, limite: int = 8) -> list[str]:
 def _fetch_categoria(session: requests.Session, url_cat: str) -> list[tuple[str, str, str]]:
     encontrados: list[tuple[str, str, str]] = []
     try:
-        r = session.get(url_cat, timeout=(5, 12))
+        time.sleep(DELAY_POR_REQ)
+        r = session.get(url_cat, timeout=(6, 15))
         if r.status_code != 200:
             return encontrados
         soup = BeautifulSoup(r.content, HTML_PARSER)
@@ -148,7 +152,7 @@ def _fetch_categoria(session: requests.Session, url_cat: str) -> list[tuple[str,
 def descobrir_canais(session: requests.Session) -> dict[str, dict[str, str]]:
     canais: dict[str, dict[str, str]] = {}
     urls_vistas: set[str] = set()
-    with ThreadPoolExecutor(max_workers=min(10, len(CATEGORIAS))) as executor:
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         futures = [executor.submit(_fetch_categoria, session, url) for url in CATEGORIAS]
         for fut in as_completed(futures):
             for nome, href, icon in fut.result():
@@ -160,26 +164,57 @@ def descobrir_canais(session: requests.Session) -> dict[str, dict[str, str]]:
     return canais
 
 
-def _extrair_metadados_card(card) -> tuple[list[str], list[str], list[str]]:
+def _parse_bloco_descricao(desc_elem, titulo: str) -> tuple[str, str, list[str], list[str], list[str]]:
+    if not desc_elem:
+        return "", "", [], [], []
+
+    linhas_sinopse: list[str] = []
     generos: list[str] = []
     elenco: list[str] = []
     diretores: list[str] = []
 
-    for elem in card.find_all(["p", "div", "li"]):
-        if elem.find(["p", "div", "li"]):
-            continue
-        txt = " ".join(elem.get_text(" ").split())
-        if not txt or ":" not in txt:
+    for linha_bruta in desc_elem.get_text("\n").splitlines():
+        txt = " ".join(linha_bruta.split())
+        if not txt:
             continue
 
-        if not generos and (m := _RE_GENEROS.match(txt)):
-            generos = _extrair_lista_csv(m.group(1), limite=4)
-        elif not elenco and (m := _RE_ELENCO.match(txt)):
-            elenco = _extrair_lista_csv(m.group(1), limite=6)
-        elif not diretores and (m := _RE_DIRETOR.match(txt)):
-            diretores = _extrair_lista_csv(m.group(1), limite=3)
+        if m := _RE_GENEROS.match(txt):
+            if not generos:
+                generos = _extrair_lista_csv(m.group(1), limite=4)
+            continue
+        if m := _RE_ELENCO.match(txt):
+            if not elenco:
+                elenco = _extrair_lista_csv(m.group(1), limite=6)
+            continue
+        if m := _RE_DIRETOR.match(txt):
+            if not diretores:
+                diretores = _extrair_lista_csv(m.group(1), limite=3)
+            continue
 
-    return generos, elenco, diretores
+        # Caso raro (ex.: Adrenalina Pura TV) em que "Gêneros:" vem colado no fim da sinopse
+        if m := _RE_INLINE_GEN.search(txt):
+            if not generos:
+                generos = _extrair_lista_csv(m.group(1), limite=4)
+            txt = txt[: m.start()].strip()
+
+        if txt:
+            linhas_sinopse.append(txt)
+
+    descricao = " ".join(linhas_sinopse).strip()
+    ano = ""
+    if m := _RE_ANO.match(descricao):
+        cand_ano = m.group(1)
+        descricao = m.group(2).strip()
+        if cand_ano != "1970":
+            ano = cand_ano
+
+    if (
+        descricao.rstrip(".").lower() in _SINOPSES_IGNORAR
+        or descricao.rstrip(".").lower() == titulo.rstrip(".").lower()
+    ):
+        descricao = ""
+
+    return ano, descricao, generos, elenco, diretores
 
 
 def extrair_programacao(
@@ -188,13 +223,16 @@ def extrair_programacao(
     url_canal: str,
     inicio_min: datetime,
     data_limite: datetime,
-) -> tuple[str, list[dict]]:
+) -> tuple[str, list[dict], str]:
     try:
-        r = session.get(url_canal, timeout=(5, 15))
+        time.sleep(DELAY_POR_REQ)
+        r = session.get(url_canal, timeout=(6, 15))
         if r.status_code != 200:
-            return nome, []
-    except Exception:
-        return nome, []
+            return nome, [], f"HTTP {r.status_code}"
+    except requests.Timeout:
+        return nome, [], "timeout"
+    except Exception as e:
+        return nome, [], type(e).__name__
 
     soup = BeautifulSoup(r.content, HTML_PARSER)
     eventos: list[dict] = []
@@ -229,18 +267,7 @@ def extrair_programacao(
         seen_starts.add(start_ms)
 
         desc_elem = card.find("p", class_="descricao")
-        descricao = " ".join(desc_elem.get_text().split()) if desc_elem else ""
-
-        ano = ""
-        descricao_limpa = descricao
-        if match_ano := _RE_ANO.match(descricao):
-            ano = match_ano.group(1)
-            descricao_limpa = match_ano.group(2).strip()
-
-        if descricao_limpa.rstrip(".").lower() in _SINOPSES_IGNORAR or descricao_limpa.rstrip(".").lower() == titulo.rstrip(".").lower():
-            descricao_limpa = ""
-
-        generos, elenco, diretores = _extrair_metadados_card(card)
+        ano, descricao_limpa, generos, elenco, diretores = _parse_bloco_descricao(desc_elem, titulo)
         duracao_min = max(1, (end_ms - start_ms) // 60000)
 
         eventos.append({
@@ -256,7 +283,7 @@ def extrair_programacao(
         })
 
     eventos.sort(key=lambda x: x["inicio"])
-    return nome, eventos
+    return nome, eventos, "ok" if eventos else "sem_eventos"
 
 
 def gerar_xml(caminho_saida: Path) -> None:
@@ -267,9 +294,11 @@ def gerar_xml(caminho_saida: Path) -> None:
 
     session = criar_sessao()
     canais = descobrir_canais(session)
-    print(f"WebFinal ({HTML_PARSER}) -> Canais descobertos: {len(canais)}")
+    print(f"WebFinal ({HTML_PARSER}, workers={MAX_WORKERS}) -> Canais descobertos: {len(canais)}")
 
     resultados: dict[str, list[dict]] = {}
+    erros: Counter[str] = Counter()
+
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         futures = {
             executor.submit(
@@ -278,9 +307,11 @@ def gerar_xml(caminho_saida: Path) -> None:
             for nome, info in canais.items()
         }
         for fut in as_completed(futures):
-            nome, evs = fut.result()
+            nome, evs, status = fut.result()
             if evs:
                 resultados[nome] = evs
+            else:
+                erros[status] += 1
 
     root = ET.Element("tv", {"generator-info-name": "EPG WebFinal"})
     canais_ordenados = sorted(resultados.keys(), key=str.lower)
@@ -337,10 +368,11 @@ def gerar_xml(caminho_saida: Path) -> None:
     tree.write(caminho_saida, encoding="utf-8", xml_declaration=True)
 
     elapsed = time.perf_counter() - t0
+    resumo_erros = f" | Falhas: {dict(erros)}" if erros else ""
     print(
         f"WebFinal -> Canais com grade: {len(resultados)}/{len(canais)} | "
         f"Eventos: {total_eventos} | Com gênero: {com_genero} | "
-        f"Com créditos: {com_creditos} | Tempo: {elapsed:.1f}s"
+        f"Com créditos: {com_creditos} | Tempo: {elapsed:.1f}s{resumo_erros}"
     )
     print(f"XML salvo em: {caminho_saida.resolve()}")
 
