@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Coletor otimizado GuiaDeTV (paralelo, fuso -0300 exato e XMLTV estrito)."""
+"""Coletor otimizado GuiaDeTV (paralelo, fuso ISO -> BRT -0300, categorias/badges e XMLTV estrito)."""
 from __future__ import annotations
 
 import os
@@ -30,8 +30,19 @@ CATEGORIAS = [
 ]
 
 _RE_CANAL_HREF = re.compile(r"/canal/")
-_RE_DUR_H = re.compile(r"(\d+)\s*h\s*(\d+)?", re.IGNORECASE)
-_RE_DUR_M = re.compile(r"(\d+)\s*min", re.IGNORECASE)
+_RE_DUR_H = re.compile(r"^(\d+)\s*h(?:\s*(\d+))?", re.IGNORECASE)
+_RE_DUR_M = re.compile(r"^(\d+)\s*min", re.IGNORECASE)
+_BADGES_IGNORAR = {
+    "ao vivo", "no ar", "agora", "a seguir", "em breve",
+    "inédito", "inedito", "novo", "estreia", "reprise",
+    "hd", "fhd", "4k", "cc", "ad",
+}
+_TITULOS_IGNORAR = {
+    "programação indisponível",
+    "programacao indisponivel",
+    "sem programação",
+    "sem programacao",
+}
 
 
 def criar_sessao() -> requests.Session:
@@ -49,8 +60,28 @@ def criar_sessao() -> requests.Session:
     return s
 
 
+def parse_iso_brt(raw_dt: str) -> datetime | None:
+    if not raw_dt:
+        return None
+    try:
+        dt = datetime.fromisoformat(raw_dt.strip().replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            return dt.replace(tzinfo=BRT_TZ)
+        return dt.astimezone(BRT_TZ)
+    except Exception:
+        try:
+            if len(raw_dt) >= 19:
+                return datetime.strptime(raw_dt[:19], "%Y-%m-%dT%H:%M:%S").replace(tzinfo=BRT_TZ)
+        except Exception:
+            pass
+    return None
+
+
 def descobrir_canais(session: requests.Session) -> dict[str, str]:
     canais: dict[str, str] = {}
+    urls_vistas: set[str] = set()
+    nomes_vistos: set[str] = set()
+
     for url_cat in CATEGORIAS:
         try:
             r = session.get(url_cat, timeout=15)
@@ -64,14 +95,17 @@ def descobrir_canais(session: requests.Session) -> dict[str, str]:
                 elif href.startswith("/"):
                     href = BASE + href
                 nome = " ".join(a.get_text().split())
-                if nome and nome not in canais:
-                    canais[nome] = href
+                if not nome or href in urls_vistas or nome.lower() in nomes_vistos:
+                    continue
+                canais[nome] = href
+                urls_vistas.add(href)
+                nomes_vistos.add(nome.lower())
         except Exception:
             pass
     return canais
 
 
-def extrair_programacao(session: requests.Session, nome: str, url_canal: str, data_limite: datetime) -> tuple[str, list[dict]]:
+def extrair_programacao(session: requests.Session, nome: str, url_canal: str, inicio_min: datetime, data_limite: datetime) -> tuple[str, list[dict]]:
     try:
         r = session.get(url_canal, timeout=15)
         if r.status_code != 200:
@@ -88,16 +122,8 @@ def extrair_programacao(session: requests.Session, nome: str, url_canal: str, da
         if not time_tag:
             continue
 
-        raw_dt = str(time_tag["datetime"]).strip()
-        try:
-            if len(raw_dt) >= 19:
-                inicio = datetime.strptime(raw_dt[:19], "%Y-%m-%dT%H:%M:%S").replace(tzinfo=BRT_TZ)
-            else:
-                continue
-        except Exception:
-            continue
-
-        if inicio > data_limite or inicio in seen_starts:
+        inicio = parse_iso_brt(str(time_tag["datetime"]))
+        if not inicio or inicio < inicio_min or inicio > data_limite or inicio in seen_starts:
             continue
 
         link_prog = li.find("a")
@@ -105,7 +131,7 @@ def extrair_programacao(session: requests.Session, nome: str, url_canal: str, da
             continue
 
         titulo = " ".join(link_prog.get_text().split())
-        if not titulo:
+        if not titulo or titulo.lower() in _TITULOS_IGNORAR:
             continue
 
         seen_starts.add(inicio)
@@ -114,22 +140,33 @@ def extrair_programacao(session: requests.Session, nome: str, url_canal: str, da
         if " : " in titulo:
             titulo, sub_titulo = [p.strip() for p in titulo.split(" : ", 1)]
 
-        duracao_min = 60
-        if time_tag.parent and (span_dur := time_tag.parent.find("span")):
-            txt_dur = " ".join(span_dur.get_text().split())
-            if match_dur := _RE_DUR_H.match(txt_dur):
-                duracao_min = int(match_dur.group(1)) * 60 + int(match_dur.group(2) or 0)
-            elif match_dur := _RE_DUR_M.match(txt_dur):
-                duracao_min = int(match_dur.group(1))
+        duracao_min: int | None = None
+        if time_tag.parent:
+            for span_dur in time_tag.parent.find_all("span"):
+                txt_dur = " ".join(span_dur.get_text().split())
+                if match_dur := _RE_DUR_H.match(txt_dur):
+                    duracao_min = int(match_dur.group(1)) * 60 + int(match_dur.group(2) or 0)
+                    break
+                if match_dur := _RE_DUR_M.match(txt_dur):
+                    duracao_min = int(match_dur.group(1))
+                    break
 
-        badges = [
-            " ".join(span.get_text().split())
-            for span in li.find_all("span")
-            if not span.find("span")
-            and len(" ".join(span.get_text().split())) < 30
-            and not re.match(r"^\d", " ".join(span.get_text().split()))
-        ]
+        badges = []
+        for span in li.find_all("span"):
+            if span.find("span"):
+                continue
+            txt = " ".join(span.get_text().split())
+            if not txt or len(txt) >= 30 or re.match(r"^\d", txt):
+                continue
+            badges.append(txt)
+
         tem_ao_vivo = any(b.lower() == "ao vivo" for b in badges)
+        categorias = []
+        for b in badges:
+            if b.lower() not in _BADGES_IGNORAR and b not in categorias:
+                categorias.append(b)
+                if len(categorias) >= 2:
+                    break
 
         sinopse = ""
         if p_sinopse := li.find("p"):
@@ -137,25 +174,31 @@ def extrair_programacao(session: requests.Session, nome: str, url_canal: str, da
             if "sinopse n" in sinopse.lower()[:12]:
                 sinopse = ""
 
-        evento = {
+        eventos.append({
             "inicio": inicio,
-            "fim": inicio + timedelta(minutes=max(5, duracao_min)),
+            "duracao_explicita": duracao_min is not None,
+            "fim": inicio + timedelta(minutes=max(5, duracao_min or 60)),
             "titulo": f"Ao vivo - {titulo}" if tem_ao_vivo and not titulo.lower().startswith("ao vivo") else titulo,
             "sub_titulo": sub_titulo,
+            "categorias": categorias,
             "desc": sinopse,
-        }
-        eventos.append(evento)
+        })
 
     eventos.sort(key=lambda x: x["inicio"])
     for i in range(len(eventos) - 1):
-        if eventos[i]["fim"] > eventos[i + 1]["inicio"]:
-            eventos[i]["fim"] = eventos[i + 1]["inicio"]
+        prox_inicio = eventos[i + 1]["inicio"]
+        if not eventos[i]["duracao_explicita"]:
+            if prox_inicio > eventos[i]["inicio"]:
+                eventos[i]["fim"] = min(prox_inicio, eventos[i]["inicio"] + timedelta(hours=6))
+        elif eventos[i]["fim"] > prox_inicio:
+            eventos[i]["fim"] = prox_inicio
 
     return nome, eventos
 
 
 def gerar_xml(caminho_saida: str | Path) -> None:
     hoje = datetime.now(BRT_TZ)
+    inicio_min = hoje - timedelta(hours=8)
     data_limite = hoje + timedelta(days=DIAS_PARA_FRENTE)
 
     session = criar_sessao()
@@ -165,7 +208,7 @@ def gerar_xml(caminho_saida: str | Path) -> None:
     resultados: dict[str, list[dict]] = {}
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         futures = [
-            executor.submit(extrair_programacao, session, nome, url, data_limite)
+            executor.submit(extrair_programacao, session, nome, url, inicio_min, data_limite)
             for nome, url in canais.items()
         ]
         for fut in as_completed(futures):
@@ -174,7 +217,7 @@ def gerar_xml(caminho_saida: str | Path) -> None:
                 resultados[nome] = evs
 
     root = ET.Element("tv", {"generator-info-name": "EPG GuiaDeTV"})
-    nomes_ordenados = sorted(resultados.keys())
+    nomes_ordenados = sorted(resultados.keys(), key=str.lower)
 
     for nome in nomes_ordenados:
         channel = ET.SubElement(root, "channel", id=nome)
@@ -190,11 +233,13 @@ def gerar_xml(caminho_saida: str | Path) -> None:
                 stop=ev["fim"].strftime("%Y%m%d%H%M%S -0300"),
                 channel=nome,
             )
-            ET.SubElement(prog, "title").text = ev["titulo"]
+            ET.SubElement(prog, "title", {"lang": "pt"}).text = ev["titulo"]
             if ev.get("sub_titulo"):
-                ET.SubElement(prog, "sub-title").text = ev["sub_titulo"]
+                ET.SubElement(prog, "sub-title", {"lang": "pt"}).text = ev["sub_titulo"]
+            for cat in ev.get("categorias", []):
+                ET.SubElement(prog, "category", {"lang": "pt"}).text = cat
             if ev.get("desc"):
-                ET.SubElement(prog, "desc").text = ev["desc"]
+                ET.SubElement(prog, "desc", {"lang": "pt"}).text = ev["desc"]
             total_eventos += 1
 
     tree = ET.ElementTree(root)
