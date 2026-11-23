@@ -140,7 +140,7 @@ def buscar_detalhes_filme(session: requests.Session, url_prog: str) -> tuple[str
                         and "ative o javascript" not in l.lower()
                     ]
                     if candidatos:
-                        sinopse = " ".join(candidatos)
+                        sinopse = candidatos[0]
     except Exception:
         pass
 
