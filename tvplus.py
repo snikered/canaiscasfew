@@ -118,33 +118,29 @@ def buscar_detalhes_filme(session: requests.Session, url_prog: str) -> tuple[str
             main_info = soup_prog.find("div", class_="main-info-sinopse")
             if main_info:
                 linhas_meta = [l.strip() for l in main_info.get_text("\n").split("\n") if l.strip()]
+                idx_meta = -1
                 for idx, linha in enumerate(linhas_meta[1:], start=1):
                     match_meta = _RE_META_FILME.match(linha)
                     if match_meta:
                         pais = match_meta.group("pais").strip()
                         ano_lancamento = match_meta.group("ano")
                         duracao = match_meta.group("duracao") or ""
+                        idx_meta = idx
                         break
                     if idx == 1 and "/" not in linha and not linha.lower().startswith("classificação"):
                         titulo_original = linha
 
-                # Extrai apenas a sinopse real (ignora metadados, título original e avisos do site)
-                meta_set = {l.lower() for l in linhas_meta}
-                for p in soup_prog.find_all("p"):
-                    txt = " ".join(p.get_text(" ", strip=True).split())
-                    txt_low = txt.lower()
-                    if (
-                        len(txt) < 35
-                        or txt_low in meta_set
-                        or txt_low == titulo_original.lower()
-                        or _RE_META_FILME.match(txt)
-                        or txt_low.startswith("filme,")
-                        or "ative o javascript" in txt_low
-                        or "política de privacidade" in txt_low
-                    ):
-                        continue
-                    sinopse = txt
-                    break
+                # A sinopse real vem nas linhas seguintes dentro da própria main-info-sinopse
+                if idx_meta != -1 and idx_meta + 1 < len(linhas_meta):
+                    candidatos = [
+                        l for l in linhas_meta[idx_meta + 1 :]
+                        if len(l) >= 25
+                        and "tmdb" not in l.lower()
+                        and "busque por canal" not in l.lower()
+                        and "ative o javascript" not in l.lower()
+                    ]
+                    if candidatos:
+                        sinopse = " ".join(candidatos)
     except Exception:
         pass
 
