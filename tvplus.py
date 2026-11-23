@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""Coletor otimizado TVPlus (paralelo, cache de metadados de filmes e fuso -0300)."""
+"""Coletor otimizado TVPlus (categorias + Parabólica Digital /parabolica,
+cache de metadados/sinopse de filmes e fuso -0300).
+"""
 from __future__ import annotations
 
 import os
@@ -19,7 +21,7 @@ DIAS_PARA_FRENTE = 4
 MAX_WORKERS = 8
 BRT_TZ = timezone(timedelta(hours=-3))
 
-CATEGORIAS = [
+PAGINAS_DESCOBERTA = [
     "https://www.tvplus.com.br/categoria/documentario",
     "https://www.tvplus.com.br/categoria/esportes",
     "https://www.tvplus.com.br/categoria/filmes",
@@ -29,6 +31,7 @@ CATEGORIAS = [
     "https://www.tvplus.com.br/categoria/series",
     "https://www.tvplus.com.br/categoria/tvaberta",
     "https://www.tvplus.com.br/categoria/variedades",
+    "https://www.tvplus.com.br/parabolica",
 ]
 
 MESES = {
@@ -37,12 +40,16 @@ MESES = {
     "setembro": 9, "outubro": 10, "novembro": 11, "dezembro": 12,
 }
 
+_RE_CANAL_LINK = re.compile(r"^/(?:programacao|parabolica)/(?!sinopse/)([^/?#]+)$")
 _RE_DIA = re.compile(r"^([A-Za-zÀ-ÿ\-]+),\s*(\d+)\s*de\s*([A-Za-zÀ-ÿ]+)")
 _RE_HORA = re.compile(r"(\d{2})h(\d{2})\s*-\s*(\d{2})h(\d{2})\s*\|\s*(.+)")
-_RE_META_FILME = re.compile(r"([^/]+)\s*/\s*([^/]+)\s*/\s*(\d{4})\s*/\s*(\d+)\s*Min", re.IGNORECASE)
+_RE_META_FILME = re.compile(
+    r"^(?P<genero>[^/]+?)\s*/\s*(?P<pais>.+?)\s*/\s*(?P<ano>\d{4})(?:\s*/\s*(?P<duracao>\d+)\s*Min\.?)?$",
+    re.IGNORECASE,
+)
 _RE_CLASSIF = re.compile(r"(\d{1,2})\.png")
 
-_FILME_CACHE: dict[str, tuple[str, str, str, str]] = {}
+_FILME_CACHE: dict[str, tuple[str, str, str, str, str]] = {}
 _CACHE_LOCK = threading.Lock()
 
 
@@ -54,54 +61,94 @@ def criar_sessao() -> requests.Session:
     s.mount("http://", adapter)
     s.headers.update({
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        "Accept-Language": "pt-BR,pt;q=0.9",
     })
     return s
 
 
 def descobrir_canais(session: requests.Session) -> dict[str, str]:
+    """Descobre todos os canais das 9 categorias + Parabólica Digital (/parabolica)."""
     canais: dict[str, str] = {}
-    for url_cat in CATEGORIAS:
+    urls_vistas: set[str] = set()
+
+    for url_pag in PAGINAS_DESCOBERTA:
         try:
-            r = session.get(url_cat, timeout=15)
+            r = session.get(url_pag, timeout=15)
+            if r.status_code != 200:
+                continue
             soup = BeautifulSoup(r.content, "html.parser")
-            for bloco in soup.find_all("div", class_="program"):
-                link = bloco.find("a", href=re.compile(r"/programacao/"))
-                if link:
-                    nome_elem = link.find("img")
-                    nome = (nome_elem.get("alt", "") if nome_elem else link.get_text()).strip()
-                    url_canal = link["href"].strip()
-                    if nome and nome not in canais:
-                        canais[nome] = url_canal
-        except Exception:
-            pass
+            for link in soup.find_all("a", href=True):
+                href = link["href"].strip()
+                href_rel = re.sub(r"^https?://(?:www\.)?tvplus\.com\.br", "", href)
+                if not _RE_CANAL_LINK.match(href_rel):
+                    continue
+                if href_rel in urls_vistas:
+                    continue
+
+                img = link.find("img")
+                nome = (img.get("alt", "") if img else link.get_text(" ", strip=True)).strip()
+                nome = " ".join(nome.split())
+                if not nome:
+                    continue
+
+                # Evita sobrescrever canal já descoberto nas categorias principais
+                if nome.lower() in {k.lower() for k in canais}:
+                    urls_vistas.add(href_rel)
+                    continue
+
+                canais[nome] = href_rel
+                urls_vistas.add(href_rel)
+        except Exception as exc:
+            print(f"  ⚠ TVPlus falha na descoberta em {url_pag}: {exc}")
+
     return canais
 
 
-def buscar_detalhes_filme(session: requests.Session, url_prog: str) -> tuple[str, str, str, str]:
+def buscar_detalhes_filme(session: requests.Session, url_prog: str) -> tuple[str, str, str, str, str]:
+    """Retorna (titulo_original, ano, pais, duracao, sinopse)."""
     with _CACHE_LOCK:
         if url_prog in _FILME_CACHE:
             return _FILME_CACHE[url_prog]
 
-    titulo_original, ano_lancamento, pais, duracao = "", "", "", ""
+    titulo_original, ano_lancamento, pais, duracao, sinopse = "", "", "", "", ""
     try:
         r_prog = session.get(url_prog, timeout=8)
         if r_prog.status_code == 200:
             soup_prog = BeautifulSoup(r_prog.content, "html.parser")
             main_info = soup_prog.find("div", class_="main-info-sinopse")
             if main_info:
-                linhas_meta = [l.strip() for l in main_info.get_text().split("\n") if l.strip()]
-                if len(linhas_meta) >= 2:
-                    titulo_original = linhas_meta[1]
-                if len(linhas_meta) >= 3:
-                    match_meta = _RE_META_FILME.match(linhas_meta[2])
+                linhas_meta = [l.strip() for l in main_info.get_text("\n").split("\n") if l.strip()]
+                for idx, linha in enumerate(linhas_meta[1:], start=1):
+                    match_meta = _RE_META_FILME.match(linha)
                     if match_meta:
-                        pais = match_meta.group(2).strip()
-                        ano_lancamento = match_meta.group(3)
-                        duracao = match_meta.group(4)
+                        pais = match_meta.group("pais").strip()
+                        ano_lancamento = match_meta.group("ano")
+                        duracao = match_meta.group("duracao") or ""
+                        break
+                    if idx == 1 and "/" not in linha and not linha.lower().startswith("classificação"):
+                        titulo_original = linha
+
+                # Extrai apenas a sinopse real (ignora metadados, título original e avisos do site)
+                meta_set = {l.lower() for l in linhas_meta}
+                for p in soup_prog.find_all("p"):
+                    txt = " ".join(p.get_text(" ", strip=True).split())
+                    txt_low = txt.lower()
+                    if (
+                        len(txt) < 35
+                        or txt_low in meta_set
+                        or txt_low == titulo_original.lower()
+                        or _RE_META_FILME.match(txt)
+                        or txt_low.startswith("filme,")
+                        or "ative o javascript" in txt_low
+                        or "política de privacidade" in txt_low
+                    ):
+                        continue
+                    sinopse = txt
+                    break
     except Exception:
         pass
 
-    res = (titulo_original, ano_lancamento, pais, duracao)
+    res = (titulo_original, ano_lancamento, pais, duracao, sinopse)
     with _CACHE_LOCK:
         _FILME_CACHE[url_prog] = res
     return res
@@ -173,9 +220,9 @@ def extrair_programacao(session: requests.Session, nome: str, url_canal: str, da
             continue
 
         categorias = [p.strip() for p in genero_bruto.split(",") if p.strip()][:2] if genero_bruto else []
-        titulo_original, ano_lancamento, pais, duracao = "", "", "", ""
+        titulo_original, ano_lancamento, pais, duracao, sinopse = "", "", "", "", ""
         if "Filme" in categorias and url_prog:
-            titulo_original, ano_lancamento, pais, duracao = buscar_detalhes_filme(session, url_prog)
+            titulo_original, ano_lancamento, pais, duracao, sinopse = buscar_detalhes_filme(session, url_prog)
 
         titulo_final = f"Ao vivo - {titulo}" if tem_ao_vivo and not titulo.lower().startswith("ao vivo") else titulo
         eventos.append({
@@ -188,6 +235,7 @@ def extrair_programacao(session: requests.Session, nome: str, url_canal: str, da
             "ano": ano_lancamento,
             "pais": pais,
             "duracao": duracao,
+            "sinopse": sinopse,
         })
 
     eventos.sort(key=lambda x: x["inicio"])
@@ -200,6 +248,7 @@ def gerar_xml(caminho_saida: str | Path) -> None:
 
     session = criar_sessao()
     canais = descobrir_canais(session)
+    print(f"TVPlus -> {len(canais)} canais descobertos (categorias + parabólica). Extraindo grades...")
 
     resultados: dict[str, list[dict]] = {}
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
@@ -213,7 +262,7 @@ def gerar_xml(caminho_saida: str | Path) -> None:
                 resultados[nome] = evs
 
     root = ET.Element("tv", {"generator-info-name": "EPG TVPlus"})
-    nomes_ordenados = sorted(resultados.keys())
+    nomes_ordenados = sorted(resultados.keys(), key=str.lower)
 
     for nome in nomes_ordenados:
         channel = ET.SubElement(root, "channel", id=nome)
@@ -229,11 +278,11 @@ def gerar_xml(caminho_saida: str | Path) -> None:
                 stop=ev["fim"].strftime("%Y%m%d%H%M%S -0300"),
                 channel=nome,
             )
-            ET.SubElement(prog, "title").text = ev["titulo"]
+            ET.SubElement(prog, "title", {"lang": "pt"}).text = ev["titulo"]
             if ev["titulo_original"] and ev["titulo_original"].upper() != ev["titulo"].upper():
-                ET.SubElement(prog, "sub-title").text = ev["titulo_original"]
+                ET.SubElement(prog, "sub-title", {"lang": "pt"}).text = ev["titulo_original"]
             for cat in ev["categorias"]:
-                ET.SubElement(prog, "category").text = cat
+                ET.SubElement(prog, "category", {"lang": "pt"}).text = cat
             if ev["ano"]:
                 ET.SubElement(prog, "date").text = ev["ano"]
             if ev["duracao"]:
@@ -243,11 +292,13 @@ def gerar_xml(caminho_saida: str | Path) -> None:
             if ev["classificacao"]:
                 rating = ET.SubElement(prog, "rating")
                 ET.SubElement(rating, "value").text = ev["classificacao"]
+            if ev["sinopse"]:
+                ET.SubElement(prog, "desc", {"lang": "pt"}).text = ev["sinopse"]
             total_eventos += 1
 
     tree = ET.ElementTree(root)
     tree.write(caminho_saida, encoding="utf-8", xml_declaration=True)
-    print(f"TVPlus -> Canais: {len(resultados)}/{len(canais)} | Eventos: {total_eventos}")
+    print(f"TVPlus -> Canais com grade: {len(resultados)}/{len(canais)} | Eventos: {total_eventos}")
 
 
 if __name__ == "__main__":
