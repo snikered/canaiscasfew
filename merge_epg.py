@@ -466,6 +466,7 @@ EPG_SOURCES_CONFIG = [
     ("Claro Git", "https://raw.githubusercontent.com/limaalef/BrazilTVEPG/refs/heads/main/claro.xml", "git_operadora", 1.0),
     ("GuiaDeTV", "epg_guiadetv.xml", "guiadetv", 1.0),
     ("Meu Guia", "epg_meuguia.xml", "meuguia", 1.0),
+    ("TVMap", "epg_tvmap.xml", "tvmap", 1.0),
     ("MiTV", "epg_mitv.xml", "mitv", 1.0),
     ("TV Plus", "epg_tvplus.xml", "tvplus", 1.0),
     ("WebFinal", "epg_webfinal.xml", "webfinal", 1.0),
@@ -739,6 +740,13 @@ CHANNEL_SYNONYMS = {
     "TV PAMPA": ["TV PAMPA RS", "PAMPA", "REDE PAMPA"],
     "CNN INTERNACIONAL": ["CNN INTERNATIONAL"],
     "CNN INTERNATIONAL": ["CNN INTERNACIONAL"],
+    "CNN BRASIL MONEY": ["CNN MONEY"],
+    "CNN MONEY": ["CNN BRASIL MONEY"],
+    "CANAL UOL": ["UOL", "UOL TV"],
+    "UOL": ["CANAL UOL", "UOL TV"],
+    "GETV": ["GE", "GE TV"],
+    "GE TV": ["GE", "GETV"],
+    "HISTORY": ["THE HISTORY CHANNEL", "HISTORY CHANNEL"],
     "CNN ESPANHOL": ["CNN EN ESPANOL", "CNN EN ESPAÑOL"],
     "CNN EN ESPANOL": ["CNN ESPANHOL", "CNN EN ESPAÑOL"],
     "JOVEM PAN": ["JOVEM PAN NEWS", "JP NEWS"],
@@ -934,6 +942,9 @@ def normalizar_canal(nome: str) -> str:
         nome = re.sub(r'\bMAX\b(?!\s*(?:PRIME|\d))', 'HBO MUNDI', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bHBO\s*(?:\+|MAIS)\b', 'HBO PLUS', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bH2\b', 'HISTORY 2', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bPREMIERE\s+FC\b', 'PREMIERE', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bTHE\s+HISTORY\s+CHANNEL\b', 'HISTORY', nome, flags=re.IGNORECASE)
+        nome = re.sub(r'\bINVESTIGA[CÇ][AÃ]O\s+DISCOVERY\s+ID\b', 'INVESTIGACAO DISCOVERY', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bHISTORY CHANNEL\b', 'HISTORY', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bDISC(?:OVERY)?\.?\s*HOME\s*(?:&|AND)?\s*HEALT[H]?\b', 'DISCOVERY HOME & HEALTH', nome, flags=re.IGNORECASE)
         nome = re.sub(r'\bDISCOVERY H&H\b', 'DISCOVERY HOME & HEALTH', nome, flags=re.IGNORECASE)
