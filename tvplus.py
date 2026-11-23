@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-"""Coletor otimizado TVPlus (categorias + Parabólica Digital /parabolica,
-cache de metadados/sinopse de filmes e fuso -0300).
+"""Coletor otimizado TVPlus (fail-fast anti-timeout, categorias + /parabolica,
+lxml, cache de metadados/sinopse de filmes e fuso -0300).
 """
 from __future__ import annotations
 
 import os
 import re
 import threading
+import time
 import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
@@ -16,6 +17,12 @@ import requests
 from bs4 import BeautifulSoup
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
+
+try:
+    import lxml  # noqa: F401
+    HTML_PARSER = "lxml"
+except ImportError:
+    HTML_PARSER = "html.parser"
 
 DIAS_PARA_FRENTE = 4
 MAX_WORKERS = 8
@@ -55,8 +62,19 @@ _CACHE_LOCK = threading.Lock()
 
 def criar_sessao() -> requests.Session:
     s = requests.Session()
-    retry = Retry(total=3, backoff_factor=0.5, status_forcelist=(429, 500, 502, 503, 504))
-    adapter = HTTPAdapter(pool_connections=MAX_WORKERS, pool_maxsize=MAX_WORKERS * 2, max_retries=retry)
+    retry = Retry(
+        total=2,
+        connect=1,
+        read=2,
+        backoff_factor=0.5,
+        status_forcelist=(429, 500, 502, 503, 504),
+        allowed_methods=("GET",),
+    )
+    adapter = HTTPAdapter(
+        pool_connections=MAX_WORKERS + 2,
+        pool_maxsize=(MAX_WORKERS + 2) * 2,
+        max_retries=retry,
+    )
     s.mount("https://", adapter)
     s.mount("http://", adapter)
     s.headers.update({
@@ -67,22 +85,22 @@ def criar_sessao() -> requests.Session:
 
 
 def descobrir_canais(session: requests.Session) -> dict[str, str]:
-    """Descobre todos os canais das 9 categorias + Parabólica Digital (/parabolica)."""
+    """Descobre canais das 9 categorias + /parabolica com fail-fast se o host estiver inacessível."""
     canais: dict[str, str] = {}
     urls_vistas: set[str] = set()
+    falhas_conexao_seguidas = 0
 
     for url_pag in PAGINAS_DESCOBERTA:
         try:
-            r = session.get(url_pag, timeout=15)
+            r = session.get(url_pag, timeout=(5, 12))
+            falhas_conexao_seguidas = 0
             if r.status_code != 200:
                 continue
-            soup = BeautifulSoup(r.content, "html.parser")
+            soup = BeautifulSoup(r.content, HTML_PARSER)
             for link in soup.find_all("a", href=True):
                 href = link["href"].strip()
                 href_rel = re.sub(r"^https?://(?:www\.)?tvplus\.com\.br", "", href)
-                if not _RE_CANAL_LINK.match(href_rel):
-                    continue
-                if href_rel in urls_vistas:
+                if not _RE_CANAL_LINK.match(href_rel) or href_rel in urls_vistas:
                     continue
 
                 img = link.find("img")
@@ -91,13 +109,18 @@ def descobrir_canais(session: requests.Session) -> dict[str, str]:
                 if not nome:
                     continue
 
-                # Evita sobrescrever canal já descoberto nas categorias principais
                 if nome.lower() in {k.lower() for k in canais}:
                     urls_vistas.add(href_rel)
                     continue
 
                 canais[nome] = href_rel
                 urls_vistas.add(href_rel)
+        except (requests.ConnectTimeout, requests.ConnectionError) as exc:
+            falhas_conexao_seguidas += 1
+            print(f"  ⚠ TVPlus falha de conexão em {url_pag}: {exc}")
+            if falhas_conexao_seguidas >= 2 and not canais:
+                print("  ⚠ TVPlus inacessível (timeout/bloqueio de IP). Abortando rápido para não segurar o workflow.")
+                break
         except Exception as exc:
             print(f"  ⚠ TVPlus falha na descoberta em {url_pag}: {exc}")
 
@@ -112,9 +135,9 @@ def buscar_detalhes_filme(session: requests.Session, url_prog: str) -> tuple[str
 
     titulo_original, ano_lancamento, pais, duracao, sinopse = "", "", "", "", ""
     try:
-        r_prog = session.get(url_prog, timeout=8)
+        r_prog = session.get(url_prog, timeout=(4, 8))
         if r_prog.status_code == 200:
-            soup_prog = BeautifulSoup(r_prog.content, "html.parser")
+            soup_prog = BeautifulSoup(r_prog.content, HTML_PARSER)
             main_info = soup_prog.find("div", class_="main-info-sinopse")
             if main_info:
                 linhas_meta = [l.strip() for l in main_info.get_text("\n").split("\n") if l.strip()]
@@ -130,7 +153,6 @@ def buscar_detalhes_filme(session: requests.Session, url_prog: str) -> tuple[str
                     if idx == 1 and "/" not in linha and not linha.lower().startswith("classificação"):
                         titulo_original = linha
 
-                # A sinopse real vem nas linhas seguintes dentro da própria main-info-sinopse
                 if idx_meta != -1 and idx_meta + 1 < len(linhas_meta):
                     candidatos = [
                         l for l in linhas_meta[idx_meta + 1 :]
@@ -155,13 +177,13 @@ def extrair_programacao(session: requests.Session, nome: str, url_canal: str, da
         url_canal = "https://www.tvplus.com.br" + url_canal
 
     try:
-        r = session.get(url_canal, timeout=15)
+        r = session.get(url_canal, timeout=(5, 12))
         if r.status_code != 200:
             return nome, []
     except Exception:
         return nome, []
 
-    soup = BeautifulSoup(r.content, "html.parser")
+    soup = BeautifulSoup(r.content, HTML_PARSER)
     eventos: list[dict] = []
     data_atual: datetime | None = None
 
@@ -239,23 +261,25 @@ def extrair_programacao(session: requests.Session, nome: str, url_canal: str, da
 
 
 def gerar_xml(caminho_saida: str | Path) -> None:
+    t0 = time.perf_counter()
     hoje = datetime.now(BRT_TZ)
     data_limite = hoje + timedelta(days=DIAS_PARA_FRENTE)
 
     session = criar_sessao()
     canais = descobrir_canais(session)
-    print(f"TVPlus -> {len(canais)} canais descobertos (categorias + parabólica). Extraindo grades...")
+    print(f"TVPlus ({HTML_PARSER}) -> {len(canais)} canais descobertos (categorias + parabólica). Extraindo grades...")
 
     resultados: dict[str, list[dict]] = {}
-    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        futures = [
-            executor.submit(extrair_programacao, session, nome, url, data_limite, hoje)
-            for nome, url in canais.items()
-        ]
-        for fut in as_completed(futures):
-            nome, evs = fut.result()
-            if evs:
-                resultados[nome] = evs
+    if canais:
+        with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+            futures = [
+                executor.submit(extrair_programacao, session, nome, url, data_limite, hoje)
+                for nome, url in canais.items()
+            ]
+            for fut in as_completed(futures):
+                nome, evs = fut.result()
+                if evs:
+                    resultados[nome] = evs
 
     root = ET.Element("tv", {"generator-info-name": "EPG TVPlus"})
     nomes_ordenados = sorted(resultados.keys(), key=str.lower)
@@ -293,8 +317,10 @@ def gerar_xml(caminho_saida: str | Path) -> None:
             total_eventos += 1
 
     tree = ET.ElementTree(root)
+    ET.indent(tree, space="  ")
     tree.write(caminho_saida, encoding="utf-8", xml_declaration=True)
-    print(f"TVPlus -> Canais com grade: {len(resultados)}/{len(canais)} | Eventos: {total_eventos}")
+    elapsed = time.perf_counter() - t0
+    print(f"TVPlus -> Canais com grade: {len(resultados)}/{len(canais)} | Eventos: {total_eventos} | Tempo: {elapsed:.1f}s")
 
 
 if __name__ == "__main__":
