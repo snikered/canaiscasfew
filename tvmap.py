@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
-"""Coletor otimizado TVMap (preserva fuso ISO da API, deduplica grades e ordena XMLTV)."""
+"""Coletor otimizado TVMap (Todos os Canais, janelas de 3h em paralelo para 4 dias,
+fuso BRT -0300 e XMLTV com lang="pt").
+"""
 from __future__ import annotations
 
 import os
 import xml.etree.ElementTree as ET
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -12,56 +15,49 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 DIAS_PARA_FRENTE = 4
+MAX_WORKERS = 6
 BRT_TZ = timezone(timedelta(hours=-3))
+
+MESES_ABREV = {
+    1: "jan", 2: "fev", 3: "mar", 4: "abr",
+    5: "mai", 6: "jun", 7: "jul", 8: "ago",
+    9: "set", 10: "out", 11: "nov", 12: "dez",
+}
 
 
 def criar_sessao() -> requests.Session:
     s = requests.Session()
     retry = Retry(total=3, backoff_factor=0.5, status_forcelist=(429, 500, 502, 503, 504))
-    adapter = HTTPAdapter(pool_connections=4, pool_maxsize=8, max_retries=retry)
+    adapter = HTTPAdapter(pool_connections=MAX_WORKERS, pool_maxsize=MAX_WORKERS * 2, max_retries=retry)
     s.mount("https://", adapter)
     s.mount("http://", adapter)
-    s.headers.update({"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/124.0.0.0"})
+    s.headers.update({
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        "Accept": "application/json, text/plain, */*",
+        "Accept-Language": "pt-BR,pt;q=0.9",
+    })
     return s
 
 
-def pegar_grade(session: requests.Session, url_grid: str | None = None) -> dict:
-    url = (
-        f"https://tvmap.com.br/api/Programacao?availWidth=2560&grid={url_grid}"
-        if url_grid
-        else "https://tvmap.com.br/api/Programacao?availWidth=2560"
-    )
-    r = session.get(url, timeout=15)
-    r.raise_for_status()
-    return r.json()
+def gerar_urls_janelas(hoje: datetime, dias: int) -> list[str]:
+    """Gera URLs de 3 em 3 horas para os próximos `dias` dias."""
+    urls: list[str] = []
+    for d in range(dias):
+        data = hoje + timedelta(days=d)
+        data_str = f"{data.day:02d}-{MESES_ABREV[data.month]}-{data.year}"
+        for hora in range(0, 24, 3):
+            urls.append(f"https://tvmap.com.br/api/Programacao/{data_str}/{hora}.00hs?availWidth=2560")
+    return urls
 
 
-def extrair_todos(session: requests.Session) -> dict[str, list[dict]]:
-    todos_canais: dict[str, list[dict]] = {}
-    url_grid = None
-    seen_grids: set[str] = set()
-    paginas = 0
-
-    while paginas < 50:
-        try:
-            data = pegar_grade(session, url_grid)
-        except Exception:
-            break
-
-        for ch in data.get("channels", []):
-            nome = (ch.get("displayName") or "").strip()
-            if not nome:
-                continue
-            todos_canais.setdefault(nome, []).extend(ch.get("exhibitions", []))
-
-        next_grid = (data.get("nextGridUrl") or "").strip()
-        if not next_grid or next_grid in seen_grids:
-            break
-        seen_grids.add(next_grid)
-        url_grid = next_grid
-        paginas += 1
-
-    return todos_canais
+def buscar_janela(session: requests.Session, url: str) -> list[dict]:
+    try:
+        r = session.get(url, timeout=15)
+        if r.status_code != 200 or not r.text.strip():
+            return []
+        return r.json().get("channels", [])
+    except Exception:
+        return []
 
 
 def parse_iso_to_brt(iso_str: str) -> datetime | None:
@@ -81,7 +77,18 @@ def gerar_xml(caminho_saida: str | Path) -> None:
     data_limite = hoje + timedelta(days=DIAS_PARA_FRENTE)
 
     session = criar_sessao()
-    todos_canais = extrair_todos(session)
+    urls = gerar_urls_janelas(hoje, DIAS_PARA_FRENTE)
+    print(f"TVMap -> Consultando {len(urls)} janelas de 3h ({DIAS_PARA_FRENTE} dias)...")
+
+    todos_canais: dict[str, list[dict]] = {}
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        futures = [executor.submit(buscar_janela, session, u) for u in urls]
+        for fut in as_completed(futures):
+            for ch in fut.result():
+                nome = (ch.get("displayName") or "").strip()
+                if not nome:
+                    continue
+                todos_canais.setdefault(nome, []).extend(ch.get("exhibitions", []))
 
     root = ET.Element("tv", {"generator-info-name": "EPG TVMap"})
     resultados: dict[str, list[tuple[datetime, datetime, str, str]]] = {}
@@ -103,7 +110,7 @@ def gerar_xml(caminho_saida: str | Path) -> None:
             evs.sort(key=lambda x: x[0])
             resultados[nome] = evs
 
-    nomes_ordenados = sorted(resultados.keys())
+    nomes_ordenados = sorted(resultados.keys(), key=str.lower)
     for nome in nomes_ordenados:
         channel = ET.SubElement(root, "channel", id=nome)
         ET.SubElement(channel, "display-name").text = nome
@@ -118,9 +125,9 @@ def gerar_xml(caminho_saida: str | Path) -> None:
                 stop=fim.strftime("%Y%m%d%H%M%S -0300"),
                 channel=nome,
             )
-            ET.SubElement(p, "title").text = titulo
+            ET.SubElement(p, "title", {"lang": "pt"}).text = titulo
             if desc_texto:
-                ET.SubElement(p, "desc").text = desc_texto
+                ET.SubElement(p, "desc", {"lang": "pt"}).text = desc_texto
             total_eventos += 1
 
     tree = ET.ElementTree(root)
