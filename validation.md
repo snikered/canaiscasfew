@@ -1,0 +1,760 @@
+# Validação e Consenso de Grade
+
+- **HBO** (MiTV): Agora **Godzilla e Kong - O Novo Império** - Confiança **81%**
+- **PREMIERE CLUBES** (Claro Git): Agora **Fluminense x Mirassol** - Confiança **70%**
+- **HBO POP** (Claro Git): Agora **O Turista** - Confiança **75%**
+- **PREMIERE 2** (Claro Git): Agora **Dia 29/11: Internacional x Bragantino** - Confiança **59%**
+- **PREMIERE 3** (Claro Git): Agora **Dia 29/11: Vitória x Santos** - Confiança **63%**
+- **HBO MUNDI** (MiTV): Agora **Sangue pela Glória** - Confiança **81%**
+- **HBO XTREME** (IPTV-EPG BR): Agora **O Senhor dos Anéis: O Retorno do Rei - Versão Estendida** - Confiança **81%**
+- **PREMIERE 4** (Claro Git): Agora **Dia 29/11: Mirassol x Athletico-PR** - Confiança **64%**
+- **Animal Planet** (MiTV): Agora **Dodo Heroes - Resgate sem Fronteiras** - Confiança **87%**
+- **HBO SIGNATURE** (Claro Git): Agora **The Last of Us** - Confiança **86%**
+- **SporTV 1** (Claro Git): Agora **Seleção sportv - ao vivo** - Confiança **81%**
+- **FISH TV** (MiTV): Agora **Na Pegada do Fly** - Confiança **83%**
+- **BAND SPORTS** (Claro Git): Agora **Porsche Cup Brasil: 10ª Etapa Interlagos-SP: Endurance - ao vivo** - Confiança **69%**
+- **COMBATE** (Globo): Agora **Ao Mundo Bambas: Volta Ao Mundo Bambas 12 - ao vivo** - Confiança **66%**
+- **ESPN** (Claro Git): Agora **Equipe F - ao vivo** - Confiança **76%**
+- **Food Network** (MiTV): Agora **A Guerra dos Cupcakes** - Confiança **83%**
+- **HBO FAMILY** (IPTV-EPG BR): Agora **DC Liga dos Superpets** - Confiança **82%**
+- **History** (MiTV): Agora **Grandes Fugas com Morgan Freeman** - Confiança **90%**
+- **SPORTV 2** (Vivo Play API): Agora **Cruzeiro x Minas - Superliga Masculina de Vôlei** - Confiança **74%**
+- **CARTOON NETWORK** (Claro Git): Agora **Hora de Aventura** - Confiança **86%**
+- **HBO 2** (WebFinal): Agora **Cidade de Deus: A Luta Não Para** - Confiança **80%**
+- **HBO Plus** (MiTV): Agora **Maldição da Múmia** - Confiança **82%**
+- **CNN BRASIL** (MiTV): Agora **CNN Séries Originais** - Confiança **65%**
+- **ESPN 2** (MiTV): Agora **Ao vivo - Torino x Lazio** - Confiança **75%**
+- **ESPN 3** (Vivo Play API): Agora **Espanha x Chile - Amistoso Internacional de Futebol Feminino** - Confiança **66%**
+- **History 2** (MiTV): Agora **Monstros Reais** - Confiança **80%**
+- **PREMIERE 5** (Claro Git): Agora **Com o PREMIERE dá jogo!** - Confiança **62%**
+- **PREMIERE 6** (Claro Git): Agora **Com o PREMIERE dá jogo!** - Confiança **64%**
+- **PREMIERE 7** (Claro Git): Agora **Com o PREMIERE dá jogo!** - Confiança **64%**
+- **BAND NEWS** (MiTV): Agora **Viver Melhor** - Confiança **81%**
+- **Cartoonito** (MiTV): Agora **Booba** - Confiança **82%**
+- **ESPN 4** (Claro Git): Agora **Ipswich x Aston Villa - ao vivo** - Confiança **69%**
+- **ESPN 5** (Claro Git): Agora **NHL: Toronto Maple Leafs x Boston Bruins** - Confiança **62%**
+- **GLOOB** (MiTV): Agora **Vlog da Berê** - Confiança **90%**
+- **REDE TV** (MiTV): Agora **A Hora do Zap** - Confiança **81%**
+- **BIS** (MiTV): Agora **Kiss Live At Hellfest 2013 Highlights** - Confiança **86%**
+- **SPORTV 3** (MiTV): Agora **Ao vivo - GP do Catar - Classificação** - Confiança **64%**
+- **DISCOVERY KIDS** (MiTV): Agora **Mermicorno - A Queda das Estrelas** - Confiança **86%**
+- **Multishow** (MiTV): Agora **Blogueirinha Entrevista** - Confiança **89%**
+- **TV CULTURA** (Vivo Play API): Agora **Quintal TV** - Confiança **83%**
+- **Discovery Home & Health** (MiTV): Agora **De Casa Nova** - Confiança **86%**
+- **MODO VIAGEM** (Claro Git): Agora **Uvas E Vinhedos** - Confiança **72%**
+- **Canal OFF** (MiTV): Agora **Skimboard Nazaré** - Confiança **90%**
+- **ESPN 6** (Vivo Play API): Agora **Programação ESPN 3** - Confiança **64%**
+- **GLOOBINHO** (MiTV): Agora **Madagascar - Pequenos Selvagens** - Confiança **84%**
+- **RECORD NEWS** (MiTV): Agora **Hora News - Edição de Sábado** - Confiança **80%**
+- **DISCOVERY TURBO** (MiTV): Agora **Texas Metal** - Confiança **84%**
+- **GNT** (MiTV): Agora **Angélica ao Vivo** - Confiança **93%**
+- **TLC** (MiTV): Agora **Meu Grande Casamento Cigano** - Confiança **79%**
+- **TOONCAST** (MiTV): Agora **Manda-Chuva** - Confiança **77%**
+- **X SPORTS** (TVMap): Agora **Al Ittihad x Neom - Campeonato Saudita de Futebol** - Confiança **53%**
+- **BAND SP** (IPTV-EPG BR): Agora **Al Ahli x Al Taawoun** - Confiança **54%**
+- **CANCAO NOVA** (Claro Git): Agora **Summer Beats** - Confiança **69%**
+- **Curta!** (MiTV): Agora **Brizola** - Confiança **80%**
+- **LIFETIME** (MiTV): Agora **Batalha de Natal** - Confiança **82%**
+- **TV RA TIM BUM** (MiTV): Agora **Era uma Vez no Quintal** - Confiança **81%**
+- **HGTV** (MiTV): Agora **Davina & Kristin - Casas com Potencial** - Confiança **83%**
+- **Megapix** (Globo): Agora **Viradão Velozes E Furiosos** - Confiança **85%**
+- **SBT NEWS** (Mais SBT): Agora **True Crime - inédito** - Confiança **63%**
+- **Sony** (MiTV): Agora **Esposa de Mentirinha** - Confiança **85%**
+- **TNT** (MiTV): Agora **Shrek** - Confiança **79%**
+- **ARTE 1** (MiTV): Agora **Eu Não Sou Tudo o que Quero Ser** - Confiança **84%**
+- **AXN** (MiTV): Agora **CSI: Miami** - Confiança **88%**
+- **CANAL DO BOI** (Claro Git): Agora **Leilão Fazenda Cachoeira do Campo** - Confiança **65%**
+- **E!** (WebFinal): Agora **Million Dollar Listing Los Angeles** - Confiança **43%**
+- **GB SP** (MiTV): Agora **Caldeirão com Mion** - Confiança **72%**
+- **RECORDTV SP** (IPTV-EPG BR): Agora **Balanço Geral - Edição de Sábado** - Confiança **52%**
+- **TELECINE PIPOCA** (IPTV-EPG BR): Agora **Fúria de Titãs** - Confiança **85%**
+- **TELECINE PREMIUM** (MiTV): Agora **211 - O Grande Assalto** - Confiança **81%**
+- **TV APARECIDA** (MiTV): Agora **Ao vivo - Terço de Aparecida** - Confiança **62%**
+- **VIVA** (Claro Git): Agora **O Profeta** - Confiança **85%**
+- **GB RJ** (MiTV): Agora **Caldeirão com Mion** - Confiança **68%**
+- **GLOBO BRASÍLIA** (MiTV): Agora **Caldeirão com Mion** - Confiança **64%**
+- **Music Box Brazil** (MiTV): Agora **Jukebox** - Confiança **81%**
+- **PREMIERE 8** (IPTV-EPG BR): Agora **Premiere 8** - Confiança **56%**
+- **Space** (Claro Git): Agora **Space Jam: O Jogo do Século** - Confiança **74%**
+- **TNT Séries** (Claro Git): Agora **Law & Order SVU** - Confiança **83%**
+- **Warner** (Claro Git): Agora **Atômica** - Confiança **85%**
+- **REDE VIDA** (MiTV): Agora **Batismo de Fogo** - Confiança **82%**
+- **SBT SP** (IPTV-EPG BR): Agora **Eita Lucas!** - Confiança **51%**
+- **TELECINE ACTION** (MiTV): Agora **Jurassic World - Domínio** - Confiança **84%**
+- **TELECINE CULT** (Claro TV+ API): Agora **Capitão Fantástico** - Confiança **85%**
+- **TELECINE FUN** (IPTV-EPG BR): Agora **Brasil Animado** - Confiança **85%**
+- **TELECINE TOUCH** (MiTV): Agora **O Bebê de Bridget Jones** - Confiança **85%**
+- **TV BRASIL** (MiTV): Agora **Ao vivo - Corinthians x Atlético-MG** - Confiança **75%**
+- **AGROMAIS** (Dearbulut BR): Agora **4º Grupo Suprema** - Confiança **67%**
+- **FUTURA** (MiTV): Agora **Somos Museus** - Confiança **86%**
+- **GB NORDESTE** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **GB RBS PORTO ALEGRE** (MiTV): Agora **Caldeirão com Mion** - Confiança **55%**
+- **GLOBO NEWS** (Claro Git): Agora **Cidades e Soluções** - Confiança **87%**
+- **PRIME BOX BRAZIL** (MiTV): Agora **Forrobodó da Paixão** - Confiança **79%**
+- **SBT** (MiTV): Agora **Eita Lucas!** - Confiança **71%**
+- **Travel Box Brazil** (MiTV): Agora **Ponto de Chegada** - Confiança **84%**
+- **TV NOVO TEMPO** (MiTV): Agora **Bíblia Fácil** - Confiança **70%**
+- **CANAL WOOHOO** (MiTV): Agora **Hootalks** - Confiança **82%**
+- **Discovery** (MiTV): Agora **Menu Selvagem** - Confiança **87%**
+- **Fashion TV** (MiTV): Agora **Fash.Weeks - Especial SPFW N61** - Confiança **78%**
+- **TV DIARIO** (MiTV): Agora **Forrobodó** - Confiança **57%**
+- **EPTV CAMPINAS** (IPTV-EPG BR): Agora **Programação ESPN 3** - Confiança **48%**
+- **EPTV RIBEIRÃO PRETO** (IPTV-EPG BR): Agora **Torino x Lazio - Campeonato Italiano** - Confiança **48%**
+- **GB MINAS** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **GB NSC FLORIANOPOLIS** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **GB RPC CURITIBA** (MiTV): Agora **Caldeirão com Mion** - Confiança **54%**
+- **GB TV BAHIA** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **GB TV CENTRO AMERICA** (MiTV): Agora **Caldeirão com Mion** - Confiança **56%**
+- **GB TV GAZETA VITORIA** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **GB TV LIBERAL BELEM** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **GB TV SERGIPE** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **GB TV VERDES MARES** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **INTER TV GRANDE MINAS** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **INTER TV SERRA MAR** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **53%**
+- **NSC JOINVILLE** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **NSC TV CHAPECO** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **RBS PELOTAS** (MiTV): Agora **Caldeirão com Mion** - Confiança **55%**
+- **RECORD TV BELEM** (MiTV): Agora **Pará Bom D+** - Confiança **55%**
+- **RPC FOZ DO IGUACU** (MiTV): Agora **Caldeirão com Mion** - Confiança **54%**
+- **RPC MARINGA** (MiTV): Agora **Caldeirão com Mion** - Confiança **54%**
+- **RPC TV PARANAVAI** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **RPC TV PONTA GROSSA** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **Trace Brazuca** (MiTV): Agora **Hits Non Stop** - Confiança **55%**
+- **TV ASA BRANCA** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **TV GAZETA SUL** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **TV INTEGRAÇÃO JUIZ DE FORA** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **TV MIRANTE SAO LUIS** (MiTV): Agora **Caldeirão com Mion** - Confiança **54%**
+- **TV RIO SUL** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **TV TEM BAURU** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **53%**
+- **TV TEM ITAPETININGA** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **53%**
+- **TV TEM S J RIO PRETO** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **TV TEM SOROCABA** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **53%**
+- **TV TRIBUNA SANTOS** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **TV VANGUARDA TAUBATE** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **53%**
+- **USA Network** (Claro Git): Agora **Suits** - Confiança **70%**
+- **CANAL RURAL** (EPGShare BR1): Agora **Leilão** - Confiança **75%**
+- **Dog TV** (MiTV): Agora **Relaxamento** - Confiança **61%**
+- **A&E** (Claro Git): Agora **Quem dá Mais?** - Confiança **88%**
+- **BAND CAMPINAS** (Vivo Play API): Agora **Al Ahli x Al Taawoun - Campeonato Saudita de Futebol** - Confiança **64%**
+- **EPTV SUL DE MINAS** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **GB TV ANHANGUERA** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **GB TV CABO BRANCO** (MiTV): Agora **Caldeirão com Mion** - Confiança **61%**
+- **GB TV GAZETA ALAGOAS** (MiTV): Agora **Caldeirão com Mion** - Confiança **48%**
+- **JOVEN PAN NEWS** (Claro Git): Agora **Mala Pronta** - Confiança **74%**
+- **RECORDTV MANAUS** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **76%**
+- **RECORDTV MG** (MiTV): Agora **Balanço Geral MG - Edição de Sábado** - Confiança **72%**
+- **TV DIARIO MOGI DAS CRUZES** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **53%**
+- **TV FRONTEIRA P PRUDENTE** (MiTV): Agora **Caldeirão com Mion** - Confiança **69%**
+- **TV GAZETA SP** (GuiaDeTV): Agora **O Melhor do Mulheres** - Confiança **76%**
+- **TV VANGUARDA S J CAMPOS** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **53%**
+- **ZooMoo** (MiTV): Agora **Vamos Incluir** - Confiança **66%**
+- **GLOBO CENTRO AMÉRICA** (MiTV): Agora **Caldeirão com Mion** - Confiança **56%**
+- **RECORD RS** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **58%**
+- **TV SENADO** (MiTV): Agora **Leituras** - Confiança **74%**
+- **Universal TV** (Claro Git): Agora **Chicago Fire** - Confiança **84%**
+- **AMC** (MiTV): Agora **Sete Homens e um Destino** - Confiança **79%**
+- **BAND RJ** (MiTV): Agora **Ao vivo - Al Ahli x Al Taawoun** - Confiança **59%**
+- **BOA VONTADE** (MiTV): Agora **7º Congresso do Roteiro Missionário Irmão Paiva, Eterna Gratidão** - Confiança **67%**
+- **CANAL BRASIL** (Claro Git): Agora **A Voz De Deus** - Confiança **80%**
+- **Cinemax** (IPTV-EPG BR): Agora **Homem-Aranha - De Volta ao Lar** - Confiança **81%**
+- **CNN INTERNACIONAL** (EPGShare BR1): Agora **CNN Newsroom Saturday** - Confiança **66%**
+- **Discovery Science** (MiTV): Agora **Mentes Geniais** - Confiança **86%**
+- **Discovery Theater** (MiTV): Agora **Rota Perigosa** - Confiança **85%**
+- **Discovery World** (MiTV): Agora **Viciados em Viagens** - Confiança **84%**
+- **Film & Arts** (MiTV): Agora **O Bastardo** - Confiança **84%**
+- **Globo TV TEM Sao Jose do Rio Preto** (MiTV): Agora **Caldeirão com Mion** - Confiança **69%**
+- **GLOBO TV VERDES MARES CARIRI** (MiTV): Agora **Caldeirão com Mion** - Confiança **56%**
+- **GLOBO VERDES MARES** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **IDEAL TV** (MiTV): Agora **Ao vivo - Al Ittihad x Neom** - Confiança **47%**
+- **INTER TV DOS VALES** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **Investigação Discovery** (MiTV): Agora **Vivendo com o Inimigo** - Confiança **75%**
+- **NHK** (MiTV): Agora **Nyan-chu Space Broadcasting** - Confiança **61%**
+- **NSC BLUMENAU** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **RECORDTV PARAIBA TV CORREIO** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **76%**
+- **RECORDTV RJ** (IPTV-EPG BR): Agora **Rio Bom D+** - Confiança **54%**
+- **SBT RJ** (IPTV-EPG BR): Agora **Eita Lucas!** - Confiança **54%**
+- **SPORTYNET 1** (Claro Git): Agora **Programação Esportiva** - Confiança **48%**
+- **SPORTYNET 2** (Claro Git): Agora **Programação Esportiva** - Confiança **48%**
+- **SPORTYNET 3** (Claro Git): Agora **Programação Esportiva** - Confiança **46%**
+- **Universal Studio** (MiTV): Agora **A Carta de Natal** - Confiança **78%**
+- **TNT Novelas** (Claro Git): Agora **Os Dez Mandamentos** - Confiança **64%**
+- **TV CLUBE TERESINA** (MiTV): Agora **Que Arretado!** - Confiança **50%**
+- **BLOOMBERG** (MiTV): Agora **The Circuit** - Confiança **76%**
+- **FOX NEWS** (MiTV): Agora **Ao vivo - Fox News Live** - Confiança **68%**
+- **GLOBO AMAPÁ** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **GLOBO INTER TV COSTA BRANCA** (MiTV): Agora **Caldeirão com Mion** - Confiança **54%**
+- **GLOBO TEM BAURU** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **GLOBO TV MIRANTE COCAIS** (MiTV): Agora **Caldeirão com Mion** - Confiança **54%**
+- **RECORD ITAPOAN** (MiTV): Agora **Balanço Geral BA - Edição de Sábado** - Confiança **55%**
+- **TV CAMARA** (MiTV): Agora **Elas Pautam** - Confiança **67%**
+- **TVE** (MiTV): Agora **D corazón** - Confiança **48%**
+- **Adult Swim** (Claro Git): Agora **Rick & Morty** - Confiança **67%**
+- **ASSEMBLÉIA LEGISLATIVA** (MiTV): Agora **Atividade Parlamentar** - Confiança **55%**
+- **BAND** (MiTV): Agora **Ao vivo - Al Ahli x Al Taawoun** - Confiança **76%**
+- **Band Belem** (MiTV): Agora **Ao vivo - Al Ahli x Al Taawoun** - Confiança **51%**
+- **BAND RS** (Vivo Play API): Agora **Al Ahli x Al Taawoun - Campeonato Saudita de Futebol** - Confiança **52%**
+- **CANAL UOL** (Claro Git): Agora **UOL News Especial - ao vivo** - Confiança **68%**
+- **CNBC BRASIL** (Vivo Play API): Agora **Times Brasil - CNBC - Semana Prime** - Confiança **55%**
+- **Conmebol TV 1** (IPTV-EPG BR): Agora **Sem programação** - Confiança **15%**
+- **EPTV CENTRAL SAO CARLOS** (IPTV-EPG BR): Agora **Programação ESPN 3** - Confiança **48%**
+- **GB REDE AMAZONICA MANAUS** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **GB TV REDE AMAZONICA BOA VISTA** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **GB TV REDE AMAZONICA MACAPA** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **GB TV REDE AMAZONICA PORTO VELHO** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **GLOBO BAHIA** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **Globo NSC TV Florianopolis** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **Globo RBS TV Porto Alegre** (MiTV): Agora **Caldeirão com Mion** - Confiança **55%**
+- **Globo Rede Bahia** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **Globo RPC TV Curitiba** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **GLOBO SJRP** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **GLOBO TV ALVORADA DO SUL** (MiTV): Agora **Caldeirão com Mion** - Confiança **52%**
+- **Globo TV Vanguarda S J dos Campos** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **53%**
+- **INTER TV ALTO LITORAL** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **53%**
+- **MARKKET** (Vivo Play API): Agora **Papo de Especialista** - Confiança **62%**
+- **NSC TV BLUMENAU** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **NSC TV CENTRO OESTE** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **NSC TV CRICIUMA** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **Nsports** (Open-EPG BR): Agora **Um Assado para** - Confiança **51%**
+- **PAI ETERNO** (Claro Git): Agora **Novena do Perpétuo Socorro** - Confiança **63%**
+- **PARAMOUNT PLUS 1** (Claro Git): Agora **Libertadores e Sulamericana** - Confiança **54%**
+- **PARAMOUNT PLUS 2** (Claro Git): Agora **Libertadores e Sulamericana** - Confiança **56%**
+- **PARAMOUNT PLUS 3** (Claro Git): Agora **Libertadores e Sulamericana** - Confiança **56%**
+- **PARAMOUNT PLUS 4** (Claro Git): Agora **Libertadores e Sulamericana** - Confiança **50%**
+- **RBS CAXIAS DO SUL** (MiTV): Agora **Caldeirão com Mion** - Confiança **55%**
+- **RBS TV CAXIAS DO SUL** (MiTV): Agora **Caldeirão com Mion** - Confiança **52%**
+- **RBS TV PASSO FUNDO** (MiTV): Agora **Caldeirão com Mion** - Confiança **55%**
+- **RBS TV SANTA MARIA** (MiTV): Agora **Caldeirão com Mion** - Confiança **52%**
+- **RECORD INTERIOR SP** (Vivo Play API): Agora **Balanço Geral - Edição de Sábado** - Confiança **55%**
+- **RECORD RIO** (MiTV): Agora **Rio Bom D+** - Confiança **57%**
+- **RECORD TV CAMPINAS** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **77%**
+- **RECORDTV DF** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **57%**
+- **RECORDTV FRANCA E RIBEIRAO** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **77%**
+- **RECORDTV GOIAS** (MiTV): Agora **Balanço Geral GO - Edição de Sábado** - Confiança **60%**
+- **RECORDTV LESTE** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **77%**
+- **RECORDTV PAULISTA** (MiTV): Agora **Tá no Ar Interior** - Confiança **57%**
+- **RECORDTV PIAUI A10** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **76%**
+- **RECORDTV RJ INTERIOR** (Vivo Play API): Agora **Balanço Geral - Edição de Sábado** - Confiança **53%**
+- **RECORDTV SP INTERIOR** (Vivo Play API): Agora **Balanço Geral - Edição de Sábado** - Confiança **55%**
+- **RECORDTV THATHI CAMPINAS** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **77%**
+- **RECORDTV UBERLANDIA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **76%**
+- **RPC CASCAVEL** (MiTV): Agora **Caldeirão com Mion** - Confiança **54%**
+- **RPC LONDRINA** (MiTV): Agora **Caldeirão com Mion** - Confiança **54%**
+- **SBT VTV SANTOS CAMPINAS** (MiTV): Agora **Eita Lucas!** - Confiança **81%**
+- **TV EVANGELIZAR** (Vivo Play API): Agora **Pastoral da Criança** - Confiança **59%**
+- **TV INTEGRAÇÃO ARAXA** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **TV INTEGRACAO UBERABA** (MiTV): Agora **Caldeirão com Mion** - Confiança **56%**
+- **TV INTEGRACAO UBERLANDIA** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **TV MORENA CAMPO GRANDE** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **TV SANTA CRUZ** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **TV SUBAE** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **TV SUDOESTE** (MiTV): Agora **Caldeirão com Mion** - Confiança **52%**
+- **BAND BAHIA** (MiTV): Agora **Ao vivo - Al Ahli x Al Taawoun** - Confiança **49%**
+- **DUMDUM** (Vivo Play API): Agora **Vamos Incluir** - Confiança **62%**
+- **GLOBO AMAZÔNICA RIO BRANCO** (MiTV): Agora **Caldeirão com Mion** - Confiança **53%**
+- **GLOBO ANHANGUERA CATALAO** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **GLOBO ANHANGUERA GOIANIA** (MiTV): Agora **Caldeirão com Mion** - Confiança **61%**
+- **GLOBO BELÉM** (MiTV): Agora **Caldeirão com Mion** - Confiança **53%**
+- **GLOBO CABO BRANCO** (MiTV): Agora **Caldeirão com Mion** - Confiança **61%**
+- **GLOBO EPCAMPINAS** (IPTV-EPG BR): Agora **Programação ESPN 3** - Confiança **48%**
+- **GLOBO INTER GRANDE MINAS** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **GLOBO JUAZEIRO BAHIA** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **GLOBO MORENA** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **GLOBO TEM SOROCABA** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **GLOBO TRIBUNA SANTOS** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **GLOBO VANG S J CAMPOS** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **53%**
+- **MALHAÇÃO FAST** (Globoplay Oficial API): Agora **Malhação - Múltipla Escolha** - Confiança **56%**
+- **RECORD** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **76%**
+- **RECORD BRASILIA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **57%**
+- **RECORDTV GUARARAPES** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **76%**
+- **REDE SUPER** (MiTV): Agora **Institucional Rede Super** - Confiança **56%**
+- **RIT TV** (MiTV): Agora **Show da Fé** - Confiança **71%**
+- **SBT TV JORNAL RECIFE** (MiTV): Agora **Eita Lucas!** - Confiança **51%**
+- **TV JUSTICA** (IPTV-EPG BR): Agora **Descomplicando** - Confiança **68%**
+- **BAND TV GOIANIA** (MiTV): Agora **Band Esporte Clube** - Confiança **52%**
+- **BAND TV MINAS** (MiTV): Agora **Ao vivo - Al Ahli x Al Taawoun** - Confiança **55%**
+- **Conmebol TV 2** (IPTV-EPG BR): Agora **Sem programação** - Confiança **15%**
+- **Conmebol TV 3** (IPTV-EPG BR): Agora **Sem programação** - Confiança **15%**
+- **Conmebol TV 4** (Claro TV+ API): Agora **Libertadores e Sulamericana** - Confiança **52%**
+- **EPTV SAO CARLOS** (IPTV-EPG BR): Agora **Programação ESPN 3** - Confiança **48%**
+- **GB TV MORENA** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **GB TV REDE AMAZONICA MANAUS** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **GB TV REDE AMAZONICA RIO BRANCO** (MiTV): Agora **Caldeirão com Mion** - Confiança **54%**
+- **GE TV** (Vivo Play API): Agora **Pré-Jogo** - Confiança **63%**
+- **Globo Bahia Vitória da Conquista** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **GLOBOBELOHORIZONTE** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **GLOBO BOA VISTA** (MiTV): Agora **Caldeirão com Mion** - Confiança **71%**
+- **GLOBO EPRIBEIRAO PRETO** (IPTV-EPG BR): Agora **Torino x Lazio - Campeonato Italiano** - Confiança **48%**
+- **GLOBO EPSUL DE MINAS** (MiTV): Agora **Caldeirão com Mion** - Confiança **54%**
+- **GLOBO FEIRA DE SANTANA BAHIA** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **GLOBO GAZETA VITÓRIA** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **GLOBO INTEG JUIZ DE FORA** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **GLOBO INTER CABUGI** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **GLOBO INTER DOS VALES** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **GLOBO INTER TV CABUGI** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **GLOBOINTERTVGRANDEMINASMG** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **GLOBO INTERTV PLANICIE** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **53%**
+- **GLOBO MARANHÃO** (MiTV): Agora **Caldeirão com Mion** - Confiança **53%**
+- **GLOBONSCCHAPECO** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **GLOBONSCCRICIUMA** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **GLOBO PERNAMBUCO** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **GLOBO RBS TV BAGE** (MiTV): Agora **Caldeirão com Mion** - Confiança **55%**
+- **GLOBORBSTVPELOTAS** (MiTV): Agora **Caldeirão com Mion** - Confiança **55%**
+- **GLOBO REDE AMAZONAS ARQUEMES** (MiTV): Agora **Caldeirão com Mion** - Confiança **71%**
+- **Globo Rede Amazonica** (MiTV): Agora **Caldeirão com Mion** - Confiança **56%**
+- **Globo Rede Amazonica Rio Branco** (MiTV): Agora **Caldeirão com Mion** - Confiança **54%**
+- **GLOBO REDE AMAZONICA RONDONIA** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **GLOBORPCPARANAVAI** (MiTV): Agora **Caldeirão com Mion** - Confiança **54%**
+- **GLOBO SERGIPE** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **GLOBO TV ALAGOAS** (MiTV): Agora **Caldeirão com Mion** - Confiança **48%**
+- **GLOBO TV ANHANGUERA ARAGUAINA** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **GLOBO TV ANHANGUERA GOIANIA** (MiTV): Agora **Caldeirão com Mion** - Confiança **61%**
+- **GLOBOTVDIARIO** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **53%**
+- **GLOBO TV GAZETA SUL ES** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **GLOBOTVINTEGARAXA** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **GLOBOTVINTEGJUIZDEFORA** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **GLOBO TV MIRANTE BALSAS MARANHAO** (MiTV): Agora **Caldeirão com Mion** - Confiança **54%**
+- **GLOBO TV NORDESTE** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **GLOBO TV SANTA CRUZ ITABUNA BAHIA** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **GLOBOTVSERRAMAR** (MiTV): Agora **Caldeirão com Mion** - Confiança **71%**
+- **GLOBOTVVANGSJCAMPOS** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **53%**
+- **INTER TV CABUGI NATAL** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **NHK WORLD** (WebFinal): Agora **Nyan-chu Space Broadcasting** - Confiança **43%**
+- **RAI** (MiTV): Agora **L'eredità** - Confiança **60%**
+- **RECORD CAMPOS DOS GOYTACAZES** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **77%**
+- **RECORDTV BA** (MiTV): Agora **Balanço Geral BA - Edição de Sábado** - Confiança **53%**
+- **RECORD TV BAHIA** (MiTV): Agora **Balanço Geral BA - Edição de Sábado** - Confiança **56%**
+- **RECORD TV CIDADE CEARA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **76%**
+- **RECORDTV FRANCA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **77%**
+- **RECORDTV GO** (Open-EPG BR): Agora **Balanço Geral GO - Edição de Sábado** - Confiança **53%**
+- **RECORDTV LITORAL VALE DO PARAIBA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **76%**
+- **RECORD TV MINAS** (MiTV): Agora **Balanço Geral MG - Edição de Sábado** - Confiança **58%**
+- **RECORDTV PARANAIBA UBERLANDIA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **76%**
+- **RECORDTV RORAIMA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **76%**
+- **RECORD TV SANTA CATARINA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **76%**
+- **RECORDTV VILA REAL** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **76%**
+- **REDE AMAZONICA ARIQUEMES** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **REDE AMAZONICA COARI** (MiTV): Agora **Caldeirão com Mion** - Confiança **56%**
+- **REDE AMAZONICA HUMAITA** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **REDE AMAZONICA ITACOTIARA** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **REDE AMAZONICA JI PARANA** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **REDE AMAZONICA PARINTINS** (MiTV): Agora **Caldeirão com Mion** - Confiança **53%**
+- **REDE AMAZONICA VILHENA** (Dearbulut BR): Agora **Caldeirão com Mion** - Confiança **59%**
+- **REDE GOSPEL** (MiTV): Agora **Clipes Gospel** - Confiança **63%**
+- **REDETV PAMPA** (MiTV): Agora **Pampa Show** - Confiança **50%**
+- **SBT JANGADEIRO CE** (MiTV): Agora **Eita Lucas!** - Confiança **54%**
+- **SBT PR** (MiTV): Agora **Eita Lucas!** - Confiança **58%**
+- **SBT REDE MASSA** (MiTV): Agora **Eita Lucas!** - Confiança **58%**
+- **SBT TV ALTEROSA** (MiTV): Agora **Eita Lucas!** - Confiança **53%**
+- **SBT TV CAMPINAS** (MiTV): Agora **Eita Lucas!** - Confiança **81%**
+- **SBT TV SERRA DOURADA** (MiTV): Agora **Eita Lucas!** - Confiança **54%**
+- **SBT VTV CAMPINAS** (MiTV): Agora **Eita Lucas!** - Confiança **81%**
+- **TERRA VIVA** (MiTV): Agora **2° Leilão Top Corte Marcelo Andrade & Amigos** - Confiança **73%**
+- **TV ALVORADA** (MiTV): Agora **Que Arretado!** - Confiança **50%**
+- **TV ANHANGUERA ANAPOLIS** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **TV ANHANGUERA CATALAO** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **TV ANHANGUERA GURUPI** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **TV ANHANGUERA ITUMBIARA** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **TV ANHANGUERA JATAI** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **TV ANHANGUERA LUZIANIA** (MiTV): Agora **Caldeirão com Mion** - Confiança **65%**
+- **TV ANHANGUERA PORANGATU** (MiTV): Agora **Caldeirão com Mion** - Confiança **61%**
+- **TV ANHANGUERA RIO VERDE** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **TV CENTRO AMERICA NORTE** (MiTV): Agora **Caldeirão com Mion** - Confiança **56%**
+- **TV CENTRO AMERICA SUL** (MiTV): Agora **Caldeirão com Mion** - Confiança **56%**
+- **TV CENTRO AMERICA TANGARA DA SERRA** (MiTV): Agora **Caldeirão com Mion** - Confiança **56%**
+- **TV GRANDE RIO** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **TV LIBERAL CASTANHAL** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **TV LIBERAL MARABA** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **TV LIBERAL PARAGOMINAS** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **TV LIBERAL PARAUAPEBAS** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **TV MIRANTE BALSAS** (MiTV): Agora **Caldeirão com Mion** - Confiança **54%**
+- **TV MIRANTE IMPERATRIZ** (MiTV): Agora **Caldeirão com Mion** - Confiança **54%**
+- **TV MORENA CORUMBA** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **TV MORENA PONTA PORA** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **TV OESTE** (Vivo Play API): Agora **Faroeste à Brasileira** - Confiança **53%**
+- **TV PAMPA RS** (MiTV): Agora **Pampa Show** - Confiança **54%**
+- **TV PARAIBA** (MiTV): Agora **Caldeirão com Mion** - Confiança **61%**
+- **TV SAO FRANCISCO** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **TV TAPAJOS** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **52%**
+- **TV UNIAO** (MiTV): Agora **Super Clipes** - Confiança **54%**
+- **BAND CEARA** (MiTV): Agora **Ao vivo - Al Ahli x Al Taawoun** - Confiança **78%**
+- **BAND NATAL** (MiTV): Agora **Ao vivo - Al Ahli x Al Taawoun** - Confiança **52%**
+- **CNN BRASIL MONEY** (Vivo Play API): Agora **CNN Money News** - Confiança **54%**
+- **CNN ESPANHOL** (MiTV): Agora **Directo USA** - Confiança **55%**
+- **GLOBO AMAZONICA PORTO VELHO** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **GLOBO AMAZONICA RONDONIA** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **GLOBO DIARIO MOGI DAS CRUZES** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **53%**
+- **GLOBO FRONTEIRA PAULISTA** (MiTV): Agora **Caldeirão com Mion** - Confiança **69%**
+- **GLOBO INTEG ARAXÁ** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **GLOBO INTEG UBERLÂNDIA** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **GLOBO INTER ALTO LITORAL** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **53%**
+- **GLOBO RBS PASSO FUNDO** (MiTV): Agora **Caldeirão com Mion** - Confiança **55%**
+- **GLOBO RPC PONTA GROSSA** (MiTV): Agora **Caldeirão com Mion** - Confiança **54%**
+- **GLOBO SERRA MAR** (MiTV): Agora **Caldeirão com Mion** - Confiança **71%**
+- **GLOBO TERESINA** (MiTV): Agora **Caldeirão com Mion** - Confiança **54%**
+- **GLOBO VANG TAUBATE** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **53%**
+- **POLISHOP** (Claro Git): Agora **Programação Polishop TV** - Confiança **48%**
+- **RECORD RICTV MARINGA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **76%**
+- **RECORD TV CORREIO JOAO PESSOA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **76%**
+- **RECORD TV TROPICAL** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **76%**
+- **SBT BRASILIA** (MiTV): Agora **Eita Lucas!** - Confiança **54%**
+- **SBT MG TV ALTEROSA** (MiTV): Agora **Eita Lucas!** - Confiança **53%**
+- **SBT PARA** (MiTV): Agora **Eita Lucas!** - Confiança **54%**
+- **SBT RS** (MiTV): Agora **Eita Lucas!** - Confiança **54%**
+- **SBT TV ARATU BAHIA** (MiTV): Agora **Eita Lucas!** - Confiança **53%**
+- **SESCTV** (MiTV): Agora **Fronteiras Fluidas** - Confiança **56%**
+- **BAND BSB** (MiTV): Agora **Ao vivo - Al Ahli x Al Taawoun** - Confiança **78%**
+- **BAND CASCAVEL** (MiTV): Agora **Ao vivo - Al Ahli x Al Taawoun** - Confiança **78%**
+- **BAND CASCAVEL PR** (MiTV): Agora **Ao vivo - Al Ahli x Al Taawoun** - Confiança **60%**
+- **BAND CASCAVEL TV TAROBA** (MiTV): Agora **Ao vivo - Al Ahli x Al Taawoun** - Confiança **78%**
+- **BAND MANAIRA PARAIBA** (MiTV): Agora **Ao vivo - Al Ahli x Al Taawoun** - Confiança **78%**
+- **Band MG** (MiTV): Agora **Ao vivo - Al Ahli x Al Taawoun** - Confiança **55%**
+- **BAND NORDESTE** (MiTV): Agora **Ao vivo - Al Ahli x Al Taawoun** - Confiança **76%**
+- **BAND PARAIBA** (MiTV): Agora **Ao vivo - Al Ahli x Al Taawoun** - Confiança **78%**
+- **BAND PARANA** (MiTV): Agora **Ao vivo - Al Ahli x Al Taawoun** - Confiança **78%**
+- **BAND PAULISTA** (Vivo Play API): Agora **Al Ahli x Al Taawoun - Campeonato Saudita de Futebol** - Confiança **64%**
+- **BAND RECIFE** (MiTV): Agora **Ao vivo - Al Ahli x Al Taawoun** - Confiança **46%**
+- **BAND RIBEIRAO PRETO** (MiTV): Agora **Ao vivo - Al Ahli x Al Taawoun** - Confiança **76%**
+- **BAND RIO** (MiTV): Agora **Ao vivo - Al Ahli x Al Taawoun** - Confiança **56%**
+- **BAND SC TVBV** (MiTV): Agora **Ao vivo - Al Ahli x Al Taawoun** - Confiança **76%**
+- **BAND SJC** (MiTV): Agora **Ao vivo - Al Ahli x Al Taawoun** - Confiança **76%**
+- **BAND TRIANGULO** (Vivo Play API): Agora **Al Ahli x Al Taawoun - Campeonato Saudita de Futebol** - Confiança **64%**
+- **BAND TV TRIBUNA RECIFE** (MiTV): Agora **Ao vivo - Al Ahli x Al Taawoun** - Confiança **78%**
+- **BAND VALE** (Vivo Play API): Agora **Al Ahli x Al Taawoun - Campeonato Saudita de Futebol** - Confiança **64%**
+- **CNN** (MiTV): Agora **World Sport** - Confiança **53%**
+- **CTV NEWS** (TV Plus): Agora **Sem programação** - Confiança **15%**
+- **DPA FAST** (Globoplay Oficial API): Agora **D.P.A.- Detetives Do Prédio Azul** - Confiança **59%**
+- **EPTV ARARAQUARA** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **Globo** (MiTV): Agora **Caldeirão com Mion** - Confiança **62%**
+- **GLOBO ALAGOAS** (MiTV): Agora **Caldeirão com Mion** - Confiança **48%**
+- **GLOBO AMAZÔNICA MANAUS** (MiTV): Agora **Caldeirão com Mion** - Confiança **53%**
+- **GLOBO CEARÁ** (MiTV): Agora **Caldeirão com Mion** - Confiança **53%**
+- **GLOBO EPSÃO CARLOS** (IPTV-EPG BR): Agora **Programação ESPN 3** - Confiança **48%**
+- **GLOBO GAZETA ALAGOAS** (MiTV): Agora **Caldeirão com Mion** - Confiança **48%**
+- **GLOBO GAZETA SUL** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **GLOBO INTER PT** (MiTV): Agora **Caldeirão com Mion** - Confiança **80%**
+- **GLOBO INTER VALE MG** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **GLOBO MIRANTE SÃO LUIS** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **GLOBO NATAL** (MiTV): Agora **Caldeirão com Mion** - Confiança **54%**
+- **GLOBO PE ASA BRANCA** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **GLOBO RECIFE** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **GLOBO REDE AMAZONAS MACAPA** (MiTV): Agora **Caldeirão com Mion** - Confiança **71%**
+- **Globo Rio** (MiTV): Agora **Caldeirão com Mion** - Confiança **64%**
+- **GLOBO RORAIMA** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **GLOBO SANTA CRUZ** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **Globo São Paulo** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **55%**
+- **GLOBO TV ANHANGUERA GURUPI TOCANTINS** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **GLOBO TV ANHANGUERA PALMAS TOCANTINS** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **GLOBO TV GAZETA VITORIA ES** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **GLOBO TV MIRANTE** (MiTV): Agora **Caldeirão com Mion** - Confiança **54%**
+- **GLOBO TV OESTE BAHIA** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **GLOBO TV VANG TAUBATE** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **53%**
+- **GLOBO VITÓRIA** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **MAX 1** (MiTV): Agora **Sangue pela Glória** - Confiança **46%**
+- **NBR** (MiTV): Agora **Documentário** - Confiança **55%**
+- **NICK** (IPTV-EPG BR): Agora **Sem programação** - Confiança **15%**
+- **RBS CAXIAS** (Dearbulut BR): Agora **Sem programação** - Confiança **15%**
+- **RBS PASSO FUNDO GLOBO** (MiTV): Agora **Caldeirão com Mion** - Confiança **45%**
+- **RECEITAS FAST** (Globo): Agora **Sabor Em Jogo** - Confiança **46%**
+- **RECORD LITORAL VALE DO PARNAIBA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **77%**
+- **RECORD SERGIPE** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **76%**
+- **RECORD SIC TV RONDONIA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **76%**
+- **RECORD SJR PRETO** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **77%**
+- **RECORDTV ATALAIA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **76%**
+- **RECORDTV BAURU** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **77%**
+- **RECORDTV CABRALIA** (Dearbulut BR): Agora **Lamba Show** - Confiança **59%**
+- **RECORDTV CURITIBA** (MiTV): Agora **Macks da Gente** - Confiança **53%**
+- **RECORDTV FLORIANOPOLIS** (MiTV): Agora **Clube da Bola** - Confiança **53%**
+- **RECORDTV NDTV FLORIANOPOLIS** (MiTV): Agora **Clube da Bola** - Confiança **53%**
+- **RECORDTV RECIFE** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **76%**
+- **RECORDTV RIC MARINGA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **76%**
+- **RECORDTV RN TV TROPICAL** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **77%**
+- **RECORDTV VITORIA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **76%**
+- **REDE 21** (EPGShare BR1): Agora **Igreja Universal do Reino de Deus** - Confiança **56%**
+- **REDE AMAZONICA CACOAL** (Dearbulut BR): Agora **Caldeirão com Mion** - Confiança **59%**
+- **REDE AMAZONICA CRUZEIRO DO SUL** (Dearbulut BR): Agora **Caldeirão com Mion** - Confiança **50%**
+- **REDE AMAZONICA MANACAPURU** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **REDE AMAZONICA RORAINOPOLIS** (Dearbulut BR): Agora **Caldeirão com Mion** - Confiança **59%**
+- **Rede Brasil** (Dearbulut BR): Agora **O Papai Noel Trapalhão** - Confiança **63%**
+- **REDE CNT** (MiTV): Agora **Vício Tem Cura** - Confiança **67%**
+- **SBT ALAGOAS TV PONTA VERDE** (MiTV): Agora **Eita Lucas!** - Confiança **51%**
+- **SBT ALTAMIRA** (MiTV): Agora **Eita Lucas!** - Confiança **77%**
+- **SBT CUIABA** (MiTV): Agora **Eita Lucas!** - Confiança **54%**
+- **SBT DIFUSORA** (MiTV): Agora **Eita Lucas!** - Confiança **77%**
+- **SBT FOZ DO IGUACU** (MiTV): Agora **Eita Lucas!** - Confiança **77%**
+- **SBT INTERIOR SP** (Vivo Play API): Agora **Eita Lucas!** - Confiança **58%**
+- **SBT JORNAL PE** (MiTV): Agora **Eita Lucas!** - Confiança **51%**
+- **SBT MARINGA** (MiTV): Agora **Eita Lucas!** - Confiança **44%**
+- **SBT NOVA FRIBURGO** (Vivo Play API): Agora **Eita Lucas!** - Confiança **69%**
+- **SBT PONTA GROSSA** (MiTV): Agora **Eita Lucas!** - Confiança **77%**
+- **SBTRIO** (MiTV): Agora **Eita Lucas!** - Confiança **56%**
+- **SBT SAO LUIZ** (MiTV): Agora **Eita Lucas!** - Confiança **77%**
+- **SBT SIM** (MiTV): Agora **Eita Lucas!** - Confiança **81%**
+- **SBT TAMBAU PARAIBA** (MiTV): Agora **Eita Lucas!** - Confiança **77%**
+- **SBT TH PLUS VALE** (MiTV): Agora **Eita Lucas!** - Confiança **61%**
+- **SBT TV ALTEROSA MG** (MiTV): Agora **Eita Lucas!** - Confiança **53%**
+- **SBT TV PIAUI** (MiTV): Agora **Eita Lucas!** - Confiança **51%**
+- **SBT TV RBS** (Vivo Play API): Agora **Eita Lucas!** - Confiança **71%**
+- **SBT TV RN** (MiTV): Agora **Eita Lucas!** - Confiança **81%**
+- **SBT VITORIOSA** (MiTV): Agora **Eita Lucas!** - Confiança **81%**
+- **TBS** (MiTV): Agora **Os Dez Mandamentos** - Confiança **55%**
+- **TCM** (MiTV): Agora **A Árvore dos Desejos** - Confiança **76%**
+- **TruTV** (MiTV): Agora **Rick and Morty** - Confiança **70%**
+- **Tv Cidade Verde Picos** (MiTV): Agora **Eita Lucas!** - Confiança **51%**
+- **TVE BAHIA** (MiTV): Agora **Corinthians x Atlético-MG** - Confiança **47%**
+- **TV GRANDE RIO PETROLINA** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **TV LIBERAL ALTAMIRA** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **TV LIBERAL REDENCAO** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **TV Santa Cruz Bahia** (MiTV): Agora **Caldeirão com Mion** - Confiança **55%**
+- **UNIVERSAL REALITY** (Claro Git): Agora **The Real Housewives of Miami** - Confiança **68%**
+- **AGRO CANAL** (TV Plus): Agora **Leilão Fazenda Tapajós & Convidados – Etapa Fêmeas** - Confiança **32%**
+- **BAND BRASILIA** (MiTV): Agora **Ao vivo - Al Ahli x Al Taawoun** - Confiança **55%**
+- **Band Curitiba** (MiTV): Agora **Ao vivo - Al Ahli x Al Taawoun** - Confiança **60%**
+- **Band Maceio** (MiTV): Agora **Ao vivo - Al Ahli x Al Taawoun** - Confiança **52%**
+- **BAND PA** (MiTV): Agora **Ao vivo - Al Ahli x Al Taawoun** - Confiança **51%**
+- **BAND PR** (MiTV): Agora **Ao vivo - Al Ahli x Al Taawoun** - Confiança **60%**
+- **BAND TV ARAPUAN PB** (MiTV): Agora **Ao vivo - Al Ahli x Al Taawoun** - Confiança **76%**
+- **BOX KIDS TV** (Vivo Play API): Agora **Ding-Ding Pula** - Confiança **66%**
+- **Chef TV** (MiTV): Agora **Seu Alimento, Seu Medicamento** - Confiança **66%**
+- **DREAMWORKS** (Vivo Play API): Agora **Piratas Pirados!** - Confiança **57%**
+- **GLOBO AMAZONICA ITACOATIARA** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **GLOBO AMAZÔNICA MACAPÁ** (MiTV): Agora **Caldeirão com Mion** - Confiança **71%**
+- **GLOBO AMAZONICA PARINTINS** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **GLOBO ANHANGUERA** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **GLOBO ANHANGUERA ANAPOLIS** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **GLOBO ANHANGUERA ITUMBIARA** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **GLOBO ANHANGUERA JATAI** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **GLOBO ANHANGUERA LUZIANIA** (MiTV): Agora **Caldeirão com Mion** - Confiança **61%**
+- **GLOBO ANHANGUERA PORANGATU** (MiTV): Agora **Caldeirão com Mion** - Confiança **61%**
+- **GLOBO ANHANGUERA TOCANTINS** (MiTV): Agora **Caldeirão com Mion** - Confiança **61%**
+- **GLOBO ASA BRANCA** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **GLOBO BELÉM LIBERAL** (MiTV): Agora **Caldeirão com Mion** - Confiança **70%**
+- **GLOBO BOA VISTA RORAIMA** (MiTV): Agora **Caldeirão com Mion** - Confiança **71%**
+- **GLOBO CACOAL** (MiTV): Agora **Caldeirão com Mion** - Confiança **71%**
+- **GLOBO DIÁRIO FORTALEZA** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **GLOBO DIVINÓPOLIS** (MiTV): Agora **Caldeirão com Mion** - Confiança **80%**
+- **Globo EPTV Central** (IPTV-EPG BR): Agora **Programação ESPN 3** - Confiança **48%**
+- **GLOBO GAZETA ES** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **GLOBO GAZETA SUL ES** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **Globo Integração Araxa** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **71%**
+- **Globo Integração Uberaba** (MiTV): Agora **Caldeirão com Mion** - Confiança **71%**
+- **GLOBO INTERTV CEL FABRICIANO** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **53%**
+- **GLOBO INTERTV GOV VALADARES** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **53%**
+- **GLOBO JUAZEIRO DO NORTE** (MiTV): Agora **Caldeirão com Mion** - Confiança **71%**
+- **GLOBO MIRANTE COCAIS** (MiTV): Agora **Caldeirão com Mion** - Confiança **54%**
+- **GLOBO NACIONAL** (MiTV): Agora **Caldeirão com Mion** - Confiança **80%**
+- **Globo Novelas** (Claro Git): Agora **O Profeta** - Confiança **85%**
+- **GLOBO NOW** (MiTV): Agora **Caldeirão com Mion** - Confiança **80%**
+- **GLOBO NSC CENTRO OESTE** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **GLOBO OESTE BARREIRAS BAHIA** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **GLOBO PORTO VELHO** (MiTV): Agora **Caldeirão com Mion** - Confiança **71%**
+- **Globo RBS Centro Oeste** (MiTV): Agora **Caldeirão com Mion** - Confiança **55%**
+- **Globo RBS Criciúma** (MiTV): Agora **Caldeirão com Mion** - Confiança **51%**
+- **GLOBO RBS SANTA MARIA** (MiTV): Agora **Caldeirão com Mion** - Confiança **55%**
+- **GLOBO RBS TV CRUZ ALTA** (MiTV): Agora **Caldeirão com Mion** - Confiança **55%**
+- **GLOBO RBS TV ERECHIM** (MiTV): Agora **Caldeirão com Mion** - Confiança **55%**
+- **GLOBO RBS TV SANTA ROSA** (MiTV): Agora **Caldeirão com Mion** - Confiança **52%**
+- **GLOBO RBS TV URUGUAIANA** (MiTV): Agora **Caldeirão com Mion** - Confiança **55%**
+- **Globo Recife PE** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **51%**
+- **GLOBO RIO SUL** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **GLOBO RJ ALTO LITORAL** (MiTV): Agora **Caldeirão com Mion** - Confiança **64%**
+- **GLOBO RJ INTERIOR** (MiTV): Agora **Caldeirão com Mion** - Confiança **64%**
+- **GLOBO RPC GUARAPUAVA** (MiTV): Agora **Caldeirão com Mion** - Confiança **54%**
+- **GLOBO TAPAJÓS PA** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **GLOBO TAPAJÓS SANTARÉM** (MiTV): Agora **Caldeirão com Mion** - Confiança **71%**
+- **GLOBO TEM ITAPETININGA** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **Globo TV Asa Branca PE** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **Globo TV Cabo Branco PB** (MiTV): Agora **Caldeirão com Mion** - Confiança **61%**
+- **Globo TV Clube PI** (MiTV): Agora **Caldeirão com Mion** - Confiança **50%**
+- **Globo TV Grande Rio PE** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **GLOBO TV GUAJARÁ MIRIM** (MiTV): Agora **Caldeirão com Mion** - Confiança **80%**
+- **GLOBO TV ITACOTIARA** (MiTV): Agora **Caldeirão com Mion** - Confiança **80%**
+- **GLOBO TV JI PARANA** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **Globo TV Oeste BA** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **GLOBO TV PARINTINS** (MiTV): Agora **Caldeirão com Mion** - Confiança **71%**
+- **GLOBO TV RBS BAGÉ** (MiTV): Agora **Caldeirão com Mion** - Confiança **55%**
+- **Globo TV Subaé BA** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **Globo TV Sudoeste BA** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **GLOBO TV VANGUARDA TTE** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **53%**
+- **GLOBO TV VILHENA** (MiTV): Agora **Caldeirão com Mion** - Confiança **71%**
+- **Globo Vanguarda Taubaté** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **53%**
+- **LA Boomerang** (Vivo Play API): Agora **Booba** - Confiança **71%**
+- **LA Cartoon Network** (Claro Git): Agora **Hora de Aventura** - Confiança **78%**
+- **LA Discovery** (Claro Git): Agora **Menu Selvagem** - Confiança **74%**
+- **LA Discovery KIDS** (Claro Git): Agora **Mermicorno: A Queda das Estrelas** - Confiança **77%**
+- **LA Discovery Science** (Claro Git): Agora **Mentes Geniais** - Confiança **76%**
+- **LA Discovery Turbo** (Claro Git): Agora **Texas Metal** - Confiança **77%**
+- **LA ESPN 2** (MiTV): Agora **Ao vivo - Torino x Lazio** - Confiança **75%**
+- **LA ESPN 3** (Vivo Play API): Agora **Espanha x Chile - Amistoso Internacional de Futebol Feminino** - Confiança **64%**
+- **LA HBO Family** (IPTV-EPG BR): Agora **DC Liga dos Superpets** - Confiança **78%**
+- **LA HBO PLUS** (Claro Git): Agora **Maldição da Múmia** - Confiança **78%**
+- **LIKE** (Claro TV+ API): Agora **Trailers, Entrevistas e Festivais** - Confiança **54%**
+- **MEgaTV** (MiTV): Agora **Prosperidade com Deus** - Confiança **58%**
+- **Paramount Channel** (EPGShare BR2): Agora **Sem programação** - Confiança **15%**
+- **PARAMOUNT PLUS PLTF 1** (Claro Git): Agora **Libertadores e Sulamericana** - Confiança **54%**
+- **PARAMOUNT PLUS PLTF 2** (Claro Git): Agora **Libertadores e Sulamericana** - Confiança **56%**
+- **PARAMOUNT PLUS PLTF 3** (Claro Git): Agora **Libertadores e Sulamericana** - Confiança **56%**
+- **RECORD CORREIO PB** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **77%**
+- **RECORD ES** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **77%**
+- **RECORD FLORIANÓPOLIS SC NDTV** (MiTV): Agora **Clube da Bola** - Confiança **53%**
+- **RECORD MT** (MiTV): Agora **Lamba Show** - Confiança **53%**
+- **RECORD NATAL** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **76%**
+- **RECORD PA** (MiTV): Agora **Pará Bom D+** - Confiança **55%**
+- **RECORD PAJUÇARA AL** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **45%**
+- **RECORD PIAUÍ TV ANTENA 10** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **76%**
+- **RECORD PR** (MiTV): Agora **Macks da Gente** - Confiança **53%**
+- **RECORD REMANSO MA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **77%**
+- **RECORD RN** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **77%**
+- **RECORD SC** (MiTV): Agora **Clube da Bola** - Confiança **53%**
+- **RECORD SIC RO** (Vivo Play API): Agora **Rio Bom D+** - Confiança **66%**
+- **RECORD TO** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **37%**
+- **Record TV Bahia Itabuna** (MiTV): Agora **Balanço Geral BA - Edição de Sábado** - Confiança **55%**
+- **Record TV Fortaleza** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **76%**
+- **Record TV Guaíba RS** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **61%**
+- **Record TV Rio Preto** (Vivo Play API): Agora **Balanço Geral - Edição de Sábado** - Confiança **63%**
+- **Record TV Santos e Vale** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **77%**
+- **REDE BRASIL TV** (Dearbulut BR): Agora **O Papai Noel Trapalhão** - Confiança **63%**
+- **REDE FAMILIA** (MiTV): Agora **Família Kids** - Confiança **56%**
+- **REDE MINAS** (MiTV): Agora **Conexão 31** - Confiança **53%**
+- **Sabor & Arte** (Vivo Play API): Agora **Do Pão ao Caviar** - Confiança **70%**
+- **SBT Alagoas** (MiTV): Agora **Eita Lucas!** - Confiança **51%**
+- **SBT ALLAMANDA RO** (Vivo Play API): Agora **Eita Lucas!** - Confiança **71%**
+- **SBT AM** (MiTV): Agora **Eita Lucas!** - Confiança **81%**
+- **SBT AMAZONAS** (MiTV): Agora **Eita Lucas!** - Confiança **77%**
+- **SBT BA** (MiTV): Agora **Eita Lucas!** - Confiança **44%**
+- **SBT CASTANHAL TV PARAENSE** (MiTV): Agora **Eita Lucas!** - Confiança **77%**
+- **SBT CENTRAL** (Vivo Play API): Agora **Eita Lucas!** - Confiança **68%**
+- **SBT CUIABA MT** (Open-EPG BR): Agora **Eita Lucas!** - Confiança **41%**
+- **SBT Difusora Caxias** (MiTV): Agora **Eita Lucas!** - Confiança **77%**
+- **SBT GO** (Genius): Agora **Eita Lucas!** - Confiança **43%**
+- **SBT MA** (Dearbulut BR): Agora **A Hora do Zap** - Confiança **38%**
+- **SBT MG** (MiTV): Agora **Eita Lucas!** - Confiança **44%**
+- **SBT MT** (MiTV): Agora **Eita Lucas!** - Confiança **54%**
+- **SBT Nacional** (Dearbulut BR): Agora **Eita Lucas!** - Confiança **63%**
+- **SBT PA** (MiTV): Agora **Eita Lucas!** - Confiança **54%**
+- **SBT PA GUAJARÁ** (MiTV): Agora **Eita Lucas!** - Confiança **54%**
+- **SBT PE** (MiTV): Agora **Eita Lucas!** - Confiança **44%**
+- **SBT PI** (MiTV): Agora **Eita Lucas!** - Confiança **51%**
+- **SBT Rede Massa PR** (MiTV): Agora **Eita Lucas!** - Confiança **58%**
+- **SBT RIBEIRÃO PRETO** (MiTV): Agora **Eita Lucas!** - Confiança **81%**
+- **SBT SAO LUIZ MA** (Dearbulut BR): Agora **A Hora do Zap** - Confiança **38%**
+- **SBT SC** (MiTV): Agora **Eita Lucas!** - Confiança **51%**
+- **SBT SCC** (MiTV): Agora **Eita Lucas!** - Confiança **81%**
+- **SBT TO** (MiTV): Agora **Eita Lucas!** - Confiança **51%**
+- **SBT TRIBUNAES** (MiTV): Agora **Eita Lucas!** - Confiança **81%**
+- **SBT TV Tambaú PB** (Open-EPG BR): Agora **Eita Lucas!** - Confiança **56%**
+- **SPORTV 4** (Globo): Agora **Fórmula 1: Classificação - Gp Do Catar - ao vivo** - Confiança **36%**
+- **TV A CRÍTICA** (MiTV): Agora **Magazine** - Confiança **59%**
+- **TV DIARIO FORTALEZA** (MiTV): Agora **Forrobodó** - Confiança **57%**
+- **TV ESCOLA** (MiTV): Agora **Portão Mágico** - Confiança **47%**
+- **TV IMACULADA** (TV Plus): Agora **A Igreja Pelo Mundo** - Confiança **30%**
+- **TV MEIO NORTE** (TV Plus): Agora **Bar e Cia** - Confiança **22%**
+- **TV MUNDO MAIOR** (TV Plus): Agora **DNA Mulher** - Confiança **30%**
+- **TV PAMPA** (MiTV): Agora **Pampa Show** - Confiança **54%**
+- **UNIVERSAL** (Claro Git): Agora **Chicago Fire** - Confiança **84%**
+- **Xsports 2** (TVMap): Agora **Boston Bruins x Toronto Maple Leafs - NHL** - Confiança **52%**
+- **Sportynet PLUS 1** (Claro Git): Agora **Programação Esportiva** - Confiança **48%**
+- **Sportynet PLUS 2** (Claro Git): Agora **Programação Esportiva** - Confiança **48%**
+- **Sabor & Art** (Vivo Play API): Agora **Do Pão ao Caviar** - Confiança **70%**
+- **Sportynet PLUS 3** (Claro Git): Agora **Programação Esportiva** - Confiança **46%**
+- **TIMES Exclusivo CNBC** (Vivo Play API): Agora **Times Brasil - CNBC - Semana Prime** - Confiança **52%**
+- **CARTOON NETWOORK** (Claro Git): Agora **Hora de Aventura** - Confiança **86%**
+- **CULTURA PA** (Vivo Play API): Agora **Quintal TV** - Confiança **68%**
+- **EVANGELIZAR** (Vivo Play API): Agora **Pastoral da Criança** - Confiança **59%**
+- **FOOD NETWOORK** (MiTV): Agora **A Guerra dos Cupcakes** - Confiança **83%**
+- **RECORD NSC SANTA CATARINA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **76%**
+- **RECORD TV PARANA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **76%**
+- **RECORD SERGIPE ATALAIA** (MiTV): Agora **Balanço Geral - Edição de Sábado** - Confiança **76%**
+- **SBT JANGADEIRO** (MiTV): Agora **Eita Lucas!** - Confiança **54%**
+- **SBT PARANA** (MiTV): Agora **Eita Lucas!** - Confiança **58%**
+- **TOONSCAST** (MiTV): Agora **Manda-Chuva** - Confiança **77%**
+- **SPORTYNET** (TVMap): Agora **Hamburgo x Bayern de Munique - Campeonato Alemão** - Confiança **53%**
+- **Band FM Bahia** (Dearbulut BR): Agora **Al Ahli x Al Taawoun** - Confiança **63%**
+- **Jovem Pan SP** (Claro Git): Agora **Mala Pronta** - Confiança **74%**
+- **Band News RJ** (MiTV): Agora **Viver Melhor** - Confiança **79%**
+- **GLOBO RJ INTER ALTO LITORAL** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **53%**
+- **GLOBO RJ INTER TV ALTO LITORAL** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **53%**
+- **GLOBO RJ PLANÍCIE** (MiTV): Agora **Caldeirão com Mion** - Confiança **64%**
+- **GLOBO EPTV CENTRAL SÃO CARLOS SP** (IPTV-EPG BR): Agora **Programação ESPN 3** - Confiança **48%**
+- **GLOBO TV BELÉM** (MiTV): Agora **Caldeirão com Mion** - Confiança **53%**
+- **GLOBO TV BRASÍLIA** (MiTV): Agora **Caldeirão com Mion** - Confiança **64%**
+- **GLOBO TV PORTO VELHO** (MiTV): Agora **Caldeirão com Mion** - Confiança **71%**
+- **GLOBO AMAZONICA RO** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **GLOBO AMAZÔNICA CRUZEIRO ACRE** (MiTV): Agora **Caldeirão com Mion** - Confiança **71%**
+- **GLOBO BAHIA SANTA CRUZ** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **GLOBO BAHIA VDC** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **GLOBO INTEGRAÇÃO UBERLÂNDIA** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **71%**
+- **GLOBO INTER CABUGI RN** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **GLOBO INTER TV CORONEL FABRICIANO** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **53%**
+- **GLOBO INTER TV GOVERNADOR VALADARES** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **GLOBO NSC TV JOINVILLE** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **GLOBO RBS SANTA CRUZ** (MiTV): Agora **Caldeirão com Mion** - Confiança **55%**
+- **GLOBO SÃO JOSÉ DO RIO PRETO** (MiTV): Agora **Caldeirão com Mion** - Confiança **69%**
+- **GLOBO TV ANHANGUERA TOCANTINS** (MiTV): Agora **Caldeirão com Mion** - Confiança **61%**
+- **GLOBO TV CLUBE PIAUÍ** (MiTV): Agora **Caldeirão com Mion** - Confiança **50%**
+- **GLOBO TV FRONTEIRA PAULISTA** (MiTV): Agora **Caldeirão com Mion** - Confiança **69%**
+- **GLOBO TV GAZETA ES** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **GLOBO TV INTEGRAÇÃO ITUITABA** (MiTV): Agora **Caldeirão com Mion** - Confiança **80%**
+- **GLOBO TV INTEGRAÇÃO JUIZ DE FORA MG** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **61%**
+- **GLOBO TV LIBERAL PARAUABEBAS** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **GLOBO TV RECIFE** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **GLOBO TV TEM TAUBATÉ** (MiTV): Agora **Caldeirão com Mion** - Confiança **69%**
+- **GLOBO TV VANGUARDA SJC** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **53%**
+- **GLOBO TV VERDES MARES CE** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **Globo Vanguarda S. J. dos Campos** (MiTV): Agora **Caldeirão com Mion** - Confiança **58%**
+- **Globo Integração Ituiutaba MG** (MiTV): Agora **Caldeirão com Mion** - Confiança **63%**
+- **Globo Integracao Juiz de Fora** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **Globo Inter TV dos Vales MG** (Claro Git): Agora **Cidades e Soluções** - Confiança **85%**
+- **Globo Inter TV Alto Litoral RJ** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **53%**
+- **Globo Inter TV Planície RJ** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **53%**
+- **Globo Inter TV Serra Mar RJ** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **53%**
+- **Globo NSC TV Centro Oeste Joaçaba** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **Globo RBS TV dos Vales Santa Cruz do Sul** (MiTV): Agora **Caldeirão com Mion** - Confiança **55%**
+- **Globo TV Anhanguera Palmas TO** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **Globo TV Anhanguera Gurupi TO** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **Globo TV Anhanguera Araguaina TO** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **Globo Verdes Mares Fortaleza** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **Globo Verdes Mares Cariri CE** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **Globo TV Santa Cruz do Sul Itabuna BA** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **Globo TV São Francisco BA** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **Globo Inter TV Cabugi Natal RN** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **Globo Inter TV Costa Branca RN** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **Globo TV Liberal Belém PA** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **Globo TV Liberal Redenção PA** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **Globo TV Liberal Castanhal PA** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **Globo TV Liberal Altamira PA** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **Globo TV Liberal Maraba PA** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **Globo TV Liberal Paragominas PA** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **Globo TV Liberal Parauapebas PA** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **Globo TV Tapajós Santarém PA** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **Globo TV Mirante São Luís MA** (MiTV): Agora **Caldeirão com Mion** - Confiança **54%**
+- **Globo TV Mirante Balsas MA** (MiTV): Agora **Caldeirão com Mion** - Confiança **54%**
+- **Globo TV Mirante Imperatriz MA** (MiTV): Agora **Caldeirão com Mion** - Confiança **54%**
+- **Globo TV Mirante Cocais MA** (MiTV): Agora **Caldeirão com Mion** - Confiança **54%**
+- **Globo TV Alvorada do Sul PI** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **47%**
+- **Globo Rede Amazônica Parintins AM** (MiTV): Agora **Caldeirão com Mion** - Confiança **59%**
+- **Globo Rede Amazônica Macapá AP** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **Globo Rede Amazônica Porto Velho RO** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **62%**
+- **Globo Rede Amazônica Boa Vista RR** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **Globo Rede Amazônica Rio Branco AC** (MiTV): Agora **Caldeirão com Mion** - Confiança **53%**
+- **Globo Rede Amazônica Coari AM** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **Globo Rede Amazônica Humaita AM** (MiTV): Agora **Caldeirão com Mion** - Confiança **53%**
+- **Globo Rede Amazônica Itacoatiara AM** (MiTV): Agora **Caldeirão com Mion** - Confiança **57%**
+- **Globo Rede Amazônica Manacapuru AM** (MiTV): Agora **Caldeirão com Mion** - Confiança **53%**
+- **Globo Rede Amazônica Rorainópolis RR** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **Globo Rede Amazônica Cruzeiro do Sul AC** (MiTV): Agora **Caldeirão com Mion** - Confiança **54%**
+- **Globo Rede Amazônica Ariquemedes RO** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **Globo Rede Amazônica Coacal RO** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **Globo Rede Amazônica Ji Paraná RO** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **Globo Rede Amazônica Vilhena RO** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **Globo Asa Branca Caruaru PE** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **GLOBO PE** (Globo Oficial API): Agora **Caldeirão Com Mion** - Confiança **45%**
+- **SBT JORNAL** (MiTV): Agora **Eita Lucas!** - Confiança **51%**
+- **BAND TV ARAPUAN** (MiTV): Agora **Ao vivo - Al Ahli x Al Taawoun** - Confiança **76%**
+- **SBT TV Tambaú** (Open-EPG BR): Agora **Eita Lucas!** - Confiança **56%**
+- **FUTURAMA** (Claro Git): Agora **Somos Museus** - Confiança **76%**
+- **FBI Internacional** (Claro Git): Agora **Talentos Em Grande** - Confiança **54%**
+- **XXX Sextreme** (Claro TV+ API): Agora **Vem Pegar Carona No Meu Grelo!** - Confiança **59%**
+- **Pantanal** (Dearbulut BR): Agora **A Hora do Zap** - Confiança **42%**
+- **Eurochannel** (MiTV): Agora **O Orfanato** - Confiança **75%**
+- **France 24** (Claro Git): Agora **Carrusel** - Confiança **55%**
+- **Sony Movies** (EPGShare BR1): Agora **Adoráveis Mulheres** - Confiança **70%**
